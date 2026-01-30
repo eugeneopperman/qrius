@@ -91,6 +91,8 @@ export type CornerSquareType = 'square' | 'dot' | 'extra-rounded';
 export type CornerDotType = 'square' | 'dot';
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
 
+export type FrameStyle = 'none' | 'simple' | 'rounded' | 'bottom-label' | 'top-label' | 'badge';
+
 export interface QRStyleOptions {
   dotsColor: string;
   backgroundColor: string;
@@ -100,6 +102,9 @@ export interface QRStyleOptions {
   errorCorrectionLevel: ErrorCorrectionLevel;
   logoUrl?: string;
   logoSize?: number;
+  frameStyle?: FrameStyle;
+  frameLabel?: string;
+  frameColor?: string;
 }
 
 export interface ExportOptions {

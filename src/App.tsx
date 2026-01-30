@@ -3,6 +3,11 @@ import { TypeSelector } from './components/TypeSelector';
 import { InputForm } from './components/InputForm';
 import { QRPreview } from './components/QRPreview';
 import { ColorSection } from './components/customization/ColorSection';
+import { LogoSection } from './components/customization/LogoSection';
+import { StyleSection } from './components/customization/StyleSection';
+import { FrameSection } from './components/customization/FrameSection';
+import { AccordionItem } from './components/ui/Accordion';
+import { Palette, Image, Shapes, Frame } from 'lucide-react';
 
 function App() {
   return (
@@ -23,8 +28,36 @@ function App() {
 
             {/* Customization */}
             <div className="card">
-              <h2 className="section-title mb-4">Customization</h2>
-              <ColorSection />
+              <h2 className="section-title mb-2">Customization</h2>
+
+              <AccordionItem
+                title="Colors"
+                icon={<Palette className="w-5 h-5" />}
+                defaultOpen={true}
+              >
+                <ColorSection />
+              </AccordionItem>
+
+              <AccordionItem
+                title="Logo"
+                icon={<Image className="w-5 h-5" />}
+              >
+                <LogoSection />
+              </AccordionItem>
+
+              <AccordionItem
+                title="Style"
+                icon={<Shapes className="w-5 h-5" />}
+              >
+                <StyleSection />
+              </AccordionItem>
+
+              <AccordionItem
+                title="Frame & Label"
+                icon={<Frame className="w-5 h-5" />}
+              >
+                <FrameSection />
+              </AccordionItem>
             </div>
           </div>
 

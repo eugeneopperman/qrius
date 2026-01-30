@@ -1,17 +1,11 @@
 import { useQRStore } from '../../stores/qrStore';
 import { ColorPicker } from '../ui/ColorPicker';
-import { Palette } from 'lucide-react';
 
 export function ColorSection() {
   const { styleOptions, setStyleOptions } = useQRStore();
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-        <Palette className="w-5 h-5" />
-        <h3 className="font-medium">Colors</h3>
-      </div>
-
       <ColorPicker
         label="QR Code Color"
         value={styleOptions.dotsColor}
