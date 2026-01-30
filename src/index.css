@@ -10,8 +10,17 @@
     --color-error: 239 68 68;
   }
 
+  html {
+    background-color: #f9fafb;
+  }
+
+  html.dark {
+    background-color: #111827;
+  }
+
   body {
     @apply antialiased;
+    background-color: inherit;
   }
 }
 
