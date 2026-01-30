@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
-import { Printer, Check } from 'lucide-react';
+import { Printer, Check, FileImage, FileText } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { LabelWithTooltip } from '../ui/Tooltip';
 
 interface PrintTemplate {
   id: string;
@@ -12,6 +13,8 @@ interface PrintTemplate {
   qrSize: number; // QR code size in mm
   dpi: number;
 }
+
+type ExportFormat = 'png' | 'pdf';
 
 const printTemplates: PrintTemplate[] = [
   {
@@ -93,55 +96,167 @@ export function PrintTemplates() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf');
+  const [includeBleed, setIncludeBleed] = useState(true);
+  const [includeCropMarks, setIncludeCropMarks] = useState(true);
+
+  const BLEED_MM = 3; // Standard 3mm bleed
+  const CROP_MARK_LENGTH = 5; // 5mm crop marks
+  const CROP_MARK_OFFSET = 3; // 3mm from edge
 
   const mmToPixels = (mm: number, dpi: number) => Math.round((mm / 25.4) * dpi);
+
+  const generateQRCanvas = async (template: PrintTemplate): Promise<HTMLCanvasElement> => {
+    const QRCodeStyling = (await import('qr-code-styling')).default;
+    const qrPixelSize = mmToPixels(template.qrSize, template.dpi);
+
+    // Build gradient config if enabled
+    const getGradientConfig = () => {
+      if (styleOptions.useGradient && styleOptions.gradient) {
+        return {
+          type: styleOptions.gradient.type,
+          rotation: styleOptions.gradient.rotation || 0,
+          colorStops: styleOptions.gradient.colorStops.map((stop) => ({
+            offset: stop.offset,
+            color: stop.color,
+          })),
+        };
+      }
+      return undefined;
+    };
+
+    const gradientConfig = getGradientConfig();
+    const dotsOptions = gradientConfig
+      ? { type: styleOptions.dotsType, gradient: gradientConfig }
+      : { type: styleOptions.dotsType, color: styleOptions.dotsColor };
+
+    const qrCode = new QRCodeStyling({
+      width: qrPixelSize,
+      height: qrPixelSize,
+      type: 'canvas',
+      data: getQRValue(),
+      dotsOptions,
+      cornersSquareOptions: gradientConfig
+        ? { type: styleOptions.cornersSquareType, gradient: gradientConfig }
+        : { type: styleOptions.cornersSquareType, color: styleOptions.dotsColor },
+      cornersDotOptions: gradientConfig
+        ? { type: styleOptions.cornersDotType, gradient: gradientConfig }
+        : { type: styleOptions.cornersDotType, color: styleOptions.dotsColor },
+      backgroundOptions: {
+        color: styleOptions.backgroundColor,
+      },
+      qrOptions: {
+        errorCorrectionLevel: styleOptions.errorCorrectionLevel,
+      },
+      imageOptions: {
+        crossOrigin: 'anonymous',
+        margin: 10,
+        imageSize: styleOptions.logoSize || 0.3,
+      },
+      image: styleOptions.logoUrl,
+    });
+
+    // Create a temporary container
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    document.body.appendChild(container);
+
+    await qrCode.append(container);
+
+    // Wait for rendering
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const canvas = container.querySelector('canvas');
+    if (!canvas) {
+      document.body.removeChild(container);
+      throw new Error('Failed to generate QR canvas');
+    }
+
+    // Clone the canvas before removing container
+    const clonedCanvas = document.createElement('canvas');
+    clonedCanvas.width = canvas.width;
+    clonedCanvas.height = canvas.height;
+    const ctx = clonedCanvas.getContext('2d');
+    ctx?.drawImage(canvas, 0, 0);
+
+    document.body.removeChild(container);
+    return clonedCanvas;
+  };
+
+  const generatePDF = async (template: PrintTemplate, qrCanvas: HTMLCanvasElement) => {
+    const { jsPDF } = await import('jspdf');
+
+    // Calculate dimensions with bleed
+    const bleed = includeBleed ? BLEED_MM : 0;
+    const totalWidth = template.width + bleed * 2;
+    const totalHeight = template.height + bleed * 2;
+
+    // Create PDF with bleed area
+    const pdf = new jsPDF({
+      orientation: totalWidth > totalHeight ? 'landscape' : 'portrait',
+      unit: 'mm',
+      format: [totalWidth, totalHeight],
+    });
+
+    // Fill background
+    pdf.setFillColor(styleOptions.backgroundColor);
+    pdf.rect(0, 0, totalWidth, totalHeight, 'F');
+
+    // Calculate QR position (centered)
+    const qrX = (totalWidth - template.qrSize) / 2;
+    const qrY = (totalHeight - template.qrSize) / 2;
+
+    // Add QR code
+    const qrDataUrl = qrCanvas.toDataURL('image/png');
+    pdf.addImage(qrDataUrl, 'PNG', qrX, qrY, template.qrSize, template.qrSize);
+
+    // Add crop marks if enabled
+    if (includeCropMarks && includeBleed) {
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.25);
+
+      // Top-left corner
+      pdf.line(bleed, CROP_MARK_OFFSET, bleed, CROP_MARK_OFFSET + CROP_MARK_LENGTH); // Vertical
+      pdf.line(CROP_MARK_OFFSET, bleed, CROP_MARK_OFFSET + CROP_MARK_LENGTH, bleed); // Horizontal
+
+      // Top-right corner
+      pdf.line(totalWidth - bleed, CROP_MARK_OFFSET, totalWidth - bleed, CROP_MARK_OFFSET + CROP_MARK_LENGTH);
+      pdf.line(totalWidth - CROP_MARK_OFFSET, bleed, totalWidth - CROP_MARK_OFFSET - CROP_MARK_LENGTH, bleed);
+
+      // Bottom-left corner
+      pdf.line(bleed, totalHeight - CROP_MARK_OFFSET, bleed, totalHeight - CROP_MARK_OFFSET - CROP_MARK_LENGTH);
+      pdf.line(CROP_MARK_OFFSET, totalHeight - bleed, CROP_MARK_OFFSET + CROP_MARK_LENGTH, totalHeight - bleed);
+
+      // Bottom-right corner
+      pdf.line(totalWidth - bleed, totalHeight - CROP_MARK_OFFSET, totalWidth - bleed, totalHeight - CROP_MARK_OFFSET - CROP_MARK_LENGTH);
+      pdf.line(totalWidth - CROP_MARK_OFFSET, totalHeight - bleed, totalWidth - CROP_MARK_OFFSET - CROP_MARK_LENGTH, totalHeight - bleed);
+    }
+
+    // Save PDF
+    pdf.save(`qrcode-${template.id}${includeBleed ? '-with-bleed' : ''}.pdf`);
+  };
+
+  const generatePNG = async (template: PrintTemplate, qrCanvas: HTMLCanvasElement) => {
+    // For PNG, just download the QR code directly
+    const link = document.createElement('a');
+    link.download = `qrcode-${template.id}-${template.dpi}dpi.png`;
+    link.href = qrCanvas.toDataURL('image/png');
+    link.click();
+  };
 
   const generatePrintReady = async (template: PrintTemplate) => {
     setIsGenerating(true);
     setSelectedTemplate(template.id);
 
     try {
-      // Dynamic import for code splitting
-      const QRCodeStyling = (await import('qr-code-styling')).default;
+      const qrCanvas = await generateQRCanvas(template);
 
-      const qrPixelSize = mmToPixels(template.qrSize, template.dpi);
-
-      const qrCode = new QRCodeStyling({
-        width: qrPixelSize,
-        height: qrPixelSize,
-        type: 'canvas',
-        data: getQRValue(),
-        dotsOptions: {
-          color: styleOptions.dotsColor,
-          type: styleOptions.dotsType,
-        },
-        cornersSquareOptions: {
-          color: styleOptions.dotsColor,
-          type: styleOptions.cornersSquareType,
-        },
-        cornersDotOptions: {
-          color: styleOptions.dotsColor,
-          type: styleOptions.cornersDotType,
-        },
-        backgroundOptions: {
-          color: styleOptions.backgroundColor,
-        },
-        qrOptions: {
-          errorCorrectionLevel: styleOptions.errorCorrectionLevel,
-        },
-        imageOptions: {
-          crossOrigin: 'anonymous',
-          margin: 10,
-          imageSize: styleOptions.logoSize || 0.3,
-        },
-        image: styleOptions.logoUrl,
-      });
-
-      // Generate and download
-      await qrCode.download({
-        name: `qrcode-${template.id}-${template.dpi}dpi`,
-        extension: 'png',
-      });
+      if (exportFormat === 'pdf') {
+        await generatePDF(template, qrCanvas);
+      } else {
+        await generatePNG(template, qrCanvas);
+      }
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
@@ -165,10 +280,80 @@ export function PrintTemplates() {
         professional printing quality.
       </p>
 
+      {/* Export Options */}
+      <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg space-y-3">
+        {/* Format Selection */}
+        <div>
+          <LabelWithTooltip
+            label="Export Format"
+            tooltip="PDF is recommended for professional printing with bleed marks. PNG exports just the QR code at high resolution."
+            className="mb-2"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => setExportFormat('pdf')}
+              className={cn(
+                'flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border transition-colors flex-1',
+                exportFormat === 'pdf'
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-indigo-300'
+              )}
+            >
+              <FileText className="w-4 h-4" />
+              PDF
+            </button>
+            <button
+              onClick={() => setExportFormat('png')}
+              className={cn(
+                'flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border transition-colors flex-1',
+                exportFormat === 'png'
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-indigo-300'
+              )}
+            >
+              <FileImage className="w-4 h-4" />
+              PNG
+            </button>
+          </div>
+        </div>
+
+        {/* PDF Options */}
+        {exportFormat === 'pdf' && (
+          <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={includeBleed}
+                onChange={(e) => setIncludeBleed(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Include 3mm bleed area
+              </span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={includeCropMarks}
+                onChange={(e) => setIncludeCropMarks(e.target.checked)}
+                disabled={!includeBleed}
+                className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50"
+              />
+              <span className={cn(
+                "text-sm",
+                includeBleed ? "text-gray-700 dark:text-gray-300" : "text-gray-400 dark:text-gray-500"
+              )}>
+                Include crop marks
+              </span>
+            </label>
+          </div>
+        )}
+      </div>
+
       {success && (
         <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-700 dark:text-green-400">
           <Check className="w-4 h-4" />
-          Print-ready QR code downloaded!
+          Print-ready {exportFormat.toUpperCase()} downloaded!
         </div>
       )}
 
@@ -201,6 +386,7 @@ export function PrintTemplates() {
       <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
         <p className="text-xs text-gray-500 dark:text-gray-400">
           Tip: For best results, use high error correction when printing at smaller sizes.
+          {exportFormat === 'pdf' && includeBleed && ' The bleed area ensures colors extend to the edge after trimming.'}
         </p>
       </div>
     </div>

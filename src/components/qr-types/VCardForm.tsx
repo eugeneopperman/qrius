@@ -1,9 +1,30 @@
+import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
 import { User } from 'lucide-react';
+import { validateEmail, validatePhone, validateUrl, validateName } from '../../utils/validators';
 
 export function VCardForm() {
   const { vcardData, setVcardData } = useQRStore();
+  const [touched, setTouched] = useState({
+    name: false,
+    phone: false,
+    email: false,
+    website: false,
+  });
+
+  const nameValidation = touched.name
+    ? validateName(vcardData.firstName, vcardData.lastName)
+    : { isValid: true };
+  const phoneValidation = touched.phone && vcardData.phone
+    ? validatePhone(vcardData.phone)
+    : { isValid: true };
+  const emailValidation = touched.email && vcardData.email
+    ? validateEmail(vcardData.email)
+    : { isValid: true };
+  const websiteValidation = touched.website && vcardData.website
+    ? validateUrl(vcardData.website)
+    : { isValid: true };
 
   return (
     <div className="space-y-4">
@@ -18,14 +39,18 @@ export function VCardForm() {
           type="text"
           value={vcardData.firstName}
           onChange={(e) => setVcardData({ firstName: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, name: true }))}
           placeholder="John"
+          error={!vcardData.lastName && nameValidation.error ? nameValidation.error : undefined}
         />
         <Input
           label="Last Name"
           type="text"
           value={vcardData.lastName}
           onChange={(e) => setVcardData({ lastName: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, name: true }))}
           placeholder="Doe"
+          error={!vcardData.firstName && nameValidation.error ? nameValidation.error : undefined}
         />
       </div>
 
@@ -52,14 +77,18 @@ export function VCardForm() {
           type="tel"
           value={vcardData.phone || ''}
           onChange={(e) => setVcardData({ phone: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
           placeholder="+1 555 123 4567"
+          error={phoneValidation.error}
         />
         <Input
           label="Email"
           type="email"
           value={vcardData.email || ''}
           onChange={(e) => setVcardData({ email: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, email: true }))}
           placeholder="john@example.com"
+          error={emailValidation.error}
         />
       </div>
 
@@ -68,7 +97,9 @@ export function VCardForm() {
         type="url"
         value={vcardData.website || ''}
         onChange={(e) => setVcardData({ website: e.target.value })}
+        onBlur={() => setTouched((t) => ({ ...t, website: true }))}
         placeholder="https://example.com"
+        error={websiteValidation.error}
       />
 
       <Input

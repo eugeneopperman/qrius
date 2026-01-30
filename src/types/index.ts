@@ -93,6 +93,19 @@ export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
 
 export type FrameStyle = 'none' | 'simple' | 'rounded' | 'bottom-label' | 'top-label' | 'badge';
 
+export type LogoShape = 'square' | 'rounded' | 'circle';
+
+export type GradientType = 'linear' | 'radial';
+
+export interface GradientOptions {
+  type: GradientType;
+  rotation?: number; // 0-360 degrees, only for linear
+  colorStops: Array<{
+    offset: number; // 0-1
+    color: string;
+  }>;
+}
+
 export interface QRStyleOptions {
   dotsColor: string;
   backgroundColor: string;
@@ -102,9 +115,13 @@ export interface QRStyleOptions {
   errorCorrectionLevel: ErrorCorrectionLevel;
   logoUrl?: string;
   logoSize?: number;
+  logoShape?: LogoShape;
   frameStyle?: FrameStyle;
   frameLabel?: string;
   frameColor?: string;
+  useGradient?: boolean;
+  gradient?: GradientOptions;
+  showFallbackUrl?: boolean;
 }
 
 export interface ExportOptions {
@@ -118,4 +135,14 @@ export interface BrandKit {
   name: string;
   createdAt: number;
   style: Partial<QRStyleOptions>;
+}
+
+export interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  type: QRCodeType;
+  data: QRData;
+  styleOptions: QRStyleOptions;
+  qrValue: string;
+  thumbnail?: string;
 }

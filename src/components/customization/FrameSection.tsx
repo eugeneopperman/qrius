@@ -2,6 +2,7 @@ import { useQRStore } from '../../stores/qrStore';
 import { Type } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { cn } from '../../utils/cn';
+import { LabelWithTooltip } from '../ui/Tooltip';
 import type { FrameStyle } from '../../types';
 
 const frameTemplates: { id: FrameStyle; label: string; hasLabel: boolean }[] = [
@@ -33,9 +34,16 @@ export function FrameSection() {
     <div className="space-y-4">
       {/* Frame Template Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Frame Style
-        </label>
+        <LabelWithTooltip
+          label="Frame Style"
+          tooltip={
+            <div className="space-y-1">
+              <p className="font-medium">Add a decorative border around your QR code.</p>
+              <p className="text-gray-300 dark:text-gray-600">Frames with labels help guide users to scan and can include a call-to-action like "Scan Me" or "Learn More".</p>
+            </div>
+          }
+          className="mb-2"
+        />
         <div className="grid grid-cols-3 gap-2">
           {frameTemplates.map((template) => (
             <button
@@ -59,7 +67,10 @@ export function FrameSection() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <Type className="w-4 h-4" />
-            <span className="text-sm font-medium">Label Text</span>
+            <LabelWithTooltip
+              label="Label Text"
+              tooltip="Short call-to-action text displayed with the frame. Keep it brief and actionable for best results."
+            />
           </div>
 
           <Input

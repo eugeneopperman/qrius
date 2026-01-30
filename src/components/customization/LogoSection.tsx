@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
-import { Upload, X, AlertCircle } from 'lucide-react';
+import { Upload, X, AlertCircle, Square, Circle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
+import { LabelWithTooltip } from '../ui/Tooltip';
+import type { LogoShape } from '../../types';
 
 export function LogoSection() {
   const { styleOptions, setStyleOptions } = useQRStore();
@@ -92,7 +94,11 @@ export function LogoSection() {
             <img
               src={styleOptions.logoUrl}
               alt="Logo preview"
-              className="w-20 h-20 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-white"
+              className={cn(
+                "w-20 h-20 object-cover border border-gray-200 dark:border-gray-700 bg-white",
+                styleOptions.logoShape === 'circle' ? "rounded-full" :
+                styleOptions.logoShape === 'rounded' ? "rounded-xl" : "rounded-lg"
+              )}
             />
             <button
               onClick={handleRemoveLogo}
@@ -103,9 +109,16 @@ export function LogoSection() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Logo Size
-            </label>
+            <LabelWithTooltip
+              label="Logo Size"
+              tooltip={
+                <div className="space-y-1">
+                  <p className="font-medium">How much of the QR code the logo covers.</p>
+                  <p className="text-gray-300 dark:text-gray-600">Larger logos look better but reduce scannability. Keep it under 25% for best results, and use High error correction.</p>
+                </div>
+              }
+              className="mb-2"
+            />
             <div className="flex flex-wrap gap-2">
               {logoSizeOptions.map((option) => (
                 <button
@@ -121,6 +134,42 @@ export function LogoSection() {
                   {option.label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Logo Shape */}
+          <div>
+            <LabelWithTooltip
+              label="Logo Shape"
+              tooltip="Apply a shape mask to your logo. Circular logos work well for profile pictures or round brand marks."
+              className="mb-2"
+            />
+            <div className="flex gap-2">
+              {([
+                { value: 'square' as LogoShape, label: 'Square', icon: Square },
+                { value: 'rounded' as LogoShape, label: 'Rounded', icon: Square },
+                { value: 'circle' as LogoShape, label: 'Circle', icon: Circle },
+              ]).map((option) => {
+                const Icon = option.icon;
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => setStyleOptions({ logoShape: option.value })}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors',
+                      (styleOptions.logoShape || 'square') === option.value
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
+                    )}
+                  >
+                    <Icon className={cn(
+                      "w-3.5 h-3.5",
+                      option.value === 'rounded' && "rounded-sm"
+                    )} />
+                    {option.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Wifi } from 'lucide-react';
+import { validateSsid, validateWifiPassword } from '../../utils/validators';
 
 const encryptionOptions = [
   { value: 'WPA', label: 'WPA/WPA2/WPA3' },
@@ -11,6 +13,12 @@ const encryptionOptions = [
 
 export function WifiForm() {
   const { wifiData, setWifiData } = useQRStore();
+  const [touched, setTouched] = useState({ ssid: false, password: false });
+
+  const ssidValidation = touched.ssid ? validateSsid(wifiData.ssid) : { isValid: true };
+  const passwordValidation = touched.password
+    ? validateWifiPassword(wifiData.password || '', wifiData.encryption)
+    : { isValid: true };
 
   return (
     <div className="space-y-4">
@@ -24,7 +32,9 @@ export function WifiForm() {
         type="text"
         value={wifiData.ssid}
         onChange={(e) => setWifiData({ ssid: e.target.value })}
+        onBlur={() => setTouched((t) => ({ ...t, ssid: true }))}
         placeholder="MyWiFiNetwork"
+        error={ssidValidation.error}
       />
 
       <Select
@@ -42,7 +52,10 @@ export function WifiForm() {
           type="password"
           value={wifiData.password || ''}
           onChange={(e) => setWifiData({ password: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, password: true }))}
           placeholder="Network password"
+          error={passwordValidation.error}
+          hint={wifiData.encryption === 'WPA' ? 'WPA passwords must be 8-63 characters' : undefined}
         />
       )}
 

@@ -1,13 +1,17 @@
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { useQRStore } from '../stores/qrStore';
+import { useHistoryStore } from '../stores/historyStore';
 import { Download, Copy, Check, ChevronDown } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../utils/cn';
+import { applyLogoMask } from '../utils/logoMask';
+import type { GradientOptions } from '../types';
 
 export interface QRPreviewHandle {
   download: () => void;
   copy: () => void;
+  showFormatPicker: () => void;
 }
 
 export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
@@ -15,9 +19,106 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   const qrCodeRef = useRef<QRCodeStyling | null>(null);
   const [copied, setCopied] = useState(false);
   const [showFormatMenu, setShowFormatMenu] = useState(false);
-  const { getQRValue, styleOptions } = useQRStore();
+  const [processedLogoUrl, setProcessedLogoUrl] = useState<string | undefined>(undefined);
+  const { getQRValue, styleOptions, activeType, getCurrentData } = useQRStore();
+  const { addEntry, updateThumbnail } = useHistoryStore();
 
   const qrValue = getQRValue();
+
+  // Process logo with shape mask when logo or shape changes
+  useEffect(() => {
+    if (!styleOptions.logoUrl) {
+      setProcessedLogoUrl(undefined);
+      return;
+    }
+
+    const shape = styleOptions.logoShape || 'square';
+
+    // Only apply mask for non-square shapes
+    if (shape === 'square') {
+      setProcessedLogoUrl(styleOptions.logoUrl);
+      return;
+    }
+
+    applyLogoMask(styleOptions.logoUrl, shape)
+      .then(setProcessedLogoUrl)
+      .catch((error) => {
+        console.error('Failed to apply logo mask:', error);
+        setProcessedLogoUrl(styleOptions.logoUrl);
+      });
+  }, [styleOptions.logoUrl, styleOptions.logoShape]);
+
+  // Convert gradient options to qr-code-styling format
+  const getGradientConfig = useCallback((gradient: GradientOptions) => {
+    return {
+      type: gradient.type,
+      rotation: gradient.rotation || 0,
+      colorStops: gradient.colorStops.map((stop) => ({
+        offset: stop.offset,
+        color: stop.color,
+      })),
+    };
+  }, []);
+
+  // Build dots options with or without gradient
+  const dotsOptions = useMemo(() => {
+    const base = { type: styleOptions.dotsType };
+    if (styleOptions.useGradient && styleOptions.gradient) {
+      return { ...base, gradient: getGradientConfig(styleOptions.gradient) };
+    }
+    return { ...base, color: styleOptions.dotsColor };
+  }, [styleOptions.dotsType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor, getGradientConfig]);
+
+  // Build corners options with or without gradient
+  const cornersSquareOptions = useMemo(() => {
+    const base = { type: styleOptions.cornersSquareType };
+    if (styleOptions.useGradient && styleOptions.gradient) {
+      return { ...base, gradient: getGradientConfig(styleOptions.gradient) };
+    }
+    return { ...base, color: styleOptions.dotsColor };
+  }, [styleOptions.cornersSquareType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor, getGradientConfig]);
+
+  const cornersDotOptions = useMemo(() => {
+    const base = { type: styleOptions.cornersDotType };
+    if (styleOptions.useGradient && styleOptions.gradient) {
+      return { ...base, gradient: getGradientConfig(styleOptions.gradient) };
+    }
+    return { ...base, color: styleOptions.dotsColor };
+  }, [styleOptions.cornersDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor, getGradientConfig]);
+
+  // Save to history with thumbnail
+  const saveToHistory = useCallback(async () => {
+    const currentData = getCurrentData();
+
+    // Add entry first (without thumbnail for speed)
+    addEntry({
+      type: activeType,
+      data: currentData,
+      styleOptions: { ...styleOptions },
+      qrValue,
+    });
+
+    // Generate thumbnail asynchronously
+    if (qrCodeRef.current) {
+      try {
+        const blob = await qrCodeRef.current.getRawData('png');
+        if (blob) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = reader.result as string;
+            // Get the most recent entry and update its thumbnail
+            const entries = useHistoryStore.getState().entries;
+            if (entries.length > 0) {
+              updateThumbnail(entries[0].id, base64);
+            }
+          };
+          reader.readAsDataURL(blob);
+        }
+      } catch (error) {
+        console.error('Failed to generate thumbnail:', error);
+      }
+    }
+  }, [activeType, getCurrentData, styleOptions, qrValue, addEntry, updateThumbnail]);
 
   // Initialize QR code
   useEffect(() => {
@@ -26,18 +127,9 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       height: 280,
       type: 'svg',
       data: qrValue,
-      dotsOptions: {
-        color: styleOptions.dotsColor,
-        type: styleOptions.dotsType,
-      },
-      cornersSquareOptions: {
-        color: styleOptions.dotsColor,
-        type: styleOptions.cornersSquareType,
-      },
-      cornersDotOptions: {
-        color: styleOptions.dotsColor,
-        type: styleOptions.cornersDotType,
-      },
+      dotsOptions,
+      cornersSquareOptions,
+      cornersDotOptions,
       backgroundOptions: {
         color: styleOptions.backgroundColor,
       },
@@ -49,7 +141,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
         margin: 10,
         imageSize: styleOptions.logoSize || 0.3,
       },
-      image: styleOptions.logoUrl,
+      image: processedLogoUrl,
     });
 
     if (containerRef.current) {
@@ -69,18 +161,9 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
     if (qrCodeRef.current) {
       qrCodeRef.current.update({
         data: qrValue,
-        dotsOptions: {
-          color: styleOptions.dotsColor,
-          type: styleOptions.dotsType,
-        },
-        cornersSquareOptions: {
-          color: styleOptions.dotsColor,
-          type: styleOptions.cornersSquareType,
-        },
-        cornersDotOptions: {
-          color: styleOptions.dotsColor,
-          type: styleOptions.cornersDotType,
-        },
+        dotsOptions,
+        cornersSquareOptions,
+        cornersDotOptions,
         backgroundOptions: {
           color: styleOptions.backgroundColor,
         },
@@ -92,10 +175,10 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
           margin: 10,
           imageSize: styleOptions.logoSize || 0.3,
         },
-        image: styleOptions.logoUrl || undefined,
+        image: processedLogoUrl || undefined,
       });
     }
-  }, [qrValue, styleOptions]);
+  }, [qrValue, styleOptions, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl]);
 
   const handleDownload = async (format: 'png' | 'svg' | 'jpeg' = 'png') => {
     if (qrCodeRef.current) {
@@ -103,6 +186,47 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
         name: 'qrcode',
         extension: format,
       });
+      // Save to history after download
+      saveToHistory();
+    }
+    setShowFormatMenu(false);
+  };
+
+  const handlePdfDownload = async () => {
+    if (!qrCodeRef.current) return;
+
+    try {
+      const { jsPDF } = await import('jspdf');
+      const blob = await qrCodeRef.current.getRawData('png');
+      if (!blob) return;
+
+      // Convert blob to data URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+
+        // Create A4 PDF with QR code centered
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const qrSize = 80; // 80mm QR code
+        const x = (pageWidth - qrSize) / 2;
+        const y = (pageHeight - qrSize) / 2;
+
+        pdf.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
+        pdf.save('qrcode.pdf');
+      };
+      reader.readAsDataURL(blob);
+
+      // Save to history
+      saveToHistory();
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
     }
     setShowFormatMenu(false);
   };
@@ -117,6 +241,8 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
           ]);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
+          // Save to history after copy
+          saveToHistory();
         }
       } catch (error) {
         console.error('Failed to copy:', error);
@@ -128,6 +254,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   useImperativeHandle(ref, () => ({
     download: () => handleDownload('png'),
     copy: handleCopy,
+    showFormatPicker: () => setShowFormatMenu(true),
   }));
 
   const frameStyle = styleOptions.frameStyle || 'none';
@@ -185,6 +312,15 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
             {frameLabel}
           </div>
         )}
+
+        {/* Fallback URL Display */}
+        {styleOptions.showFallbackUrl && qrValue && (
+          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center break-all max-w-[280px]">
+              {qrValue.length > 100 ? `${qrValue.substring(0, 100)}...` : qrValue}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Action Buttons */}
@@ -201,7 +337,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
           </Button>
 
           {showFormatMenu && (
-            <div className="absolute top-full left-0 mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 min-w-[140px] z-10">
+            <div className="absolute top-full left-0 mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 min-w-[160px] z-10">
               <button
                 onClick={() => handleDownload('png')}
                 className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -219,6 +355,13 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
                 className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 JPEG (Compressed)
+              </button>
+              <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+              <button
+                onClick={handlePdfDownload}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+              >
+                PDF (Print Ready)
               </button>
             </div>
           )}

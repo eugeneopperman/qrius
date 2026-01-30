@@ -12,8 +12,10 @@ import { ScannabilityScore } from './components/features/ScannabilityScore';
 import { BrandKitManager } from './components/features/BrandKit';
 import { KeyboardShortcutsModal } from './components/features/KeyboardShortcuts';
 import { PrintTemplates } from './components/features/PrintTemplates';
+import { HistoryModal } from './components/features/History';
+import { SmartPresets } from './components/features/SmartPresets';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { Palette, Image, Shapes, Frame, ScanLine, Bookmark, Keyboard, Printer } from 'lucide-react';
+import { Palette, Image, Shapes, Frame, ScanLine, Bookmark, Keyboard, Printer, Sparkles } from 'lucide-react';
 import { Button } from './components/ui/Button';
 
 // Lazy load QR Reader for code splitting
@@ -30,6 +32,7 @@ function LoadingSpinner() {
 function App() {
   const [showReader, setShowReader] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const qrPreviewRef = useRef<QRPreviewHandle>(null);
 
   const toggleDarkMode = useCallback(() => {
@@ -39,15 +42,17 @@ function App() {
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onDownload: () => qrPreviewRef.current?.download(),
+    onDownloadWithPicker: () => qrPreviewRef.current?.showFormatPicker(),
     onCopy: () => qrPreviewRef.current?.copy(),
     onToggleDarkMode: toggleDarkMode,
     onShowHelp: () => setShowShortcuts(true),
     onOpenReader: () => setShowReader(true),
+    onOpenHistory: () => setShowHistory(true),
   });
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <Header />
+      <Header onHistoryClick={() => setShowHistory(true)} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Type Selector */}
@@ -64,6 +69,14 @@ function App() {
             {/* Customization */}
             <div className="card">
               <h2 className="section-title mb-2">Customization</h2>
+
+              <AccordionItem
+                title="Smart Presets"
+                icon={<Sparkles className="w-5 h-5" />}
+                defaultOpen={false}
+              >
+                <SmartPresets />
+              </AccordionItem>
 
               <AccordionItem
                 title="Colors"
@@ -174,6 +187,12 @@ function App() {
       <KeyboardShortcutsModal
         isOpen={showShortcuts}
         onClose={() => setShowShortcuts(false)}
+      />
+
+      {/* History Modal */}
+      <HistoryModal
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
       />
     </div>
   );

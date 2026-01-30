@@ -4,10 +4,12 @@ import type { QRCodeType } from '../types';
 
 export function useKeyboardShortcuts(callbacks: {
   onDownload?: () => void;
+  onDownloadWithPicker?: () => void;
   onCopy?: () => void;
   onToggleDarkMode?: () => void;
   onShowHelp?: () => void;
   onOpenReader?: () => void;
+  onOpenHistory?: () => void;
 }) {
   const { setActiveType } = useQRStore();
 
@@ -54,10 +56,10 @@ export function useKeyboardShortcuts(callbacks: {
         return;
       }
 
-      // Ctrl/Cmd + Shift + S - Download with format picker (same as regular for now)
+      // Ctrl/Cmd + Shift + S - Download with format picker
       if (cmdOrCtrl && e.shiftKey && e.key.toLowerCase() === 's') {
         e.preventDefault();
-        callbacks.onDownload?.();
+        callbacks.onDownloadWithPicker?.();
         return;
       }
 
@@ -92,6 +94,13 @@ export function useKeyboardShortcuts(callbacks: {
         callbacks.onOpenReader?.();
         return;
       }
+
+      // Ctrl/Cmd + H - Open History
+      if (cmdOrCtrl && e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        callbacks.onOpenHistory?.();
+        return;
+      }
     },
     [setActiveType, callbacks]
   );
@@ -104,9 +113,11 @@ export function useKeyboardShortcuts(callbacks: {
 
 export const shortcuts = [
   { keys: ['Ctrl', '1-9'], description: 'Switch QR code type' },
-  { keys: ['Ctrl', 'S'], description: 'Download QR code' },
+  { keys: ['Ctrl', 'S'], description: 'Download QR code (PNG)' },
+  { keys: ['Ctrl', 'Shift', 'S'], description: 'Download with format picker' },
   { keys: ['Ctrl', 'C'], description: 'Copy QR code to clipboard' },
   { keys: ['Ctrl', 'D'], description: 'Toggle dark mode' },
   { keys: ['Ctrl', 'R'], description: 'Open QR code reader' },
+  { keys: ['Ctrl', 'H'], description: 'Open history' },
   { keys: ['?'], description: 'Show keyboard shortcuts' },
 ];

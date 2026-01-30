@@ -1,9 +1,18 @@
+import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
 import { Calendar } from 'lucide-react';
+import { validateEventTitle, validateEventDate } from '../../utils/validators';
 
 export function EventForm() {
   const { eventData, setEventData } = useQRStore();
+  const [touched, setTouched] = useState({ title: false, startDate: false, endDate: false });
+
+  const titleValidation = touched.title ? validateEventTitle(eventData.title) : { isValid: true };
+  const startDateValidation = touched.startDate ? validateEventDate(eventData.startDate) : { isValid: true };
+  const endDateValidation = touched.endDate && eventData.endDate
+    ? validateEventDate(eventData.startDate, eventData.endDate)
+    : { isValid: true };
 
   return (
     <div className="space-y-4">
@@ -17,7 +26,9 @@ export function EventForm() {
         type="text"
         value={eventData.title}
         onChange={(e) => setEventData({ title: e.target.value })}
+        onBlur={() => setTouched((t) => ({ ...t, title: true }))}
         placeholder="Meeting with Team"
+        error={titleValidation.error}
       />
 
       <Input
@@ -34,6 +45,8 @@ export function EventForm() {
           type="date"
           value={eventData.startDate}
           onChange={(e) => setEventData({ startDate: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, startDate: true }))}
+          error={startDateValidation.error}
         />
         <Input
           label="Start Time"
@@ -49,6 +62,8 @@ export function EventForm() {
           type="date"
           value={eventData.endDate || ''}
           onChange={(e) => setEventData({ endDate: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, endDate: true }))}
+          error={endDateValidation.error}
         />
         <Input
           label="End Time"

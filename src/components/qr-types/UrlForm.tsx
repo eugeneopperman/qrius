@@ -5,11 +5,15 @@ import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Link, Shrink, Loader2, Check, AlertCircle, Copy } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { validateUrl } from '../../utils/validators';
 
 export function UrlForm() {
   const { urlData, setUrlData } = useQRStore();
   const { shorten, isLoading, error } = useUrlShortener();
   const [copied, setCopied] = useState(false);
+  const [touched, setTouched] = useState(false);
+
+  const urlValidation = touched ? validateUrl(urlData.url) : { isValid: true };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
@@ -17,6 +21,7 @@ export function UrlForm() {
   };
 
   const handleUrlBlur = () => {
+    setTouched(true);
     let url = urlData.url.trim();
     if (url && !url.match(/^https?:\/\//i) && !url.startsWith('//')) {
       url = 'https://' + url;
@@ -64,7 +69,8 @@ export function UrlForm() {
         onChange={handleUrlChange}
         onBlur={handleUrlBlur}
         placeholder="https://example.com"
-        hint="Enter the full URL including https://"
+        hint={urlValidation.isValid ? "Enter the full URL including https://" : undefined}
+        error={urlValidation.error}
       />
 
       {urlData.url && (
