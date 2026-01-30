@@ -112,3 +112,10 @@ export interface ExportOptions {
   size: number;
   quality?: number;
 }
+
+export interface BrandKit {
+  id: string;
+  name: string;
+  createdAt: number;
+  style: Partial<QRStyleOptions>;
+}

@@ -1,11 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { useQRStore } from '../stores/qrStore';
 import { Download, Copy, Check, ChevronDown } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../utils/cn';
 
-export function QRPreview() {
+export interface QRPreviewHandle {
+  download: () => void;
+  copy: () => void;
+}
+
+export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const qrCodeRef = useRef<QRCodeStyling | null>(null);
   const [copied, setCopied] = useState(false);
@@ -92,7 +97,7 @@ export function QRPreview() {
     }
   }, [qrValue, styleOptions]);
 
-  const handleDownload = async (format: 'png' | 'svg' | 'jpeg') => {
+  const handleDownload = async (format: 'png' | 'svg' | 'jpeg' = 'png') => {
     if (qrCodeRef.current) {
       await qrCodeRef.current.download({
         name: 'qrcode',
@@ -118,6 +123,12 @@ export function QRPreview() {
       }
     }
   };
+
+  // Expose methods via ref
+  useImperativeHandle(ref, () => ({
+    download: () => handleDownload('png'),
+    copy: handleCopy,
+  }));
 
   const frameStyle = styleOptions.frameStyle || 'none';
   const frameLabel = styleOptions.frameLabel || '';
@@ -193,19 +204,19 @@ export function QRPreview() {
             <div className="absolute top-full left-0 mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 min-w-[140px] z-10">
               <button
                 onClick={() => handleDownload('png')}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 PNG (High Quality)
               </button>
               <button
                 onClick={() => handleDownload('svg')}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 SVG (Vector)
               </button>
               <button
                 onClick={() => handleDownload('jpeg')}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 JPEG (Compressed)
               </button>
@@ -237,4 +248,6 @@ export function QRPreview() {
       )}
     </div>
   );
-}
+});
+
+QRPreview.displayName = 'QRPreview';
