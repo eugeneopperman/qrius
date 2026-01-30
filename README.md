@@ -1,117 +1,73 @@
-# EPS QuickLook Plugin for macOS
+# React + TypeScript + Vite
 
-A native macOS QuickLook plugin that enables preview and thumbnail generation for EPS (Encapsulated PostScript) files directly in Finder.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
+Currently, two official plugins are available:
 
-- **Quick Look Preview**: Press Space on any EPS file in Finder to see a full preview
-- **Thumbnail Generation**: See EPS file thumbnails in Finder icon views
-- **Native Performance**: Uses macOS's built-in PostScript rendering capabilities
-- **Retina Support**: High-resolution previews on Retina displays
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Requirements
+## React Compiler
 
-- macOS 12.0 (Monterey) or later
-- Xcode 14.0 or later (for building from source)
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Installation
+## Expanding the ESLint configuration
 
-### Option 1: Build from Source
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-1. Open `EPSQuickLook.xcodeproj` in Xcode
-2. Select the `EPSQuickLook` scheme
-3. Build the project (⌘B)
-4. Archive and export the application (Product → Archive)
-5. Move `EPSQuickLook.app` to your `/Applications` folder
-6. Launch the app once to register the extensions
-7. Go to **System Preferences → Extensions → Quick Look** and enable:
-   - EPS Preview Extension
-   - EPS Thumbnail Extension
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-### Option 2: Manual Installation (After Building)
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-1. Build the project in Xcode
-2. Right-click on the built `EPSQuickLook.app` and select "Show Package Contents"
-3. Navigate to `Contents/PlugIns/`
-4. Copy both `.appex` extensions to `~/Library/QuickLook/`
-5. Run `qlmanage -r` in Terminal to refresh QuickLook
-
-## Usage
-
-Once installed:
-
-1. **Preview**: Select any `.eps` file in Finder and press **Space**
-2. **Thumbnails**: EPS files will show visual thumbnails in icon view
-3. **Column View**: Preview pane in column view will show EPS content
-
-## Troubleshooting
-
-### Previews not showing?
-
-1. Open Terminal and run:
-   ```bash
-   qlmanage -r
-   qlmanage -r cache
-   ```
-
-2. Restart Finder:
-   ```bash
-   killall Finder
-   ```
-
-3. Verify the extension is enabled in System Preferences → Extensions → Quick Look
-
-### Debug Mode
-
-To test the QuickLook generator directly:
-
-```bash
-# Test preview generation
-qlmanage -p /path/to/your/file.eps
-
-# Test thumbnail generation
-qlmanage -t /path/to/your/file.eps
-
-# View debug output
-qlmanage -d4 -p /path/to/your/file.eps
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## Project Structure
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-EPSQuickLook/
-├── EPSQuickLook/                    # Host application
-│   ├── EPSQuickLookApp.swift
-│   ├── ContentView.swift
-│   └── Info.plist
-├── EPSPreviewExtension/             # QuickLook Preview Extension
-│   ├── PreviewViewController.swift
-│   └── Info.plist
-├── EPSThumbnailExtension/           # Thumbnail Extension
-│   ├── ThumbnailProvider.swift
-│   └── Info.plist
-└── Shared/                          # Shared EPS rendering code
-    └── EPSRenderer.swift
-```
-
-## How It Works
-
-The plugin uses macOS's native `NSEPSImageRep` class to render EPS files. This provides:
-
-- Full PostScript language support
-- Vector graphics rendering
-- Proper color management
-- Integration with Core Graphics
-
-## License
-
-MIT License - See [LICENSE](LICENSE) for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit pull requests.
-
-## Acknowledgments
-
-- Built using Apple's QuickLook framework
-- Uses native macOS PostScript rendering capabilities
