@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, lazy, Suspense } from 'react';
 import { Header } from './components/Header';
 import { TypeSelector } from './components/TypeSelector';
 import { InputForm } from './components/InputForm';
@@ -9,12 +9,23 @@ import { StyleSection } from './components/customization/StyleSection';
 import { FrameSection } from './components/customization/FrameSection';
 import { AccordionItem } from './components/ui/Accordion';
 import { ScannabilityScore } from './components/features/ScannabilityScore';
-import { QRReader } from './components/features/QRReader';
 import { BrandKitManager } from './components/features/BrandKit';
 import { KeyboardShortcutsModal } from './components/features/KeyboardShortcuts';
+import { PrintTemplates } from './components/features/PrintTemplates';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { Palette, Image, Shapes, Frame, ScanLine, Bookmark, Keyboard } from 'lucide-react';
+import { Palette, Image, Shapes, Frame, ScanLine, Bookmark, Keyboard, Printer } from 'lucide-react';
 import { Button } from './components/ui/Button';
+
+// Lazy load QR Reader for code splitting
+const QRReader = lazy(() => import('./components/features/QRReader').then(m => ({ default: m.QRReader })));
+
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center py-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    </div>
+  );
+}
 
 function App() {
   const [showReader, setShowReader] = useState(false);
@@ -89,6 +100,13 @@ function App() {
               >
                 <BrandKitManager />
               </AccordionItem>
+
+              <AccordionItem
+                title="Print Templates"
+                icon={<Printer className="w-5 h-5" />}
+              >
+                <PrintTemplates />
+              </AccordionItem>
             </div>
           </div>
 
@@ -122,7 +140,9 @@ function App() {
                     <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-4">
                       QR Code Reader
                     </h3>
-                    <QRReader />
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <QRReader />
+                    </Suspense>
                   </div>
                 )}
               </div>
