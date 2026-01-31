@@ -9,27 +9,129 @@ import type { ReactNode } from 'react';
 interface StyleOption<T> {
   value: T;
   label: string;
-  preview?: React.ReactNode;
+  preview?: ReactNode;
+}
+
+// Visual previews for dot patterns
+function DotPreview({ type }: { type: DotType }) {
+  const patterns: Record<DotType, ReactNode> = {
+    square: (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <rect x="2" y="2" width="6" height="6" fill="currentColor" />
+        <rect x="10" y="2" width="6" height="6" fill="currentColor" />
+        <rect x="2" y="10" width="6" height="6" fill="currentColor" />
+        <rect x="16" y="10" width="6" height="6" fill="currentColor" />
+        <rect x="10" y="16" width="6" height="6" fill="currentColor" />
+      </svg>
+    ),
+    dots: (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <circle cx="5" cy="5" r="3" fill="currentColor" />
+        <circle cx="13" cy="5" r="3" fill="currentColor" />
+        <circle cx="5" cy="13" r="3" fill="currentColor" />
+        <circle cx="19" cy="13" r="3" fill="currentColor" />
+        <circle cx="13" cy="19" r="3" fill="currentColor" />
+      </svg>
+    ),
+    rounded: (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <rect x="2" y="2" width="6" height="6" rx="1.5" fill="currentColor" />
+        <rect x="10" y="2" width="6" height="6" rx="1.5" fill="currentColor" />
+        <rect x="2" y="10" width="6" height="6" rx="1.5" fill="currentColor" />
+        <rect x="16" y="10" width="6" height="6" rx="1.5" fill="currentColor" />
+        <rect x="10" y="16" width="6" height="6" rx="1.5" fill="currentColor" />
+      </svg>
+    ),
+    'extra-rounded': (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <rect x="2" y="2" width="6" height="6" rx="3" fill="currentColor" />
+        <rect x="10" y="2" width="6" height="6" rx="3" fill="currentColor" />
+        <rect x="2" y="10" width="6" height="6" rx="3" fill="currentColor" />
+        <rect x="16" y="10" width="6" height="6" rx="3" fill="currentColor" />
+        <rect x="10" y="16" width="6" height="6" rx="3" fill="currentColor" />
+      </svg>
+    ),
+    classy: (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <path d="M2 2h6v6H2z M10 2h6v6h-6z M2 10h6v6H2z M16 10h6v6h-6z M10 16h6v6h-6z" fill="currentColor" />
+        <rect x="4" y="4" width="2" height="2" fill="white" opacity="0.3" />
+        <rect x="12" y="4" width="2" height="2" fill="white" opacity="0.3" />
+      </svg>
+    ),
+    'classy-rounded': (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <rect x="2" y="2" width="6" height="6" rx="1" fill="currentColor" />
+        <rect x="10" y="2" width="6" height="6" rx="1" fill="currentColor" />
+        <rect x="2" y="10" width="6" height="6" rx="1" fill="currentColor" />
+        <rect x="16" y="10" width="6" height="6" rx="1" fill="currentColor" />
+        <rect x="10" y="16" width="6" height="6" rx="1" fill="currentColor" />
+        <rect x="3" y="3" width="2" height="2" rx="0.5" fill="white" opacity="0.2" />
+      </svg>
+    ),
+  };
+  return patterns[type] || patterns.square;
+}
+
+// Visual previews for corner squares
+function CornerSquarePreview({ type }: { type: CornerSquareType }) {
+  const patterns: Record<CornerSquareType, ReactNode> = {
+    square: (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <rect x="2" y="2" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="3" />
+        <rect x="7" y="7" width="10" height="10" fill="currentColor" />
+      </svg>
+    ),
+    'extra-rounded': (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="currentColor" strokeWidth="3" />
+        <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" />
+      </svg>
+    ),
+    dot: (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="3" />
+        <circle cx="12" cy="12" r="5" fill="currentColor" />
+      </svg>
+    ),
+  };
+  return patterns[type] || patterns.square;
+}
+
+// Visual previews for corner dots
+function CornerDotPreview({ type }: { type: CornerDotType }) {
+  const patterns: Record<CornerDotType, ReactNode> = {
+    square: (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <rect x="4" y="4" width="16" height="16" fill="currentColor" />
+      </svg>
+    ),
+    dot: (
+      <svg viewBox="0 0 24 24" className="w-full h-full">
+        <circle cx="12" cy="12" r="8" fill="currentColor" />
+      </svg>
+    ),
+  };
+  return patterns[type] || patterns.square;
 }
 
 const dotStyleOptions: StyleOption<DotType>[] = [
-  { value: 'square', label: 'Square' },
-  { value: 'dots', label: 'Dots' },
-  { value: 'rounded', label: 'Rounded' },
-  { value: 'extra-rounded', label: 'Extra Rounded' },
-  { value: 'classy', label: 'Classy' },
-  { value: 'classy-rounded', label: 'Classy Rounded' },
+  { value: 'square', label: 'Square', preview: <DotPreview type="square" /> },
+  { value: 'dots', label: 'Dots', preview: <DotPreview type="dots" /> },
+  { value: 'rounded', label: 'Rounded', preview: <DotPreview type="rounded" /> },
+  { value: 'extra-rounded', label: 'Extra Rounded', preview: <DotPreview type="extra-rounded" /> },
+  { value: 'classy', label: 'Classy', preview: <DotPreview type="classy" /> },
+  { value: 'classy-rounded', label: 'Classy Rounded', preview: <DotPreview type="classy-rounded" /> },
 ];
 
 const cornerSquareOptions: StyleOption<CornerSquareType>[] = [
-  { value: 'square', label: 'Square' },
-  { value: 'extra-rounded', label: 'Rounded' },
-  { value: 'dot', label: 'Dot' },
+  { value: 'square', label: 'Square', preview: <CornerSquarePreview type="square" /> },
+  { value: 'extra-rounded', label: 'Rounded', preview: <CornerSquarePreview type="extra-rounded" /> },
+  { value: 'dot', label: 'Dot', preview: <CornerSquarePreview type="dot" /> },
 ];
 
 const cornerDotOptions: StyleOption<CornerDotType>[] = [
-  { value: 'square', label: 'Square' },
-  { value: 'dot', label: 'Dot' },
+  { value: 'square', label: 'Square', preview: <CornerDotPreview type="square" /> },
+  { value: 'dot', label: 'Dot', preview: <CornerDotPreview type="dot" /> },
 ];
 
 const errorCorrectionOptions: StyleOption<ErrorCorrectionLevel>[] = [
@@ -45,12 +147,14 @@ function OptionGroup<T extends string>({
   options,
   value,
   onChange,
+  showPreview = false,
 }: {
   label: string;
   tooltip?: ReactNode;
   options: StyleOption<T>[];
   value: T;
   onChange: (value: T) => void;
+  showPreview?: boolean;
 }) {
   return (
     <div>
@@ -63,19 +167,41 @@ function OptionGroup<T extends string>({
           </label>
         )
       )}
-      <div className="flex flex-wrap gap-2">
+      <div className={cn(
+        showPreview ? 'grid grid-cols-3 sm:grid-cols-6 gap-2' : 'flex flex-wrap gap-2'
+      )}>
         {options.map((option) => (
           <button
             key={option.value}
             onClick={() => onChange(option.value)}
+            title={option.label}
             className={cn(
-              'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all',
-              value === option.value
-                ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-400'
-                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-indigo-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+              'transition-all',
+              showPreview && option.preview
+                ? cn(
+                    'flex flex-col items-center gap-1 p-2 rounded-lg border',
+                    value === option.value
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-400 ring-2 ring-indigo-500/20'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-indigo-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  )
+                : cn(
+                    'px-3 py-1.5 text-xs font-medium rounded-lg border',
+                    value === option.value
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-400'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-indigo-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  )
             )}
           >
-            {option.label}
+            {showPreview && option.preview ? (
+              <>
+                <div className="w-8 h-8">
+                  {option.preview}
+                </div>
+                <span className="text-[10px] font-medium truncate max-w-full">{option.label}</span>
+              </>
+            ) : (
+              option.label
+            )}
           </button>
         ))}
       </div>
@@ -99,6 +225,7 @@ export function StyleSection() {
         options={dotStyleOptions}
         value={styleOptions.dotsType}
         onChange={(value) => setStyleOptions({ dotsType: value })}
+        showPreview
       />
 
       <OptionGroup
@@ -112,6 +239,7 @@ export function StyleSection() {
         options={cornerSquareOptions}
         value={styleOptions.cornersSquareType}
         onChange={(value) => setStyleOptions({ cornersSquareType: value })}
+        showPreview
       />
 
       <OptionGroup
@@ -125,6 +253,7 @@ export function StyleSection() {
         options={cornerDotOptions}
         value={styleOptions.cornersDotType}
         onChange={(value) => setStyleOptions({ cornersDotType: value })}
+        showPreview
       />
 
       <div className="pt-2 border-t border-gray-200 dark:border-gray-700">

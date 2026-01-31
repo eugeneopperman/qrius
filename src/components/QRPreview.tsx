@@ -3,11 +3,44 @@ import QRCodeStyling from 'qr-code-styling';
 import { useQRStore } from '../stores/qrStore';
 import { useHistoryStore } from '../stores/historyStore';
 import { toast } from '../stores/toastStore';
-import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
+import { Download, Copy, Check, ChevronDown, Loader2, QrCode, Sparkles } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../utils/cn';
 import { applyLogoMask } from '../utils/logoMask';
 import type { GradientOptions } from '../types';
+
+// Empty state component when no QR data
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-center animate-fade-in">
+      <div className="relative mb-4">
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center">
+          <QrCode className="w-10 h-10 text-indigo-500 dark:text-indigo-400" />
+        </div>
+        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
+          <Sparkles className="w-3 h-3 text-white" />
+        </div>
+      </div>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+        Create Your QR Code
+      </h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-[240px]">
+        Enter your content on the left and watch your QR code appear here instantly
+      </p>
+      <div className="mt-4 flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px]">1-9</kbd>
+          <span>Switch types</span>
+        </span>
+        <span className="text-gray-300 dark:text-gray-600">•</span>
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px]">S</kbd>
+          <span>Download</span>
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export interface QRPreviewHandle {
   download: () => void;
@@ -282,6 +315,9 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   const frameStyle = styleOptions.frameStyle || 'none';
   const frameLabel = styleOptions.frameLabel || '';
 
+  // Check if we have meaningful content
+  const hasContent = qrValue && qrValue.trim().length > 0;
+
   const getFrameClasses = () => {
     switch (frameStyle) {
       case 'simple':
@@ -297,12 +333,23 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
     }
   };
 
+  // Show empty state when no content
+  if (!hasContent) {
+    return (
+      <div className="flex flex-col items-center gap-6">
+        <div className="relative p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 min-w-[280px]">
+          <EmptyState />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-6">
       {/* QR Code with Frame */}
       <div
         className={cn(
-          'relative p-6 bg-white dark:bg-gray-800 shadow-lg transition-all',
+          'relative p-6 bg-white dark:bg-gray-800 shadow-lg transition-all qr-preview-glow animate-scale-in',
           frameStyle === 'none'
             ? 'rounded-2xl border border-gray-200 dark:border-gray-700'
             : getFrameClasses()

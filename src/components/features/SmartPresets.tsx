@@ -8,7 +8,8 @@ import {
   CreditCard,
   Minimize2,
   Sparkles,
-  Check
+  Check,
+  QrCode
 } from 'lucide-react';
 import { useState } from 'react';
 import { smartPresets, type SmartPreset } from '../../data/smartPresets';
@@ -26,6 +27,48 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   CreditCard,
   Minimize2,
 };
+
+// Mini QR preview component to show the preset's style
+function PresetQRPreview({ preset }: { preset: SmartPreset }) {
+  const { styleOptions } = preset;
+  const dotsColor = styleOptions.dotsColor || '#000000';
+  const bgColor = styleOptions.backgroundColor || '#ffffff';
+
+  // Get gradient style if applicable
+  const getGradientStyle = () => {
+    if (styleOptions.useGradient && styleOptions.gradient) {
+      const g = styleOptions.gradient;
+      const colors = g.colorStops?.map(s => s.color).join(', ') || dotsColor;
+      if (g.type === 'radial') {
+        return `radial-gradient(circle, ${colors})`;
+      }
+      return `linear-gradient(${g.rotation || 45}deg, ${colors})`;
+    }
+    return dotsColor;
+  };
+
+  const qrColor = styleOptions.useGradient ? getGradientStyle() : dotsColor;
+
+  return (
+    <div
+      className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: bgColor }}
+    >
+      <div
+        className="w-8 h-8 flex items-center justify-center"
+        style={styleOptions.useGradient ? { background: qrColor, WebkitBackgroundClip: 'text' } : {}}
+      >
+        <QrCode
+          className="w-7 h-7"
+          style={styleOptions.useGradient
+            ? { color: 'transparent', background: qrColor, WebkitBackgroundClip: 'text', backgroundClip: 'text' }
+            : { color: dotsColor }
+          }
+        />
+      </div>
+    </div>
+  );
+}
 
 interface SmartPresetsProps {
   onApply?: () => void;
@@ -77,7 +120,7 @@ export function SmartPresets({ onApply }: SmartPresetsProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-        <Sparkles className="w-4 h-4" />
+        <Sparkles className="w-4 h-4 text-indigo-500" />
         <span>One-click templates for common use cases</span>
       </div>
 
@@ -91,68 +134,70 @@ export function SmartPresets({ onApply }: SmartPresetsProps) {
               key={preset.id}
               onClick={() => applyPreset(preset)}
               className={cn(
-                'group relative flex items-start gap-3 p-3 rounded-lg border text-left transition-all',
-                'hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20',
+                'group relative flex items-start gap-3 p-3 rounded-xl border text-left transition-all duration-200',
+                'hover:border-indigo-400 hover:shadow-md hover:-translate-y-0.5',
                 isApplied
-                  ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                  ? 'border-green-500 bg-green-50 dark:bg-green-900/20 ring-2 ring-green-500/20'
                   : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
               )}
             >
-              {/* Icon */}
-              <div
-                className={cn(
-                  'flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors',
-                  isApplied
-                    ? 'bg-green-100 dark:bg-green-800'
-                    : 'bg-gray-100 dark:bg-gray-700 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-800'
-                )}
-              >
+              {/* QR Preview */}
+              <div className={cn(
+                'flex-shrink-0 rounded-lg overflow-hidden border transition-all',
+                isApplied
+                  ? 'border-green-300 dark:border-green-700'
+                  : 'border-gray-200 dark:border-gray-600 group-hover:border-indigo-300 dark:group-hover:border-indigo-600'
+              )}>
                 {isApplied ? (
-                  <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <div className="w-12 h-12 flex items-center justify-center bg-green-100 dark:bg-green-800">
+                    <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  </div>
                 ) : (
-                  <Icon
-                    className={cn(
-                      'w-5 h-5 transition-colors',
-                      'text-gray-600 dark:text-gray-400',
-                      'group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
-                    )}
-                  />
+                  <PresetQRPreview preset={preset} />
                 )}
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <h4 className={cn(
-                  'text-sm font-medium truncate',
-                  isApplied
-                    ? 'text-green-700 dark:text-green-300'
-                    : 'text-gray-900 dark:text-white'
-                )}>
-                  {isApplied ? 'Applied!' : preset.name}
-                </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                <div className="flex items-center gap-2">
+                  <h4 className={cn(
+                    'text-sm font-semibold truncate',
+                    isApplied
+                      ? 'text-green-700 dark:text-green-300'
+                      : 'text-gray-900 dark:text-white'
+                  )}>
+                    {isApplied ? 'Applied!' : preset.name}
+                  </h4>
+                  <Icon className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
                   {preset.description}
                 </p>
-              </div>
 
-              {/* Preview indicator for gradient presets */}
-              {preset.styleOptions.useGradient && preset.styleOptions.gradient && (
-                <div
-                  className="absolute top-2 right-2 w-3 h-3 rounded-full"
-                  style={{
-                    background: `linear-gradient(${preset.styleOptions.gradient.rotation || 45}deg, ${preset.styleOptions.gradient.colorStops.map(s => s.color).join(', ')})`,
-                  }}
-                  title="Uses gradient"
-                />
-              )}
+                {/* Style tags */}
+                <div className="flex items-center gap-1.5 mt-2">
+                  {preset.styleOptions.useGradient && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                      Gradient
+                    </span>
+                  )}
+                  {preset.styleOptions.frameStyle && preset.styleOptions.frameStyle !== 'none' && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                      Frame
+                    </span>
+                  )}
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 capitalize">
+                    {preset.type}
+                  </span>
+                </div>
+              </div>
             </button>
           );
         })}
       </div>
 
-      <p className="text-xs text-gray-400 dark:text-gray-500">
-        Presets apply both styling and optimal settings for each use case.
-        You can customize further after applying.
+      <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+        Presets apply both styling and optimal settings. Customize further after applying.
       </p>
     </div>
   );
