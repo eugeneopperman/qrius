@@ -40,7 +40,8 @@ export function Tooltip({
   useEffect(() => {
     if (isVisible && tooltipRef.current && triggerRef.current) {
       const tooltipRect = tooltipRef.current.getBoundingClientRect();
-      const triggerRect = triggerRef.current.getBoundingClientRect();
+      // triggerRect is available for future use if needed
+      void triggerRef.current.getBoundingClientRect();
 
       let newPosition = position;
 

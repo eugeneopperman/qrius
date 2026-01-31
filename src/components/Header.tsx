@@ -1,25 +1,30 @@
 import { QrCode, Sun, Moon, History } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { useHistoryStore } from '../stores/historyStore';
+import { useThemeStore } from '../stores/themeStore';
+import { useQRStore } from '../stores/qrStore';
+import type { QRCodeType } from '../types';
+
+const typeLabels: Record<QRCodeType, string> = {
+  url: 'URL',
+  text: 'Text',
+  email: 'Email',
+  phone: 'Phone',
+  sms: 'SMS',
+  wifi: 'WiFi',
+  vcard: 'vCard',
+  event: 'Event',
+  location: 'Location',
+};
 
 interface HeaderProps {
   onHistoryClick?: () => void;
 }
 
 export function Header({ onHistoryClick }: HeaderProps) {
-  const [isDark, setIsDark] = useState(false);
+  const { resolvedTheme, toggleTheme } = useThemeStore();
+  const isDark = resolvedTheme === 'dark';
   const historyCount = useHistoryStore((state) => state.entries.length);
-
-  useEffect(() => {
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    setIsDark(isDarkMode);
-  }, []);
-
-  const toggleTheme = () => {
-    const newDark = !isDark;
-    setIsDark(newDark);
-    document.documentElement.classList.toggle('dark', newDark);
-  };
+  const activeType = useQRStore((state) => state.activeType);
 
   return (
     <header className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
@@ -27,12 +32,17 @@ export function Header({ onHistoryClick }: HeaderProps) {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-600 rounded-lg">
-              <QrCode className="w-6 h-6 text-white" />
+              <QrCode className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                QR Code Generator
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                  QR Code Generator
+                </h1>
+                <span className="hidden sm:inline-flex px-2 py-0.5 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full">
+                  {typeLabels[activeType]}
+                </span>
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Internal Tool
               </p>

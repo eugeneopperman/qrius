@@ -13,6 +13,7 @@ import {
 import { useState } from 'react';
 import { smartPresets, type SmartPreset } from '../../data/smartPresets';
 import { useQRStore } from '../../stores/qrStore';
+import { toast } from '../../stores/toastStore';
 import { cn } from '../../utils/cn';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -67,6 +68,7 @@ export function SmartPresets({ onApply }: SmartPresetsProps) {
     // Show applied feedback
     setAppliedPreset(preset.id);
     setTimeout(() => setAppliedPreset(null), 1500);
+    toast.success(`Applied "${preset.name}" preset`);
 
     // Call optional callback
     onApply?.();

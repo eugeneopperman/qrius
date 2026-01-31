@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { toast } from '../../stores/toastStore';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Palette, Plus, Trash2, Download, Upload, Check, X, AlertCircle } from 'lucide-react';
 
 export function BrandKitManager() {
@@ -13,6 +15,7 @@ export function BrandKitManager() {
   const [newKitName, setNewKitName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSaveKit = () => {
@@ -139,7 +142,8 @@ export function BrandKitManager() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => deleteBrandKit(kit.id)}
+                  onClick={() => setDeleteConfirm({ id: kit.id, name: kit.name })}
+                  aria-label={`Delete ${kit.name}`}
                   className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -214,6 +218,23 @@ export function BrandKitManager() {
           />
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => {
+          if (deleteConfirm) {
+            deleteBrandKit(deleteConfirm.id);
+            toast.success(`"${deleteConfirm.name}" deleted`);
+          }
+        }}
+        title="Delete Brand Kit?"
+        message={`Are you sure you want to delete "${deleteConfirm?.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Keep"
+        variant="danger"
+      />
     </div>
   );
 }

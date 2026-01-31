@@ -44,13 +44,14 @@ export function FrameSection() {
           }
           className="mb-2"
         />
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {frameTemplates.map((template) => (
             <button
               key={template.id}
               onClick={() => setStyleOptions({ frameStyle: template.id })}
+              aria-pressed={selectedFrame === template.id}
               className={cn(
-                'p-3 text-xs font-medium rounded-lg border transition-all text-center',
+                'p-3 min-h-[44px] text-xs font-medium rounded-lg border transition-all text-center touch-manipulation',
                 selectedFrame === template.id
                   ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-400'
                   : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-indigo-300'
@@ -88,8 +89,9 @@ export function FrameSection() {
                 <button
                   key={label}
                   onClick={() => setStyleOptions({ frameLabel: label })}
+                  aria-pressed={currentLabel === label}
                   className={cn(
-                    'px-2 py-1 text-xs rounded-md border transition-colors',
+                    'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
                     currentLabel === label
                       ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
                       : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'

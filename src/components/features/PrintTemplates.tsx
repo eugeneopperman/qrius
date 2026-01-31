@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
+import { toast } from '../../stores/toastStore';
 import { Printer, Check, FileImage, FileText } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
@@ -260,8 +261,10 @@ export function PrintTemplates() {
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
+      toast.success(`Print-ready ${exportFormat.toUpperCase()} downloaded for ${template.name}`);
     } catch (error) {
       console.error('Failed to generate print-ready QR:', error);
+      toast.error('Failed to generate print-ready file. Please try again.');
     } finally {
       setIsGenerating(false);
       setSelectedTemplate(null);

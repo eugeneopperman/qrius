@@ -83,13 +83,14 @@ export function ColorPicker({ label, value, onChange, presets = defaultPresets }
 
         {isOpen && (
           <div className="absolute z-50 mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 w-full">
-            <div className="grid grid-cols-8 gap-1.5">
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
               {presets.map((color) => (
                 <button
                   key={color}
                   type="button"
+                  aria-label={`Select color ${color}`}
                   className={cn(
-                    'w-6 h-6 rounded-md border-2 transition-transform hover:scale-110',
+                    'w-10 h-10 sm:w-8 sm:h-8 rounded-md border-2 transition-transform hover:scale-110 touch-manipulation',
                     value === color
                       ? 'border-indigo-500 ring-2 ring-indigo-500/20'
                       : 'border-transparent'

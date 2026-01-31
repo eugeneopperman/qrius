@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
 import { MessageSquare } from 'lucide-react';
-import { validatePhone, validateSmsMessage } from '../../utils/validators';
+import { validatePhone } from '../../utils/validators';
 import { cn } from '../../utils/cn';
 
 export function SmsForm() {
@@ -10,7 +10,6 @@ export function SmsForm() {
   const [touched, setTouched] = useState({ phone: false, message: false });
 
   const phoneValidation = touched.phone ? validatePhone(smsData.phone) : { isValid: true };
-  const messageValidation = validateSmsMessage(smsData.message || '');
   const messageLength = (smsData.message || '').length;
 
   return (

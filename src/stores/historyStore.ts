@@ -1,15 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { HistoryEntry, QRCodeType, QRData, QRStyleOptions } from '../types';
+import type { HistoryEntry, QRCodeType, QRData } from '../types';
 
 const MAX_HISTORY_ENTRIES = 20;
+const UNDO_TIMEOUT_MS = 10000; // 10 seconds to undo
 
 interface HistoryStore {
   entries: HistoryEntry[];
+  _clearedEntries: HistoryEntry[] | null;
+  _undoTimeoutId: number | null;
 
   addEntry: (entry: Omit<HistoryEntry, 'id' | 'timestamp'>) => void;
   removeEntry: (id: string) => void;
   clearHistory: () => void;
+  undoClear: () => boolean;
+  canUndo: () => boolean;
   getEntry: (id: string) => HistoryEntry | undefined;
 
   updateThumbnail: (id: string, thumbnail: string) => void;
@@ -19,6 +24,8 @@ export const useHistoryStore = create<HistoryStore>()(
   persist(
     (set, get) => ({
       entries: [],
+      _clearedEntries: null,
+      _undoTimeoutId: null,
 
       addEntry: (entry) => {
         const newEntry: HistoryEntry = {
@@ -41,7 +48,48 @@ export const useHistoryStore = create<HistoryStore>()(
       },
 
       clearHistory: () => {
-        set({ entries: [] });
+        const state = get();
+
+        // Clear any existing undo timeout
+        if (state._undoTimeoutId) {
+          clearTimeout(state._undoTimeoutId);
+        }
+
+        // Store current entries for undo
+        const clearedEntries = [...state.entries];
+
+        // Set timeout to clear the undo buffer
+        const timeoutId = window.setTimeout(() => {
+          set({ _clearedEntries: null, _undoTimeoutId: null });
+        }, UNDO_TIMEOUT_MS);
+
+        set({
+          entries: [],
+          _clearedEntries: clearedEntries,
+          _undoTimeoutId: timeoutId,
+        });
+      },
+
+      undoClear: () => {
+        const state = get();
+        if (!state._clearedEntries) return false;
+
+        // Clear the undo timeout
+        if (state._undoTimeoutId) {
+          clearTimeout(state._undoTimeoutId);
+        }
+
+        set({
+          entries: state._clearedEntries,
+          _clearedEntries: null,
+          _undoTimeoutId: null,
+        });
+
+        return true;
+      },
+
+      canUndo: () => {
+        return get()._clearedEntries !== null;
       },
 
       getEntry: (id) => {
@@ -58,6 +106,7 @@ export const useHistoryStore = create<HistoryStore>()(
     }),
     {
       name: 'qr-history-storage',
+      partialize: (state) => ({ entries: state.entries }), // Only persist entries
     }
   )
 );

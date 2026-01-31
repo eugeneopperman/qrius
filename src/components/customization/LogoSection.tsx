@@ -102,7 +102,8 @@ export function LogoSection() {
             />
             <button
               onClick={handleRemoveLogo}
-              className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+              aria-label="Remove logo"
+              className="absolute -top-2 -right-2 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -125,7 +126,7 @@ export function LogoSection() {
                   key={option.value}
                   onClick={() => setStyleOptions({ logoSize: option.value })}
                   className={cn(
-                    'px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors',
+                    'px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border transition-colors touch-manipulation',
                     (styleOptions.logoSize || 0.3) === option.value
                       ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
                       : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
@@ -144,7 +145,7 @@ export function LogoSection() {
               tooltip="Apply a shape mask to your logo. Circular logos work well for profile pictures or round brand marks."
               className="mb-2"
             />
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {([
                 { value: 'square' as LogoShape, label: 'Square', icon: Square },
                 { value: 'rounded' as LogoShape, label: 'Rounded', icon: Square },
@@ -156,7 +157,7 @@ export function LogoSection() {
                     key={option.value}
                     onClick={() => setStyleOptions({ logoShape: option.value })}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors',
+                      'flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border transition-colors touch-manipulation',
                       (styleOptions.logoShape || 'square') === option.value
                         ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
                         : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'

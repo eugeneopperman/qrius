@@ -1,18 +1,18 @@
-import { forwardRef, useId, type InputHTMLAttributes } from 'react';
+import { forwardRef, useId, type TextareaHTMLAttributes } from 'react';
 import { cn } from '../../utils/cn';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   hint?: string;
 }
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, id, required, ...props }, ref) => {
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, label, error, hint, id, required, rows = 3, ...props }, ref) => {
     const generatedId = useId();
-    const inputId = id || generatedId;
-    const errorId = `${inputId}-error`;
-    const hintId = `${inputId}-hint`;
+    const textareaId = id || generatedId;
+    const errorId = `${textareaId}-error`;
+    const hintId = `${textareaId}-hint`;
 
     // Build aria-describedby based on what's present
     const describedBy = [
@@ -26,7 +26,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className="w-full">
         {label && (
           <label
-            htmlFor={inputId}
+            htmlFor={textareaId}
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             {label}
@@ -37,14 +37,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             )}
           </label>
         )}
-        <input
+        <textarea
           ref={ref}
-          id={inputId}
+          id={textareaId}
+          rows={rows}
           required={required}
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={describedBy}
           className={cn(
-            'w-full rounded-lg border bg-white px-3 py-2.5 text-sm transition-colors min-h-[44px]',
+            'w-full rounded-lg border bg-white px-3 py-2.5 text-sm transition-colors resize-none',
             'placeholder:text-gray-400 dark:placeholder:text-gray-500',
             'focus:outline-none focus:ring-2 focus:ring-offset-0',
             'dark:bg-gray-800 dark:text-white',
@@ -70,6 +71,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-Input.displayName = 'Input';
+Textarea.displayName = 'Textarea';
 
-export { Input };
+export { Textarea };

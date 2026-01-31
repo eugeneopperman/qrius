@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallba
 import QRCodeStyling from 'qr-code-styling';
 import { useQRStore } from '../stores/qrStore';
 import { useHistoryStore } from '../stores/historyStore';
-import { Download, Copy, Check, ChevronDown } from 'lucide-react';
+import { toast } from '../stores/toastStore';
+import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../utils/cn';
 import { applyLogoMask } from '../utils/logoMask';
@@ -19,6 +20,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   const qrCodeRef = useRef<QRCodeStyling | null>(null);
   const [copied, setCopied] = useState(false);
   const [showFormatMenu, setShowFormatMenu] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [processedLogoUrl, setProcessedLogoUrl] = useState<string | undefined>(undefined);
   const { getQRValue, styleOptions, activeType, getCurrentData } = useQRStore();
   const { addEntry, updateThumbnail } = useHistoryStore();
@@ -44,6 +46,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       .then(setProcessedLogoUrl)
       .catch((error) => {
         console.error('Failed to apply logo mask:', error);
+        toast.error('Failed to apply logo shape. Using original image.');
         setProcessedLogoUrl(styleOptions.logoUrl);
       });
   }, [styleOptions.logoUrl, styleOptions.logoShape]);
@@ -182,12 +185,18 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
 
   const handleDownload = async (format: 'png' | 'svg' | 'jpeg' = 'png') => {
     if (qrCodeRef.current) {
-      await qrCodeRef.current.download({
-        name: 'qrcode',
-        extension: format,
-      });
-      // Save to history after download
-      saveToHistory();
+      try {
+        await qrCodeRef.current.download({
+          name: 'qrcode',
+          extension: format,
+        });
+        toast.success(`QR code downloaded as ${format.toUpperCase()}`);
+        // Save to history after download
+        saveToHistory();
+      } catch (error) {
+        console.error('Failed to download:', error);
+        toast.error('Failed to download QR code. Please try again.');
+      }
     }
     setShowFormatMenu(false);
   };
@@ -195,10 +204,15 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   const handlePdfDownload = async () => {
     if (!qrCodeRef.current) return;
 
+    setIsDownloading(true);
     try {
       const { jsPDF } = await import('jspdf');
       const blob = await qrCodeRef.current.getRawData('png');
-      if (!blob) return;
+      if (!blob) {
+        toast.error('Failed to generate PDF. Please try again.');
+        setIsDownloading(false);
+        return;
+      }
 
       // Convert blob to data URL
       const reader = new FileReader();
@@ -220,6 +234,8 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
 
         pdf.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
         pdf.save('qrcode.pdf');
+        toast.success('QR code downloaded as PDF');
+        setIsDownloading(false);
       };
       reader.readAsDataURL(blob);
 
@@ -227,6 +243,8 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       saveToHistory();
     } catch (error) {
       console.error('Failed to generate PDF:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+      setIsDownloading(false);
     }
     setShowFormatMenu(false);
   };
@@ -241,11 +259,15 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
           ]);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
+          toast.success('QR code copied to clipboard');
           // Save to history after copy
           saveToHistory();
+        } else {
+          toast.error('Failed to copy QR code. Please try again.');
         }
       } catch (error) {
         console.error('Failed to copy:', error);
+        toast.error('Failed to copy to clipboard. Your browser may not support this feature.');
       }
     }
   };
@@ -329,37 +351,60 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
           <Button
             variant="primary"
             size="md"
+            aria-haspopup="menu"
+            aria-expanded={showFormatMenu}
+            aria-controls="download-format-menu"
+            disabled={isDownloading}
             onClick={() => setShowFormatMenu(!showFormatMenu)}
           >
-            <Download className="w-4 h-4" />
-            Download
-            <ChevronDown className="w-4 h-4" />
+            {isDownloading ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Download className="w-4 h-4" aria-hidden="true" />
+            )}
+            {isDownloading ? 'Generating...' : 'Download'}
+            {!isDownloading && <ChevronDown className="w-4 h-4" aria-hidden="true" />}
+            {/* Keyboard shortcut hint */}
+            {!isDownloading && (
+              <kbd className="hidden lg:inline-flex ml-1 px-1.5 py-0.5 text-[10px] bg-indigo-700 rounded text-indigo-200">
+                S
+              </kbd>
+            )}
           </Button>
 
           {showFormatMenu && (
-            <div className="absolute top-full left-0 mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 min-w-[160px] z-10">
+            <div
+              id="download-format-menu"
+              role="menu"
+              aria-label="Download format options"
+              className="absolute top-full left-0 mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 min-w-[160px] z-10"
+            >
               <button
+                role="menuitem"
                 onClick={() => handleDownload('png')}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
               >
                 PNG (High Quality)
               </button>
               <button
+                role="menuitem"
                 onClick={() => handleDownload('svg')}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
               >
                 SVG (Vector)
               </button>
               <button
+                role="menuitem"
                 onClick={() => handleDownload('jpeg')}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
               >
                 JPEG (Compressed)
               </button>
-              <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+              <div className="border-t border-gray-200 dark:border-gray-700 my-1" role="separator" />
               <button
+                role="menuitem"
                 onClick={handlePdfDownload}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
               >
                 PDF (Print Ready)
               </button>
@@ -367,16 +412,19 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
           )}
         </div>
 
-        <Button variant="ghost" size="md" onClick={handleCopy}>
+        <Button variant="ghost" size="md" onClick={handleCopy} aria-label={copied ? 'Copied to clipboard' : 'Copy QR code to clipboard'}>
           {copied ? (
             <>
-              <Check className="w-4 h-4 text-green-500" />
+              <Check className="w-4 h-4 text-green-500" aria-hidden="true" />
               Copied!
             </>
           ) : (
             <>
-              <Copy className="w-4 h-4" />
+              <Copy className="w-4 h-4" aria-hidden="true" />
               Copy
+              <kbd className="hidden lg:inline-flex ml-1 px-1.5 py-0.5 text-[10px] bg-gray-200 dark:bg-gray-700 rounded text-gray-500 dark:text-gray-400">
+                C
+              </kbd>
             </>
           )}
         </Button>

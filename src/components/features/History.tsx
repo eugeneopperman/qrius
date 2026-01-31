@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import { X, Trash2, Clock, RotateCcw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Trash2, Clock, RotateCcw, Undo2 } from 'lucide-react';
 import { useHistoryStore, getTypeLabel, getDataSummary } from '../../stores/historyStore';
 import { useQRStore } from '../../stores/qrStore';
+import { toast } from '../../stores/toastStore';
 import { Button } from '../ui/Button';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import type { HistoryEntry } from '../../types';
 
 interface HistoryModalProps {
@@ -11,8 +13,34 @@ interface HistoryModalProps {
 }
 
 export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
-  const { entries, removeEntry, clearHistory } = useHistoryStore();
-  const [confirmClear, setConfirmClear] = useState(false);
+  const { entries, removeEntry, clearHistory, undoClear, canUndo } = useHistoryStore();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showUndo, setShowUndo] = useState(false);
+
+  // Check if we can undo when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setShowUndo(canUndo());
+    }
+  }, [isOpen, canUndo]);
+
+  const handleClearHistory = () => {
+    clearHistory();
+    setShowUndo(true);
+    toast.info('History cleared. You can undo within 10 seconds.');
+
+    // Auto-hide undo button after 10 seconds
+    setTimeout(() => {
+      setShowUndo(false);
+    }, 10000);
+  };
+
+  const handleUndo = () => {
+    if (undoClear()) {
+      toast.success('History restored');
+      setShowUndo(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -38,42 +66,31 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {entries.length > 0 && (
-              confirmClear ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Clear all?</span>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => {
-                      clearHistory();
-                      setConfirmClear(false);
-                    }}
-                  >
-                    Yes
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setConfirmClear(false)}
-                  >
-                    No
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setConfirmClear(true)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Clear All
-                </Button>
-              )
+            {showUndo && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleUndo}
+                className="text-amber-600 dark:text-amber-400"
+              >
+                <Undo2 className="w-4 h-4" />
+                Undo
+              </Button>
+            )}
+            {entries.length > 0 && !showUndo && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowClearConfirm(true)}
+              >
+                <Trash2 className="w-4 h-4" />
+                Clear All
+              </Button>
             )}
             <button
               onClick={onClose}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              aria-label="Close history"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <X className="w-5 h-5" />
             </button>
@@ -106,6 +123,18 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
           )}
         </div>
       </div>
+
+      {/* Clear Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        onConfirm={handleClearHistory}
+        title="Clear History?"
+        message="This will remove all QR codes from your history. You'll have 10 seconds to undo this action."
+        confirmLabel="Clear All"
+        cancelLabel="Keep History"
+        variant="warning"
+      />
     </div>
   );
 }
@@ -156,6 +185,9 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
 
     // Restore style options
     setStyleOptions(entry.styleOptions);
+
+    // Show success message
+    toast.success('QR code restored from history');
 
     // Close the modal
     onClose();
@@ -208,19 +240,19 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Actions - Always visible on mobile for touch support */}
+      <div className="absolute top-2 right-2 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
         <button
           onClick={handleRestore}
-          className="p-1.5 text-indigo-600 hover:bg-indigo-100 dark:text-indigo-400 dark:hover:bg-indigo-900/50 rounded"
-          title="Restore this QR code"
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-indigo-600 hover:bg-indigo-100 dark:text-indigo-400 dark:hover:bg-indigo-900/50 rounded-lg"
+          aria-label="Restore this QR code"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
         <button
           onClick={onRemove}
-          className="p-1.5 text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/50 rounded"
-          title="Remove from history"
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/50 rounded-lg"
+          aria-label="Remove from history"
         >
           <Trash2 className="w-4 h-4" />
         </button>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
+import { Textarea } from '../ui/Textarea';
 import { Calendar } from 'lucide-react';
 import { validateEventTitle, validateEventDate } from '../../utils/validators';
 
@@ -24,6 +25,7 @@ export function EventForm() {
       <Input
         label="Event Title"
         type="text"
+        required
         value={eventData.title}
         onChange={(e) => setEventData({ title: e.target.value })}
         onBlur={() => setTouched((t) => ({ ...t, title: true }))}
@@ -39,10 +41,11 @@ export function EventForm() {
         placeholder="Conference Room A"
       />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input
           label="Start Date"
           type="date"
+          required
           value={eventData.startDate}
           onChange={(e) => setEventData({ startDate: e.target.value })}
           onBlur={() => setTouched((t) => ({ ...t, startDate: true }))}
@@ -56,7 +59,7 @@ export function EventForm() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input
           label="End Date"
           type="date"
@@ -73,18 +76,13 @@ export function EventForm() {
         />
       </div>
 
-      <div className="w-full">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Description
-        </label>
-        <textarea
-          value={eventData.description || ''}
-          onChange={(e) => setEventData({ description: e.target.value })}
-          placeholder="Event details..."
-          rows={2}
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 resize-none"
-        />
-      </div>
+      <Textarea
+        label="Description"
+        value={eventData.description || ''}
+        onChange={(e) => setEventData({ description: e.target.value })}
+        placeholder="Event details..."
+        rows={2}
+      />
     </div>
   );
 }
