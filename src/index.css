@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Configure dark mode to use class-based selector instead of media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --color-primary: 99 102 241;
