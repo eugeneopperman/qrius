@@ -14,6 +14,12 @@ import type {
   LocationData,
 } from '../types';
 
+interface HistoryEntry {
+  type: QRCodeType;
+  data: QRData;
+  styleOptions: QRStyleOptions;
+}
+
 interface QRStore {
   // Current QR type
   activeType: QRCodeType;
@@ -45,6 +51,11 @@ interface QRStore {
   styleOptions: QRStyleOptions;
   setStyleOptions: (options: Partial<QRStyleOptions>) => void;
 
+  // Batch update actions
+  restoreFromHistory: (entry: HistoryEntry) => void;
+  applyPreset: (preset: Partial<QRStyleOptions>) => void;
+  resetToDefaults: () => void;
+
   // Get current QR data
   getCurrentData: () => QRData;
   getQRValue: () => string;
@@ -56,7 +67,7 @@ const defaultStyleOptions: QRStyleOptions = {
   dotsType: 'square',
   cornersSquareType: 'square',
   cornersDotType: 'square',
-  errorCorrectionLevel: 'M',
+  errorCorrectionLevel: 'H', // Always use high (30%) for best logo support
 };
 
 export const useQRStore = create<QRStore>((set, get) => ({
@@ -89,6 +100,67 @@ export const useQRStore = create<QRStore>((set, get) => ({
   styleOptions: defaultStyleOptions,
   setStyleOptions: (options) =>
     set((state) => ({ styleOptions: { ...state.styleOptions, ...options } })),
+
+  // Batch update actions - restore from history entry in a single update
+  restoreFromHistory: (entry) => {
+    const updates: Partial<{
+      activeType: QRCodeType;
+      urlData: URLData;
+      textData: TextData;
+      emailData: EmailData;
+      phoneData: PhoneData;
+      smsData: SMSData;
+      wifiData: WiFiData;
+      vcardData: VCardData;
+      eventData: EventData;
+      locationData: LocationData;
+      styleOptions: QRStyleOptions;
+    }> = {
+      activeType: entry.type,
+      styleOptions: entry.styleOptions,
+    };
+
+    // Set the correct data based on type
+    switch (entry.data.type) {
+      case 'url':
+        updates.urlData = entry.data.data;
+        break;
+      case 'text':
+        updates.textData = entry.data.data;
+        break;
+      case 'email':
+        updates.emailData = entry.data.data;
+        break;
+      case 'phone':
+        updates.phoneData = entry.data.data;
+        break;
+      case 'sms':
+        updates.smsData = entry.data.data;
+        break;
+      case 'wifi':
+        updates.wifiData = entry.data.data;
+        break;
+      case 'vcard':
+        updates.vcardData = entry.data.data;
+        break;
+      case 'event':
+        updates.eventData = entry.data.data;
+        break;
+      case 'location':
+        updates.locationData = entry.data.data;
+        break;
+    }
+
+    set(updates);
+  },
+
+  // Apply a style preset (e.g., from brand kits)
+  applyPreset: (preset) =>
+    set((state) => ({ styleOptions: { ...state.styleOptions, ...preset } })),
+
+  // Reset to default options
+  resetToDefaults: () =>
+    set({ styleOptions: defaultStyleOptions }),
 
   // Get current data based on active type
   getCurrentData: () => {

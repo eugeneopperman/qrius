@@ -1,23 +1,37 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { analyzeScannability } from '../../utils/scannabilityAnalyzer';
+import { useDebounce } from '../../hooks/useDebounce';
 import { CheckCircle, AlertTriangle, XCircle, Info, ChevronRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { TIMING } from '../../config/constants';
 
-export function ScannabilityScore() {
+export const ScannabilityScore = memo(function ScannabilityScore() {
   const { styleOptions, getQRValue } = useQRStore();
   const qrValue = getQRValue();
 
+  // Debounce inputs to avoid recalculating on every keystroke
+  const debouncedQrValue = useDebounce(qrValue, TIMING.SCANNABILITY_DEBOUNCE);
+  const debouncedDotsColor = useDebounce(styleOptions.dotsColor, TIMING.SCANNABILITY_DEBOUNCE);
+  const debouncedBgColor = useDebounce(styleOptions.backgroundColor, TIMING.SCANNABILITY_DEBOUNCE);
+
   const analysis = useMemo(() => {
     return analyzeScannability({
-      dotsColor: styleOptions.dotsColor,
-      backgroundColor: styleOptions.backgroundColor,
+      dotsColor: debouncedDotsColor,
+      backgroundColor: debouncedBgColor,
       logoSize: styleOptions.logoSize,
       hasLogo: !!styleOptions.logoUrl,
-      dataLength: qrValue.length,
+      dataLength: debouncedQrValue.length,
       errorCorrectionLevel: styleOptions.errorCorrectionLevel,
     });
-  }, [styleOptions, qrValue]);
+  }, [
+    debouncedDotsColor,
+    debouncedBgColor,
+    styleOptions.logoSize,
+    styleOptions.logoUrl,
+    debouncedQrValue.length,
+    styleOptions.errorCorrectionLevel,
+  ]);
 
   const scoreConfig = {
     excellent: {
@@ -127,4 +141,6 @@ export function ScannabilityScore() {
       )}
     </div>
   );
-}
+});
+
+ScannabilityScore.displayName = 'ScannabilityScore';

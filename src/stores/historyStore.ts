@@ -18,6 +18,7 @@ interface HistoryStore {
   getEntry: (id: string) => HistoryEntry | undefined;
 
   updateThumbnail: (id: string, thumbnail: string) => void;
+  updateEntry: (id: string, updates: Partial<HistoryEntry>) => void;
 }
 
 export const useHistoryStore = create<HistoryStore>()(
@@ -100,6 +101,14 @@ export const useHistoryStore = create<HistoryStore>()(
         set((state) => ({
           entries: state.entries.map((entry) =>
             entry.id === id ? { ...entry, thumbnail } : entry
+          ),
+        }));
+      },
+
+      updateEntry: (id, updates) => {
+        set((state) => ({
+          entries: state.entries.map((entry) =>
+            entry.id === id ? { ...entry, ...updates } : entry
           ),
         }));
       },

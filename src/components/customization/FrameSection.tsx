@@ -1,9 +1,22 @@
+import { memo, useCallback } from 'react';
 import { useQRStore } from '../../stores/qrStore';
-import { Type } from 'lucide-react';
+import {
+  Type,
+  QrCode,
+  Smartphone,
+  Camera,
+  ArrowRight,
+  Download,
+  ExternalLink,
+  ScanLine,
+  Fingerprint,
+  Ban
+} from 'lucide-react';
 import { Input } from '../ui/Input';
 import { cn } from '../../utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
-import type { FrameStyle } from '../../types';
+import { FRAME_CONFIG } from '../../config/constants';
+import type { FrameStyle, FrameFontSize, FrameFontFamily, FrameIcon, FrameIconPosition } from '../../types';
 
 const frameTemplates: { id: FrameStyle; label: string; hasLabel: boolean }[] = [
   { id: 'none', label: 'None', hasLabel: false },
@@ -14,21 +27,76 @@ const frameTemplates: { id: FrameStyle; label: string; hasLabel: boolean }[] = [
   { id: 'badge', label: 'Badge Style', hasLabel: true },
 ];
 
-const defaultLabels = [
-  'Scan Me',
-  'Learn More',
-  'Get Started',
-  'Download App',
-  'Visit Website',
-  'Contact Us',
+
+const fontSizeOptions: { value: FrameFontSize; label: string }[] = [
+  { value: 'sm', label: 'Small' },
+  { value: 'base', label: 'Medium' },
+  { value: 'lg', label: 'Large' },
+  { value: 'xl', label: 'Extra Large' },
 ];
 
-export function FrameSection() {
+const fontFamilyOptions: { value: FrameFontFamily; label: string }[] = [
+  { value: 'sans', label: 'Sans' },
+  { value: 'serif', label: 'Serif' },
+  { value: 'mono', label: 'Mono' },
+  { value: 'rounded', label: 'Rounded' },
+];
+
+const iconOptions: { value: FrameIcon; label: string; icon: React.ComponentType<{ className?: string }> | null }[] = [
+  { value: 'none', label: 'None', icon: Ban },
+  { value: 'qr-code', label: 'QR', icon: QrCode },
+  { value: 'smartphone', label: 'Phone', icon: Smartphone },
+  { value: 'camera', label: 'Camera', icon: Camera },
+  { value: 'scan', label: 'Scan', icon: ScanLine },
+  { value: 'arrow-right', label: 'Arrow', icon: ArrowRight },
+  { value: 'download', label: 'Download', icon: Download },
+  { value: 'external-link', label: 'Link', icon: ExternalLink },
+  { value: 'finger-print', label: 'Touch', icon: Fingerprint },
+];
+
+const iconPositionOptions: { value: FrameIconPosition; label: string }[] = [
+  { value: 'none', label: 'None' },
+  { value: 'left', label: 'Left' },
+  { value: 'right', label: 'Right' },
+];
+
+export const FrameSection = memo(function FrameSection() {
   const { styleOptions, setStyleOptions } = useQRStore();
 
   const selectedFrame = styleOptions.frameStyle || 'none';
   const currentLabel = styleOptions.frameLabel || '';
   const showLabelInput = frameTemplates.find(f => f.id === selectedFrame)?.hasLabel;
+
+  const handleFrameStyleChange = useCallback((style: FrameStyle) => {
+    setStyleOptions({ frameStyle: style });
+  }, [setStyleOptions]);
+
+  const handleLabelChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setStyleOptions({ frameLabel: e.target.value });
+  }, [setStyleOptions]);
+
+  const handleQuickLabel = useCallback((label: string) => {
+    setStyleOptions({ frameLabel: label });
+  }, [setStyleOptions]);
+
+  const handleFontSizeChange = useCallback((size: FrameFontSize) => {
+    setStyleOptions({ frameFontSize: size });
+  }, [setStyleOptions]);
+
+  const handleFontFamilyChange = useCallback((family: FrameFontFamily) => {
+    setStyleOptions({ frameFontFamily: family });
+  }, [setStyleOptions]);
+
+  const handleIconChange = useCallback((icon: FrameIcon) => {
+    setStyleOptions({
+      frameIcon: icon,
+      frameIconPosition: icon === 'none' ? 'none' : (styleOptions.frameIconPosition || 'left')
+    });
+  }, [setStyleOptions, styleOptions.frameIconPosition]);
+
+  const handleIconPositionChange = useCallback((position: FrameIconPosition) => {
+    setStyleOptions({ frameIconPosition: position });
+  }, [setStyleOptions]);
 
   return (
     <div className="space-y-4">
@@ -48,7 +116,7 @@ export function FrameSection() {
           {frameTemplates.map((template) => (
             <button
               key={template.id}
-              onClick={() => setStyleOptions({ frameStyle: template.id })}
+              onClick={() => handleFrameStyleChange(template.id)}
               aria-pressed={selectedFrame === template.id}
               className={cn(
                 'p-3 min-h-[44px] text-xs font-medium rounded-lg border transition-all text-center touch-manipulation',
@@ -76,22 +144,23 @@ export function FrameSection() {
 
           <Input
             value={currentLabel}
-            onChange={(e) => setStyleOptions({ frameLabel: e.target.value })}
+            onChange={handleLabelChange}
             placeholder="Enter label text..."
-            maxLength={30}
+            maxLength={FRAME_CONFIG.MAX_LABEL_LENGTH}
           />
 
           {/* Quick Label Suggestions */}
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Quick suggestions:</p>
             <div className="flex flex-wrap gap-1.5">
-              {defaultLabels.map((label) => (
+              {FRAME_CONFIG.DEFAULT_LABELS.map((label) => (
                 <button
                   key={label}
-                  onClick={() => setStyleOptions({ frameLabel: label })}
+                  onClick={() => handleQuickLabel(label)}
                   aria-pressed={currentLabel === label}
                   className={cn(
                     'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
+                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
                     currentLabel === label
                       ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
                       : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
@@ -104,10 +173,116 @@ export function FrameSection() {
           </div>
 
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            {currentLabel.length}/30 characters
+            {currentLabel.length}/{FRAME_CONFIG.MAX_LABEL_LENGTH} characters
           </p>
+
+          {/* Font Size */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+              Font Size
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {fontSizeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleFontSizeChange(option.value)}
+                  className={cn(
+                    'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
+                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
+                    (styleOptions.frameFontSize || 'base') === option.value
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Font Family */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+              Font Style
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {fontFamilyOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleFontFamilyChange(option.value)}
+                  className={cn(
+                    'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
+                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
+                    option.value === 'serif' && 'font-serif',
+                    option.value === 'mono' && 'font-mono',
+                    (styleOptions.frameFontFamily || 'sans') === option.value
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Icon Selection */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+              Icon
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {iconOptions.map((option) => {
+                const IconComponent = option.icon;
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => handleIconChange(option.value)}
+                    title={option.label}
+                    className={cn(
+                      'p-2 min-w-[36px] min-h-[36px] rounded-md border transition-colors touch-manipulation flex items-center justify-center',
+                      'focus:outline-none focus:ring-2 focus:ring-orange-400',
+                      (styleOptions.frameIcon || 'none') === option.value
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
+                    )}
+                  >
+                    {IconComponent && <IconComponent className="w-4 h-4" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Icon Position - only show if an icon is selected */}
+          {styleOptions.frameIcon && styleOptions.frameIcon !== 'none' && (
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                Icon Position
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {iconPositionOptions.filter(o => o.value !== 'none').map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleIconPositionChange(option.value)}
+                    className={cn(
+                      'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
+                      'focus:outline-none focus:ring-2 focus:ring-orange-400',
+                      (styleOptions.frameIconPosition || 'left') === option.value
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
-}
+});
+
+FrameSection.displayName = 'FrameSection';

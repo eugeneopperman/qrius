@@ -1,124 +1,67 @@
+import { memo, useCallback, useMemo } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { ColorPicker } from '../ui/ColorPicker';
 import { cn } from '../../utils/cn';
 import { Tooltip } from '../ui/Tooltip';
+import { InlineToggle } from '../ui/Toggle';
 import { HelpCircle } from 'lucide-react';
+import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '../../config/constants';
 import type { GradientOptions, GradientType } from '../../types';
 
-const defaultGradient: GradientOptions = {
-  type: 'linear',
-  rotation: 45,
-  colorStops: [
-    { offset: 0, color: '#6366F1' },
-    { offset: 1, color: '#EC4899' },
-  ],
-};
-
-const gradientPresets: { name: string; gradient: GradientOptions }[] = [
-  {
-    name: 'Indigo to Pink',
-    gradient: { type: 'linear', rotation: 45, colorStops: [{ offset: 0, color: '#6366F1' }, { offset: 1, color: '#EC4899' }] },
-  },
-  {
-    name: 'Blue to Cyan',
-    gradient: { type: 'linear', rotation: 90, colorStops: [{ offset: 0, color: '#3B82F6' }, { offset: 1, color: '#06B6D4' }] },
-  },
-  {
-    name: 'Green to Yellow',
-    gradient: { type: 'linear', rotation: 135, colorStops: [{ offset: 0, color: '#22C55E' }, { offset: 1, color: '#EAB308' }] },
-  },
-  {
-    name: 'Purple to Orange',
-    gradient: { type: 'linear', rotation: 45, colorStops: [{ offset: 0, color: '#8B5CF6' }, { offset: 1, color: '#F97316' }] },
-  },
-  {
-    name: 'Red to Pink',
-    gradient: { type: 'radial', colorStops: [{ offset: 0, color: '#EF4444' }, { offset: 1, color: '#EC4899' }] },
-  },
-  {
-    name: 'Teal Radial',
-    gradient: { type: 'radial', colorStops: [{ offset: 0, color: '#14B8A6' }, { offset: 1, color: '#0F172A' }] },
-  },
-];
-
-// Color palette presets for solid colors
-const colorPalettes: { name: string; qrColor: string; bgColor: string }[] = [
-  { name: 'Classic', qrColor: '#000000', bgColor: '#FFFFFF' },
-  { name: 'Indigo', qrColor: '#4F46E5', bgColor: '#FFFFFF' },
-  { name: 'Ocean', qrColor: '#0369A1', bgColor: '#F0F9FF' },
-  { name: 'Forest', qrColor: '#166534', bgColor: '#F0FDF4' },
-  { name: 'Sunset', qrColor: '#C2410C', bgColor: '#FFF7ED' },
-  { name: 'Berry', qrColor: '#9D174D', bgColor: '#FDF2F8' },
-  { name: 'Slate', qrColor: '#334155', bgColor: '#F8FAFC' },
-  { name: 'Inverted', qrColor: '#FFFFFF', bgColor: '#000000' },
-];
-
-export function ColorSection() {
+export const ColorSection = memo(function ColorSection() {
   const { styleOptions, setStyleOptions } = useQRStore();
 
   const useGradient = styleOptions.useGradient ?? false;
-  const gradient = styleOptions.gradient ?? defaultGradient;
+  const gradient = styleOptions.gradient ?? DEFAULT_GRADIENT;
 
-  const handleToggleGradient = () => {
+  const handleToggleGradient = useCallback(() => {
     if (!useGradient && !styleOptions.gradient) {
       // First time enabling gradient, set default
-      setStyleOptions({ useGradient: true, gradient: defaultGradient });
+      setStyleOptions({ useGradient: true, gradient: DEFAULT_GRADIENT });
     } else {
       setStyleOptions({ useGradient: !useGradient });
     }
-  };
+  }, [useGradient, styleOptions.gradient, setStyleOptions]);
 
-  const updateGradient = (updates: Partial<GradientOptions>) => {
+  const updateGradient = useCallback((updates: Partial<GradientOptions>) => {
     setStyleOptions({
       gradient: { ...gradient, ...updates },
     });
-  };
+  }, [gradient, setStyleOptions]);
 
-  const updateColorStop = (index: number, color: string) => {
+  const updateColorStop = useCallback((index: number, color: string) => {
     const newColorStops = [...gradient.colorStops];
     newColorStops[index] = { ...newColorStops[index], color };
     updateGradient({ colorStops: newColorStops });
-  };
+  }, [gradient.colorStops, updateGradient]);
 
-  const getGradientPreview = (g: GradientOptions) => {
+  const getGradientPreview = useCallback((g: GradientOptions) => {
     const colors = g.colorStops.map((s) => `${s.color} ${s.offset * 100}%`).join(', ');
     if (g.type === 'radial') {
       return `radial-gradient(circle, ${colors})`;
     }
     return `linear-gradient(${g.rotation || 0}deg, ${colors})`;
-  };
+  }, []);
+
+  // Memoize the current gradient preview
+  const currentGradientPreview = useMemo(() => getGradientPreview(gradient), [gradient, getGradientPreview]);
 
   return (
     <div className="space-y-4">
       {/* Gradient Toggle */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Use Gradient
-          </span>
+      <InlineToggle
+        checked={useGradient}
+        onChange={handleToggleGradient}
+        label="Use Gradient"
+        tooltip={
           <Tooltip
             content="Apply a color gradient to your QR code instead of a solid color. Gradients add visual interest but ensure sufficient contrast for reliable scanning."
             position="top"
           >
             <HelpCircle className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 cursor-help" />
           </Tooltip>
-        </div>
-        <button
-          type="button"
-          onClick={handleToggleGradient}
-          className={cn(
-            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-            useGradient ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-600'
-          )}
-        >
-          <span
-            className={cn(
-              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-              useGradient ? 'translate-x-6' : 'translate-x-1'
-            )}
-          />
-        </button>
-      </div>
+        }
+      />
 
       {useGradient ? (
         <>
@@ -197,7 +140,7 @@ export function ColorSection() {
             </label>
             <div
               className="h-8 rounded-lg border border-gray-200 dark:border-gray-600"
-              style={{ background: getGradientPreview(gradient) }}
+              style={{ background: currentGradientPreview }}
             />
           </div>
 
@@ -207,12 +150,12 @@ export function ColorSection() {
               Presets
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {gradientPresets.map((preset) => (
+              {GRADIENT_PRESETS.map((preset) => (
                 <button
                   key={preset.name}
                   type="button"
                   onClick={() => setStyleOptions({ gradient: preset.gradient })}
-                  className="group relative h-8 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all"
+                  className="group relative h-8 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-orange-400"
                   title={preset.name}
                 >
                   <div
@@ -238,13 +181,13 @@ export function ColorSection() {
               Color Palettes
             </label>
             <div className="grid grid-cols-4 gap-2">
-              {colorPalettes.map((palette) => (
+              {COLOR_PALETTES.map((palette) => (
                 <button
                   key={palette.name}
                   type="button"
                   onClick={() => setStyleOptions({ dotsColor: palette.qrColor, backgroundColor: palette.bgColor })}
                   className={cn(
-                    "group relative h-10 rounded-lg border overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all",
+                    "group relative h-10 rounded-lg border overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-orange-400",
                     styleOptions.dotsColor === palette.qrColor && styleOptions.backgroundColor === palette.bgColor
                       ? "ring-2 ring-indigo-500"
                       : "border-gray-200 dark:border-gray-600"
@@ -281,4 +224,6 @@ export function ColorSection() {
       </div>
     </div>
   );
-}
+});
+
+ColorSection.displayName = 'ColorSection';

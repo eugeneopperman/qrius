@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import {
   Link,
   Type,
@@ -19,82 +19,89 @@ interface TypeOption {
   label: string;
   icon: React.ElementType;
   description: string;
-  color: string;
 }
 
 const typeOptions: TypeOption[] = [
-  { id: 'url', label: 'URL', icon: Link, description: 'Website link', color: 'indigo' },
-  { id: 'text', label: 'Text', icon: Type, description: 'Plain text', color: 'slate' },
-  { id: 'email', label: 'Email', icon: Mail, description: 'Email address', color: 'rose' },
-  { id: 'phone', label: 'Phone', icon: Phone, description: 'Phone number', color: 'emerald' },
-  { id: 'sms', label: 'SMS', icon: MessageSquare, description: 'Text message', color: 'cyan' },
-  { id: 'wifi', label: 'WiFi', icon: Wifi, description: 'Network credentials', color: 'violet' },
-  { id: 'vcard', label: 'vCard', icon: User, description: 'Contact info', color: 'orange' },
-  { id: 'event', label: 'Event', icon: Calendar, description: 'Calendar event', color: 'pink' },
-  { id: 'location', label: 'Location', icon: MapPin, description: 'Geographic location', color: 'lime' },
+  { id: 'url', label: 'URL', icon: Link, description: 'Website link' },
+  { id: 'text', label: 'Text', icon: Type, description: 'Plain text' },
+  { id: 'email', label: 'Email', icon: Mail, description: 'Email address' },
+  { id: 'phone', label: 'Phone', icon: Phone, description: 'Phone number' },
+  { id: 'sms', label: 'SMS', icon: MessageSquare, description: 'Text message' },
+  { id: 'wifi', label: 'WiFi', icon: Wifi, description: 'Network credentials' },
+  { id: 'vcard', label: 'vCard', icon: User, description: 'Contact info' },
+  { id: 'event', label: 'Event', icon: Calendar, description: 'Calendar event' },
+  { id: 'location', label: 'Location', icon: MapPin, description: 'Geographic location' },
 ] as const;
-
-// Color variants for active state
-const colorVariants: Record<string, { bg: string; border: string; text: string; iconBg: string }> = {
-  indigo: {
-    bg: 'bg-indigo-50 dark:bg-indigo-900/30',
-    border: 'border-indigo-500 dark:border-indigo-400',
-    text: 'text-indigo-600 dark:text-indigo-400',
-    iconBg: 'bg-indigo-100 dark:bg-indigo-800',
-  },
-  slate: {
-    bg: 'bg-slate-50 dark:bg-slate-900/30',
-    border: 'border-slate-500 dark:border-slate-400',
-    text: 'text-slate-600 dark:text-slate-400',
-    iconBg: 'bg-slate-100 dark:bg-slate-800',
-  },
-  rose: {
-    bg: 'bg-rose-50 dark:bg-rose-900/30',
-    border: 'border-rose-500 dark:border-rose-400',
-    text: 'text-rose-600 dark:text-rose-400',
-    iconBg: 'bg-rose-100 dark:bg-rose-800',
-  },
-  emerald: {
-    bg: 'bg-emerald-50 dark:bg-emerald-900/30',
-    border: 'border-emerald-500 dark:border-emerald-400',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    iconBg: 'bg-emerald-100 dark:bg-emerald-800',
-  },
-  cyan: {
-    bg: 'bg-cyan-50 dark:bg-cyan-900/30',
-    border: 'border-cyan-500 dark:border-cyan-400',
-    text: 'text-cyan-600 dark:text-cyan-400',
-    iconBg: 'bg-cyan-100 dark:bg-cyan-800',
-  },
-  violet: {
-    bg: 'bg-violet-50 dark:bg-violet-900/30',
-    border: 'border-violet-500 dark:border-violet-400',
-    text: 'text-violet-600 dark:text-violet-400',
-    iconBg: 'bg-violet-100 dark:bg-violet-800',
-  },
-  orange: {
-    bg: 'bg-orange-50 dark:bg-orange-900/30',
-    border: 'border-orange-500 dark:border-orange-400',
-    text: 'text-orange-600 dark:text-orange-400',
-    iconBg: 'bg-orange-100 dark:bg-orange-800',
-  },
-  pink: {
-    bg: 'bg-pink-50 dark:bg-pink-900/30',
-    border: 'border-pink-500 dark:border-pink-400',
-    text: 'text-pink-600 dark:text-pink-400',
-    iconBg: 'bg-pink-100 dark:bg-pink-800',
-  },
-  lime: {
-    bg: 'bg-lime-50 dark:bg-lime-900/30',
-    border: 'border-lime-500 dark:border-lime-400',
-    text: 'text-lime-600 dark:text-lime-400',
-    iconBg: 'bg-lime-100 dark:bg-lime-800',
-  },
-};
 
 export function TypeSelector() {
   const { activeType, setActiveType } = useQRStore();
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [animatingTab, setAnimatingTab] = useState<string | null>(null);
+  const [showLeftFade, setShowLeftFade] = useState(false);
+  const [showRightFade, setShowRightFade] = useState(true);
+
+  // Check scroll position to show/hide edge fades
+  const updateScrollFades = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setShowLeftFade(scrollLeft > 10);
+    setShowRightFade(scrollLeft < scrollWidth - clientWidth - 10);
+  }, []);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    updateScrollFades();
+    container.addEventListener('scroll', updateScrollFades, { passive: true });
+    window.addEventListener('resize', updateScrollFades);
+
+    return () => {
+      container.removeEventListener('scroll', updateScrollFades);
+      window.removeEventListener('resize', updateScrollFades);
+    };
+  }, [updateScrollFades]);
+
+  // Cleanup animation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Scroll active tab into view
+  const scrollTabIntoView = useCallback((index: number) => {
+    const tab = tabRefs.current[index];
+    const container = scrollContainerRef.current;
+    if (!tab || !container) return;
+
+    const tabRect = tab.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    if (tabRect.left < containerRect.left + 40) {
+      container.scrollBy({ left: tabRect.left - containerRect.left - 40, behavior: 'smooth' });
+    } else if (tabRect.right > containerRect.right - 40) {
+      container.scrollBy({ left: tabRect.right - containerRect.right + 40, behavior: 'smooth' });
+    }
+  }, []);
+
+  const handleSelect = useCallback((option: typeof typeOptions[number], index: number) => {
+    setAnimatingTab(option.id);
+    setActiveType(option.id);
+    scrollTabIntoView(index);
+
+    // Clear animation state after animation completes
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+    animationTimeoutRef.current = setTimeout(() => setAnimatingTab(null), 300);
+  }, [setActiveType, scrollTabIntoView]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent, currentIndex: number) => {
@@ -123,10 +130,10 @@ export function TypeSelector() {
 
       if (nextIndex !== null) {
         tabRefs.current[nextIndex]?.focus();
-        setActiveType(typeOptions[nextIndex].id);
+        handleSelect(typeOptions[nextIndex], nextIndex);
       }
     },
-    [setActiveType]
+    [handleSelect]
   );
 
   return (
@@ -137,77 +144,83 @@ export function TypeSelector() {
       >
         QR Code Type
       </h2>
-      <div
-        role="tablist"
-        aria-labelledby="qr-type-label"
-        aria-orientation="horizontal"
-        className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2"
-      >
-        {typeOptions.map((option, index) => {
-          const Icon = option.icon;
-          const isActive = activeType === option.id;
-          const colors = colorVariants[option.color];
 
-          return (
-            <button
-              key={option.id}
-              ref={(el) => {
-                tabRefs.current[index] = el;
-              }}
-              role="tab"
-              id={`qr-type-tab-${option.id}`}
-              aria-selected={isActive}
-              aria-controls={`qr-type-panel-${option.id}`}
-              tabIndex={isActive ? 0 : -1}
-              onClick={() => setActiveType(option.id)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              className={cn(
-                'group flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 min-h-[72px]',
-                'hover:shadow-md hover:-translate-y-0.5',
-                'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                isActive
-                  ? cn(colors.border, colors.bg, 'shadow-sm focus:ring-current')
-                  : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 focus:ring-indigo-500'
-              )}
-            >
-              <div
+      {/* Horizontal scrollable container */}
+      <div className="relative w-full">
+        {/* Left fade gradient */}
+        <div
+          className={cn(
+            "absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-[var(--color-bg)] to-transparent z-10 pointer-events-none transition-opacity duration-200",
+            showLeftFade ? "opacity-100" : "opacity-0"
+          )}
+        />
+
+        {/* Right fade gradient */}
+        <div
+          className={cn(
+            "absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-[var(--color-bg)] to-transparent z-10 pointer-events-none transition-opacity duration-200",
+            showRightFade ? "opacity-100" : "opacity-0"
+          )}
+        />
+
+        {/* Scrollable tabs container */}
+        <div
+          ref={scrollContainerRef}
+          role="tablist"
+          aria-labelledby="qr-type-label"
+          aria-orientation="horizontal"
+          className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide scroll-smooth snap-x"
+        >
+          {typeOptions.map((option, index) => {
+            const Icon = option.icon;
+            const isActive = activeType === option.id;
+            const isAnimating = animatingTab === option.id;
+
+            return (
+              <button
+                key={option.id}
+                ref={(el) => {
+                  tabRefs.current[index] = el;
+                }}
+                role="tab"
+                id={`qr-type-tab-${option.id}`}
+                aria-selected={isActive}
+                aria-controls={`qr-type-panel-${option.id}`}
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => handleSelect(option, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
                 className={cn(
-                  'p-1.5 rounded-lg transition-colors',
-                  isActive ? colors.iconBg : 'bg-gray-100 dark:bg-gray-700 group-hover:bg-gray-200 dark:group-hover:bg-gray-600'
+                  'group relative flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap snap-start',
+                  'transition-all duration-200 ease-out',
+                  'focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2',
+                  'active:scale-95',
+                  isActive
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-500 hover:text-gray-900 dark:hover:text-white hover:shadow-sm'
                 )}
               >
                 <Icon
                   aria-hidden="true"
                   className={cn(
-                    'w-4 h-4',
+                    'w-4 h-4 transition-all duration-200',
                     isActive
-                      ? colors.text
-                      : 'text-gray-500 dark:text-gray-400'
+                      ? 'text-white dark:text-gray-900'
+                      : 'text-gray-500 dark:text-gray-400 group-hover:text-orange-500 dark:group-hover:text-orange-400',
+                    isAnimating && 'animate-icon-bounce'
                   )}
                 />
-              </div>
-              <span
-                className={cn(
-                  'text-xs font-medium',
-                  isActive
-                    ? colors.text
-                    : 'text-gray-600 dark:text-gray-300'
+                <span className="text-sm font-medium">
+                  {option.label}
+                </span>
+
+                {/* Active indicator dot */}
+                {isActive && (
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-orange-500 rounded-full animate-scale-in" />
                 )}
-              >
-                {option.label}
-              </span>
-              {/* Keyboard shortcut hint on desktop */}
-              <kbd className={cn(
-                "hidden lg:block text-[10px] font-mono px-1 rounded",
-                isActive
-                  ? cn(colors.iconBg, colors.text)
-                  : "text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700"
-              )}>
-                {index + 1}
-              </kbd>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

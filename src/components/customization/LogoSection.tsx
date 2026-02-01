@@ -1,18 +1,19 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback, memo } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Upload, X, AlertCircle, Square, Circle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
+import { LOGO_CONFIG } from '../../config/constants';
 import type { LogoShape } from '../../types';
 
-export function LogoSection() {
+export const LogoSection = memo(function LogoSection() {
   const { styleOptions, setStyleOptions } = useQRStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = useCallback((file: File) => {
     setError(null);
 
     // Validate file type
@@ -21,49 +22,89 @@ export function LogoSection() {
       return;
     }
 
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
+    // Validate file size
+    if (file.size > LOGO_CONFIG.MAX_FILE_SIZE) {
       setError('Image must be less than 2MB');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setStyleOptions({ logoUrl: dataUrl });
-    };
-    reader.readAsDataURL(file);
+    // Check if it's an SVG file
+    const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+
+    if (isSvg) {
+      // Read SVG as text to preserve vector data
+      const textReader = new FileReader();
+      textReader.onload = (e) => {
+        const svgContent = e.target?.result as string;
+        // Sanitize SVG content (remove scripts, event handlers, external references)
+        const sanitizedSvg = sanitizeSvg(svgContent);
+
+        // Also create a data URL for preview
+        const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(sanitizedSvg)));
+        setStyleOptions({ logoUrl: dataUrl, logoSvgContent: sanitizedSvg });
+      };
+      textReader.readAsText(file);
+    } else {
+      // For raster images, just read as data URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        setStyleOptions({ logoUrl: dataUrl, logoSvgContent: undefined });
+      };
+      reader.readAsDataURL(file);
+    }
+  }, [setStyleOptions]);
+
+  // Sanitize SVG content to remove potentially dangerous elements
+  const sanitizeSvg = (svgContent: string): string => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+    const svg = doc.documentElement;
+
+    // Remove script elements
+    svg.querySelectorAll('script').forEach(el => el.remove());
+
+    // Remove event handlers from all elements
+    const allElements = svg.querySelectorAll('*');
+    allElements.forEach(el => {
+      // Remove event handler attributes
+      Array.from(el.attributes).forEach(attr => {
+        if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
+          el.removeAttribute(attr.name);
+        }
+      });
+    });
+
+    // Remove external references (use, image with external href)
+    svg.querySelectorAll('use[href^="http"], use[xlink\\:href^="http"], image[href^="http"], image[xlink\\:href^="http"]').forEach(el => {
+      el.remove();
+    });
+
+    return new XMLSerializer().serializeToString(svg);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
     if (file) handleFileSelect(file);
-  };
+  }, [handleFileSelect]);
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(true);
-  };
+  }, []);
 
-  const handleDragLeave = () => {
+  const handleDragLeave = useCallback(() => {
     setDragOver(false);
-  };
+  }, []);
 
-  const handleRemoveLogo = () => {
-    setStyleOptions({ logoUrl: undefined, logoSize: 0.3 });
+  const handleRemoveLogo = useCallback(() => {
+    setStyleOptions({ logoUrl: undefined, logoSvgContent: undefined, logoSize: LOGO_CONFIG.DEFAULT_SIZE });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  };
-
-  const logoSizeOptions = [
-    { value: 0.15, label: 'Small (15%)' },
-    { value: 0.2, label: 'Medium (20%)' },
-    { value: 0.25, label: 'Large (25%)' },
-    { value: 0.3, label: 'Extra Large (30%)' },
-  ];
+  }, [setStyleOptions]);
 
   return (
     <div className="space-y-4">
@@ -121,13 +162,14 @@ export function LogoSection() {
               className="mb-2"
             />
             <div className="flex flex-wrap gap-2">
-              {logoSizeOptions.map((option) => (
+              {LOGO_CONFIG.SIZE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setStyleOptions({ logoSize: option.value })}
                   className={cn(
                     'px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border transition-colors touch-manipulation',
-                    (styleOptions.logoSize || 0.3) === option.value
+                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
+                    (styleOptions.logoSize || LOGO_CONFIG.DEFAULT_SIZE) === option.value
                       ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
                       : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
                   )}
@@ -174,6 +216,32 @@ export function LogoSection() {
             </div>
           </div>
 
+          {/* Logo Padding */}
+          <div>
+            <LabelWithTooltip
+              label="Logo Padding"
+              tooltip="Space between the logo and QR code modules. Less padding makes the logo appear larger but may affect scannability."
+              className="mb-2"
+            />
+            <div className="flex flex-wrap gap-2">
+              {LOGO_CONFIG.PADDING_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setStyleOptions({ logoMargin: option.value })}
+                  className={cn(
+                    'px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border transition-colors touch-manipulation',
+                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
+                    (styleOptions.logoMargin ?? LOGO_CONFIG.DEFAULT_MARGIN) === option.value
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <Button
             variant="secondary"
             size="sm"
@@ -209,4 +277,6 @@ export function LogoSection() {
       )}
     </div>
   );
-}
+});
+
+LogoSection.displayName = 'LogoSection';

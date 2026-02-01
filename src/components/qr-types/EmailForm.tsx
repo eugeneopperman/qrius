@@ -1,14 +1,12 @@
-import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
 import { Mail } from 'lucide-react';
 import { validateEmail } from '../../utils/validators';
+import { useFormField } from '../../hooks/useFormField';
 
 export function EmailForm() {
   const { emailData, setEmailData } = useQRStore();
-  const [touched, setTouched] = useState({ email: false });
-
-  const emailValidation = touched.email ? validateEmail(emailData.email) : { isValid: true };
+  const emailField = useFormField(emailData.email, validateEmail);
 
   return (
     <div className="space-y-4">
@@ -22,9 +20,9 @@ export function EmailForm() {
         type="email"
         value={emailData.email}
         onChange={(e) => setEmailData({ email: e.target.value })}
-        onBlur={() => setTouched((t) => ({ ...t, email: true }))}
+        onBlur={emailField.handleBlur}
         placeholder="example@email.com"
-        error={emailValidation.error}
+        error={emailField.error}
       />
 
       <Input

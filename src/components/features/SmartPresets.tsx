@@ -11,7 +11,7 @@ import {
   Check,
   QrCode
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { smartPresets, type SmartPreset } from '../../data/smartPresets';
 import { useQRStore } from '../../stores/qrStore';
 import { toast } from '../../stores/toastStore';
@@ -76,6 +76,7 @@ interface SmartPresetsProps {
 
 export function SmartPresets({ onApply }: SmartPresetsProps) {
   const [appliedPreset, setAppliedPreset] = useState<string | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
     setActiveType,
     setStyleOptions,
@@ -84,6 +85,15 @@ export function SmartPresets({ onApply }: SmartPresetsProps) {
     setVcardData,
     setEventData,
   } = useQRStore();
+
+  // Cleanup timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const applyPreset = (preset: SmartPreset) => {
     // Set the QR type
@@ -108,9 +118,12 @@ export function SmartPresets({ onApply }: SmartPresetsProps) {
     // Apply style options
     setStyleOptions(preset.styleOptions);
 
-    // Show applied feedback
+    // Show applied feedback with proper cleanup
     setAppliedPreset(preset.id);
-    setTimeout(() => setAppliedPreset(null), 1500);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => setAppliedPreset(null), 1500);
     toast.success(`Applied "${preset.name}" preset`);
 
     // Call optional callback
@@ -134,11 +147,11 @@ export function SmartPresets({ onApply }: SmartPresetsProps) {
               key={preset.id}
               onClick={() => applyPreset(preset)}
               className={cn(
-                'group relative flex items-start gap-3 p-3 rounded-xl border text-left transition-all duration-200',
-                'hover:border-indigo-400 hover:shadow-md hover:-translate-y-0.5',
+                'group relative flex items-start gap-3 p-4 rounded-2xl text-left transition-all duration-200',
+                'hover:shadow-md',
                 isApplied
-                  ? 'border-green-500 bg-green-50 dark:bg-green-900/20 ring-2 ring-green-500/20'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+                  ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-500'
+                  : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'
               )}
             >
               {/* QR Preview */}

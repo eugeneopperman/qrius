@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { toast } from '../../stores/toastStore';
@@ -17,6 +17,26 @@ export function BrandKitManager() {
   const [success, setSuccess] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (feedbackTimeoutRef.current) {
+        clearTimeout(feedbackTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const clearFeedbackAfterDelay = (delay = 2000) => {
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current);
+    }
+    feedbackTimeoutRef.current = setTimeout(() => {
+      setSuccess(null);
+      setError(null);
+    }, delay);
+  };
 
   const handleSaveKit = () => {
     if (!newKitName.trim()) {
@@ -38,13 +58,13 @@ export function BrandKitManager() {
     setNewKitName('');
     setIsAdding(false);
     setSuccess('Brand kit saved!');
-    setTimeout(() => setSuccess(null), 2000);
+    clearFeedbackAfterDelay();
   };
 
   const handleApplyKit = (kit: (typeof brandKits)[0]) => {
     setStyleOptions(kit.style);
     setSuccess(`Applied "${kit.name}" style`);
-    setTimeout(() => setSuccess(null), 2000);
+    clearFeedbackAfterDelay();
   };
 
   const handleExport = () => {
@@ -65,16 +85,13 @@ export function BrandKitManager() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const json = event.target?.result as string;
-      const success = importBrandKits(json);
-      if (success) {
+      const importSuccess = importBrandKits(json);
+      if (importSuccess) {
         setSuccess('Brand kits imported successfully!');
       } else {
         setError('Failed to import brand kits. Invalid file format.');
       }
-      setTimeout(() => {
-        setSuccess(null);
-        setError(null);
-      }, 3000);
+      clearFeedbackAfterDelay(3000);
     };
     reader.readAsText(file);
 

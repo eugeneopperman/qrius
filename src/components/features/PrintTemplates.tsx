@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { toast } from '../../stores/toastStore';
+import { createQRElementOptions } from '../../utils/gradientUtils';
 import { Printer, Check, FileImage, FileText } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
@@ -100,6 +101,16 @@ export function PrintTemplates() {
   const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf');
   const [includeBleed, setIncludeBleed] = useState(true);
   const [includeCropMarks, setIncludeCropMarks] = useState(true);
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const BLEED_MM = 3; // Standard 3mm bleed
   const CROP_MARK_LENGTH = 5; // 5mm crop marks
@@ -111,25 +122,27 @@ export function PrintTemplates() {
     const QRCodeStyling = (await import('qr-code-styling')).default;
     const qrPixelSize = mmToPixels(template.qrSize, template.dpi);
 
-    // Build gradient config if enabled
-    const getGradientConfig = () => {
-      if (styleOptions.useGradient && styleOptions.gradient) {
-        return {
-          type: styleOptions.gradient.type,
-          rotation: styleOptions.gradient.rotation || 0,
-          colorStops: styleOptions.gradient.colorStops.map((stop) => ({
-            offset: stop.offset,
-            color: stop.color,
-          })),
-        };
-      }
-      return undefined;
-    };
+    // Build QR element options using shared utility
+    const dotsOptions = createQRElementOptions(
+      styleOptions.dotsType,
+      styleOptions.useGradient || false,
+      styleOptions.gradient,
+      styleOptions.dotsColor
+    );
 
-    const gradientConfig = getGradientConfig();
-    const dotsOptions = gradientConfig
-      ? { type: styleOptions.dotsType, gradient: gradientConfig }
-      : { type: styleOptions.dotsType, color: styleOptions.dotsColor };
+    const cornersSquareOptions = createQRElementOptions(
+      styleOptions.cornersSquareType,
+      styleOptions.useGradient || false,
+      styleOptions.gradient,
+      styleOptions.dotsColor
+    );
+
+    const cornersDotOptions = createQRElementOptions(
+      styleOptions.cornersDotType,
+      styleOptions.useGradient || false,
+      styleOptions.gradient,
+      styleOptions.dotsColor
+    );
 
     const qrCode = new QRCodeStyling({
       width: qrPixelSize,
@@ -137,12 +150,8 @@ export function PrintTemplates() {
       type: 'canvas',
       data: getQRValue(),
       dotsOptions,
-      cornersSquareOptions: gradientConfig
-        ? { type: styleOptions.cornersSquareType, gradient: gradientConfig }
-        : { type: styleOptions.cornersSquareType, color: styleOptions.dotsColor },
-      cornersDotOptions: gradientConfig
-        ? { type: styleOptions.cornersDotType, gradient: gradientConfig }
-        : { type: styleOptions.cornersDotType, color: styleOptions.dotsColor },
+      cornersSquareOptions,
+      cornersDotOptions,
       backgroundOptions: {
         color: styleOptions.backgroundColor,
       },
@@ -260,7 +269,10 @@ export function PrintTemplates() {
       }
 
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 2000);
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+      successTimeoutRef.current = setTimeout(() => setSuccess(false), 2000);
       toast.success(`Print-ready ${exportFormat.toUpperCase()} downloaded for ${template.name}`);
     } catch (error) {
       console.error('Failed to generate print-ready QR:', error);

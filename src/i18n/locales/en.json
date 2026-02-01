@@ -1,0 +1,178 @@
+{
+  "app": {
+    "title": "QR Code Generator",
+    "tagline": "Create beautiful, scannable QR codes",
+    "footer": "All data processed locally"
+  },
+  "nav": {
+    "history": "History",
+    "shortcuts": "Shortcuts",
+    "settings": "Settings"
+  },
+  "wizard": {
+    "step1": "Choose Type",
+    "step2": "Enter Content",
+    "step3": "Customize",
+    "step4": "Download",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip to Download"
+  },
+  "qrTypes": {
+    "url": "Website URL",
+    "text": "Plain Text",
+    "email": "Email",
+    "phone": "Phone Number",
+    "sms": "SMS Message",
+    "wifi": "WiFi Network",
+    "vcard": "Contact Card",
+    "event": "Calendar Event",
+    "location": "Location"
+  },
+  "form": {
+    "url": {
+      "label": "Website URL",
+      "placeholder": "https://example.com",
+      "hint": "Enter the URL you want to encode"
+    },
+    "text": {
+      "label": "Text Content",
+      "placeholder": "Enter your text here...",
+      "hint": "Up to 2953 characters"
+    },
+    "email": {
+      "address": "Email Address",
+      "subject": "Subject",
+      "body": "Message Body"
+    },
+    "phone": {
+      "label": "Phone Number",
+      "placeholder": "+1 (555) 123-4567"
+    },
+    "sms": {
+      "phone": "Phone Number",
+      "message": "Message",
+      "messagePlaceholder": "Your message (160 chars max)"
+    },
+    "wifi": {
+      "ssid": "Network Name (SSID)",
+      "password": "Password",
+      "encryption": "Encryption",
+      "hidden": "Hidden Network"
+    },
+    "vcard": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "company": "Company",
+      "title": "Job Title",
+      "website": "Website",
+      "address": "Address"
+    },
+    "event": {
+      "title": "Event Title",
+      "location": "Location",
+      "startDate": "Start Date",
+      "startTime": "Start Time",
+      "endDate": "End Date",
+      "endTime": "End Time",
+      "description": "Description"
+    },
+    "location": {
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "label": "Location Name"
+    }
+  },
+  "customization": {
+    "style": "Style",
+    "colors": "Colors",
+    "logo": "Logo",
+    "frame": "Frame",
+    "advanced": "Advanced",
+    "dotsStyle": "Dots Style",
+    "cornersStyle": "Corners Style",
+    "foregroundColor": "Foreground Color",
+    "backgroundColor": "Background Color",
+    "useGradient": "Use Gradient",
+    "gradientType": "Gradient Type",
+    "uploadLogo": "Upload Logo",
+    "removeLogo": "Remove Logo",
+    "logoSize": "Logo Size",
+    "logoShape": "Logo Shape",
+    "frameStyle": "Frame Style",
+    "frameLabel": "Frame Label",
+    "errorCorrection": "Error Correction",
+    "showFallbackUrl": "Show URL Below QR"
+  },
+  "actions": {
+    "download": "Download",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "generating": "Generating...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "reset": "Reset",
+    "apply": "Apply"
+  },
+  "formats": {
+    "png": "PNG (High Quality)",
+    "svg": "SVG (Illustrator Ready)",
+    "jpeg": "JPEG (Compressed)",
+    "pdf": "PDF (Print Ready)"
+  },
+  "history": {
+    "title": "QR Code History",
+    "empty": "No QR codes yet",
+    "emptyHint": "Your generated QR codes will appear here",
+    "restore": "Restore",
+    "deleteConfirm": "Delete this QR code from history?",
+    "clearAll": "Clear All",
+    "clearConfirm": "Clear all history? This cannot be undone."
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "download": "Download QR code",
+    "downloadWithPicker": "Download with format picker",
+    "copy": "Copy to clipboard",
+    "toggleDarkMode": "Toggle dark mode",
+    "showHelp": "Show shortcuts",
+    "openReader": "Open QR reader",
+    "openHistory": "Open history"
+  },
+  "reader": {
+    "title": "QR Code Reader",
+    "scan": "Scan QR Code",
+    "upload": "Upload Image",
+    "result": "Scanned Result",
+    "noCamera": "Camera not available"
+  },
+  "scannability": {
+    "title": "Scannability Score",
+    "excellent": "Excellent",
+    "good": "Good",
+    "warning": "Warning",
+    "poor": "Poor"
+  },
+  "errors": {
+    "invalidUrl": "Please enter a valid URL",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPhone": "Please enter a valid phone number",
+    "required": "This field is required",
+    "tooLong": "Text is too long",
+    "downloadFailed": "Failed to download QR code",
+    "copyFailed": "Failed to copy to clipboard",
+    "somethingWrong": "Something went wrong",
+    "tryAgain": "Try Again",
+    "reloadPage": "Reload Page"
+  },
+  "toast": {
+    "downloadSuccess": "QR code downloaded",
+    "copySuccess": "QR code copied to clipboard",
+    "saveSuccess": "Saved successfully",
+    "deleteSuccess": "Deleted successfully"
+  }
+}

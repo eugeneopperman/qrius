@@ -1,0 +1,178 @@
+{
+  "app": {
+    "title": "二维码生成器",
+    "tagline": "创建美观、可扫描的二维码",
+    "footer": "所有数据本地处理"
+  },
+  "nav": {
+    "history": "历史记录",
+    "shortcuts": "快捷键",
+    "settings": "设置"
+  },
+  "wizard": {
+    "step1": "选择类型",
+    "step2": "输入内容",
+    "step3": "自定义",
+    "step4": "下载",
+    "next": "下一步",
+    "back": "返回",
+    "skip": "跳至下载"
+  },
+  "qrTypes": {
+    "url": "网站链接",
+    "text": "纯文本",
+    "email": "电子邮件",
+    "phone": "电话号码",
+    "sms": "短信",
+    "wifi": "WiFi网络",
+    "vcard": "名片",
+    "event": "日历事件",
+    "location": "位置"
+  },
+  "form": {
+    "url": {
+      "label": "网站链接",
+      "placeholder": "https://example.com",
+      "hint": "输入要编码的网址"
+    },
+    "text": {
+      "label": "文本内容",
+      "placeholder": "在此输入文本...",
+      "hint": "最多2953个字符"
+    },
+    "email": {
+      "address": "邮箱地址",
+      "subject": "主题",
+      "body": "正文"
+    },
+    "phone": {
+      "label": "电话号码",
+      "placeholder": "+86 123 4567 8901"
+    },
+    "sms": {
+      "phone": "电话号码",
+      "message": "信息",
+      "messagePlaceholder": "您的信息（最多160字符）"
+    },
+    "wifi": {
+      "ssid": "网络名称（SSID）",
+      "password": "密码",
+      "encryption": "加密方式",
+      "hidden": "隐藏网络"
+    },
+    "vcard": {
+      "firstName": "名",
+      "lastName": "姓",
+      "email": "邮箱",
+      "phone": "电话",
+      "company": "公司",
+      "title": "职位",
+      "website": "网站",
+      "address": "地址"
+    },
+    "event": {
+      "title": "事件标题",
+      "location": "地点",
+      "startDate": "开始日期",
+      "startTime": "开始时间",
+      "endDate": "结束日期",
+      "endTime": "结束时间",
+      "description": "描述"
+    },
+    "location": {
+      "latitude": "纬度",
+      "longitude": "经度",
+      "label": "地点名称"
+    }
+  },
+  "customization": {
+    "style": "样式",
+    "colors": "颜色",
+    "logo": "标志",
+    "frame": "边框",
+    "advanced": "高级",
+    "dotsStyle": "点样式",
+    "cornersStyle": "角样式",
+    "foregroundColor": "前景色",
+    "backgroundColor": "背景色",
+    "useGradient": "使用渐变",
+    "gradientType": "渐变类型",
+    "uploadLogo": "上传标志",
+    "removeLogo": "移除标志",
+    "logoSize": "标志大小",
+    "logoShape": "标志形状",
+    "frameStyle": "边框样式",
+    "frameLabel": "边框文字",
+    "errorCorrection": "纠错级别",
+    "showFallbackUrl": "在二维码下方显示网址"
+  },
+  "actions": {
+    "download": "下载",
+    "copy": "复制",
+    "copied": "已复制！",
+    "generating": "生成中...",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "confirm": "确认",
+    "reset": "重置",
+    "apply": "应用"
+  },
+  "formats": {
+    "png": "PNG（高质量）",
+    "svg": "SVG（矢量图）",
+    "jpeg": "JPEG（压缩）",
+    "pdf": "PDF（打印）"
+  },
+  "history": {
+    "title": "二维码历史",
+    "empty": "暂无二维码",
+    "emptyHint": "生成的二维码将显示在这里",
+    "restore": "恢复",
+    "deleteConfirm": "从历史记录中删除此二维码？",
+    "clearAll": "清除全部",
+    "clearConfirm": "清除所有历史记录？此操作无法撤销。"
+  },
+  "shortcuts": {
+    "title": "键盘快捷键",
+    "download": "下载二维码",
+    "downloadWithPicker": "选择格式下载",
+    "copy": "复制到剪贴板",
+    "toggleDarkMode": "切换深色模式",
+    "showHelp": "显示快捷键",
+    "openReader": "打开扫描器",
+    "openHistory": "打开历史记录"
+  },
+  "reader": {
+    "title": "二维码扫描器",
+    "scan": "扫描二维码",
+    "upload": "上传图片",
+    "result": "扫描结果",
+    "noCamera": "无法使用相机"
+  },
+  "scannability": {
+    "title": "可扫描性评分",
+    "excellent": "优秀",
+    "good": "良好",
+    "warning": "警告",
+    "poor": "较差"
+  },
+  "errors": {
+    "invalidUrl": "请输入有效的网址",
+    "invalidEmail": "请输入有效的邮箱地址",
+    "invalidPhone": "请输入有效的电话号码",
+    "required": "此字段为必填项",
+    "tooLong": "文本过长",
+    "downloadFailed": "下载二维码失败",
+    "copyFailed": "复制到剪贴板失败",
+    "somethingWrong": "出错了",
+    "tryAgain": "重试",
+    "reloadPage": "刷新页面"
+  },
+  "toast": {
+    "downloadSuccess": "二维码已下载",
+    "copySuccess": "二维码已复制到剪贴板",
+    "saveSuccess": "保存成功",
+    "deleteSuccess": "删除成功"
+  }
+}

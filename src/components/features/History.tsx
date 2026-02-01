@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
-import { X, Trash2, Clock, RotateCcw, Undo2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Trash2, Clock, RotateCcw, Undo2, BarChart3, Loader2 } from 'lucide-react';
 import { useHistoryStore, getTypeLabel, getDataSummary } from '../../stores/historyStore';
 import { useQRStore } from '../../stores/qrStore';
 import { toast } from '../../stores/toastStore';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { getTrackableQR } from '../../utils/qrTrackingApi';
+import { useSettingsStore } from '../../stores/settingsStore';
 import type { HistoryEntry } from '../../types';
 
 interface HistoryModalProps {
@@ -16,6 +19,15 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
   const { entries, removeEntry, clearHistory, undoClear, canUndo } = useHistoryStore();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showUndo, setShowUndo] = useState(false);
+  const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Focus trap for accessibility
+  useFocusTrap(isOpen, dialogRef, {
+    initialFocusRef: closeButtonRef,
+    onEscape: onClose,
+  });
 
   // Check if we can undo when modal opens
   useEffect(() => {
@@ -24,13 +36,25 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
     }
   }, [isOpen, canUndo]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (undoTimeoutRef.current) {
+        clearTimeout(undoTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleClearHistory = () => {
     clearHistory();
     setShowUndo(true);
     toast.info('History cleared. You can undo within 10 seconds.');
 
-    // Auto-hide undo button after 10 seconds
-    setTimeout(() => {
+    // Auto-hide undo button after 10 seconds with proper cleanup
+    if (undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+    }
+    undoTimeoutRef.current = setTimeout(() => {
       setShowUndo(false);
     }, 10000);
   };
@@ -45,20 +69,29 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="history-dialog-title"
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl max-h-[80vh] bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden mx-4">
+      <div
+        ref={dialogRef}
+        className="relative w-full max-w-2xl max-h-[80vh] bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden mx-4"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-indigo-600" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <Clock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
+            <h2 id="history-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-white">
               QR Code History
             </h2>
             <span className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">
@@ -88,11 +121,12 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
               </Button>
             )}
             <button
+              ref={closeButtonRef}
               onClick={onClose}
               aria-label="Close history"
               className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -147,6 +181,27 @@ interface HistoryCardProps {
 
 function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
   const { setActiveType, setStyleOptions, setUrlData, setTextData, setEmailData, setPhoneData, setSmsData, setWifiData, setVcardData, setEventData, setLocationData } = useQRStore();
+  const { trackingSettings } = useSettingsStore();
+  const { updateEntry } = useHistoryStore();
+  const [scanCount, setScanCount] = useState<number | null>(entry.totalScans ?? null);
+  const [isLoadingScans, setIsLoadingScans] = useState(false);
+
+  // Fetch scan count if this is a tracked QR and we don't have a recent count
+  useEffect(() => {
+    if (entry.trackingId && trackingSettings?.enabled) {
+      setIsLoadingScans(true);
+      getTrackableQR(entry.trackingId, trackingSettings.apiBaseUrl || undefined)
+        .then((result) => {
+          if (result.success && result.qrCode) {
+            setScanCount(result.qrCode.totalScans);
+            // Update the cached count in the store
+            updateEntry(entry.id, { totalScans: result.qrCode.totalScans });
+          }
+        })
+        .catch(console.error)
+        .finally(() => setIsLoadingScans(false));
+    }
+  }, [entry.trackingId, entry.id, trackingSettings, updateEntry]);
 
   const handleRestore = () => {
     // Set the active type
@@ -226,10 +281,20 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="px-2 py-0.5 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded">
               {getTypeLabel(entry.type)}
             </span>
+            {entry.trackingId && (
+              <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded flex items-center gap-1">
+                <BarChart3 className="w-3 h-3" />
+                {isLoadingScans ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <span>{scanCount ?? 0} scans</span>
+                )}
+              </span>
+            )}
             <span className="text-xs text-gray-400 dark:text-gray-500">
               {formatDate(entry.timestamp)}
             </span>

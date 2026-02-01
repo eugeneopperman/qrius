@@ -3,44 +3,14 @@ import QRCodeStyling from 'qr-code-styling';
 import { useQRStore } from '../stores/qrStore';
 import { useHistoryStore } from '../stores/historyStore';
 import { toast } from '../stores/toastStore';
-import { Download, Copy, Check, ChevronDown, Loader2, QrCode, Sparkles } from 'lucide-react';
+import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../utils/cn';
 import { applyLogoMask } from '../utils/logoMask';
-import type { GradientOptions } from '../types';
-
-// Empty state component when no QR data
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-8 text-center animate-fade-in">
-      <div className="relative mb-4">
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center">
-          <QrCode className="w-10 h-10 text-indigo-500 dark:text-indigo-400" />
-        </div>
-        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-          <Sparkles className="w-3 h-3 text-white" />
-        </div>
-      </div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-        Create Your QR Code
-      </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-[240px]">
-        Enter your content on the left and watch your QR code appear here instantly
-      </p>
-      <div className="mt-4 flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-        <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px]">1-9</kbd>
-          <span>Switch types</span>
-        </span>
-        <span className="text-gray-300 dark:text-gray-600">•</span>
-        <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px]">S</kbd>
-          <span>Download</span>
-        </span>
-      </div>
-    </div>
-  );
-}
+import { EmptyState, TopLabel, BadgeLabel, BottomLabel, FallbackUrl, getFrameClasses } from './qr';
+import { QR_CONFIG } from '../config/constants';
+import { createQRElementOptions } from '../utils/gradientUtils';
+import { useQRDownload } from '../hooks/useQRDownload';
 
 export interface QRPreviewHandle {
   download: () => void;
@@ -50,10 +20,9 @@ export interface QRPreviewHandle {
 
 export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const frameContainerRef = useRef<HTMLDivElement>(null);
   const qrCodeRef = useRef<QRCodeStyling | null>(null);
-  const [copied, setCopied] = useState(false);
   const [showFormatMenu, setShowFormatMenu] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
   const [processedLogoUrl, setProcessedLogoUrl] = useState<string | undefined>(undefined);
   const { getQRValue, styleOptions, activeType, getCurrentData } = useQRStore();
   const { addEntry, updateThumbnail } = useHistoryStore();
@@ -84,47 +53,48 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       });
   }, [styleOptions.logoUrl, styleOptions.logoShape]);
 
-  // Convert gradient options to qr-code-styling format
-  const getGradientConfig = useCallback((gradient: GradientOptions) => {
-    return {
-      type: gradient.type,
-      rotation: gradient.rotation || 0,
-      colorStops: gradient.colorStops.map((stop) => ({
-        offset: stop.offset,
-        color: stop.color,
-      })),
-    };
-  }, []);
+  // Build QR element options with gradient support
+  const dotsOptions = useMemo(
+    () => createQRElementOptions(
+      styleOptions.dotsType,
+      styleOptions.useGradient || false,
+      styleOptions.gradient,
+      styleOptions.dotsColor
+    ),
+    [styleOptions.dotsType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
+  );
 
-  // Build dots options with or without gradient
-  const dotsOptions = useMemo(() => {
-    const base = { type: styleOptions.dotsType };
-    if (styleOptions.useGradient && styleOptions.gradient) {
-      return { ...base, gradient: getGradientConfig(styleOptions.gradient) };
-    }
-    return { ...base, color: styleOptions.dotsColor };
-  }, [styleOptions.dotsType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor, getGradientConfig]);
+  const cornersSquareOptions = useMemo(
+    () => createQRElementOptions(
+      styleOptions.cornersSquareType,
+      styleOptions.useGradient || false,
+      styleOptions.gradient,
+      styleOptions.dotsColor
+    ),
+    [styleOptions.cornersSquareType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
+  );
 
-  // Build corners options with or without gradient
-  const cornersSquareOptions = useMemo(() => {
-    const base = { type: styleOptions.cornersSquareType };
-    if (styleOptions.useGradient && styleOptions.gradient) {
-      return { ...base, gradient: getGradientConfig(styleOptions.gradient) };
-    }
-    return { ...base, color: styleOptions.dotsColor };
-  }, [styleOptions.cornersSquareType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor, getGradientConfig]);
-
-  const cornersDotOptions = useMemo(() => {
-    const base = { type: styleOptions.cornersDotType };
-    if (styleOptions.useGradient && styleOptions.gradient) {
-      return { ...base, gradient: getGradientConfig(styleOptions.gradient) };
-    }
-    return { ...base, color: styleOptions.dotsColor };
-  }, [styleOptions.cornersDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor, getGradientConfig]);
+  const cornersDotOptions = useMemo(
+    () => createQRElementOptions(
+      styleOptions.cornersDotType,
+      styleOptions.useGradient || false,
+      styleOptions.gradient,
+      styleOptions.dotsColor
+    ),
+    [styleOptions.cornersDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
+  );
 
   // Save to history with thumbnail
   const saveToHistory = useCallback(async () => {
     const currentData = getCurrentData();
+
+    // Extract tracking info if this is a URL type with tracking enabled
+    let trackingId: string | undefined;
+    let trackingShortCode: string | undefined;
+    if (currentData.type === 'url' && currentData.data.trackingEnabled && currentData.data.trackingId) {
+      trackingId = currentData.data.trackingId;
+      trackingShortCode = currentData.data.trackingShortCode;
+    }
 
     // Add entry first (without thumbnail for speed)
     addEntry({
@@ -132,23 +102,24 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       data: currentData,
       styleOptions: { ...styleOptions },
       qrValue,
+      trackingId,
+      trackingShortCode,
     });
 
     // Generate thumbnail asynchronously
     if (qrCodeRef.current) {
       try {
-        const blob = await qrCodeRef.current.getRawData('png');
-        if (blob) {
+        const rawData = await qrCodeRef.current.getRawData('png');
+        if (rawData && rawData instanceof Blob) {
           const reader = new FileReader();
           reader.onloadend = () => {
             const base64 = reader.result as string;
-            // Get the most recent entry and update its thumbnail
             const entries = useHistoryStore.getState().entries;
             if (entries.length > 0) {
               updateThumbnail(entries[0].id, base64);
             }
           };
-          reader.readAsDataURL(blob);
+          reader.readAsDataURL(rawData);
         }
       } catch (error) {
         console.error('Failed to generate thumbnail:', error);
@@ -159,8 +130,8 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   // Initialize QR code
   useEffect(() => {
     qrCodeRef.current = new QRCodeStyling({
-      width: 280,
-      height: 280,
+      width: QR_CONFIG.SIZE,
+      height: QR_CONFIG.SIZE,
       type: 'svg',
       data: qrValue,
       dotsOptions,
@@ -174,7 +145,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       },
       imageOptions: {
         crossOrigin: 'anonymous',
-        margin: 10,
+        margin: styleOptions.logoMargin ?? 5,
         imageSize: styleOptions.logoSize || 0.3,
       },
       image: processedLogoUrl,
@@ -208,7 +179,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
         },
         imageOptions: {
           crossOrigin: 'anonymous',
-          margin: 10,
+          margin: styleOptions.logoMargin ?? 5,
           imageSize: styleOptions.logoSize || 0.3,
         },
         image: processedLogoUrl || undefined,
@@ -216,94 +187,32 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
     }
   }, [qrValue, styleOptions, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl]);
 
-  const handleDownload = async (format: 'png' | 'svg' | 'jpeg' = 'png') => {
-    if (qrCodeRef.current) {
-      try {
-        await qrCodeRef.current.download({
-          name: 'qrcode',
-          extension: format,
-        });
-        toast.success(`QR code downloaded as ${format.toUpperCase()}`);
-        // Save to history after download
-        saveToHistory();
-      } catch (error) {
-        console.error('Failed to download:', error);
-        toast.error('Failed to download QR code. Please try again.');
-      }
-    }
+  const frameStyle = styleOptions.frameStyle || 'none';
+  const hasFrame = frameStyle !== 'none';
+
+  // Use the download hook
+  const { copied, isDownloading, handleDownload, handlePdfDownload, handleCopy } = useQRDownload({
+    qrCodeRef,
+    frameContainerRef,
+    styleOptions,
+    processedLogoUrl,
+    hasFrame,
+    onSuccess: saveToHistory,
+  });
+
+  // Wrap handlers to close menu after action
+  const downloadWithMenuClose = useCallback(
+    async (format: 'png' | 'svg' | 'jpeg' = 'png') => {
+      await handleDownload(format);
+      setShowFormatMenu(false);
+    },
+    [handleDownload]
+  );
+
+  const pdfDownloadWithMenuClose = useCallback(async () => {
+    await handlePdfDownload();
     setShowFormatMenu(false);
-  };
-
-  const handlePdfDownload = async () => {
-    if (!qrCodeRef.current) return;
-
-    setIsDownloading(true);
-    try {
-      const { jsPDF } = await import('jspdf');
-      const blob = await qrCodeRef.current.getRawData('png');
-      if (!blob) {
-        toast.error('Failed to generate PDF. Please try again.');
-        setIsDownloading(false);
-        return;
-      }
-
-      // Convert blob to data URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-
-        // Create A4 PDF with QR code centered
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4',
-        });
-
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const qrSize = 80; // 80mm QR code
-        const x = (pageWidth - qrSize) / 2;
-        const y = (pageHeight - qrSize) / 2;
-
-        pdf.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
-        pdf.save('qrcode.pdf');
-        toast.success('QR code downloaded as PDF');
-        setIsDownloading(false);
-      };
-      reader.readAsDataURL(blob);
-
-      // Save to history
-      saveToHistory();
-    } catch (error) {
-      console.error('Failed to generate PDF:', error);
-      toast.error('Failed to generate PDF. Please try again.');
-      setIsDownloading(false);
-    }
-    setShowFormatMenu(false);
-  };
-
-  const handleCopy = async () => {
-    if (qrCodeRef.current) {
-      try {
-        const blob = await qrCodeRef.current.getRawData('png');
-        if (blob) {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob }),
-          ]);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-          toast.success('QR code copied to clipboard');
-          // Save to history after copy
-          saveToHistory();
-        } else {
-          toast.error('Failed to copy QR code. Please try again.');
-        }
-      } catch (error) {
-        console.error('Failed to copy:', error);
-        toast.error('Failed to copy to clipboard. Your browser may not support this feature.');
-      }
-    }
-  };
+  }, [handlePdfDownload]);
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
@@ -312,32 +221,23 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
     showFormatPicker: () => setShowFormatMenu(true),
   }));
 
-  const frameStyle = styleOptions.frameStyle || 'none';
   const frameLabel = styleOptions.frameLabel || '';
-
-  // Check if we have meaningful content
   const hasContent = qrValue && qrValue.trim().length > 0;
 
-  const getFrameClasses = () => {
-    switch (frameStyle) {
-      case 'simple':
-        return 'border-4 border-gray-800 dark:border-gray-200';
-      case 'rounded':
-        return 'border-4 border-gray-800 dark:border-gray-200 rounded-3xl';
-      case 'bottom-label':
-      case 'top-label':
-      case 'badge':
-        return 'border-4 border-gray-800 dark:border-gray-200 rounded-2xl';
-      default:
-        return '';
-    }
+  // Frame label props
+  const labelProps = {
+    label: frameLabel,
+    fontSize: styleOptions.frameFontSize || 'base',
+    fontFamily: styleOptions.frameFontFamily || 'sans',
+    icon: styleOptions.frameIcon,
+    iconPosition: styleOptions.frameIconPosition,
   };
 
   // Show empty state when no content
   if (!hasContent) {
     return (
       <div className="flex flex-col items-center gap-6">
-        <div className="relative p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 min-w-[280px]">
+        <div className="relative p-6 rounded-3xl min-w-[280px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
           <EmptyState />
         </div>
       </div>
@@ -348,48 +248,31 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
     <div className="flex flex-col items-center gap-6">
       {/* QR Code with Frame */}
       <div
+        ref={frameContainerRef}
         className={cn(
-          'relative p-6 bg-white dark:bg-gray-800 shadow-lg transition-all qr-preview-glow animate-scale-in',
+          'relative transition-all qr-preview-glow animate-scale-in',
           frameStyle === 'none'
-            ? 'rounded-2xl border border-gray-200 dark:border-gray-700'
-            : getFrameClasses()
+            ? 'p-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md'
+            : cn('p-3', getFrameClasses(frameStyle), 'bg-white dark:bg-gray-800')
         )}
       >
         {/* Top Label */}
-        {frameStyle === 'top-label' && frameLabel && (
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 text-sm font-semibold rounded-full whitespace-nowrap">
-            {frameLabel}
-          </div>
-        )}
+        {frameStyle === 'top-label' && frameLabel && <TopLabel {...labelProps} />}
 
         {/* Badge Style Top */}
-        {frameStyle === 'badge' && frameLabel && (
-          <div className="text-center mb-3 text-gray-800 dark:text-gray-200 font-bold text-sm uppercase tracking-wider">
-            {frameLabel}
-          </div>
-        )}
+        {frameStyle === 'badge' && frameLabel && <BadgeLabel {...labelProps} />}
 
         <div
           ref={containerRef}
           className="flex items-center justify-center"
-          style={{ minWidth: 280, minHeight: 280 }}
+          style={{ minWidth: QR_CONFIG.SIZE, minHeight: QR_CONFIG.SIZE }}
         />
 
         {/* Bottom Label */}
-        {frameStyle === 'bottom-label' && frameLabel && (
-          <div className="mt-3 text-center text-gray-800 dark:text-gray-200 font-semibold text-sm">
-            {frameLabel}
-          </div>
-        )}
+        {frameStyle === 'bottom-label' && frameLabel && <BottomLabel {...labelProps} />}
 
         {/* Fallback URL Display */}
-        {styleOptions.showFallbackUrl && qrValue && (
-          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center break-all max-w-[280px]">
-              {qrValue.length > 100 ? `${qrValue.substring(0, 100)}...` : qrValue}
-            </p>
-          </div>
-        )}
+        {styleOptions.showFallbackUrl && qrValue && <FallbackUrl qrValue={qrValue} />}
       </div>
 
       {/* Action Buttons */}
@@ -411,7 +294,6 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
             )}
             {isDownloading ? 'Generating...' : 'Download'}
             {!isDownloading && <ChevronDown className="w-4 h-4" aria-hidden="true" />}
-            {/* Keyboard shortcut hint */}
             {!isDownloading && (
               <kbd className="hidden lg:inline-flex ml-1 px-1.5 py-0.5 text-[10px] bg-indigo-700 rounded text-indigo-200">
                 S
@@ -428,21 +310,21 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
             >
               <button
                 role="menuitem"
-                onClick={() => handleDownload('png')}
+                onClick={() => downloadWithMenuClose('png')}
                 className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
               >
                 PNG (High Quality)
               </button>
               <button
                 role="menuitem"
-                onClick={() => handleDownload('svg')}
+                onClick={() => downloadWithMenuClose('svg')}
                 className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
               >
-                SVG (Vector)
+                SVG (Illustrator Ready)
               </button>
               <button
                 role="menuitem"
-                onClick={() => handleDownload('jpeg')}
+                onClick={() => downloadWithMenuClose('jpeg')}
                 className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
               >
                 JPEG (Compressed)
@@ -450,7 +332,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
               <div className="border-t border-gray-200 dark:border-gray-700 my-1" role="separator" />
               <button
                 role="menuitem"
-                onClick={handlePdfDownload}
+                onClick={pdfDownloadWithMenuClose}
                 className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
               >
                 PDF (Print Ready)

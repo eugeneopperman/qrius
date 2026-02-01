@@ -1,15 +1,13 @@
-import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
 import { MessageSquare } from 'lucide-react';
 import { validatePhone } from '../../utils/validators';
 import { cn } from '../../utils/cn';
+import { useFormField } from '../../hooks/useFormField';
 
 export function SmsForm() {
   const { smsData, setSmsData } = useQRStore();
-  const [touched, setTouched] = useState({ phone: false, message: false });
-
-  const phoneValidation = touched.phone ? validatePhone(smsData.phone) : { isValid: true };
+  const phoneField = useFormField(smsData.phone, validatePhone);
   const messageLength = (smsData.message || '').length;
 
   return (
@@ -24,9 +22,9 @@ export function SmsForm() {
         type="tel"
         value={smsData.phone}
         onChange={(e) => setSmsData({ phone: e.target.value })}
-        onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
+        onBlur={phoneField.handleBlur}
         placeholder="+1 (555) 123-4567"
-        error={phoneValidation.error}
+        error={phoneField.error}
       />
 
       <div className="w-full">
@@ -36,7 +34,6 @@ export function SmsForm() {
         <textarea
           value={smsData.message || ''}
           onChange={(e) => setSmsData({ message: e.target.value })}
-          onBlur={() => setTouched((t) => ({ ...t, message: true }))}
           placeholder="Pre-filled message text..."
           rows={3}
           className={cn(

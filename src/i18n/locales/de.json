@@ -1,0 +1,178 @@
+{
+  "app": {
+    "title": "QR-Code Generator",
+    "tagline": "Erstellen Sie schöne, scanbare QR-Codes",
+    "footer": "Alle Daten werden lokal verarbeitet"
+  },
+  "nav": {
+    "history": "Verlauf",
+    "shortcuts": "Tastenkürzel",
+    "settings": "Einstellungen"
+  },
+  "wizard": {
+    "step1": "Typ Wählen",
+    "step2": "Inhalt Eingeben",
+    "step3": "Anpassen",
+    "step4": "Herunterladen",
+    "next": "Weiter",
+    "back": "Zurück",
+    "skip": "Zum Download"
+  },
+  "qrTypes": {
+    "url": "Website-URL",
+    "text": "Einfacher Text",
+    "email": "E-Mail",
+    "phone": "Telefonnummer",
+    "sms": "SMS-Nachricht",
+    "wifi": "WLAN-Netzwerk",
+    "vcard": "Kontaktkarte",
+    "event": "Kalenderevent",
+    "location": "Standort"
+  },
+  "form": {
+    "url": {
+      "label": "Website-URL",
+      "placeholder": "https://beispiel.de",
+      "hint": "Geben Sie die zu codierende URL ein"
+    },
+    "text": {
+      "label": "Textinhalt",
+      "placeholder": "Geben Sie Ihren Text ein...",
+      "hint": "Bis zu 2953 Zeichen"
+    },
+    "email": {
+      "address": "E-Mail-Adresse",
+      "subject": "Betreff",
+      "body": "Nachrichtentext"
+    },
+    "phone": {
+      "label": "Telefonnummer",
+      "placeholder": "+49 123 4567890"
+    },
+    "sms": {
+      "phone": "Telefonnummer",
+      "message": "Nachricht",
+      "messagePlaceholder": "Ihre Nachricht (max. 160 Zeichen)"
+    },
+    "wifi": {
+      "ssid": "Netzwerkname (SSID)",
+      "password": "Passwort",
+      "encryption": "Verschlüsselung",
+      "hidden": "Verstecktes Netzwerk"
+    },
+    "vcard": {
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "company": "Firma",
+      "title": "Berufsbezeichnung",
+      "website": "Website",
+      "address": "Adresse"
+    },
+    "event": {
+      "title": "Eventtitel",
+      "location": "Ort",
+      "startDate": "Startdatum",
+      "startTime": "Startzeit",
+      "endDate": "Enddatum",
+      "endTime": "Endzeit",
+      "description": "Beschreibung"
+    },
+    "location": {
+      "latitude": "Breitengrad",
+      "longitude": "Längengrad",
+      "label": "Ortsname"
+    }
+  },
+  "customization": {
+    "style": "Stil",
+    "colors": "Farben",
+    "logo": "Logo",
+    "frame": "Rahmen",
+    "advanced": "Erweitert",
+    "dotsStyle": "Punktstil",
+    "cornersStyle": "Eckenstil",
+    "foregroundColor": "Vordergrundfarbe",
+    "backgroundColor": "Hintergrundfarbe",
+    "useGradient": "Farbverlauf Verwenden",
+    "gradientType": "Verlaufstyp",
+    "uploadLogo": "Logo Hochladen",
+    "removeLogo": "Logo Entfernen",
+    "logoSize": "Logo-Größe",
+    "logoShape": "Logo-Form",
+    "frameStyle": "Rahmenstil",
+    "frameLabel": "Rahmentext",
+    "errorCorrection": "Fehlerkorrektur",
+    "showFallbackUrl": "URL Unter QR Anzeigen"
+  },
+  "actions": {
+    "download": "Herunterladen",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "generating": "Generiere...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "confirm": "Bestätigen",
+    "reset": "Zurücksetzen",
+    "apply": "Anwenden"
+  },
+  "formats": {
+    "png": "PNG (Hohe Qualität)",
+    "svg": "SVG (Illustrator-fertig)",
+    "jpeg": "JPEG (Komprimiert)",
+    "pdf": "PDF (Druckfertig)"
+  },
+  "history": {
+    "title": "QR-Code Verlauf",
+    "empty": "Noch keine QR-Codes",
+    "emptyHint": "Ihre generierten QR-Codes erscheinen hier",
+    "restore": "Wiederherstellen",
+    "deleteConfirm": "Diesen QR-Code aus dem Verlauf löschen?",
+    "clearAll": "Alles Löschen",
+    "clearConfirm": "Gesamten Verlauf löschen? Dies kann nicht rückgängig gemacht werden."
+  },
+  "shortcuts": {
+    "title": "Tastenkürzel",
+    "download": "QR-Code herunterladen",
+    "downloadWithPicker": "Mit Formatauswahl herunterladen",
+    "copy": "In Zwischenablage kopieren",
+    "toggleDarkMode": "Dunkelmodus umschalten",
+    "showHelp": "Tastenkürzel anzeigen",
+    "openReader": "QR-Reader öffnen",
+    "openHistory": "Verlauf öffnen"
+  },
+  "reader": {
+    "title": "QR-Code Reader",
+    "scan": "QR-Code Scannen",
+    "upload": "Bild Hochladen",
+    "result": "Scan-Ergebnis",
+    "noCamera": "Kamera nicht verfügbar"
+  },
+  "scannability": {
+    "title": "Scan-Qualität",
+    "excellent": "Ausgezeichnet",
+    "good": "Gut",
+    "warning": "Warnung",
+    "poor": "Schlecht"
+  },
+  "errors": {
+    "invalidUrl": "Bitte geben Sie eine gültige URL ein",
+    "invalidEmail": "Bitte geben Sie eine gültige E-Mail ein",
+    "invalidPhone": "Bitte geben Sie eine gültige Telefonnummer ein",
+    "required": "Dieses Feld ist erforderlich",
+    "tooLong": "Text ist zu lang",
+    "downloadFailed": "QR-Code Download fehlgeschlagen",
+    "copyFailed": "Kopieren in Zwischenablage fehlgeschlagen",
+    "somethingWrong": "Etwas ist schiefgelaufen",
+    "tryAgain": "Erneut Versuchen",
+    "reloadPage": "Seite Neu Laden"
+  },
+  "toast": {
+    "downloadSuccess": "QR-Code heruntergeladen",
+    "copySuccess": "QR-Code in Zwischenablage kopiert",
+    "saveSuccess": "Erfolgreich gespeichert",
+    "deleteSuccess": "Erfolgreich gelöscht"
+  }
+}

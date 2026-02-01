@@ -15,14 +15,15 @@ export function FloatingAction({ onClick, className }: FloatingActionProps) {
         'fixed bottom-6 right-6 z-40 lg:hidden',
         'flex items-center justify-center',
         'w-14 h-14 rounded-full',
-        'bg-indigo-600 text-white shadow-lg',
-        'hover:bg-indigo-700 active:bg-indigo-800',
+        'bg-orange-500 text-white',
         'transition-all duration-200',
-        'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+        'hover:bg-orange-600 active:scale-95',
+        'focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2',
+        'shadow-lg shadow-orange-500/30',
         className
       )}
     >
-      <Download className="w-6 h-6" />
+      <Download className="w-5 h-5" />
     </button>
   );
 }

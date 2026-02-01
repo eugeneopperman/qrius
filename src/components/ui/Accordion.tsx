@@ -17,8 +17,10 @@ export function AccordionItem({ title, icon, children, defaultOpen = false }: Ac
 
   return (
     <div className={cn(
-      "border-b border-gray-200 dark:border-gray-700 last:border-b-0 transition-colors",
-      isOpen && "bg-gradient-to-r from-indigo-50/50 to-transparent dark:from-indigo-900/10 dark:to-transparent -mx-3 px-3 rounded-lg"
+      "border-b last:border-b-0 transition-all duration-200",
+      isOpen
+        ? "border-transparent bg-orange-50/50 dark:bg-orange-900/10 -mx-3 px-3 rounded-2xl my-1"
+        : "border-gray-100 dark:border-gray-700/50"
     )}>
       <h3>
         <button
@@ -26,16 +28,16 @@ export function AccordionItem({ title, icon, children, defaultOpen = false }: Ac
           aria-expanded={isOpen}
           aria-controls={contentId}
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between py-4 text-left hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all duration-200 -mx-2 px-2 rounded-lg min-h-[56px] group"
+          className="w-full flex items-center justify-between py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200 -mx-2 px-2 rounded-xl min-h-[52px] group"
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             {icon && (
               <span
                 aria-hidden="true"
                 className={cn(
-                  "p-1.5 rounded-lg transition-colors",
+                  "p-2 rounded-xl transition-colors duration-200",
                   isOpen
-                    ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400"
+                    ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:bg-gray-200 dark:group-hover:bg-gray-700"
                 )}
               >
@@ -45,28 +47,21 @@ export function AccordionItem({ title, icon, children, defaultOpen = false }: Ac
             <span className={cn(
               "font-medium transition-colors",
               isOpen
-                ? "text-indigo-700 dark:text-indigo-300"
-                : "text-gray-700 dark:text-gray-300"
+                ? "text-orange-700 dark:text-orange-400"
+                : "text-gray-900 dark:text-gray-100"
             )}>
               {title}
             </span>
           </div>
-          <div className={cn(
-            "p-1 rounded-full transition-all",
-            isOpen
-              ? "bg-indigo-100 dark:bg-indigo-900/50"
-              : "bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700"
-          )}>
-            <ChevronDown
-              aria-hidden="true"
-              className={cn(
-                'w-4 h-4 transition-transform duration-200',
-                isOpen
-                  ? 'rotate-180 text-indigo-600 dark:text-indigo-400'
-                  : 'text-gray-400'
-              )}
-            />
-          </div>
+          <ChevronDown
+            aria-hidden="true"
+            className={cn(
+              'w-5 h-5 transition-transform duration-200',
+              isOpen
+                ? 'rotate-180 text-orange-500'
+                : 'text-gray-400 dark:text-gray-500'
+            )}
+          />
         </button>
       </h3>
       <div

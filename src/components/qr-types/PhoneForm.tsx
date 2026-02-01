@@ -1,14 +1,12 @@
-import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
 import { Phone } from 'lucide-react';
 import { validatePhone } from '../../utils/validators';
+import { useFormField } from '../../hooks/useFormField';
 
 export function PhoneForm() {
   const { phoneData, setPhoneData } = useQRStore();
-  const [touched, setTouched] = useState(false);
-
-  const validation = touched ? validatePhone(phoneData.phone) : { isValid: true };
+  const phoneField = useFormField(phoneData.phone, validatePhone);
 
   return (
     <div className="space-y-4">
@@ -22,10 +20,10 @@ export function PhoneForm() {
         type="tel"
         value={phoneData.phone}
         onChange={(e) => setPhoneData({ phone: e.target.value })}
-        onBlur={() => setTouched(true)}
+        onBlur={phoneField.handleBlur}
         placeholder="+1 (555) 123-4567"
-        hint={validation.isValid ? "Include country code for international numbers" : undefined}
-        error={validation.error}
+        hint={phoneField.isValid ? "Include country code for international numbers" : undefined}
+        error={phoneField.error}
       />
     </div>
   );

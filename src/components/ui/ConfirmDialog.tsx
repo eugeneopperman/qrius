@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { Button } from './Button';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -24,25 +25,13 @@ export function ConfirmDialog({
   variant = 'danger',
 }: ConfirmDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Focus the cancel button when opened
-  useEffect(() => {
-    if (isOpen) {
-      cancelRef.current?.focus();
-    }
-  }, [isOpen]);
-
-  // Handle escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  // Focus trap for accessibility (handles Tab cycling, Escape key, body scroll lock)
+  useFocusTrap(isOpen, dialogRef, {
+    initialFocusRef: cancelRef,
+    onEscape: onClose,
+  });
 
   if (!isOpen) return null;
 
@@ -74,7 +63,10 @@ export function ConfirmDialog({
       />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl mx-4 overflow-hidden">
+      <div
+        ref={dialogRef}
+        className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl mx-4 overflow-hidden"
+      >
         {/* Close button */}
         <button
           onClick={onClose}

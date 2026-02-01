@@ -1,0 +1,178 @@
+{
+  "app": {
+    "title": "Generador de Códigos QR",
+    "tagline": "Crea códigos QR hermosos y escaneables",
+    "footer": "Todos los datos se procesan localmente"
+  },
+  "nav": {
+    "history": "Historial",
+    "shortcuts": "Atajos",
+    "settings": "Configuración"
+  },
+  "wizard": {
+    "step1": "Elegir Tipo",
+    "step2": "Ingresar Contenido",
+    "step3": "Personalizar",
+    "step4": "Descargar",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "skip": "Ir a Descargar"
+  },
+  "qrTypes": {
+    "url": "URL del Sitio Web",
+    "text": "Texto Plano",
+    "email": "Correo Electrónico",
+    "phone": "Número de Teléfono",
+    "sms": "Mensaje SMS",
+    "wifi": "Red WiFi",
+    "vcard": "Tarjeta de Contacto",
+    "event": "Evento de Calendario",
+    "location": "Ubicación"
+  },
+  "form": {
+    "url": {
+      "label": "URL del Sitio Web",
+      "placeholder": "https://ejemplo.com",
+      "hint": "Ingresa la URL que deseas codificar"
+    },
+    "text": {
+      "label": "Contenido de Texto",
+      "placeholder": "Ingresa tu texto aquí...",
+      "hint": "Hasta 2953 caracteres"
+    },
+    "email": {
+      "address": "Dirección de Correo",
+      "subject": "Asunto",
+      "body": "Cuerpo del Mensaje"
+    },
+    "phone": {
+      "label": "Número de Teléfono",
+      "placeholder": "+1 (555) 123-4567"
+    },
+    "sms": {
+      "phone": "Número de Teléfono",
+      "message": "Mensaje",
+      "messagePlaceholder": "Tu mensaje (máx 160 caracteres)"
+    },
+    "wifi": {
+      "ssid": "Nombre de Red (SSID)",
+      "password": "Contraseña",
+      "encryption": "Encriptación",
+      "hidden": "Red Oculta"
+    },
+    "vcard": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "company": "Empresa",
+      "title": "Cargo",
+      "website": "Sitio Web",
+      "address": "Dirección"
+    },
+    "event": {
+      "title": "Título del Evento",
+      "location": "Ubicación",
+      "startDate": "Fecha de Inicio",
+      "startTime": "Hora de Inicio",
+      "endDate": "Fecha de Fin",
+      "endTime": "Hora de Fin",
+      "description": "Descripción"
+    },
+    "location": {
+      "latitude": "Latitud",
+      "longitude": "Longitud",
+      "label": "Nombre del Lugar"
+    }
+  },
+  "customization": {
+    "style": "Estilo",
+    "colors": "Colores",
+    "logo": "Logo",
+    "frame": "Marco",
+    "advanced": "Avanzado",
+    "dotsStyle": "Estilo de Puntos",
+    "cornersStyle": "Estilo de Esquinas",
+    "foregroundColor": "Color de Primer Plano",
+    "backgroundColor": "Color de Fondo",
+    "useGradient": "Usar Degradado",
+    "gradientType": "Tipo de Degradado",
+    "uploadLogo": "Subir Logo",
+    "removeLogo": "Eliminar Logo",
+    "logoSize": "Tamaño del Logo",
+    "logoShape": "Forma del Logo",
+    "frameStyle": "Estilo del Marco",
+    "frameLabel": "Etiqueta del Marco",
+    "errorCorrection": "Corrección de Errores",
+    "showFallbackUrl": "Mostrar URL Debajo"
+  },
+  "actions": {
+    "download": "Descargar",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "generating": "Generando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "reset": "Restablecer",
+    "apply": "Aplicar"
+  },
+  "formats": {
+    "png": "PNG (Alta Calidad)",
+    "svg": "SVG (Listo para Illustrator)",
+    "jpeg": "JPEG (Comprimido)",
+    "pdf": "PDF (Listo para Imprimir)"
+  },
+  "history": {
+    "title": "Historial de Códigos QR",
+    "empty": "Aún no hay códigos QR",
+    "emptyHint": "Tus códigos QR generados aparecerán aquí",
+    "restore": "Restaurar",
+    "deleteConfirm": "¿Eliminar este código QR del historial?",
+    "clearAll": "Limpiar Todo",
+    "clearConfirm": "¿Limpiar todo el historial? Esto no se puede deshacer."
+  },
+  "shortcuts": {
+    "title": "Atajos de Teclado",
+    "download": "Descargar código QR",
+    "downloadWithPicker": "Descargar con selector de formato",
+    "copy": "Copiar al portapapeles",
+    "toggleDarkMode": "Alternar modo oscuro",
+    "showHelp": "Mostrar atajos",
+    "openReader": "Abrir lector QR",
+    "openHistory": "Abrir historial"
+  },
+  "reader": {
+    "title": "Lector de Códigos QR",
+    "scan": "Escanear Código QR",
+    "upload": "Subir Imagen",
+    "result": "Resultado Escaneado",
+    "noCamera": "Cámara no disponible"
+  },
+  "scannability": {
+    "title": "Puntuación de Escaneabilidad",
+    "excellent": "Excelente",
+    "good": "Bueno",
+    "warning": "Advertencia",
+    "poor": "Pobre"
+  },
+  "errors": {
+    "invalidUrl": "Por favor ingresa una URL válida",
+    "invalidEmail": "Por favor ingresa un correo válido",
+    "invalidPhone": "Por favor ingresa un teléfono válido",
+    "required": "Este campo es requerido",
+    "tooLong": "El texto es muy largo",
+    "downloadFailed": "Error al descargar el código QR",
+    "copyFailed": "Error al copiar al portapapeles",
+    "somethingWrong": "Algo salió mal",
+    "tryAgain": "Intentar de Nuevo",
+    "reloadPage": "Recargar Página"
+  },
+  "toast": {
+    "downloadSuccess": "Código QR descargado",
+    "copySuccess": "Código QR copiado al portapapeles",
+    "saveSuccess": "Guardado exitosamente",
+    "deleteSuccess": "Eliminado exitosamente"
+  }
+}

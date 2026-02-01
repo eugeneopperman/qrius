@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { cn } from '../../utils/cn';
+import { useClickOutside } from '../../hooks/useClickOutside';
 
 interface ColorPickerProps {
   label?: string;
@@ -18,21 +19,64 @@ const defaultPresets = [
 export function ColorPicker({ label, value, onChange, presets = defaultPresets }: ColorPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const presetRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const handleClose = useCallback(() => setIsOpen(false), []);
+  const containerRef = useClickOutside<HTMLDivElement>(handleClose, isOpen);
 
   useEffect(() => {
     setInputValue(value);
   }, [value]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+  // Handle keyboard navigation in color presets
+  const handlePresetKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {
+    const cols = 8; // Grid columns on desktop
+    const totalPresets = presets.length;
+
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault();
+        setFocusedIndex((index + 1) % totalPresets);
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        setFocusedIndex((index - 1 + totalPresets) % totalPresets);
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        setFocusedIndex(Math.min(index + cols, totalPresets - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setFocusedIndex(Math.max(index - cols, 0));
+        break;
+      case 'Escape':
+        e.preventDefault();
         setIsOpen(false);
-      }
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        onChange(presets[index]);
+        setIsOpen(false);
+        break;
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [presets, onChange]);
+
+  // Focus the correct preset when focusedIndex changes
+  useEffect(() => {
+    if (focusedIndex >= 0 && presetRefs.current[focusedIndex]) {
+      presetRefs.current[focusedIndex]?.focus();
+    }
+  }, [focusedIndex]);
+
+  // Reset focus index when closing
+  useEffect(() => {
+    if (!isOpen) {
+      setFocusedIndex(-1);
+    }
+  }, [isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -82,15 +126,24 @@ export function ColorPicker({ label, value, onChange, presets = defaultPresets }
         </div>
 
         {isOpen && (
-          <div className="absolute z-50 mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 w-full">
+          <div
+            className="absolute z-50 mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 w-full"
+            role="listbox"
+            aria-label="Color presets"
+          >
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-              {presets.map((color) => (
+              {presets.map((color, index) => (
                 <button
                   key={color}
+                  ref={(el) => { presetRefs.current[index] = el; }}
                   type="button"
+                  role="option"
+                  aria-selected={value === color}
                   aria-label={`Select color ${color}`}
+                  tabIndex={focusedIndex === index || (focusedIndex === -1 && index === 0) ? 0 : -1}
                   className={cn(
                     'w-10 h-10 sm:w-8 sm:h-8 rounded-md border-2 transition-transform hover:scale-110 touch-manipulation',
+                    'focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-1',
                     value === color
                       ? 'border-indigo-500 ring-2 ring-indigo-500/20'
                       : 'border-transparent'
@@ -100,6 +153,8 @@ export function ColorPicker({ label, value, onChange, presets = defaultPresets }
                     onChange(color);
                     setIsOpen(false);
                   }}
+                  onKeyDown={(e) => handlePresetKeyDown(e, index)}
+                  onFocus={() => setFocusedIndex(index)}
                   title={color}
                 />
               ))}

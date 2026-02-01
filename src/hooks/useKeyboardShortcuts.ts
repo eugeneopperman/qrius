@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useQRStore } from '../stores/qrStore';
+import { QR_TYPES } from '../config/constants';
 import type { QRCodeType } from '../types';
 
 export function useKeyboardShortcuts(callbacks: {
@@ -10,20 +11,11 @@ export function useKeyboardShortcuts(callbacks: {
   onShowHelp?: () => void;
   onOpenReader?: () => void;
   onOpenHistory?: () => void;
+  onOpenTemplates?: () => void;
 }) {
   const { setActiveType } = useQRStore();
 
-  const typeOrder: QRCodeType[] = [
-    'url',
-    'text',
-    'email',
-    'phone',
-    'sms',
-    'wifi',
-    'vcard',
-    'event',
-    'location',
-  ];
+  const typeOrder: readonly QRCodeType[] = QR_TYPES;
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -101,6 +93,13 @@ export function useKeyboardShortcuts(callbacks: {
         callbacks.onOpenHistory?.();
         return;
       }
+
+      // Ctrl/Cmd + T - Open Templates
+      if (cmdOrCtrl && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        callbacks.onOpenTemplates?.();
+        return;
+      }
     },
     [setActiveType, callbacks]
   );
@@ -111,13 +110,5 @@ export function useKeyboardShortcuts(callbacks: {
   }, [handleKeyDown]);
 }
 
-export const shortcuts = [
-  { keys: ['Ctrl', '1-9'], description: 'Switch QR code type' },
-  { keys: ['Ctrl', 'S'], description: 'Download QR code (PNG)' },
-  { keys: ['Ctrl', 'Shift', 'S'], description: 'Download with format picker' },
-  { keys: ['Ctrl', 'C'], description: 'Copy QR code to clipboard' },
-  { keys: ['Ctrl', 'D'], description: 'Toggle dark mode' },
-  { keys: ['Ctrl', 'R'], description: 'Open QR code reader' },
-  { keys: ['Ctrl', 'H'], description: 'Open history' },
-  { keys: ['?'], description: 'Show keyboard shortcuts' },
-];
+// Re-export shortcuts from constants for backwards compatibility
+export { SHORTCUTS as shortcuts } from '../config/constants';
