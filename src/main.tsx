@@ -1,19 +1,36 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import './i18n' // Initialize i18n before app renders
-import App from './App.tsx'
-import { ErrorBoundary } from './components/ErrorBoundary'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { RouterProvider } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import './index.css';
+import './i18n';
+import { router } from './router';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { useAuthStore } from './stores/authStore';
+
+// Initialize React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
+
+// Initialize auth on app load
+useAuthStore.getState().initialize();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary
       onError={(error, errorInfo) => {
-        // In production, you would send this to an error tracking service
         console.error('Root ErrorBoundary caught:', error, errorInfo);
       }}
     >
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     </ErrorBoundary>
-  </StrictMode>,
-)
+  </StrictMode>
+);

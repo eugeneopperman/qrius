@@ -1,10 +1,14 @@
-import { QrCode, Sun, Moon, History, Palette, Settings } from 'lucide-react';
+import { QrCode, Sun, Moon, History, Palette, Settings, LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useHistoryStore } from '../stores/historyStore';
 import { useThemeStore } from '../stores/themeStore';
 import { useQRStore } from '../stores/qrStore';
 import { useTemplateStore } from '../stores/templateStore';
+import { useAuthStore } from '../stores/authStore';
 import { LanguageSelector } from './ui/LanguageSelector';
+import { UserButton } from './auth/UserButton';
+import { AuthModal } from './auth/AuthModal';
+import { useState } from 'react';
 import type { QRCodeType } from '../types';
 
 const typeLabels: Record<QRCodeType, string> = {
@@ -32,6 +36,8 @@ export function Header({ onHistoryClick, onSettingsClick }: HeaderProps) {
   const activeType = useQRStore((state) => state.activeType);
   const templateCount = useTemplateStore((state) => state.templates.length);
   const openWizard = useTemplateStore((state) => state.openWizard);
+  const { user, isInitialized } = useAuthStore();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
     <header className="glass-header sticky top-0 z-50">
@@ -99,9 +105,27 @@ export function Header({ onHistoryClick, onSettingsClick }: HeaderProps) {
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
+
+            {/* Auth section */}
+            {isInitialized && (
+              user ? (
+                <UserButton onSettingsClick={onSettingsClick} />
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="ml-2 flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sign In</span>
+                </button>
+              )
+            )}
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </header>
   );
 }
