@@ -1,9 +1,10 @@
-import { useEffect, useRef, useMemo, memo } from 'react';
+import { useEffect, useRef, useMemo, memo, useState } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { cn } from '../../utils/cn';
 import { createQRElementOptions } from '../../utils/gradientUtils';
 import { roundnessToDotType, roundnessToCornerSquareType } from '../../stores/templateStore';
 import { useGoogleFont, getFontFamily } from '../../hooks/useGoogleFont';
+import { applyLogoMask } from '../../utils/logoMask';
 import type { BrandTemplateStyle } from '../../types';
 
 interface TemplateWizardPreviewProps {
@@ -20,9 +21,33 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
 }: TemplateWizardPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const qrCodeRef = useRef<QRCodeStyling | null>(null);
+  const [processedLogoUrl, setProcessedLogoUrl] = useState<string | undefined>(undefined);
 
   // Load Google Font if specified
   useGoogleFont(style.googleFontFamily, style.googleFontWeight);
+
+  // Process logo with shape mask when logo or shape changes
+  useEffect(() => {
+    if (!style.logoUrl) {
+      setProcessedLogoUrl(undefined);
+      return;
+    }
+
+    const shape = style.logoShape || 'square';
+
+    // Only apply mask for non-square shapes
+    if (shape === 'square') {
+      setProcessedLogoUrl(style.logoUrl);
+      return;
+    }
+
+    applyLogoMask(style.logoUrl, shape)
+      .then(setProcessedLogoUrl)
+      .catch((error) => {
+        console.error('Failed to apply logo mask:', error);
+        setProcessedLogoUrl(style.logoUrl);
+      });
+  }, [style.logoUrl, style.logoShape]);
 
   // Compute effective dot and corner types from roundness
   const effectiveDotType = style.qrRoundness !== undefined
@@ -85,7 +110,7 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
         margin: style.logoMargin ?? 5,
         imageSize: style.logoSize || 0.3,
       },
-      image: style.logoUrl,
+      image: processedLogoUrl,
     });
 
     if (containerRef.current) {
@@ -116,10 +141,10 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
           margin: style.logoMargin ?? 5,
           imageSize: style.logoSize || 0.3,
         },
-        image: style.logoUrl || undefined,
+        image: processedLogoUrl || undefined,
       });
     }
-  }, [style, dotsOptions, cornersSquareOptions, cornersDotOptions]);
+  }, [style.backgroundColor, style.logoMargin, style.logoSize, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl]);
 
   // Frame styling
   const frameStyle = style.frameStyle || 'none';
