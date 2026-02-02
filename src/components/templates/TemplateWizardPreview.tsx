@@ -119,7 +119,9 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
     }
   }, [qrRoundness, shouldPostProcess]);
 
-  // Initialize QR code
+  // Initialize and update QR code
+  // Note: qr-code-styling's update() doesn't properly handle imageOptions changes,
+  // so we recreate the QR code when any style changes
   useEffect(() => {
     qrCodeRef.current = new QRCodeStyling({
       width: PREVIEW_SIZE,
@@ -146,7 +148,7 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
     if (containerRef.current) {
       containerRef.current.innerHTML = '';
       qrCodeRef.current.append(containerRef.current);
-      // Apply smooth roundness after initial render
+      // Apply smooth roundness after render
       applyRoundness();
     }
 
@@ -155,30 +157,18 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
         containerRef.current.innerHTML = '';
       }
     };
-  }, []);
-
-  // Update QR code when style changes
-  useEffect(() => {
-    if (qrCodeRef.current) {
-      qrCodeRef.current.update({
-        data: PREVIEW_DATA,
-        dotsOptions,
-        cornersSquareOptions,
-        cornersDotOptions,
-        backgroundOptions: {
-          color: style.backgroundColor || '#ffffff',
-        },
-        imageOptions: {
-          crossOrigin: 'anonymous',
-          margin: style.logoMargin ?? 5,
-          imageSize: style.logoSize || 0.3,
-        },
-        image: processedLogoUrl || undefined,
-      });
-      // Apply smooth roundness after update
-      applyRoundness();
-    }
-  }, [style.backgroundColor, style.logoMargin, style.logoSize, qrRoundness, qrPattern, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl, applyRoundness]);
+  }, [
+    style.backgroundColor,
+    style.logoMargin,
+    style.logoSize,
+    qrRoundness,
+    qrPattern,
+    dotsOptions,
+    cornersSquareOptions,
+    cornersDotOptions,
+    processedLogoUrl,
+    applyRoundness,
+  ]);
 
   // Frame styling
   const frameStyle = style.frameStyle || 'none';
