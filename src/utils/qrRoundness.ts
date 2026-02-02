@@ -12,7 +12,8 @@
 import type { QRPattern, DotType } from '../types';
 
 /**
- * Apply smooth roundness to all rect elements in a QR code SVG.
+ * Apply smooth roundness to QR code module rect elements in an SVG.
+ * Skips the background rect (the large rect covering the entire QR code).
  *
  * @param container - The container element holding the QR code SVG
  * @param roundness - Roundness percentage (0-100)
@@ -28,15 +29,31 @@ export function applyRoundnessToQRSvg(container: HTMLElement | null, roundness: 
   // Clamp roundness to 0-100
   const clampedRoundness = Math.max(0, Math.min(100, roundness));
 
-  // Find all rect elements (QR modules, corner squares)
+  // Get SVG dimensions to identify background rect
+  const svgWidth = parseFloat(svg.getAttribute('width') || '0');
+  const svgHeight = parseFloat(svg.getAttribute('height') || '0');
+
+  // Find all rect elements (QR modules, corner squares, and background)
   const rects = svg.querySelectorAll('rect');
 
   rects.forEach((rect) => {
     const width = parseFloat(rect.getAttribute('width') || '0');
     const height = parseFloat(rect.getAttribute('height') || '0');
+    const x = parseFloat(rect.getAttribute('x') || '0');
+    const y = parseFloat(rect.getAttribute('y') || '0');
 
     // Skip if dimensions are invalid
     if (width <= 0 || height <= 0) return;
+
+    // Skip background rect: it's at position (0,0) and covers the full SVG
+    // or is very close to full size (within 1% tolerance)
+    const isBackgroundRect =
+      x === 0 &&
+      y === 0 &&
+      width >= svgWidth * 0.99 &&
+      height >= svgHeight * 0.99;
+
+    if (isBackgroundRect) return;
 
     // Use the smaller dimension to calculate radius
     const minDim = Math.min(width, height);
