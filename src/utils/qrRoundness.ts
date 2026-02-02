@@ -103,24 +103,28 @@ export function shouldApplyRoundnessPostProcessing(_pattern: QRPattern): boolean
 
 /**
  * Get corner square type based on roundness.
- * Corner squares use paths, so we use the closest discrete type.
+ * Aligned with the 4 slider steps: Sharp (0%), Slight (25%), Rounded (50%), More (75%+)
  *
  * @param roundness - Roundness percentage (0-100)
  */
 export function getCornerSquareTypeForRoundness(roundness: number): 'square' | 'extra-rounded' | 'dot' {
-  // More gradual transitions for corner squares
+  // 0-24%: Sharp square corners
   if (roundness < 25) return 'square';
-  if (roundness < 70) return 'extra-rounded';
+  // 25-74%: Rounded corners (matches "Slight" and "Rounded" steps)
+  if (roundness < 75) return 'extra-rounded';
+  // 75%+: Circular corners (matches "More" step)
   return 'dot';
 }
 
 /**
  * Get corner dot type based on roundness.
+ * The inner dot of the corner pattern.
  *
  * @param roundness - Roundness percentage (0-100)
  */
 export function getCornerDotTypeForRoundness(roundness: number): 'square' | 'dot' {
-  // Simple threshold - square for sharp, dot for rounded
-  if (roundness < 40) return 'square';
+  // 0-49%: Square inner dot
+  if (roundness < 50) return 'square';
+  // 50%+: Circular inner dot
   return 'dot';
 }
