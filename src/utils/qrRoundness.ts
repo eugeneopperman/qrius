@@ -1,9 +1,15 @@
 /**
  * Utility for applying smooth continuous roundness to QR code SVGs.
  *
+ * Supports two patterns:
+ * - 'solid': Connected modules where roundness applies to outer edges
+ * - 'dots': Separate individual modules where roundness makes them more circular
+ *
  * The qr-code-styling library only supports discrete dot types (square, rounded, etc.),
  * so we post-process the SVG to apply custom border-radius values for smooth transitions.
  */
+
+import type { QRPattern, DotType } from '../types';
 
 /**
  * Apply smooth roundness to all rect elements in a QR code SVG.
@@ -42,23 +48,39 @@ export function applyRoundnessToQRSvg(container: HTMLElement | null, roundness: 
     rect.setAttribute('rx', radius.toFixed(2));
     rect.setAttribute('ry', radius.toFixed(2));
   });
-
-  // Handle circle elements - at lower roundness, we might want to convert to rects
-  // but for simplicity, we leave circles as-is (they're already at 100% roundness)
-
-  // Handle path elements for corner patterns
-  // The corner squares and dots may use paths - we can't easily modify those
-  // but the main modules (rects) will have smooth roundness
 }
 
 /**
- * Get the base dot type to use for a given roundness level.
- * We always use 'square' to get rect elements that we can then post-process.
+ * Get the dot type to use based on pattern and roundness.
  *
- * For corner elements, we still need discrete types since they use paths.
+ * For 'solid' pattern: Always use 'square' so we get rect elements to post-process
+ * For 'dots' pattern: Map roundness to discrete dot types for individual dots look
+ *
+ * @param pattern - 'solid' or 'dots'
+ * @param roundness - Roundness percentage (0-100)
  */
-export function getBaseDotType(): 'square' {
-  return 'square';
+export function getDotTypeForPattern(pattern: QRPattern, roundness: number): DotType {
+  if (pattern === 'solid') {
+    // Solid pattern: use 'square' for post-processing with smooth roundness
+    return 'square';
+  }
+
+  // Dots pattern: use discrete types that create individual separated dots
+  // Map roundness to appropriate dot type for visual consistency
+  if (roundness < 20) return 'square';
+  if (roundness < 40) return 'rounded';
+  if (roundness < 60) return 'extra-rounded';
+  return 'dots'; // Fully circular dots
+}
+
+/**
+ * Check if we should apply post-processing roundness.
+ * Only applies to 'solid' pattern where we use 'square' type and post-process.
+ *
+ * @param pattern - 'solid' or 'dots'
+ */
+export function shouldApplyRoundnessPostProcessing(pattern: QRPattern): boolean {
+  return pattern === 'solid';
 }
 
 /**

@@ -105,6 +105,9 @@ export type FrameIcon = 'none' | 'qr-code' | 'smartphone' | 'camera' | 'arrow-ri
 
 export type LogoShape = 'square' | 'rounded' | 'circle';
 
+// QR pattern type: solid (connected modules) vs dots (separate individual modules)
+export type QRPattern = 'solid' | 'dots';
+
 export type GradientType = 'linear' | 'radial';
 
 export interface GradientOptions {
@@ -139,6 +142,7 @@ export interface QRStyleOptions {
   gradient?: GradientOptions;
   showFallbackUrl?: boolean;
   qrRoundness?: number; // 0-100% for smooth continuous roundness
+  qrPattern?: QRPattern; // 'solid' (connected) or 'dots' (separate)
 }
 
 export interface ExportOptions {

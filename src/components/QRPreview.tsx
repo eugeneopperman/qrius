@@ -9,6 +9,8 @@ import { cn } from '../utils/cn';
 import { applyLogoMask } from '../utils/logoMask';
 import {
   applyRoundnessToQRSvg,
+  getDotTypeForPattern,
+  shouldApplyRoundnessPostProcessing,
   getCornerSquareTypeForRoundness,
   getCornerDotTypeForRoundness,
 } from '../utils/qrRoundness';
@@ -58,13 +60,15 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       });
   }, [styleOptions.logoUrl, styleOptions.logoShape]);
 
-  // Get roundness value for smooth transitions
+  // Get roundness and pattern values for smooth transitions
   const qrRoundness = styleOptions.qrRoundness;
+  const qrPattern = styleOptions.qrPattern ?? 'solid';
 
-  // Determine effective dot/corner types
-  // When qrRoundness is set, use 'square' for dots so we can post-process with smooth roundness
+  // Determine effective dot/corner types based on pattern:
+  // - Solid pattern: Use 'square' and post-process with smooth roundness
+  // - Dots pattern: Use discrete dot types for individual separated dots
   const effectiveDotType = qrRoundness !== undefined
-    ? 'square' as const
+    ? getDotTypeForPattern(qrPattern, qrRoundness)
     : styleOptions.dotsType;
 
   const effectiveCornerSquareType = qrRoundness !== undefined
@@ -74,6 +78,9 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
   const effectiveCornerDotType = qrRoundness !== undefined
     ? getCornerDotTypeForRoundness(qrRoundness)
     : styleOptions.cornersDotType;
+
+  // Only apply post-processing for solid pattern
+  const shouldPostProcess = shouldApplyRoundnessPostProcessing(qrPattern) && qrRoundness !== undefined;
 
   // Build QR element options with gradient support
   const dotsOptions = useMemo(
@@ -106,14 +113,14 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
     [effectiveCornerDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
   );
 
-  // Apply smooth roundness to SVG after rendering
+  // Apply smooth roundness to SVG (only for solid pattern)
   const applyRoundness = useCallback(() => {
-    if (qrRoundness !== undefined) {
+    if (shouldPostProcess && qrRoundness !== undefined) {
       requestAnimationFrame(() => {
         applyRoundnessToQRSvg(containerRef.current, qrRoundness);
       });
     }
-  }, [qrRoundness]);
+  }, [qrRoundness, shouldPostProcess]);
 
   // Save to history with thumbnail
   const saveToHistory = useCallback(async () => {
@@ -220,7 +227,7 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       // Apply smooth roundness after update
       applyRoundness();
     }
-  }, [qrValue, styleOptions, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl, qrRoundness, applyRoundness]);
+  }, [qrValue, styleOptions, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl, qrRoundness, qrPattern, applyRoundness]);
 
   const frameStyle = styleOptions.frameStyle || 'none';
   const hasFrame = frameStyle !== 'none';

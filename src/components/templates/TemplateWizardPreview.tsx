@@ -6,6 +6,8 @@ import { useGoogleFont, getFontFamily } from '../../hooks/useGoogleFont';
 import { applyLogoMask } from '../../utils/logoMask';
 import {
   applyRoundnessToQRSvg,
+  getDotTypeForPattern,
+  shouldApplyRoundnessPostProcessing,
   getCornerSquareTypeForRoundness,
   getCornerDotTypeForRoundness,
 } from '../../utils/qrRoundness';
@@ -53,23 +55,27 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
       });
   }, [style.logoUrl, style.logoShape]);
 
-  // Get roundness value (0-100)
+  // Get roundness and pattern values
   const qrRoundness = style.qrRoundness ?? 0;
+  const qrPattern = style.qrPattern ?? 'solid';
 
-  // For smooth roundness, we always use 'square' dots and post-process the SVG
-  // This gives us rect elements that we can apply continuous border-radius to
-  // Corner elements still use discrete types since they're rendered as paths
+  // Determine dot type based on pattern:
+  // - Solid: Use 'square' and post-process with smooth roundness
+  // - Dots: Use discrete dot types for individual separated dots
   const effectiveDotType = style.qrRoundness !== undefined
-    ? 'square' as const  // Always square for post-processing
+    ? getDotTypeForPattern(qrPattern, qrRoundness)
     : style.dotsType || 'square';
 
   const effectiveCornerSquareType = style.qrRoundness !== undefined
-    ? getCornerSquareTypeForRoundness(style.qrRoundness)
+    ? getCornerSquareTypeForRoundness(qrRoundness)
     : style.cornersSquareType || 'square';
 
   const effectiveCornerDotType = style.qrRoundness !== undefined
-    ? getCornerDotTypeForRoundness(style.qrRoundness)
+    ? getCornerDotTypeForRoundness(qrRoundness)
     : style.cornersDotType || 'square';
+
+  // Only apply post-processing for solid pattern
+  const shouldPostProcess = shouldApplyRoundnessPostProcessing(qrPattern) && style.qrRoundness !== undefined;
 
   // Build QR element options
   const dotsOptions = useMemo(
@@ -103,14 +109,15 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
   );
 
   // Apply smooth roundness to SVG after rendering
+  // Apply smooth roundness to SVG (only for solid pattern)
   const applyRoundness = useCallback(() => {
-    if (style.qrRoundness !== undefined) {
+    if (shouldPostProcess) {
       // Small delay to ensure SVG is rendered
       requestAnimationFrame(() => {
         applyRoundnessToQRSvg(containerRef.current, qrRoundness);
       });
     }
-  }, [qrRoundness, style.qrRoundness]);
+  }, [qrRoundness, shouldPostProcess]);
 
   // Initialize QR code
   useEffect(() => {
@@ -171,7 +178,7 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
       // Apply smooth roundness after update
       applyRoundness();
     }
-  }, [style.backgroundColor, style.logoMargin, style.logoSize, qrRoundness, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl, applyRoundness]);
+  }, [style.backgroundColor, style.logoMargin, style.logoSize, qrRoundness, qrPattern, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl, applyRoundness]);
 
   // Frame styling
   const frameStyle = style.frameStyle || 'none';

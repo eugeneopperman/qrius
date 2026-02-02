@@ -1,11 +1,11 @@
 import { memo, useCallback } from 'react';
-import { Palette } from 'lucide-react';
+import { Palette, Square, Circle } from 'lucide-react';
 import { ColorPicker } from '../../ui/ColorPicker';
 import { Slider } from '../../ui/Slider';
 import { InlineToggle } from '../../ui/Toggle';
 import { cn } from '../../../utils/cn';
 import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '../../../config/constants';
-import type { BrandTemplateStyle, GradientOptions, GradientType } from '../../../types';
+import type { BrandTemplateStyle, GradientOptions, GradientType, QRPattern } from '../../../types';
 
 interface StepColorsStyleProps {
   style: BrandTemplateStyle;
@@ -19,6 +19,7 @@ export const StepColorsStyle = memo(function StepColorsStyle({
   const useGradient = style.useGradient ?? false;
   const gradient = style.gradient ?? DEFAULT_GRADIENT;
   const qrRoundness = style.qrRoundness ?? 0;
+  const qrPattern = style.qrPattern ?? 'solid';
 
   const handleToggleGradient = useCallback(() => {
     if (!useGradient && !style.gradient) {
@@ -71,6 +72,40 @@ export const StepColorsStyle = memo(function StepColorsStyle({
         </div>
       </div>
 
+      {/* QR Pattern Toggle */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          QR Pattern
+        </label>
+        <div className="flex gap-2">
+          {(['solid', 'dots'] as QRPattern[]).map((pattern) => (
+            <button
+              key={pattern}
+              type="button"
+              onClick={() => onStyleChange({ qrPattern: pattern })}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-lg border transition-colors',
+                qrPattern === pattern
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                  : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              )}
+            >
+              {pattern === 'solid' ? (
+                <Square className="w-4 h-4" />
+              ) : (
+                <Circle className="w-4 h-4" />
+              )}
+              <span className="capitalize">{pattern}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          {qrPattern === 'solid'
+            ? 'Connected modules with smooth rounded edges'
+            : 'Individual separate dots that become more circular'}
+        </p>
+      </div>
+
       {/* QR Roundness Slider */}
       <div className="space-y-2">
         <Slider
@@ -85,7 +120,9 @@ export const StepColorsStyle = memo(function StepColorsStyle({
           tickLabels={['Sharp', 'Rounded', 'Circular']}
         />
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Smoothly adjusts how rounded the QR code modules appear
+          {qrPattern === 'solid'
+            ? 'Smoothly rounds the corners of connected shapes'
+            : 'Controls how circular each individual dot appears'}
         </p>
       </div>
 
