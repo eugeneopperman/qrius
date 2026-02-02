@@ -79,13 +79,13 @@ export const StepColorsStyle = memo(function StepColorsStyle({
           onChange={(value) => onStyleChange({ qrRoundness: value })}
           min={0}
           max={100}
-          step={5}
+          step={1}
           unit="%"
           showTicks
           tickLabels={['Sharp', 'Rounded', 'Circular']}
         />
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Controls how rounded the QR code modules appear
+          Smoothly adjusts how rounded the QR code modules appear
         </p>
       </div>
 

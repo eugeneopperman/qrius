@@ -138,6 +138,7 @@ export interface QRStyleOptions {
   useGradient?: boolean;
   gradient?: GradientOptions;
   showFallbackUrl?: boolean;
+  qrRoundness?: number; // 0-100% for smooth continuous roundness
 }
 
 export interface ExportOptions {

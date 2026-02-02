@@ -311,15 +311,9 @@ export const useTemplateStore = create<TemplateStore>()(
         const { style } = template;
         const qrStore = useQRStore.getState();
 
-        // Convert roundness to actual dot/corner types
-        const effectiveStyle = { ...style };
-        if (style.qrRoundness !== undefined) {
-          effectiveStyle.dotsType = roundnessToDotType(style.qrRoundness);
-          effectiveStyle.cornersSquareType = roundnessToCornerSquareType(style.qrRoundness);
-        }
-
-        // Apply to QR store
-        qrStore.setStyleOptions(effectiveStyle);
+        // Apply to QR store - preserve qrRoundness for smooth rendering
+        // The QRPreview will handle the roundness post-processing
+        qrStore.setStyleOptions({ ...style });
       },
 
       // Migration

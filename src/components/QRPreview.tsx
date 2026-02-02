@@ -7,6 +7,11 @@ import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../utils/cn';
 import { applyLogoMask } from '../utils/logoMask';
+import {
+  applyRoundnessToQRSvg,
+  getCornerSquareTypeForRoundness,
+  getCornerDotTypeForRoundness,
+} from '../utils/qrRoundness';
 import { EmptyState, TopLabel, BadgeLabel, BottomLabel, FallbackUrl, getFrameClasses } from './qr';
 import { QR_CONFIG } from '../config/constants';
 import { createQRElementOptions } from '../utils/gradientUtils';
@@ -53,36 +58,62 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       });
   }, [styleOptions.logoUrl, styleOptions.logoShape]);
 
+  // Get roundness value for smooth transitions
+  const qrRoundness = styleOptions.qrRoundness;
+
+  // Determine effective dot/corner types
+  // When qrRoundness is set, use 'square' for dots so we can post-process with smooth roundness
+  const effectiveDotType = qrRoundness !== undefined
+    ? 'square' as const
+    : styleOptions.dotsType;
+
+  const effectiveCornerSquareType = qrRoundness !== undefined
+    ? getCornerSquareTypeForRoundness(qrRoundness)
+    : styleOptions.cornersSquareType;
+
+  const effectiveCornerDotType = qrRoundness !== undefined
+    ? getCornerDotTypeForRoundness(qrRoundness)
+    : styleOptions.cornersDotType;
+
   // Build QR element options with gradient support
   const dotsOptions = useMemo(
     () => createQRElementOptions(
-      styleOptions.dotsType,
+      effectiveDotType,
       styleOptions.useGradient || false,
       styleOptions.gradient,
       styleOptions.dotsColor
     ),
-    [styleOptions.dotsType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
+    [effectiveDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
   );
 
   const cornersSquareOptions = useMemo(
     () => createQRElementOptions(
-      styleOptions.cornersSquareType,
+      effectiveCornerSquareType,
       styleOptions.useGradient || false,
       styleOptions.gradient,
       styleOptions.dotsColor
     ),
-    [styleOptions.cornersSquareType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
+    [effectiveCornerSquareType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
   );
 
   const cornersDotOptions = useMemo(
     () => createQRElementOptions(
-      styleOptions.cornersDotType,
+      effectiveCornerDotType,
       styleOptions.useGradient || false,
       styleOptions.gradient,
       styleOptions.dotsColor
     ),
-    [styleOptions.cornersDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
+    [effectiveCornerDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
   );
+
+  // Apply smooth roundness to SVG after rendering
+  const applyRoundness = useCallback(() => {
+    if (qrRoundness !== undefined) {
+      requestAnimationFrame(() => {
+        applyRoundnessToQRSvg(containerRef.current, qrRoundness);
+      });
+    }
+  }, [qrRoundness]);
 
   // Save to history with thumbnail
   const saveToHistory = useCallback(async () => {
@@ -154,6 +185,8 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
     if (containerRef.current) {
       containerRef.current.innerHTML = '';
       qrCodeRef.current.append(containerRef.current);
+      // Apply smooth roundness after initial render
+      applyRoundness();
     }
 
     return () => {
@@ -184,8 +217,10 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
         },
         image: processedLogoUrl || undefined,
       });
+      // Apply smooth roundness after update
+      applyRoundness();
     }
-  }, [qrValue, styleOptions, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl]);
+  }, [qrValue, styleOptions, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl, qrRoundness, applyRoundness]);
 
   const frameStyle = styleOptions.frameStyle || 'none';
   const hasFrame = frameStyle !== 'none';
