@@ -70,34 +70,35 @@ export function applyRoundnessToQRSvg(container: HTMLElement | null, roundness: 
 /**
  * Get the dot type to use based on pattern and roundness.
  *
- * For 'solid' pattern: Always use 'square' so we get rect elements to post-process
- * For 'dots' pattern: Map roundness to discrete dot types for individual dots look
+ * For 'solid' pattern: Modules appear connected, use square → rounded → extra-rounded
+ * For 'dots' pattern: Modules are clearly separated circles
  *
  * @param pattern - 'solid' or 'dots'
  * @param roundness - Roundness percentage (0-100)
  */
 export function getDotTypeForPattern(pattern: QRPattern, roundness: number): DotType {
-  if (pattern === 'solid') {
-    // Solid pattern: use 'square' for post-processing with smooth roundness
-    return 'square';
+  if (pattern === 'dots') {
+    // Dots pattern: always use circular dots for clear separation
+    return 'dots';
   }
 
-  // Dots pattern: use discrete types that create individual separated dots
-  // Map roundness to appropriate dot type for visual consistency
-  if (roundness < 20) return 'square';
-  if (roundness < 40) return 'rounded';
-  if (roundness < 60) return 'extra-rounded';
-  return 'dots'; // Fully circular dots
+  // Solid pattern: modules stay connected, roundness adds slight corner rounding
+  // Using library's built-in types for proper rendering
+  if (roundness < 25) return 'square';
+  if (roundness < 50) return 'rounded';
+  if (roundness < 75) return 'extra-rounded';
+  return 'extra-rounded'; // Max rounding while staying "solid"
 }
 
 /**
  * Check if we should apply post-processing roundness.
- * Only applies to 'solid' pattern where we use 'square' type and post-process.
+ * We no longer use post-processing - the library's built-in types handle it.
  *
  * @param pattern - 'solid' or 'dots'
  */
-export function shouldApplyRoundnessPostProcessing(pattern: QRPattern): boolean {
-  return pattern === 'solid';
+export function shouldApplyRoundnessPostProcessing(_pattern: QRPattern): boolean {
+  // Disabled - using library's built-in dot types instead
+  return false;
 }
 
 /**

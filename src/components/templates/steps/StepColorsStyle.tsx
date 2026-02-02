@@ -101,30 +101,30 @@ export const StepColorsStyle = memo(function StepColorsStyle({
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
           {qrPattern === 'solid'
-            ? 'Connected modules with smooth rounded edges'
-            : 'Individual separate dots that become more circular'}
+            ? 'Square modules that appear connected'
+            : 'Circular dots that are clearly separated'}
         </p>
       </div>
 
-      {/* QR Roundness Slider */}
-      <div className="space-y-2">
-        <Slider
-          label="QR Roundness"
-          value={qrRoundness}
-          onChange={(value) => onStyleChange({ qrRoundness: value })}
-          min={0}
-          max={100}
-          step={1}
-          unit="%"
-          showTicks
-          tickLabels={['Sharp', 'Rounded', 'Circular']}
-        />
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          {qrPattern === 'solid'
-            ? 'Smoothly rounds the corners of connected shapes'
-            : 'Controls how circular each individual dot appears'}
-        </p>
-      </div>
+      {/* QR Roundness Slider - only show for solid pattern */}
+      {qrPattern === 'solid' && (
+        <div className="space-y-2">
+          <Slider
+            label="Corner Roundness"
+            value={qrRoundness}
+            onChange={(value) => onStyleChange({ qrRoundness: value })}
+            min={0}
+            max={100}
+            step={25}
+            unit="%"
+            showTicks
+            tickLabels={['Sharp', 'Slight', 'Rounded', 'More']}
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Adds slight rounding to module corners
+          </p>
+        </div>
+      )}
 
       {/* Gradient Toggle */}
       <InlineToggle
