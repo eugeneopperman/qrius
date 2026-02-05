@@ -4,7 +4,7 @@ import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../stores/authStore';
 import { getSession } from '../../lib/supabase';
-import { toast } from 'sonner';
+import { toast } from '../../stores/toastStore';
 import {
   ArrowLeft,
   Check,

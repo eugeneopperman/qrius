@@ -194,14 +194,14 @@ export default function DashboardPage() {
               </p>
               <div className="flex justify-end gap-3">
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   onClick={() => setDeleteConfirm(null)}
                   disabled={isDeleting}
                 >
                   Cancel
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="danger"
                   onClick={handleDeleteConfirm}
                   disabled={isDeleting}
                 >
