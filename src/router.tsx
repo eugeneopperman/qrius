@@ -37,19 +37,34 @@ function RootLayout() {
 }
 
 // Auth check for protected routes
-async function requireAuth() {
-  const { isInitialized } = useAuthStore.getState();
+const AUTH_TIMEOUT_MS = 10000; // 10 second timeout
 
-  // Wait for auth to initialize
-  if (!isInitialized) {
-    await new Promise<void>((resolve) => {
-      const unsubscribe = useAuthStore.subscribe((state) => {
-        if (state.isInitialized) {
-          unsubscribe();
-          resolve();
-        }
-      });
+async function waitForAuthInit(): Promise<void> {
+  const { isInitialized } = useAuthStore.getState();
+  if (isInitialized) return;
+
+  return new Promise<void>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      unsubscribe();
+      reject(new Error('Auth initialization timed out'));
+    }, AUTH_TIMEOUT_MS);
+
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      if (state.isInitialized) {
+        clearTimeout(timeoutId);
+        unsubscribe();
+        resolve();
+      }
     });
+  });
+}
+
+async function requireAuth() {
+  try {
+    await waitForAuthInit();
+  } catch (error) {
+    console.error('Auth initialization failed:', error);
+    throw redirect({ to: '/signin', search: { redirect: window.location.pathname } });
   }
 
   const currentUser = useAuthStore.getState().user;
@@ -60,17 +75,12 @@ async function requireAuth() {
 
 // Guest check for auth pages
 async function requireGuest() {
-  const { isInitialized } = useAuthStore.getState();
-
-  if (!isInitialized) {
-    await new Promise<void>((resolve) => {
-      const unsubscribe = useAuthStore.subscribe((state) => {
-        if (state.isInitialized) {
-          unsubscribe();
-          resolve();
-        }
-      });
-    });
+  try {
+    await waitForAuthInit();
+  } catch (error) {
+    console.error('Auth initialization failed:', error);
+    // Allow access to auth pages if initialization times out
+    return;
   }
 
   const currentUser = useAuthStore.getState().user;

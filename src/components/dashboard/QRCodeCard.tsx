@@ -24,10 +24,15 @@ export function QRCodeCard({ qrCode, onDelete }: QRCodeCardProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleCopyUrl = () => {
+  const handleCopyUrl = async () => {
     const trackingUrl = `${window.location.origin}/r/${qrCode.short_code}`;
-    navigator.clipboard.writeText(trackingUrl);
-    toast.success('URL copied to clipboard');
+    try {
+      await navigator.clipboard.writeText(trackingUrl);
+      toast.success('URL copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      toast.error('Failed to copy to clipboard');
+    }
     setMenuOpen(false);
   };
 

@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
+import { Link, useSearch } from '@tanstack/react-router';
 import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../stores/authStore';
+import { getSession } from '../../lib/supabase';
+import { toast } from 'sonner';
 import {
   ArrowLeft,
   Check,
@@ -11,6 +13,12 @@ import {
   Loader2,
   Sparkles,
 } from 'lucide-react';
+
+// Stripe price IDs from environment variables
+const STRIPE_PRICES = {
+  pro: import.meta.env.VITE_STRIPE_PRICE_PRO || '',
+  business: import.meta.env.VITE_STRIPE_PRICE_BUSINESS || '',
+};
 
 const plans = [
   {
@@ -66,22 +74,101 @@ const plans = [
 ];
 
 export default function BillingSettingsPage() {
-  const { currentOrganization } = useAuthStore();
+  const { currentOrganization, fetchOrganizations } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const currentPlan = currentOrganization?.plan || 'free';
 
-  const handleUpgrade = async (_planId: string) => {
+  // Handle success/cancel URL params from Stripe redirect
+  const search = useSearch({ strict: false }) as { success?: string; canceled?: string };
+
+  useEffect(() => {
+    if (search.success === 'true') {
+      toast.success('Subscription updated successfully!');
+      // Refresh organization data to get new plan
+      fetchOrganizations();
+    } else if (search.canceled === 'true') {
+      toast.info('Checkout canceled');
+    }
+  }, [search.success, search.canceled, fetchOrganizations]);
+
+  const handleUpgrade = async (planId: string) => {
+    if (planId === 'free') return;
+
+    const priceId = STRIPE_PRICES[planId as keyof typeof STRIPE_PRICES];
+    if (!priceId) {
+      toast.error('Stripe is not configured. Please contact support.');
+      return;
+    }
+
     setIsLoading(true);
-    // TODO: Implement Stripe checkout
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
+    try {
+      const session = await getSession();
+      if (!session?.access_token) {
+        toast.error('Please sign in to upgrade');
+        return;
+      }
+
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ priceId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to start checkout');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleManageBilling = async () => {
     setIsLoading(true);
-    // TODO: Implement Stripe customer portal redirect
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
+    try {
+      const session = await getSession();
+      if (!session?.access_token) {
+        toast.error('Please sign in to manage billing');
+        return;
+      }
+
+      const response = await fetch('/api/billing/portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to open billing portal');
+      }
+
+      // Redirect to Stripe Customer Portal
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Portal error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to open billing portal');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -3,6 +3,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { notifyPaymentFailed } from '../_lib/notifications';
+import { logger } from '../_lib/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16',
@@ -48,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const rawBody = await getRawBody(req);
     event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+    logger.webhooks.error('Webhook signature verification failed', { error: String(err) });
     return res.status(400).json({ error: 'Webhook signature verification failed' });
   }
 
@@ -76,12 +78,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.webhooks.debug('Unhandled event type', { eventType: event.type });
     }
 
     return res.status(200).json({ received: true });
   } catch (error) {
-    console.error('Webhook handler error:', error);
+    logger.webhooks.error('Webhook handler error', { error: String(error) });
     return res.status(500).json({ error: 'Webhook handler failed' });
   }
 }
@@ -89,7 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const organizationId = session.metadata?.organization_id;
   if (!organizationId) {
-    console.error('No organization_id in checkout session metadata');
+    logger.webhooks.error('No organization_id in checkout session metadata', { sessionId: session.id });
     return;
   }
 
@@ -121,7 +123,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     cancel_at_period_end: subscription.cancel_at_period_end,
   });
 
-  console.log(`Checkout completed for org ${organizationId}, plan: ${plan}`);
+  logger.webhooks.info('Checkout completed', { organizationId, plan });
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -135,7 +137,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       .single();
 
     if (!org) {
-      console.error('Could not find organization for subscription');
+      logger.webhooks.error('Could not find organization for subscription', { customerId: subscription.customer });
       return;
     }
 
@@ -162,7 +164,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       cancel_at_period_end: subscription.cancel_at_period_end,
     });
 
-    console.log(`Subscription updated for org ${org.id}, status: ${subscription.status}`);
+    logger.webhooks.info('Subscription updated', { organizationId: org.id, status: subscription.status });
     return;
   }
 
@@ -189,7 +191,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     cancel_at_period_end: subscription.cancel_at_period_end,
   });
 
-  console.log(`Subscription updated for org ${organizationId}, status: ${subscription.status}`);
+  logger.webhooks.info('Subscription updated', { organizationId, status: subscription.status });
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -201,7 +203,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .single();
 
   if (!sub) {
-    console.error('Could not find subscription record');
+    logger.webhooks.error('Could not find subscription record', { subscriptionId: subscription.id });
     return;
   }
 
@@ -220,7 +222,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .update({ status: 'canceled' })
     .eq('stripe_subscription_id', subscription.id);
 
-  console.log(`Subscription deleted for org ${sub.organization_id}`);
+  logger.webhooks.info('Subscription deleted', { organizationId: sub.organization_id });
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
@@ -233,7 +235,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     .update({ status: 'active' })
     .eq('stripe_subscription_id', subscriptionId);
 
-  console.log(`Payment succeeded for subscription ${subscriptionId}`);
+  logger.webhooks.info('Payment succeeded', { subscriptionId });
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
@@ -246,7 +248,25 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     .update({ status: 'past_due' })
     .eq('stripe_subscription_id', subscriptionId);
 
-  console.log(`Payment failed for subscription ${subscriptionId}`);
+  logger.webhooks.warn('Payment failed', { subscriptionId });
 
-  // TODO: Send email notification to organization admins
+  // Find organization and send notification
+  const { data: sub } = await supabaseAdmin
+    .from('subscriptions')
+    .select('organization_id')
+    .eq('stripe_subscription_id', subscriptionId)
+    .single();
+
+  if (sub?.organization_id) {
+    await notifyPaymentFailed(sub.organization_id, {
+      subscriptionId,
+      invoiceId: invoice.id,
+      amount: invoice.amount_due,
+      currency: invoice.currency,
+      attemptCount: invoice.attempt_count || 1,
+      nextAttempt: invoice.next_payment_attempt
+        ? new Date(invoice.next_payment_attempt * 1000)
+        : undefined,
+    });
+  }
 }

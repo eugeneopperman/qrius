@@ -5,6 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, toQRCodeResponse, type QRCodeRow } from '../_lib/db';
 import { generateShortCode } from '../_lib/shortCode';
 import { setCachedRedirect } from '../_lib/kv';
+import { logger } from '../_lib/logger';
 import {
   authenticate,
   getUserOrganization,
@@ -70,7 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error instanceof ForbiddenError) {
       return res.status(403).json({ error: error.message });
     }
-    console.error('API error:', error);
+    logger.qrCodes.error('API error', { error: String(error) });
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -179,7 +180,19 @@ async function handleCreate(
     RETURNING *
   `;
 
+  // Validate INSERT result
+  if (!result || result.length === 0) {
+    logger.qrCodes.error('QR code INSERT returned no rows');
+    return res.status(500).json({ error: 'Failed to create QR code' });
+  }
+
   const row = result[0] as QRCodeRow;
+
+  // Validate required fields exist
+  if (!row.id || !row.short_code) {
+    logger.qrCodes.error('QR code INSERT returned invalid data', { row });
+    return res.status(500).json({ error: 'Failed to create QR code' });
+  }
 
   // Pre-populate cache for fast redirects
   await setCachedRedirect(shortCode, {

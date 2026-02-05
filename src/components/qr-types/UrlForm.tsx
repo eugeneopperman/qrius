@@ -70,12 +70,16 @@ export function UrlForm() {
 
   const handleCopyShortened = async () => {
     if (urlData.shortened) {
-      await navigator.clipboard.writeText(urlData.shortened);
-      setCopied(true);
-      if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current);
+      try {
+        await navigator.clipboard.writeText(urlData.shortened);
+        setCopied(true);
+        if (copiedTimeoutRef.current) {
+          clearTimeout(copiedTimeoutRef.current);
+        }
+        copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
       }
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -111,12 +115,16 @@ export function UrlForm() {
 
   const handleCopyTrackingUrl = async () => {
     if (urlData.trackingUrl) {
-      await navigator.clipboard.writeText(urlData.trackingUrl);
-      setTrackingCopied(true);
-      if (trackingCopiedTimeoutRef.current) {
-        clearTimeout(trackingCopiedTimeoutRef.current);
+      try {
+        await navigator.clipboard.writeText(urlData.trackingUrl);
+        setTrackingCopied(true);
+        if (trackingCopiedTimeoutRef.current) {
+          clearTimeout(trackingCopiedTimeoutRef.current);
+        }
+        trackingCopiedTimeoutRef.current = setTimeout(() => setTrackingCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
       }
-      trackingCopiedTimeoutRef.current = setTimeout(() => setTrackingCopied(false), 2000);
     }
   };
 

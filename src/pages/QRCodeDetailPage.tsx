@@ -68,11 +68,16 @@ export default function QRCodeDetailPage() {
     fetchQRCode();
   }, [id]);
 
-  const handleCopyUrl = () => {
+  const handleCopyUrl = async () => {
     if (!qrCode) return;
     const trackingUrl = `${window.location.origin}/r/${qrCode.short_code}`;
-    navigator.clipboard.writeText(trackingUrl);
-    toast.success('Tracking URL copied to clipboard');
+    try {
+      await navigator.clipboard.writeText(trackingUrl);
+      toast.success('Tracking URL copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   if (isLoading) {

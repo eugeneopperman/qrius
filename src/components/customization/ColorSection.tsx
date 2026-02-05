@@ -8,6 +8,15 @@ import { HelpCircle } from 'lucide-react';
 import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '../../config/constants';
 import type { GradientOptions, GradientType } from '../../types';
 
+// Pure function moved outside component to avoid recreation
+function getGradientPreview(g: GradientOptions): string {
+  const colors = g.colorStops.map((s) => `${s.color} ${s.offset * 100}%`).join(', ');
+  if (g.type === 'radial') {
+    return `radial-gradient(circle, ${colors})`;
+  }
+  return `linear-gradient(${g.rotation || 0}deg, ${colors})`;
+}
+
 export const ColorSection = memo(function ColorSection() {
   const { styleOptions, setStyleOptions } = useQRStore();
 
@@ -35,16 +44,8 @@ export const ColorSection = memo(function ColorSection() {
     updateGradient({ colorStops: newColorStops });
   }, [gradient.colorStops, updateGradient]);
 
-  const getGradientPreview = useCallback((g: GradientOptions) => {
-    const colors = g.colorStops.map((s) => `${s.color} ${s.offset * 100}%`).join(', ');
-    if (g.type === 'radial') {
-      return `radial-gradient(circle, ${colors})`;
-    }
-    return `linear-gradient(${g.rotation || 0}deg, ${colors})`;
-  }, []);
-
   // Memoize the current gradient preview
-  const currentGradientPreview = useMemo(() => getGradientPreview(gradient), [gradient, getGradientPreview]);
+  const currentGradientPreview = useMemo(() => getGradientPreview(gradient), [gradient]);
 
   return (
     <div className="space-y-4">

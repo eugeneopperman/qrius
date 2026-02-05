@@ -14,6 +14,47 @@ import type {
   LocationData,
 } from '../types';
 
+// Escape functions for QR code formats
+
+/**
+ * Escape special characters for vCard format
+ * vCard requires escaping: backslash, semicolon, comma, newline
+ */
+function escapeVCard(str: string | undefined): string {
+  if (!str) return '';
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+}
+
+/**
+ * Escape special characters for WiFi QR format
+ * WiFi format requires escaping: backslash, semicolon, colon, comma
+ */
+function escapeWiFi(str: string | undefined): string {
+  if (!str) return '';
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/:/g, '\\:')
+    .replace(/,/g, '\\,');
+}
+
+/**
+ * Escape special characters for iCalendar/vEvent format
+ * iCalendar requires escaping: backslash, semicolon, comma, newline
+ */
+function escapeICalendar(str: string | undefined): string {
+  if (!str) return '';
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+}
+
 interface HistoryEntry {
   type: QRCodeType;
   data: QRData;
@@ -220,8 +261,8 @@ export const useQRStore = create<QRStore>((set, get) => ({
       case 'wifi': {
         const { ssid, password, encryption, hidden } = state.wifiData;
         if (!ssid) return 'WIFI:S:MyNetwork;T:WPA;P:password;;';
-        let wifi = `WIFI:S:${ssid};T:${encryption};`;
-        if (password && encryption !== 'nopass') wifi += `P:${password};`;
+        let wifi = `WIFI:S:${escapeWiFi(ssid)};T:${encryption};`;
+        if (password && encryption !== 'nopass') wifi += `P:${escapeWiFi(password)};`;
         if (hidden) wifi += 'H:true;';
         wifi += ';';
         return wifi;
@@ -230,15 +271,15 @@ export const useQRStore = create<QRStore>((set, get) => ({
         const v = state.vcardData;
         if (!v.firstName && !v.lastName) return 'BEGIN:VCARD\nVERSION:3.0\nN:Doe;John\nFN:John Doe\nEND:VCARD';
         let vcard = 'BEGIN:VCARD\nVERSION:3.0\n';
-        vcard += `N:${v.lastName || ''};${v.firstName || ''}\n`;
-        vcard += `FN:${v.firstName || ''} ${v.lastName || ''}\n`;
-        if (v.organization) vcard += `ORG:${v.organization}\n`;
-        if (v.title) vcard += `TITLE:${v.title}\n`;
-        if (v.phone) vcard += `TEL:${v.phone}\n`;
-        if (v.email) vcard += `EMAIL:${v.email}\n`;
-        if (v.website) vcard += `URL:${v.website}\n`;
-        if (v.address) vcard += `ADR:;;${v.address};;;;\n`;
-        if (v.note) vcard += `NOTE:${v.note}\n`;
+        vcard += `N:${escapeVCard(v.lastName)};${escapeVCard(v.firstName)}\n`;
+        vcard += `FN:${escapeVCard(v.firstName)} ${escapeVCard(v.lastName)}\n`;
+        if (v.organization) vcard += `ORG:${escapeVCard(v.organization)}\n`;
+        if (v.title) vcard += `TITLE:${escapeVCard(v.title)}\n`;
+        if (v.phone) vcard += `TEL:${escapeVCard(v.phone)}\n`;
+        if (v.email) vcard += `EMAIL:${escapeVCard(v.email)}\n`;
+        if (v.website) vcard += `URL:${escapeVCard(v.website)}\n`;
+        if (v.address) vcard += `ADR:;;${escapeVCard(v.address)};;;;\n`;
+        if (v.note) vcard += `NOTE:${escapeVCard(v.note)}\n`;
         vcard += 'END:VCARD';
         return vcard;
       }
@@ -251,11 +292,11 @@ export const useQRStore = create<QRStore>((set, get) => ({
           return d + 'T' + t;
         };
         let vevent = 'BEGIN:VEVENT\n';
-        vevent += `SUMMARY:${e.title}\n`;
-        if (e.location) vevent += `LOCATION:${e.location}\n`;
+        vevent += `SUMMARY:${escapeICalendar(e.title)}\n`;
+        if (e.location) vevent += `LOCATION:${escapeICalendar(e.location)}\n`;
         if (e.startDate) vevent += `DTSTART:${formatDate(e.startDate, e.startTime)}\n`;
         if (e.endDate) vevent += `DTEND:${formatDate(e.endDate, e.endTime)}\n`;
-        if (e.description) vevent += `DESCRIPTION:${e.description}\n`;
+        if (e.description) vevent += `DESCRIPTION:${escapeICalendar(e.description)}\n`;
         vevent += 'END:VEVENT';
         return vevent;
       }

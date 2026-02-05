@@ -14,9 +14,23 @@ export function QRReader() {
 
   useEffect(() => {
     return () => {
-      if (scannerRef.current?.isScanning) {
-        scannerRef.current.stop().catch(console.error);
-      }
+      // Cleanup scanner resources
+      const cleanup = async () => {
+        if (scannerRef.current) {
+          try {
+            if (scannerRef.current.isScanning) {
+              await scannerRef.current.stop();
+            }
+            // Clear releases all resources including camera
+            await scannerRef.current.clear();
+          } catch (err) {
+            console.error('Error cleaning up QR scanner:', err);
+          }
+          scannerRef.current = null;
+        }
+      };
+      cleanup();
+
       if (copiedTimeoutRef.current) {
         clearTimeout(copiedTimeoutRef.current);
       }
@@ -55,8 +69,14 @@ export function QRReader() {
   };
 
   const stopScanning = async () => {
-    if (scannerRef.current?.isScanning) {
-      await scannerRef.current.stop();
+    if (scannerRef.current) {
+      try {
+        if (scannerRef.current.isScanning) {
+          await scannerRef.current.stop();
+        }
+      } catch (err) {
+        console.error('Error stopping scanner:', err);
+      }
     }
   };
 
@@ -85,12 +105,16 @@ export function QRReader() {
 
   const handleCopy = async () => {
     if (result) {
-      await navigator.clipboard.writeText(result);
-      setCopied(true);
-      if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current);
+      try {
+        await navigator.clipboard.writeText(result);
+        setCopied(true);
+        if (copiedTimeoutRef.current) {
+          clearTimeout(copiedTimeoutRef.current);
+        }
+        copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
       }
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     }
   };
 

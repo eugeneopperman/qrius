@@ -56,9 +56,14 @@ export default function ApiKeysSettingsPage() {
     fetchApiKeys();
   }, [currentOrganization]);
 
-  const handleCopyKey = (key: string) => {
-    navigator.clipboard.writeText(key);
-    toast.success('API key copied to clipboard');
+  const handleCopyKey = async (key: string) => {
+    try {
+      await navigator.clipboard.writeText(key);
+      toast.success('API key copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   const handleDeleteKey = async (keyId: string) => {
@@ -78,11 +83,55 @@ export default function ApiKeysSettingsPage() {
     }
   };
 
-  const handleCreateKey = async (_name: string) => {
-    // TODO: Implement API key creation
-    const mockKey = `qr_${Math.random().toString(36).substring(2, 12)}_${Math.random().toString(36).substring(2, 32)}`;
-    setNewKey(mockKey);
-    toast.success('API key created');
+  const handleCreateKey = async (name: string) => {
+    if (!currentOrganization) {
+      toast.error('No organization selected');
+      return;
+    }
+
+    try {
+      // Generate API key: qr_<prefix>_<secret>
+      const prefix = crypto.randomUUID().replace(/-/g, '').substring(0, 8);
+      const secret = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
+      const fullKey = `qr_${prefix}_${secret}`;
+
+      // Hash the key for storage using Web Crypto API
+      const encoder = new TextEncoder();
+      const data = encoder.encode(fullKey);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const keyHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      // Store in database
+      const { data: newApiKey, error } = await supabase
+        .from('api_keys')
+        .insert({
+          organization_id: currentOrganization.id,
+          name: name,
+          key_hash: keyHash,
+          key_prefix: `qr_${prefix}`,
+          scopes: ['qr:read', 'qr:write'],
+          rate_limit_per_day: planLimits?.api_requests_per_day || 1000,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating API key:', error);
+        toast.error('Failed to create API key');
+        return;
+      }
+
+      // Add to local state
+      setApiKeys([newApiKey, ...apiKeys]);
+
+      // Show the full key (only time user will see it)
+      setNewKey(fullKey);
+      toast.success('API key created');
+    } catch (error) {
+      console.error('Error creating API key:', error);
+      toast.error('Failed to create API key');
+    }
   };
 
   if (!hasApiAccess) {

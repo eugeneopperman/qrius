@@ -224,19 +224,93 @@ export default function TeamSettingsPage() {
 }
 
 function InviteMemberModal({ onClose }: { onClose: () => void }) {
+  const { currentOrganization, user } = useAuthStore();
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<OrgRole>('editor');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!currentOrganization || !user) {
+      toast.error('Not authenticated');
+      return;
+    }
+
     setIsLoading(true);
 
-    // TODO: Implement invitation API
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success(`Invitation sent to ${email}`);
-    setIsLoading(false);
-    onClose();
+    try {
+      // Check if user is already a member
+      const { data: existingMember } = await supabase
+        .from('organization_members')
+        .select('id')
+        .eq('organization_id', currentOrganization.id)
+        .eq('user_id', (
+          await supabase
+            .from('users')
+            .select('id')
+            .eq('email', email.toLowerCase())
+            .single()
+        ).data?.id || '')
+        .single();
+
+      if (existingMember) {
+        toast.error('This user is already a member of the organization');
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if invitation already exists
+      const { data: existingInvite } = await supabase
+        .from('organization_invitations')
+        .select('id')
+        .eq('organization_id', currentOrganization.id)
+        .eq('email', email.toLowerCase())
+        .is('accepted_at', null)
+        .single();
+
+      if (existingInvite) {
+        toast.error('An invitation has already been sent to this email');
+        setIsLoading(false);
+        return;
+      }
+
+      // Generate secure token
+      const token = crypto.randomUUID();
+
+      // Calculate expiry (7 days from now)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      // Create invitation
+      const { error: inviteError } = await supabase
+        .from('organization_invitations')
+        .insert({
+          organization_id: currentOrganization.id,
+          email: email.toLowerCase(),
+          role: role,
+          token: token,
+          invited_by: user.id,
+          expires_at: expiresAt.toISOString(),
+        });
+
+      if (inviteError) {
+        console.error('Error creating invitation:', inviteError);
+        toast.error('Failed to send invitation');
+        setIsLoading(false);
+        return;
+      }
+
+      // Note: In production, you would send an email here with the invitation link
+      // For now, we just show success message
+      toast.success(`Invitation sent to ${email}`);
+      onClose();
+    } catch (error) {
+      console.error('Error sending invitation:', error);
+      toast.error('Failed to send invitation');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

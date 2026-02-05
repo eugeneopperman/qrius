@@ -5,8 +5,8 @@ import { QRCodeList } from '../components/dashboard/QRCodeList';
 import { UpgradePrompt, UsageLimitWarning } from '../components/dashboard/UpgradePrompt';
 import { useAuthStore } from '../stores/authStore';
 import { Button } from '../components/ui/Button';
-import { Plus, ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Plus, ArrowRight, AlertTriangle } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type { QRCode } from '../types/database';
 
@@ -14,6 +14,8 @@ export default function DashboardPage() {
   const { currentOrganization, planLimits, profile } = useAuthStore();
   const [qrCodes, setQrCodes] = useState<QRCode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string | null } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [stats, setStats] = useState({
     qrCodesCount: 0,
     scansToday: 0,
@@ -74,10 +76,37 @@ export default function DashboardPage() {
     fetchData();
   }, [currentOrganization]);
 
-  const handleDeleteQR = async (id: string) => {
-    // TODO: Implement delete confirmation and API call
-    setQrCodes(qrCodes.filter((qr) => qr.id !== id));
-  };
+  const handleDeleteClick = useCallback((id: string) => {
+    const qrCode = qrCodes.find((qr) => qr.id === id);
+    setDeleteConfirm({ id, name: qrCode?.name || null });
+  }, [qrCodes]);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteConfirm) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('qr_codes')
+        .delete()
+        .eq('id', deleteConfirm.id);
+
+      if (error) {
+        console.error('Error deleting QR code:', error);
+        alert('Failed to delete QR code. Please try again.');
+        return;
+      }
+
+      setQrCodes((prev) => prev.filter((qr) => qr.id !== deleteConfirm.id));
+      setStats((prev) => ({ ...prev, qrCodesCount: prev.qrCodesCount - 1 }));
+    } catch (error) {
+      console.error('Error deleting QR code:', error);
+      alert('Failed to delete QR code. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirm(null);
+    }
+  }, [deleteConfirm]);
 
   const showUpgradePrompt = currentOrganization?.plan === 'free';
 
@@ -141,8 +170,47 @@ export default function DashboardPage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <QRCodeList qrCodes={qrCodes} isLoading={isLoading} onDelete={handleDeleteQR} />
+          <QRCodeList qrCodes={qrCodes} isLoading={isLoading} onDelete={handleDeleteClick} />
         </div>
+
+        {/* Delete confirmation modal */}
+        {deleteConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4 shadow-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
+                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Delete QR Code
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Are you sure you want to delete{' '}
+                <span className="font-medium">
+                  {deleteConfirm.name || 'this QR code'}
+                </span>
+                ? This action cannot be undone and all scan history will be lost.
+              </p>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteConfirm(null)}
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

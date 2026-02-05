@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import { X, ChevronLeft, ChevronRight, Save } from 'lucide-react';
 import { useTemplateStore, selectIsEditing } from '../../stores/templateStore';
 import { toast } from '../../stores/toastStore';
@@ -12,6 +12,30 @@ import { StepColorsStyle } from './steps/StepColorsStyle';
 import { StepFrameTypography } from './steps/StepFrameTypography';
 import { StepLogoSave } from './steps/StepLogoSave';
 import type { BrandTemplateStyle } from '../../types';
+
+// Default values for required BrandTemplateStyle fields
+const DEFAULT_TEMPLATE_STYLE: BrandTemplateStyle = {
+  dotsColor: '#000000',
+  backgroundColor: '#ffffff',
+  dotsType: 'rounded',
+  cornersSquareType: 'extra-rounded',
+  cornersDotType: 'dot',
+  errorCorrectionLevel: 'M',
+  frameStyle: 'none',
+  qrRoundness: 50,
+};
+
+/**
+ * Ensures draft.style has all required fields with proper defaults
+ */
+function ensureValidStyle(style: Partial<BrandTemplateStyle> | undefined): BrandTemplateStyle {
+  if (!style) return { ...DEFAULT_TEMPLATE_STYLE };
+
+  return {
+    ...DEFAULT_TEMPLATE_STYLE,
+    ...style,
+  };
+}
 
 export function TemplateWizardModal() {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -61,9 +85,13 @@ export function TemplateWizardModal() {
   // Check if can proceed
   const canProceed = currentStep !== 1 || (draft.name?.trim()?.length ?? 0) > 0;
 
-  if (!isOpen) return null;
+  // Memoize the validated style to prevent unnecessary re-renders
+  const draftStyle = useMemo(
+    () => ensureValidStyle(draft.style as Partial<BrandTemplateStyle> | undefined),
+    [draft.style]
+  );
 
-  const draftStyle = (draft.style || {}) as BrandTemplateStyle;
+  if (!isOpen) return null;
 
   return (
     <div

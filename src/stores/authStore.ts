@@ -299,10 +299,40 @@ export const useAuthStore = create<AuthState>()(
           const organizations = data as (OrganizationMember & { organization: Organization })[];
           set({ organizations });
 
-          // Set current organization if not set
+          // Set current organization if not set (avoid extra query by fetching limits here)
           const { currentOrganization } = get();
           if (!currentOrganization && organizations.length > 0) {
-            await get().setCurrentOrganization(organizations[0].organization.id);
+            const defaultOrg = organizations[0];
+
+            // Fetch plan limits for the default organization
+            const { data: limits, error: limitsError } = await supabase
+              .from('plan_limits')
+              .select('*')
+              .eq('plan', defaultOrg.organization.plan)
+              .single();
+
+            if (limitsError) {
+              console.error('Error fetching plan limits:', limitsError);
+            }
+
+            // Default limits for free plan if fetch fails
+            const defaultLimits: PlanLimits = {
+              plan: 'free',
+              qr_codes_limit: 10,
+              scans_per_month: 1000,
+              scan_history_days: 30,
+              team_members: 1,
+              api_requests_per_day: 0,
+              custom_branding: false,
+              white_label: false,
+              priority_support: false,
+            };
+
+            set({
+              currentOrganization: defaultOrg.organization,
+              currentRole: defaultOrg.role,
+              planLimits: limits || defaultLimits,
+            });
           }
         } catch (error) {
           console.error('Error fetching organizations:', error);
@@ -319,17 +349,34 @@ export const useAuthStore = create<AuthState>()(
           return;
         }
 
-        // Fetch plan limits
-        const { data: limits } = await supabase
+        // Fetch plan limits with error handling
+        const { data: limits, error: limitsError } = await supabase
           .from('plan_limits')
           .select('*')
           .eq('plan', membership.organization.plan)
           .single();
 
+        if (limitsError) {
+          console.error('Error fetching plan limits:', limitsError);
+        }
+
+        // Default limits for free plan if fetch fails
+        const defaultLimits: PlanLimits = {
+          plan: 'free',
+          qr_codes_limit: 10,
+          scans_per_month: 1000,
+          scan_history_days: 30,
+          team_members: 1,
+          api_requests_per_day: 0,
+          custom_branding: false,
+          white_label: false,
+          priority_support: false,
+        };
+
         set({
           currentOrganization: membership.organization,
           currentRole: membership.role,
-          planLimits: limits,
+          planLimits: limits || defaultLimits,
         });
       },
 
@@ -337,6 +384,8 @@ export const useAuthStore = create<AuthState>()(
       createOrganization: async (name) => {
         const { user } = get();
         if (!user) return { data: null, error: new Error('Not authenticated') };
+
+        let createdOrgId: string | null = null;
 
         try {
           // Generate slug from name
@@ -357,6 +406,8 @@ export const useAuthStore = create<AuthState>()(
             return { data: null, error: new Error(orgError.message) };
           }
 
+          createdOrgId = org.id;
+
           // Add user as owner
           const { error: memberError } = await supabase
             .from('organization_members')
@@ -367,16 +418,59 @@ export const useAuthStore = create<AuthState>()(
             });
 
           if (memberError) {
-            // Rollback org creation
-            await supabase.from('organizations').delete().eq('id', org.id);
+            // Rollback org creation with retry and error logging
+            const rollbackOrg = async (attempts = 3): Promise<void> => {
+              for (let i = 0; i < attempts; i++) {
+                const { error: deleteError } = await supabase
+                  .from('organizations')
+                  .delete()
+                  .eq('id', org.id);
+
+                if (!deleteError) return;
+
+                console.error(
+                  `Failed to rollback organization ${org.id} (attempt ${i + 1}/${attempts}):`,
+                  deleteError.message
+                );
+
+                // Wait before retry (exponential backoff)
+                if (i < attempts - 1) {
+                  await new Promise((r) => setTimeout(r, 100 * Math.pow(2, i)));
+                }
+              }
+              // Log critical error if all retries fail
+              console.error(
+                `CRITICAL: Orphaned organization ${org.id} created but owner membership failed. Manual cleanup required.`
+              );
+            };
+
+            await rollbackOrg();
             return { data: null, error: new Error(memberError.message) };
           }
+
+          // Success - clear the tracking variable
+          createdOrgId = null;
 
           // Refresh organizations list
           await get().fetchOrganizations();
 
           return { data: org, error: null };
         } catch (error) {
+          // Attempt cleanup if we created an org but something else failed
+          if (createdOrgId) {
+            console.error('Unexpected error during org creation, attempting cleanup:', error);
+            const { error: cleanupError } = await supabase
+              .from('organizations')
+              .delete()
+              .eq('id', createdOrgId);
+
+            if (cleanupError) {
+              console.error(
+                `CRITICAL: Failed to cleanup organization ${createdOrgId}:`,
+                cleanupError.message
+              );
+            }
+          }
           return { data: null, error: error as Error };
         }
       },

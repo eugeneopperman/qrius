@@ -2,6 +2,7 @@
 // Used for caching redirect destinations for fast lookups
 
 import { Redis } from '@upstash/redis';
+import { logger } from './logger';
 
 // Create Redis client from environment variables
 // In Vercel, these will be available when you add an Upstash Redis integration
@@ -33,7 +34,7 @@ export async function getCachedRedirect(shortCode: string): Promise<CachedRedire
     const cached = await kv.get<CachedRedirect>(`${REDIRECT_PREFIX}${shortCode}`);
     return cached;
   } catch (error) {
-    console.error('KV get error:', error);
+    logger.kv.warn('KV get error', { shortCode, error: String(error) });
     return null;
   }
 }
@@ -49,7 +50,7 @@ export async function setCachedRedirect(shortCode: string, data: CachedRedirect)
   try {
     await kv.set(`${REDIRECT_PREFIX}${shortCode}`, data, { ex: CACHE_TTL });
   } catch (error) {
-    console.error('KV set error:', error);
+    logger.kv.warn('KV set error', { shortCode, error: String(error) });
     // Don't throw - caching is optional
   }
 }
@@ -64,6 +65,6 @@ export async function invalidateCachedRedirect(shortCode: string): Promise<void>
   try {
     await kv.del(`${REDIRECT_PREFIX}${shortCode}`);
   } catch (error) {
-    console.error('KV del error:', error);
+    logger.kv.warn('KV del error', { shortCode, error: String(error) });
   }
 }
