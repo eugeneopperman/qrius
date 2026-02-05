@@ -109,18 +109,29 @@ export function useQRDownload({
 
         // SVG export (doesn't include HTML frame)
         if (format === 'svg') {
-          const qrInstance = qrCodeRef.current as unknown as {
-            _qr?: { getModuleCount: () => number; isDark: (row: number, col: number) => boolean };
-          };
+          // Access internal QR matrix for custom SVG generation
+          // Use type guard to safely validate the internal structure exists
+          const qrInstance = qrCodeRef.current as unknown as Record<string, unknown>;
+          const qrMatrix = qrInstance._qr as {
+            getModuleCount?: () => number;
+            isDark?: (row: number, col: number) => boolean;
+          } | undefined;
 
-          if (!qrInstance._qr) {
+          // Validate that the internal QR matrix has the required methods
+          const hasValidQrMatrix =
+            qrMatrix &&
+            typeof qrMatrix.getModuleCount === 'function' &&
+            typeof qrMatrix.isDark === 'function';
+
+          if (!hasValidQrMatrix) {
+            // Fallback to library's built-in SVG download
             await qrCodeRef.current.download({
               name: 'qrcode',
               extension: 'svg',
             });
           } else {
             const svgString = await generateIllustratorSVG({
-              qrMatrix: qrInstance._qr,
+              qrMatrix: qrMatrix as { getModuleCount: () => number; isDark: (row: number, col: number) => boolean },
               size: QR_CONFIG.SIZE,
               margin: QR_CONFIG.MARGIN,
               styleOptions,

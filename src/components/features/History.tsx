@@ -198,7 +198,10 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
             updateEntry(entry.id, { totalScans: result.qrCode.totalScans });
           }
         })
-        .catch(console.error)
+        .catch((error) => {
+          // Log error but don't show toast to avoid noise on network issues
+          console.error('Failed to fetch scan count:', error);
+        })
         .finally(() => setIsLoadingScans(false));
     }
   }, [entry.trackingId, entry.id, trackingSettings, updateEntry]);
