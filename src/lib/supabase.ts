@@ -13,8 +13,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Using generic client without strict types for flexibility
 // In production, you can add Database types once Supabase generates them
 export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key',
   {
     auth: {
       autoRefreshToken: true,
