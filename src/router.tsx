@@ -27,6 +27,11 @@ const TeamSettingsPage = lazy(() => import('./pages/settings/TeamSettingsPage'))
 const BillingSettingsPage = lazy(() => import('./pages/settings/BillingSettingsPage'));
 const ApiKeysSettingsPage = lazy(() => import('./pages/settings/ApiKeysSettingsPage'));
 
+// Legal pages
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const CookiesPage = lazy(() => import('./pages/CookiesPage'));
+
 // Root layout
 function RootLayout() {
   return (
@@ -127,6 +132,25 @@ const resetPasswordRoute = createRoute({
   component: () => import('./pages/ResetPasswordPage').then((m) => <m.default />),
 });
 
+// Legal routes
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/terms',
+  component: TermsPage,
+});
+
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy',
+  component: PrivacyPage,
+});
+
+const cookiesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/cookies',
+  component: CookiesPage,
+});
+
 // Protected routes
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -199,6 +223,9 @@ const routeTree = rootRoute.addChildren([
   signUpRoute,
   authCallbackRoute,
   resetPasswordRoute,
+  termsRoute,
+  privacyRoute,
+  cookiesRoute,
   dashboardRoute,
   qrCodesRoute,
   qrCodeDetailRoute,

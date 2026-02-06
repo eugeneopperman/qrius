@@ -6,6 +6,7 @@ import './index.css';
 import './i18n';
 import { router } from './router';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { CookieConsent } from './components/legal';
 import { useAuthStore } from './stores/authStore';
 
 // Initialize React Query
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')!).render(
     >
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
+        <CookieConsent />
       </QueryClientProvider>
     </ErrorBoundary>
   </StrictMode>
