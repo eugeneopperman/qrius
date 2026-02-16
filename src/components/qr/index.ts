@@ -5,6 +5,12 @@ export {
   TopLabel,
   BadgeLabel,
   BottomLabel,
+  BannerLabel,
+  RibbonLabel,
   FallbackUrl,
   getFrameClasses,
+  getFrameInlineStyles,
+  SpeechBubblePointer,
+  DecorativeCorners,
+  MinimalLine,
 } from './QRFrame';

@@ -44,16 +44,16 @@ export const TemplateCard = memo(function TemplateCard({
   return (
     <div
       className={cn(
-        'relative group rounded-xl border transition-all',
-        'bg-white dark:bg-gray-800',
+        'relative group rounded-2xl border transition-all shadow-sm',
+        'bg-white dark:bg-gray-900',
         isApplied
-          ? 'border-indigo-500 ring-2 ring-indigo-500/20'
-          : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 hover:shadow-md'
+          ? 'border-orange-500 ring-2 ring-orange-500/20'
+          : 'border-gray-100 dark:border-gray-800 hover:border-orange-300 hover:shadow-md'
       )}
     >
       {/* Color Preview Bar */}
       <div
-        className="h-2 rounded-t-xl"
+        className="h-2 rounded-t-2xl"
         style={{ background: getColorPreview() }}
       />
 
@@ -74,7 +74,7 @@ export const TemplateCard = memo(function TemplateCard({
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Template options"
             >
               <MoreVertical className="w-4 h-4" />
@@ -87,13 +87,13 @@ export const TemplateCard = memo(function TemplateCard({
                   className="fixed inset-0 z-10"
                   onClick={() => setShowMenu(false)}
                 />
-                <div className="absolute right-0 top-full mt-1 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20 min-w-[120px]">
+                <div className="absolute right-0 top-full mt-1 py-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-100 dark:border-gray-800 z-20 min-w-[120px]">
                   <button
                     onClick={() => {
                       onEdit(template.id);
                       setShowMenu(false);
                     }}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                     Edit
@@ -103,12 +103,12 @@ export const TemplateCard = memo(function TemplateCard({
                       onDuplicate(template.id);
                       setShowMenu(false);
                     }}
-                    className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                    className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     Duplicate
                   </button>
-                  <hr className="my-1 border-gray-200 dark:border-gray-700" />
+                  <hr className="my-1 border-gray-100 dark:border-gray-800" />
                   <button
                     onClick={() => {
                       onDelete(template.id);
@@ -159,8 +159,8 @@ export const TemplateCard = memo(function TemplateCard({
           className={cn(
             'w-full py-2 text-xs font-medium rounded-lg transition-colors',
             isApplied
-              ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 cursor-default flex items-center justify-center gap-1.5'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 hover:text-indigo-700 dark:hover:text-indigo-300'
+              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 cursor-default flex items-center justify-center gap-1.5'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300'
           )}
         >
           {isApplied ? (

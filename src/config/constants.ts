@@ -124,12 +124,58 @@ export const FRAME_CONFIG = {
   DEFAULT_LABELS: [
     'Scan Me',
     'Learn More',
-    'Get Started',
+    'Visit Us',
     'Download App',
-    'Visit Website',
-    'Contact Us',
+    'Get Coupon',
+    'Follow Us',
+    'Order Now',
+    'Shop Now',
+    'Book Now',
+    'Free Trial',
+    'Watch Video',
+    'Sign Up',
   ],
 } as const;
+
+/** Frame type categories for the visual frame picker */
+export const FRAME_CATEGORIES = [
+  {
+    label: 'Basic',
+    frames: [
+      { id: 'none', label: 'None' },
+      { id: 'simple', label: 'Simple' },
+      { id: 'rounded', label: 'Rounded' },
+      { id: 'minimal-line', label: 'Minimal Line' },
+    ],
+  },
+  {
+    label: 'Label',
+    frames: [
+      { id: 'bottom-label', label: 'Bottom Label' },
+      { id: 'top-label', label: 'Top Label' },
+      { id: 'badge', label: 'Badge' },
+      { id: 'banner-bottom', label: 'Bottom Banner' },
+      { id: 'banner-top', label: 'Top Banner' },
+    ],
+  },
+  {
+    label: 'Decorative',
+    frames: [
+      { id: 'speech-bubble', label: 'Speech Bubble' },
+      { id: 'ribbon', label: 'Ribbon' },
+      { id: 'sticker', label: 'Sticker' },
+      { id: 'decorative-corners', label: 'Corners' },
+    ],
+  },
+  {
+    label: 'Shaped & Effects',
+    frames: [
+      { id: 'circular', label: 'Circular' },
+      { id: 'gradient-border', label: 'Gradient' },
+      { id: 'shadow-3d', label: '3D Shadow' },
+    ],
+  },
+] as const;
 
 // ============================================================================
 // Timing & Debounce

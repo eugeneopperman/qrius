@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
-import { DashboardLayout } from '../../components/dashboard/DashboardLayout';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useAuthStore } from '../../stores/authStore';
@@ -8,7 +7,6 @@ import { supabase } from '../../lib/supabase';
 import { toast } from '../../stores/toastStore';
 import type { ApiKey } from '../../types/database';
 import {
-  ArrowLeft,
   Loader2,
   Plus,
   Key,
@@ -18,7 +16,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
-export default function ApiKeysSettingsPage() {
+export function ApiKeysSettingsContent() {
   const { currentOrganization, currentRole, planLimits } = useAuthStore();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -136,187 +134,178 @@ export default function ApiKeysSettingsPage() {
 
   if (!hasApiAccess) {
     return (
-      <DashboardLayout>
-        <div className="max-w-2xl mx-auto">
-          <div className="mb-6">
-            <Link
-              to="/settings"
-              className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Settings
-            </Link>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h1>
-          </div>
-
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-              <Key className="w-8 h-8 text-gray-400" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              API Access Required
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
-              Upgrade to Pro or Business to access the Qrius API and integrate QR code
-              generation into your applications.
-            </p>
-            <Link to="/settings/billing">
-              <Button>Upgrade to Pro</Button>
-            </Link>
-          </div>
+      <div className="max-w-2xl">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h1>
         </div>
-      </DashboardLayout>
+
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-8 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+            <Key className="w-8 h-8 text-gray-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            API Access Required
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            Upgrade to Pro or Business to access the Qrius API and integrate QR code
+            generation into your applications.
+          </p>
+          <Link to="/settings" search={{ tab: 'billing' }}>
+            <Button>Upgrade to Pro</Button>
+          </Link>
+        </div>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <Link
-            to="/settings"
-            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Settings
-          </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h1>
-              <p className="text-gray-500 dark:text-gray-400">
-                Manage API keys for programmatic access
+    <div className="max-w-4xl">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h1>
+            <p className="text-gray-500 dark:text-gray-400">
+              Manage API keys for programmatic access
+            </p>
+          </div>
+          {canManageKeys && (
+            <Button onClick={() => setShowCreateModal(true)}>
+              <Plus className="w-4 h-4" />
+              Create API Key
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Rate limit info */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+        <p className="text-sm text-blue-700 dark:text-blue-300">
+          Your plan includes{' '}
+          <strong>{planLimits?.api_requests_per_day.toLocaleString()}</strong> API requests per
+          day.
+        </p>
+      </div>
+
+      {/* New key display */}
+      {newKey && (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium text-green-800 dark:text-green-200 mb-2">
+                Save your API key now - you won't be able to see it again!
               </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 rounded border border-green-300 dark:border-green-700 text-sm font-mono break-all">
+                  {newKey}
+                </code>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleCopyKey(newKey)}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+              <button
+                onClick={() => setNewKey(null)}
+                className="mt-2 text-sm text-green-600 dark:text-green-400 hover:underline"
+              >
+                I've saved my key
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* API keys list */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+          </div>
+        ) : apiKeys.length === 0 ? (
+          <div className="text-center py-12 px-6">
+            <Key className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              No API keys yet
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Create an API key to integrate QR code generation into your applications.
+            </p>
             {canManageKeys && (
               <Button onClick={() => setShowCreateModal(true)}>
                 <Plus className="w-4 h-4" />
-                Create API Key
+                Create your first API key
               </Button>
             )}
           </div>
-        </div>
-
-        {/* Rate limit info */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            Your plan includes{' '}
-            <strong>{planLimits?.api_requests_per_day.toLocaleString()}</strong> API requests per
-            day.
-          </p>
-        </div>
-
-        {/* New key display */}
-        {newKey && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-medium text-green-800 dark:text-green-200 mb-2">
-                  Save your API key now - you won't be able to see it again!
-                </p>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 rounded border border-green-300 dark:border-green-700 text-sm font-mono break-all">
-                    {newKey}
-                  </code>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleCopyKey(newKey)}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-                <button
-                  onClick={() => setNewKey(null)}
-                  className="mt-2 text-sm text-green-600 dark:text-green-400 hover:underline"
-                >
-                  I've saved my key
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* API keys list */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
-            </div>
-          ) : apiKeys.length === 0 ? (
-            <div className="text-center py-12">
-              <Key className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p className="text-gray-500 dark:text-gray-400 mb-4">No API keys yet</p>
-              {canManageKeys && (
-                <Button variant="secondary" onClick={() => setShowCreateModal(true)}>
-                  <Plus className="w-4 h-4" />
-                  Create your first API key
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-800">
-              {apiKeys.map((key) => (
-                <div key={key.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">{key.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">
-                        {key.key_prefix}...
+        ) : (
+          <div className="divide-y divide-gray-200 dark:divide-gray-800">
+            {apiKeys.map((key) => (
+              <div key={key.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{key.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">
+                      {key.key_prefix}...
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right text-sm">
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Created {new Date(key.created_at).toLocaleDateString()}
                       </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right text-sm">
-                        <p className="text-gray-500 dark:text-gray-400">
-                          Created {new Date(key.created_at).toLocaleDateString()}
+                      {key.last_used_at && (
+                        <p className="text-gray-400 dark:text-gray-500">
+                          Last used {new Date(key.last_used_at).toLocaleDateString()}
                         </p>
-                        {key.last_used_at && (
-                          <p className="text-gray-400 dark:text-gray-500">
-                            Last used {new Date(key.last_used_at).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                      {canManageKeys && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          onClick={() => handleDeleteKey(key.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       )}
                     </div>
+                    {canManageKeys && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={() => handleDeleteKey(key.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* API documentation link */}
-        <div className="mt-8 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            API Documentation
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Learn how to integrate Qrius into your applications with our comprehensive API
-            documentation.
-          </p>
-          <Button variant="secondary">View Documentation</Button>
-        </div>
-
-        {/* Create key modal */}
-        {showCreateModal && (
-          <CreateKeyModal
-            onClose={() => setShowCreateModal(false)}
-            onCreate={handleCreateKey}
-          />
+              </div>
+            ))}
+          </div>
         )}
       </div>
-    </DashboardLayout>
+
+      {/* API documentation link */}
+      <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          API Documentation
+        </h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-4">
+          Learn how to integrate Qrius into your applications with our comprehensive API
+          documentation.
+        </p>
+        <Button variant="secondary">View Documentation</Button>
+      </div>
+
+      {/* Create key modal */}
+      {showCreateModal && (
+        <CreateKeyModal
+          onClose={() => setShowCreateModal(false)}
+          onCreate={handleCreateKey}
+        />
+      )}
+    </div>
   );
+}
+
+export default function ApiKeysSettingsPage() {
+  return <ApiKeysSettingsContent />;
 }
 
 function CreateKeyModal({

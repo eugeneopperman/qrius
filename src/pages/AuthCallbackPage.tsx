@@ -1,27 +1,50 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../stores/authStore';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const { hasCompletedOnboarding } = useAuthStore();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the auth code from URL
-        const { data, error } = await supabase.auth.getSession();
+        // Try PKCE flow first — extract code from query params
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
 
-        if (error) {
-          console.error('Auth callback error:', error);
-          setError(error.message);
-          return;
+        let session = null;
+
+        if (code) {
+          // PKCE flow: exchange the auth code for a session
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) {
+            console.error('Auth code exchange error:', exchangeError);
+            setError(exchangeError.message);
+            return;
+          }
+          session = data.session;
+        } else {
+          // Fallback for hash-based (implicit) flows
+          const { data, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError) {
+            console.error('Auth callback error:', sessionError);
+            setError(sessionError.message);
+            return;
+          }
+          session = data.session;
         }
 
-        if (data.session) {
-          // Redirect to dashboard on success
-          navigate({ to: '/dashboard' });
+        if (session) {
+          // Redirect new users to onboarding, returning users to dashboard
+          if (!hasCompletedOnboarding) {
+            navigate({ to: '/onboarding' });
+          } else {
+            navigate({ to: '/dashboard' });
+          }
         } else {
           // No session, redirect to sign in
           navigate({ to: '/signin' });
@@ -33,7 +56,7 @@ export default function AuthCallbackPage() {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, hasCompletedOnboarding]);
 
   if (error) {
     return (

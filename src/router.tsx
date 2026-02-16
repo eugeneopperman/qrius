@@ -22,10 +22,9 @@ const QRCodesPage = lazy(() => import('./pages/QRCodesPage'));
 const QRCodeDetailPage = lazy(() => import('./pages/QRCodeDetailPage'));
 const CreateQRPage = lazy(() => import('./pages/CreateQRPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const ProfileSettingsPage = lazy(() => import('./pages/settings/ProfileSettingsPage'));
-const TeamSettingsPage = lazy(() => import('./pages/settings/TeamSettingsPage'));
-const BillingSettingsPage = lazy(() => import('./pages/settings/BillingSettingsPage'));
-const ApiKeysSettingsPage = lazy(() => import('./pages/settings/ApiKeysSettingsPage'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+const ReaderPage = lazy(() => import('./pages/ReaderPage'));
 
 // Legal pages
 const TermsPage = lazy(() => import('./pages/TermsPage'));
@@ -180,7 +179,28 @@ const createQRRoute = createRoute({
   component: CreateQRPage,
 });
 
-// Settings routes
+const historyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/history',
+  beforeLoad: requireAuth,
+  component: HistoryPage,
+});
+
+const onboardingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/onboarding',
+  beforeLoad: requireAuth,
+  component: OnboardingPage,
+});
+
+const readerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/reader',
+  beforeLoad: requireAuth,
+  component: ReaderPage,
+});
+
+// Settings routes — single tabbed page
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
@@ -188,32 +208,37 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
-const profileSettingsRoute = createRoute({
+// Redirects for old settings sub-routes
+const profileSettingsRedirect = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings/profile',
-  beforeLoad: requireAuth,
-  component: ProfileSettingsPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/settings', search: { tab: 'profile' } });
+  },
 });
 
-const teamSettingsRoute = createRoute({
+const teamSettingsRedirect = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings/team',
-  beforeLoad: requireAuth,
-  component: TeamSettingsPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/settings', search: { tab: 'team' } });
+  },
 });
 
-const billingSettingsRoute = createRoute({
+const billingSettingsRedirect = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings/billing',
-  beforeLoad: requireAuth,
-  component: BillingSettingsPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/settings', search: { tab: 'billing' } });
+  },
 });
 
-const apiKeysSettingsRoute = createRoute({
+const apiKeysSettingsRedirect = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings/api-keys',
-  beforeLoad: requireAuth,
-  component: ApiKeysSettingsPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/settings', search: { tab: 'api-keys' } });
+  },
 });
 
 // Create route tree
@@ -230,11 +255,14 @@ const routeTree = rootRoute.addChildren([
   qrCodesRoute,
   qrCodeDetailRoute,
   createQRRoute,
+  historyRoute,
+  onboardingRoute,
+  readerRoute,
   settingsRoute,
-  profileSettingsRoute,
-  teamSettingsRoute,
-  billingSettingsRoute,
-  apiKeysSettingsRoute,
+  profileSettingsRedirect,
+  teamSettingsRedirect,
+  billingSettingsRedirect,
+  apiKeysSettingsRedirect,
 ]);
 
 // Create router

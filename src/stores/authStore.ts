@@ -1,9 +1,12 @@
 // Authentication store using Zustand
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import type { User as SupabaseUser, Session, Subscription } from '@supabase/supabase-js';
 import type { User, Organization, OrganizationMember, PlanLimits } from '../types/database';
 import { supabase } from '../lib/supabase';
+
+// Track the auth listener subscription to clean up on re-init
+let authSubscription: Subscription | null = null;
 
 export interface AuthState {
   // Auth state
@@ -12,6 +15,10 @@ export interface AuthState {
   profile: User | null;
   isLoading: boolean;
   isInitialized: boolean;
+
+  // Onboarding state
+  hasCompletedOnboarding: boolean;
+  setOnboardingComplete: () => void;
 
   // Organization state
   organizations: (OrganizationMember & { organization: Organization })[];
@@ -48,10 +55,15 @@ export const useAuthStore = create<AuthState>()(
       profile: null,
       isLoading: true,
       isInitialized: false,
+      hasCompletedOnboarding: false,
       organizations: [],
       currentOrganization: null,
       currentRole: null,
       planLimits: null,
+
+      setOnboardingComplete: () => {
+        set({ hasCompletedOnboarding: true });
+      },
 
       // Initialize auth state
       initialize: async () => {
@@ -73,8 +85,14 @@ export const useAuthStore = create<AuthState>()(
             await get().fetchOrganizations();
           }
 
+          // Clean up previous listener if initialize() is called multiple times
+          if (authSubscription) {
+            authSubscription.unsubscribe();
+            authSubscription = null;
+          }
+
           // Listen for auth changes
-          supabase.auth.onAuthStateChange(async (event, session) => {
+          const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             set({ session, user: session?.user ?? null });
 
             if (event === 'SIGNED_IN' && session) {
@@ -90,6 +108,7 @@ export const useAuthStore = create<AuthState>()(
               });
             }
           });
+          authSubscription = subscription;
 
           set({ isLoading: false, isInitialized: true });
         } catch (error) {
@@ -481,6 +500,7 @@ export const useAuthStore = create<AuthState>()(
         currentOrganization: state.currentOrganization
           ? { id: state.currentOrganization.id }
           : null,
+        hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
     }
   )

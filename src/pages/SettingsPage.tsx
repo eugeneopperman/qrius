@@ -1,38 +1,48 @@
-import { Link } from '@tanstack/react-router';
+import { useCallback, useMemo } from 'react';
+import { useSearch, useNavigate } from '@tanstack/react-router';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
-import { User, Users, CreditCard, Key } from 'lucide-react';
+import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '../components/ui/Tabs';
+import { User, Users, CreditCard, Key, Loader2 } from 'lucide-react';
+import { lazy, Suspense } from 'react';
 
-const settingsNavigation = [
-  {
-    name: 'Profile',
-    href: '/settings/profile',
-    icon: User,
-    description: 'Your personal information and preferences',
-  },
-  {
-    name: 'Team',
-    href: '/settings/team',
-    icon: Users,
-    description: 'Manage team members and invitations',
-  },
-  {
-    name: 'Billing',
-    href: '/settings/billing',
-    icon: CreditCard,
-    description: 'Subscription and payment settings',
-  },
-  {
-    name: 'API Keys',
-    href: '/settings/api-keys',
-    icon: Key,
-    description: 'Manage API access and keys',
-  },
-];
+// Lazy load settings content components
+const ProfileSettingsContent = lazy(() => import('./settings/ProfileSettingsPage').then(m => ({ default: m.ProfileSettingsContent })));
+const TeamSettingsContent = lazy(() => import('./settings/TeamSettingsPage').then(m => ({ default: m.TeamSettingsContent })));
+const BillingSettingsContent = lazy(() => import('./settings/BillingSettingsPage').then(m => ({ default: m.BillingSettingsContent })));
+const ApiKeysSettingsContent = lazy(() => import('./settings/ApiKeysSettingsPage').then(m => ({ default: m.ApiKeysSettingsContent })));
+
+function SettingsLoading() {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+    </div>
+  );
+}
+
+const TAB_KEYS = ['profile', 'team', 'billing', 'api-keys'] as const;
+type SettingsTab = (typeof TAB_KEYS)[number];
+
+function getTabIndex(tab: string | undefined): number {
+  const idx = TAB_KEYS.indexOf(tab as SettingsTab);
+  return idx >= 0 ? idx : 0;
+}
 
 export default function SettingsPage() {
+  const search = useSearch({ strict: false }) as { tab?: string };
+  const navigate = useNavigate();
+  const activeTab = useMemo(() => getTabIndex(search.tab), [search.tab]);
+
+  const handleTabChange = useCallback((index: number) => {
+    navigate({
+      to: '/settings',
+      search: { tab: TAB_KEYS[index] },
+      replace: true,
+    });
+  }, [navigate]);
+
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
           <p className="text-gray-500 dark:text-gray-400">
@@ -40,23 +50,37 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <div className="grid gap-4">
-          {settingsNavigation.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className="flex items-center gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-700 transition-colors"
-            >
-              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                <item.icon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900 dark:text-white">{item.name}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{item.description}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <TabGroup key={activeTab} defaultTab={activeTab} onChange={handleTabChange}>
+          <TabList className="mb-6 border-b border-gray-200 dark:border-gray-800 pb-0">
+            <Tab icon={User}>Profile</Tab>
+            <Tab icon={Users}>Team</Tab>
+            <Tab icon={CreditCard}>Billing</Tab>
+            <Tab icon={Key}>API Keys</Tab>
+          </TabList>
+
+          <TabPanels>
+            <TabPanel>
+              <Suspense fallback={<SettingsLoading />}>
+                <ProfileSettingsContent />
+              </Suspense>
+            </TabPanel>
+            <TabPanel>
+              <Suspense fallback={<SettingsLoading />}>
+                <TeamSettingsContent />
+              </Suspense>
+            </TabPanel>
+            <TabPanel>
+              <Suspense fallback={<SettingsLoading />}>
+                <BillingSettingsContent />
+              </Suspense>
+            </TabPanel>
+            <TabPanel>
+              <Suspense fallback={<SettingsLoading />}>
+                <ApiKeysSettingsContent />
+              </Suspense>
+            </TabPanel>
+          </TabPanels>
+        </TabGroup>
       </div>
     </DashboardLayout>
   );

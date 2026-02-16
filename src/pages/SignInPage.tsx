@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useSearch } from '@tanstack/react-router';
+import { Link, useSearch, useNavigate } from '@tanstack/react-router';
 import { SignInForm } from '../components/auth/SignInForm';
 import { ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
 import { useThemeStore } from '../stores/themeStore';
@@ -11,6 +11,7 @@ export default function SignInPage() {
   const [view, setView] = useState<View>('signin');
   const { theme, toggleTheme } = useThemeStore();
   const search = useSearch({ from: '/signin' }) as { redirect?: string };
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex">
@@ -43,7 +44,7 @@ export default function SignInPage() {
           {view === 'signin' && (
             <SignInForm
               onForgotPassword={() => setView('forgot-password')}
-              onSignUp={() => {}}
+              onSignUp={() => navigate({ to: '/signup' })}
             />
           )}
           {view === 'forgot-password' && (

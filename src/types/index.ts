@@ -96,7 +96,12 @@ export type CornerSquareType = 'square' | 'dot' | 'extra-rounded';
 export type CornerDotType = 'square' | 'dot' | 'extra-rounded';
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
 
-export type FrameStyle = 'none' | 'simple' | 'rounded' | 'bottom-label' | 'top-label' | 'badge';
+export type FrameStyle =
+  | 'none' | 'simple' | 'rounded'
+  | 'bottom-label' | 'top-label' | 'badge'
+  | 'speech-bubble' | 'circular' | 'ribbon'
+  | 'sticker' | 'gradient-border' | 'decorative-corners'
+  | 'minimal-line' | 'shadow-3d' | 'banner-bottom' | 'banner-top';
 
 export type FrameFontSize = 'sm' | 'base' | 'lg' | 'xl';
 export type FrameFontFamily = 'sans' | 'serif' | 'mono' | 'rounded';
@@ -143,6 +148,13 @@ export interface QRStyleOptions {
   showFallbackUrl?: boolean;
   qrRoundness?: number; // 0-100% for smooth continuous roundness
   qrPattern?: QRPattern; // 'solid' (connected) or 'dots' (separate)
+  // Enhanced frame properties
+  frameBorderColor?: string;
+  frameBgColor?: string;
+  frameBorderRadius?: number; // 0-32px
+  framePadding?: number; // 0-32px
+  frameSpeechPointer?: 'bottom' | 'top' | 'left' | 'right';
+  frameGradientColors?: [string, string];
 }
 
 export interface ExportOptions {

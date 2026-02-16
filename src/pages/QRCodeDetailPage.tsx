@@ -131,7 +131,7 @@ export default function QRCodeDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* QR Code preview */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
               <div className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6">
                 <QrCode className="w-32 h-32 text-gray-400" />
               </div>
@@ -152,7 +152,7 @@ export default function QRCodeDetailPage() {
           {/* Details and stats */}
           <div className="lg:col-span-2 space-y-6">
             {/* QR Code details */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Details
               </h2>
@@ -208,28 +208,28 @@ export default function QRCodeDetailPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
                 <BarChart2 className="w-5 h-5 text-orange-500 mb-2" />
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {qrCode.total_scans}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Total Scans</p>
               </div>
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
                 <Calendar className="w-5 h-5 text-orange-500 mb-2" />
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {Math.round(qrCode.total_scans * 0.1)}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Today</p>
               </div>
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
                 <Globe className="w-5 h-5 text-orange-500 mb-2" />
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {new Set(recentScans.map((s) => s.country_code).filter(Boolean)).size || '-'}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Countries</p>
               </div>
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
                 <Smartphone className="w-5 h-5 text-orange-500 mb-2" />
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {recentScans.filter((s) => s.device_type === 'mobile').length || '-'}
@@ -239,7 +239,7 @@ export default function QRCodeDetailPage() {
             </div>
 
             {/* Recent scans */}
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Recent Scans
               </h2>

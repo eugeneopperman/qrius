@@ -10,7 +10,7 @@ interface StatCardProps {
 
 function StatCard({ title, value, change, changeType = 'neutral', icon }: StatCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
       <div className="flex items-center justify-between">
         <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
           {icon}

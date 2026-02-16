@@ -1,4 +1,4 @@
-import { Link, useSearch } from '@tanstack/react-router';
+import { Link, useSearch, useNavigate } from '@tanstack/react-router';
 import { SignUpForm } from '../components/auth/SignUpForm';
 import { useThemeStore } from '../stores/themeStore';
 import { QrCode, Moon, Sun, Check } from 'lucide-react';
@@ -6,6 +6,7 @@ import { QrCode, Moon, Sun, Check } from 'lucide-react';
 export default function SignUpPage() {
   const { theme, toggleTheme } = useThemeStore();
   const search = useSearch({ from: '/signup' }) as { redirect?: string };
+  const navigate = useNavigate();
 
   const features = [
     'Create unlimited QR codes',
@@ -72,7 +73,7 @@ export default function SignUpPage() {
 
         {/* Form */}
         <main className="flex-1 flex items-center justify-center p-6">
-          <SignUpForm onSignIn={() => {}} />
+          <SignUpForm onSignIn={() => navigate({ to: '/signin' })} />
         </main>
 
         {/* Footer */}

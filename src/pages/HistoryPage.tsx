@@ -1,43 +1,32 @@
-import { useState, useEffect, useRef } from 'react';
-import { X, Trash2, Clock, RotateCcw, Undo2, BarChart3, Loader2 } from 'lucide-react';
-import { useHistoryStore, getTypeLabel, getDataSummary } from '../../stores/historyStore';
-import { useQRStore } from '../../stores/qrStore';
-import { toast } from '../../stores/toastStore';
-import { Button } from '../ui/Button';
-import { ConfirmDialog } from '../ui/ConfirmDialog';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { getTrackableQR } from '../../utils/qrTrackingApi';
-import { useSettingsStore } from '../../stores/settingsStore';
-import type { HistoryEntry } from '../../types';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { useHistoryStore, getTypeLabel, getDataSummary } from '../stores/historyStore';
+import { useQRStore } from '../stores/qrStore';
+import { useSettingsStore } from '../stores/settingsStore';
+import { toast } from '../stores/toastStore';
+import { Button } from '../components/ui/Button';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { getTrackableQR } from '../utils/qrTrackingApi';
+import {
+  Clock,
+  Trash2,
+  RotateCcw,
+  Undo2,
+  BarChart3,
+  Loader2,
+} from 'lucide-react';
+import type { HistoryEntry } from '../types';
 
-interface HistoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
+export default function HistoryPage() {
   const { entries, removeEntry, clearHistory, undoClear, canUndo } = useHistoryStore();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showUndo, setShowUndo] = useState(false);
   const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Focus trap for accessibility
-  useFocusTrap(isOpen, dialogRef, {
-    initialFocusRef: closeButtonRef,
-    onEscape: onClose,
-  });
-
-  // Check if we can undo when modal opens
   useEffect(() => {
-    if (isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync undo state on open
-      setShowUndo(canUndo());
-    }
-  }, [isOpen, canUndo]);
+    setShowUndo(canUndo());
+  }, [canUndo]);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (undoTimeoutRef.current) {
@@ -51,7 +40,6 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
     setShowUndo(true);
     toast.info('History cleared. You can undo within 10 seconds.');
 
-    // Auto-hide undo button after 10 seconds with proper cleanup
     if (undoTimeoutRef.current) {
       clearTimeout(undoTimeoutRef.current);
     }
@@ -67,37 +55,16 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="history-dialog-title"
-    >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Modal */}
-      <div
-        ref={dialogRef}
-        className="relative w-full max-w-2xl max-h-[80vh] bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xl overflow-hidden mx-4"
-      >
+    <DashboardLayout>
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
-            <h2 id="history-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-white">
-              QR Code History
-            </h2>
-            <span className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">
-              {entries.length} / 20
-            </span>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">History</h1>
+            <p className="text-gray-500 dark:text-gray-400">
+              {entries.length} QR code{entries.length !== 1 ? 's' : ''} in history
+            </p>
           </div>
           <div className="flex items-center gap-2">
             {showUndo && (
@@ -121,45 +88,33 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
                 Clear All
               </Button>
             )}
-            <button
-              ref={closeButtonRef}
-              onClick={onClose}
-              aria-label="Close history"
-              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <X className="w-5 h-5" aria-hidden="true" />
-            </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(80vh-80px)] p-6">
-          {entries.length === 0 ? (
-            <div className="text-center py-12">
-              <Clock className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">
-                No QR codes in history yet
-              </p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                Download or copy a QR code to save it here
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {entries.map((entry) => (
-                <HistoryCard
-                  key={entry.id}
-                  entry={entry}
-                  onRemove={() => removeEntry(entry.id)}
-                  onClose={onClose}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {entries.length === 0 ? (
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-12 text-center">
+            <Clock className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              No QR codes in history yet
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Download or copy a QR code to save it here
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {entries.map((entry) => (
+              <HistoryCard
+                key={entry.id}
+                entry={entry}
+                onRemove={() => removeEntry(entry.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Clear Confirmation Dialog */}
       <ConfirmDialog
         isOpen={showClearConfirm}
         onClose={() => setShowClearConfirm(false)}
@@ -170,24 +125,22 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
         cancelLabel="Keep History"
         variant="warning"
       />
-    </div>
+    </DashboardLayout>
   );
 }
 
 interface HistoryCardProps {
   entry: HistoryEntry;
   onRemove: () => void;
-  onClose: () => void;
 }
 
-function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
+function HistoryCard({ entry, onRemove }: HistoryCardProps) {
   const { setActiveType, setStyleOptions, setUrlData, setTextData, setEmailData, setPhoneData, setSmsData, setWifiData, setVcardData, setEventData, setLocationData } = useQRStore();
   const { trackingSettings } = useSettingsStore();
   const { updateEntry } = useHistoryStore();
   const [scanCount, setScanCount] = useState<number | null>(entry.totalScans ?? null);
   const [isLoadingScans, setIsLoadingScans] = useState(false);
 
-  // Fetch scan count if this is a tracked QR and we don't have a recent count
   useEffect(() => {
     if (entry.trackingId && trackingSettings?.enabled) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch callback
@@ -196,62 +149,34 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
         .then((result) => {
           if (result.success && result.qrCode) {
             setScanCount(result.qrCode.totalScans);
-            // Update the cached count in the store
             updateEntry(entry.id, { totalScans: result.qrCode.totalScans });
           }
         })
         .catch((error) => {
-          // Log error but don't show toast to avoid noise on network issues
           console.error('Failed to fetch scan count:', error);
         })
         .finally(() => setIsLoadingScans(false));
     }
   }, [entry.trackingId, entry.id, trackingSettings, updateEntry]);
 
-  const handleRestore = () => {
-    // Set the active type
+  const handleRestore = useCallback(() => {
     setActiveType(entry.type);
 
-    // Restore the data based on type
     switch (entry.data.type) {
-      case 'url':
-        setUrlData(entry.data.data);
-        break;
-      case 'text':
-        setTextData(entry.data.data);
-        break;
-      case 'email':
-        setEmailData(entry.data.data);
-        break;
-      case 'phone':
-        setPhoneData(entry.data.data);
-        break;
-      case 'sms':
-        setSmsData(entry.data.data);
-        break;
-      case 'wifi':
-        setWifiData(entry.data.data);
-        break;
-      case 'vcard':
-        setVcardData(entry.data.data);
-        break;
-      case 'event':
-        setEventData(entry.data.data);
-        break;
-      case 'location':
-        setLocationData(entry.data.data);
-        break;
+      case 'url': setUrlData(entry.data.data); break;
+      case 'text': setTextData(entry.data.data); break;
+      case 'email': setEmailData(entry.data.data); break;
+      case 'phone': setPhoneData(entry.data.data); break;
+      case 'sms': setSmsData(entry.data.data); break;
+      case 'wifi': setWifiData(entry.data.data); break;
+      case 'vcard': setVcardData(entry.data.data); break;
+      case 'event': setEventData(entry.data.data); break;
+      case 'location': setLocationData(entry.data.data); break;
     }
 
-    // Restore style options
     setStyleOptions(entry.styleOptions);
-
-    // Show success message
     toast.success('QR code restored from history');
-
-    // Close the modal
-    onClose();
-  };
+  }, [entry, setActiveType, setStyleOptions, setUrlData, setTextData, setEmailData, setPhoneData, setSmsData, setWifiData, setVcardData, setEventData, setLocationData]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -269,10 +194,10 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
   };
 
   return (
-    <div className="group relative bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+    <div className="group relative bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 hover:shadow-md transition-all">
       <div className="flex gap-4">
         {/* Thumbnail */}
-        <div className="flex-shrink-0 w-16 h-16 bg-white dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 dark:border-gray-600">
+        <div className="flex-shrink-0 w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center border border-gray-100 dark:border-gray-700">
           {entry.thumbnail ? (
             <img
               src={entry.thumbnail}
@@ -310,7 +235,7 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
         </div>
       </div>
 
-      {/* Actions - Always visible on mobile for touch support */}
+      {/* Actions */}
       <div className="absolute top-2 right-2 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
         <button
           onClick={handleRestore}

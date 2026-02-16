@@ -4,10 +4,11 @@ import { LogoSection } from '../../customization/LogoSection';
 import { StyleSection } from '../../customization/StyleSection';
 import { FrameSection } from '../../customization/FrameSection';
 import { MoreSection } from '../../customization/MoreSection';
+import { TemplatePickerSection } from '../../customization/TemplatePickerSection';
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '../../ui/Tabs';
 import { Button } from '../../ui/Button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { Palette, Image, Shapes, Frame, Sparkles } from 'lucide-react';
+import { Layers, Palette, Image, Shapes, Frame, Sparkles } from 'lucide-react';
 
 export function StepCustomize() {
   const { nextStep, prevStep } = useWizardStore();
@@ -27,6 +28,7 @@ export function StepCustomize() {
       <div className="card mb-6">
         <TabGroup defaultTab={0}>
           <TabList>
+            <Tab icon={Layers}>Templates</Tab>
             <Tab icon={Palette}>Colors</Tab>
             <Tab icon={Image}>Logo</Tab>
             <Tab icon={Shapes}>Style</Tab>
@@ -34,6 +36,9 @@ export function StepCustomize() {
             <Tab icon={Sparkles}>More</Tab>
           </TabList>
           <TabPanels className="pt-4">
+            <TabPanel>
+              <TemplatePickerSection />
+            </TabPanel>
             <TabPanel>
               <ColorSection />
             </TabPanel>

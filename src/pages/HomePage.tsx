@@ -1,4 +1,4 @@
-import { useState, useRef, lazy, Suspense, useMemo, useCallback, useEffect } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Header } from '../components/Header';
 import { WizardContainer } from '../components/wizard';
@@ -10,33 +10,18 @@ import { ToastContainer } from '../components/ui/Toast';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useThemeStore } from '../stores/themeStore';
-import { useWizardStore } from '../stores/wizardStore';
 import { useTemplateStore } from '../stores/templateStore';
 import { useAuthStore } from '../stores/authStore';
 import { toast } from '../stores/toastStore';
-import { ScanLine, Keyboard, ArrowRight } from 'lucide-react';
-import { Button } from '../components/ui/Button';
+import { Keyboard, ArrowRight } from 'lucide-react';
 import type { QRPreviewHandle } from '../components/QRPreview';
 
-// Lazy load QR Reader for code splitting
-const QRReader = lazy(() => import('../components/features/QRReader').then(m => ({ default: m.QRReader })));
-
-function LoadingSpinner() {
-  return (
-    <div className="flex items-center justify-center py-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-    </div>
-  );
-}
-
 export default function HomePage() {
-  const [showReader, setShowReader] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const qrPreviewRef = useRef<QRPreviewHandle | null>(null);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
-  const currentStep = useWizardStore((state) => state.currentStep);
   const { hasMigrated, migrateFromBrandKits, openWizard } = useTemplateStore();
   const { user } = useAuthStore();
 
@@ -67,10 +52,6 @@ export default function HomePage() {
     setShowShortcuts(true);
   }, []);
 
-  const handleOpenReader = useCallback(() => {
-    setShowReader(true);
-  }, []);
-
   const handleOpenHistory = useCallback(() => {
     setShowHistory(true);
   }, []);
@@ -86,7 +67,6 @@ export default function HomePage() {
     onCopy: handleCopy,
     onToggleDarkMode: toggleTheme,
     onShowHelp: handleShowShortcuts,
-    onOpenReader: handleOpenReader,
     onOpenHistory: handleOpenHistory,
     onOpenTemplates: handleOpenTemplates,
   }), [
@@ -95,7 +75,6 @@ export default function HomePage() {
     handleCopy,
     toggleTheme,
     handleShowShortcuts,
-    handleOpenReader,
     handleOpenHistory,
     handleOpenTemplates,
   ]);
@@ -114,7 +93,7 @@ export default function HomePage() {
         onSettingsClick={() => setShowSettings(true)}
       />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* CTA for unauthenticated users */}
         {!user && (
           <div className="mb-8 p-6 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl text-white">
@@ -140,32 +119,6 @@ export default function HomePage() {
           <WizardContainer onPreviewRef={handlePreviewRef} />
         </ErrorBoundary>
 
-        {/* QR Reader - Collapsible section */}
-        {currentStep !== 1 && currentStep !== 4 && (
-          <div className="mt-8">
-            <Button
-              variant="secondary"
-              className="w-full sm:w-auto"
-              onClick={() => setShowReader(!showReader)}
-            >
-              <ScanLine className="w-4 h-4" />
-              {showReader ? 'Hide QR Reader' : 'Scan Existing QR Code'}
-            </Button>
-
-            {showReader && (
-              <div className="mt-4 card max-w-md">
-                <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-4">
-                  QR Code Reader
-                </h3>
-                <ErrorBoundary minimal>
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <QRReader />
-                  </Suspense>
-                </ErrorBoundary>
-              </div>
-            )}
-          </div>
-        )}
       </main>
 
       {/* Footer */}

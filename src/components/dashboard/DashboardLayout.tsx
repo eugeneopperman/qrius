@@ -8,12 +8,13 @@ import {
   LayoutDashboard,
   Plus,
   Settings,
-  BarChart3,
+  Clock,
+  Layers,
+  ScanLine,
   Sun,
   Moon,
   Menu,
   X,
-  Search,
   Building2,
   ChevronDown,
 } from 'lucide-react';
@@ -28,7 +29,9 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'QR Codes', href: '/qr-codes', icon: QrCode },
-  { name: 'Analytics', href: '/dashboard', icon: BarChart3, badge: 'Soon' },
+  { name: 'History', href: '/history', icon: Clock },
+  { name: 'Reader', href: '/reader', icon: ScanLine },
+  { name: 'Templates', href: '/create', icon: Layers },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -145,11 +148,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 >
                   <item.icon className="w-5 h-5" />
                   <span className="font-medium">{item.name}</span>
-                  {item.badge && (
-                    <span className="ml-auto text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               );
             })}
@@ -180,17 +178,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
 
-            {/* Search (placeholder) */}
-            <div className="hidden sm:flex flex-1 max-w-md mx-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search QR codes..."
-                  className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:bg-white dark:focus:bg-gray-900"
-                />
-              </div>
-            </div>
+            <div className="flex-1" />
 
             {/* Right side actions */}
             <div className="flex items-center gap-2">
@@ -212,7 +200,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6">{children}</main>
+        <main className="p-6 lg:p-8">{children}</main>
       </div>
 
       <ToastContainer />

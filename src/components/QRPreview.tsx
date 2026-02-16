@@ -14,7 +14,11 @@ import {
   getCornerSquareTypeForRoundness,
   getCornerDotTypeForRoundness,
 } from '../utils/qrRoundness';
-import { EmptyState, TopLabel, BadgeLabel, BottomLabel, FallbackUrl, getFrameClasses } from './qr';
+import {
+  EmptyState, TopLabel, BadgeLabel, BottomLabel, BannerLabel, RibbonLabel,
+  FallbackUrl, getFrameClasses, getFrameInlineStyles,
+  SpeechBubblePointer, DecorativeCorners, MinimalLine,
+} from './qr';
 import { QR_CONFIG } from '../config/constants';
 import { createQRElementOptions } from '../utils/gradientUtils';
 import { useQRDownload } from '../hooks/useQRDownload';
@@ -299,12 +303,29 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
             ? 'p-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md'
             : cn('p-3', getFrameClasses(frameStyle), 'bg-white dark:bg-gray-800')
         )}
+        style={frameStyle !== 'none' ? getFrameInlineStyles(frameStyle, styleOptions) : undefined}
       >
+        {/* Decorative Corners */}
+        {frameStyle === 'decorative-corners' && <DecorativeCorners color={styleOptions.frameBorderColor} />}
+
+        {/* Minimal Line Top */}
+        {frameStyle === 'minimal-line' && <MinimalLine position="top" color={styleOptions.frameBorderColor} />}
+
         {/* Top Label */}
         {frameStyle === 'top-label' && frameLabel && <TopLabel {...labelProps} />}
 
         {/* Badge Style Top */}
         {frameStyle === 'badge' && frameLabel && <BadgeLabel {...labelProps} />}
+
+        {/* Banner Top */}
+        {frameStyle === 'banner-top' && frameLabel && (
+          <BannerLabel {...labelProps} bgColor={styleOptions.frameBgColor} position="top" />
+        )}
+
+        {/* Speech Bubble Pointer (top) */}
+        {frameStyle === 'speech-bubble' && styleOptions.frameSpeechPointer === 'top' && (
+          <SpeechBubblePointer direction="top" color={styleOptions.frameBorderColor} />
+        )}
 
         <div
           ref={containerRef}
@@ -314,6 +335,30 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
 
         {/* Bottom Label */}
         {frameStyle === 'bottom-label' && frameLabel && <BottomLabel {...labelProps} />}
+
+        {/* Ribbon */}
+        {frameStyle === 'ribbon' && frameLabel && (
+          <RibbonLabel {...labelProps} bgColor={styleOptions.frameBgColor} />
+        )}
+
+        {/* Banner Bottom */}
+        {frameStyle === 'banner-bottom' && frameLabel && (
+          <BannerLabel {...labelProps} bgColor={styleOptions.frameBgColor} position="bottom" />
+        )}
+
+        {/* Speech Bubble Pointer (bottom - default) */}
+        {frameStyle === 'speech-bubble' && styleOptions.frameSpeechPointer !== 'top' && (
+          <SpeechBubblePointer
+            direction={styleOptions.frameSpeechPointer || 'bottom'}
+            color={styleOptions.frameBorderColor}
+          />
+        )}
+
+        {/* Sticker label */}
+        {frameStyle === 'sticker' && frameLabel && <BottomLabel {...labelProps} />}
+
+        {/* Minimal Line Bottom */}
+        {frameStyle === 'minimal-line' && <MinimalLine position="bottom" color={styleOptions.frameBorderColor} />}
 
         {/* Fallback URL Display */}
         {styleOptions.showFallbackUrl && qrValue && <FallbackUrl qrValue={qrValue} />}

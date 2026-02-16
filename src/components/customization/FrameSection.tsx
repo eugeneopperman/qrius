@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import {
   Type,
@@ -10,24 +10,35 @@ import {
   ExternalLink,
   ScanLine,
   Fingerprint,
-  Ban
+  Ban,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { cn } from '../../utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
 import { SelectButtonGroup, type SelectButtonOption } from '../ui/SelectButtonGroup';
-import { FRAME_CONFIG } from '../../config/constants';
+import { FRAME_CONFIG, FRAME_CATEGORIES } from '../../config/constants';
 import type { FrameStyle, FrameFontSize, FrameFontFamily, FrameIcon, FrameIconPosition } from '../../types';
 
-const frameTemplates: { id: FrameStyle; label: string; hasLabel: boolean }[] = [
-  { id: 'none', label: 'None', hasLabel: false },
-  { id: 'simple', label: 'Simple Border', hasLabel: false },
-  { id: 'rounded', label: 'Rounded Border', hasLabel: false },
-  { id: 'bottom-label', label: 'Bottom Label', hasLabel: true },
-  { id: 'top-label', label: 'Top Label', hasLabel: true },
-  { id: 'badge', label: 'Badge Style', hasLabel: true },
+// Frame types that support labels
+const LABEL_FRAMES: FrameStyle[] = [
+  'bottom-label', 'top-label', 'badge',
+  'speech-bubble', 'ribbon', 'sticker',
+  'banner-bottom', 'banner-top',
 ];
 
+// Frame types that support custom border color
+const BORDER_COLOR_FRAMES: FrameStyle[] = [
+  'simple', 'rounded', 'bottom-label', 'top-label', 'badge',
+  'speech-bubble', 'circular', 'ribbon', 'decorative-corners',
+  'minimal-line', 'shadow-3d',
+];
+
+// Frame types that support background color
+const BG_COLOR_FRAMES: FrameStyle[] = [
+  'sticker', 'banner-bottom', 'banner-top', 'ribbon',
+];
 
 const fontSizeOptions: { value: FrameFontSize; label: string }[] = [
   { value: 'sm', label: 'Small' },
@@ -61,12 +72,59 @@ const iconPositionOptions: { value: FrameIconPosition; label: string }[] = [
   { value: 'right', label: 'Right' },
 ];
 
+const speechPointerOptions: { value: 'bottom' | 'top' | 'left' | 'right'; label: string }[] = [
+  { value: 'bottom', label: 'Bottom' },
+  { value: 'top', label: 'Top' },
+  { value: 'left', label: 'Left' },
+  { value: 'right', label: 'Right' },
+];
+
+// Mini preview for each frame style
+function FrameMiniPreview({ frameId, isActive }: { frameId: string; isActive: boolean }) {
+  const previewStyles: Record<string, React.CSSProperties> = {
+    'none': {},
+    'simple': { border: '2px solid #374151' },
+    'rounded': { border: '2px solid #374151', borderRadius: '8px' },
+    'bottom-label': { border: '2px solid #374151', borderRadius: '6px' },
+    'top-label': { border: '2px solid #374151', borderRadius: '6px' },
+    'badge': { border: '2px solid #374151', borderRadius: '6px' },
+    'speech-bubble': { border: '2px solid #374151', borderRadius: '6px' },
+    'circular': { border: '2px solid #374151', borderRadius: '50%' },
+    'ribbon': { border: '2px solid #374151', borderRadius: '6px' },
+    'sticker': { backgroundColor: '#FEF3C7', borderRadius: '6px', transform: 'rotate(-1deg)' },
+    'gradient-border': { border: '2px solid transparent', borderRadius: '6px', backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #6366F1, #EC4899)', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' },
+    'decorative-corners': {},
+    'minimal-line': {},
+    'shadow-3d': { borderRadius: '6px', boxShadow: '3px 3px 0px #d1d5db' },
+    'banner-bottom': { borderRadius: '6px', overflow: 'hidden' },
+    'banner-top': { borderRadius: '6px', overflow: 'hidden' },
+  };
+
+  return (
+    <div
+      className={cn(
+        'w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 transition-all',
+        isActive && 'ring-2 ring-orange-500'
+      )}
+      style={previewStyles[frameId] || {}}
+    >
+      <div className="w-5 h-5 bg-gray-800 dark:bg-gray-200 rounded-sm" />
+      {frameId === 'speech-bubble' && (
+        <div className="absolute -bottom-1 w-0 h-0" style={{ borderLeft: '3px solid transparent', borderRight: '3px solid transparent', borderTop: '4px solid #374151' }} />
+      )}
+    </div>
+  );
+}
+
 export const FrameSection = memo(function FrameSection() {
   const { styleOptions, setStyleOptions } = useQRStore();
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const selectedFrame = styleOptions.frameStyle || 'none';
   const currentLabel = styleOptions.frameLabel || '';
-  const showLabelInput = frameTemplates.find(f => f.id === selectedFrame)?.hasLabel;
+  const showLabelInput = LABEL_FRAMES.includes(selectedFrame);
+  const showBorderColor = BORDER_COLOR_FRAMES.includes(selectedFrame);
+  const showBgColor = BG_COLOR_FRAMES.includes(selectedFrame);
 
   const handleFrameStyleChange = useCallback((style: FrameStyle) => {
     setStyleOptions({ frameStyle: style });
@@ -101,35 +159,46 @@ export const FrameSection = memo(function FrameSection() {
 
   return (
     <div className="space-y-4">
-      {/* Frame Template Selection */}
+      {/* Frame Template Selection - Visual Picker */}
       <div>
         <LabelWithTooltip
           label="Frame Style"
           tooltip={
             <div className="space-y-1">
               <p className="font-medium">Add a decorative border around your QR code.</p>
-              <p className="text-gray-300 dark:text-gray-600">Frames with labels help guide users to scan and can include a call-to-action like "Scan Me" or "Learn More".</p>
+              <p className="text-gray-300 dark:text-gray-600">Choose from basic, label, decorative, and shaped frames to make your QR code stand out.</p>
             </div>
           }
-          className="mb-2"
+          className="mb-3"
         />
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {frameTemplates.map((template) => (
-            <button
-              key={template.id}
-              onClick={() => handleFrameStyleChange(template.id)}
-              aria-pressed={selectedFrame === template.id}
-              className={cn(
-                'p-3 min-h-[44px] text-xs font-medium rounded-lg border transition-all text-center touch-manipulation',
-                selectedFrame === template.id
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-400'
-                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-indigo-300'
-              )}
-            >
-              {template.label}
-            </button>
-          ))}
-        </div>
+
+        {FRAME_CATEGORIES.map((category) => (
+          <div key={category.label} className="mb-3">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
+              {category.label}
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {category.frames.map((frame) => (
+                <button
+                  key={frame.id}
+                  onClick={() => handleFrameStyleChange(frame.id as FrameStyle)}
+                  aria-pressed={selectedFrame === frame.id}
+                  className={cn(
+                    'flex flex-col items-center gap-1.5 p-2.5 min-h-[68px] rounded-xl border transition-all text-center touch-manipulation',
+                    selectedFrame === frame.id
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 ring-1 ring-orange-500'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-orange-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  )}
+                >
+                  <FrameMiniPreview frameId={frame.id} isActive={selectedFrame === frame.id} />
+                  <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400 leading-tight">
+                    {frame.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Label Input - Only show if frame supports labels */}
@@ -163,8 +232,8 @@ export const FrameSection = memo(function FrameSection() {
                     'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
                     'focus:outline-none focus:ring-2 focus:ring-orange-400',
                     currentLabel === label
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
+                      ? 'border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-orange-300 text-gray-600 dark:text-gray-400'
                   )}
                 >
                   {label}
@@ -176,36 +245,121 @@ export const FrameSection = memo(function FrameSection() {
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {currentLabel.length}/{FRAME_CONFIG.MAX_LABEL_LENGTH} characters
           </p>
+        </div>
+      )}
 
-          <SelectButtonGroup
-            label="Font Size"
-            options={fontSizeOptions}
-            value={styleOptions.frameFontSize || 'base'}
-            onChange={handleFontSizeChange}
-          />
+      {/* Speech Bubble Pointer Direction */}
+      {selectedFrame === 'speech-bubble' && (
+        <SelectButtonGroup
+          label="Pointer Direction"
+          options={speechPointerOptions}
+          value={styleOptions.frameSpeechPointer || 'bottom'}
+          onChange={(dir) => setStyleOptions({ frameSpeechPointer: dir })}
+        />
+      )}
 
-          <SelectButtonGroup
-            label="Font Style"
-            options={fontFamilyOptions}
-            value={styleOptions.frameFontFamily || 'sans'}
-            onChange={handleFontFamilyChange}
-          />
+      {/* Gradient Colors for gradient-border frame */}
+      {selectedFrame === 'gradient-border' && (
+        <div>
+          <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Gradient Colors</p>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2">
+              <input
+                type="color"
+                value={styleOptions.frameGradientColors?.[0] || '#6366F1'}
+                onChange={(e) => setStyleOptions({
+                  frameGradientColors: [e.target.value, styleOptions.frameGradientColors?.[1] || '#EC4899']
+                })}
+                className="w-8 h-8 rounded cursor-pointer"
+              />
+              <span className="text-xs text-gray-500">Start</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="color"
+                value={styleOptions.frameGradientColors?.[1] || '#EC4899'}
+                onChange={(e) => setStyleOptions({
+                  frameGradientColors: [styleOptions.frameGradientColors?.[0] || '#6366F1', e.target.value]
+                })}
+                className="w-8 h-8 rounded cursor-pointer"
+              />
+              <span className="text-xs text-gray-500">End</span>
+            </label>
+          </div>
+        </div>
+      )}
 
-          <SelectButtonGroup
-            label="Icon"
-            options={iconOptions as SelectButtonOption<FrameIcon>[]}
-            value={styleOptions.frameIcon || 'none'}
-            onChange={handleIconChange}
-          />
+      {/* Border & Background Color Controls */}
+      {(showBorderColor || showBgColor) && (
+        <div className="flex flex-wrap gap-4">
+          {showBorderColor && (
+            <label className="flex items-center gap-2">
+              <input
+                type="color"
+                value={styleOptions.frameBorderColor || '#374151'}
+                onChange={(e) => setStyleOptions({ frameBorderColor: e.target.value })}
+                className="w-8 h-8 rounded cursor-pointer"
+              />
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Border</span>
+            </label>
+          )}
+          {showBgColor && (
+            <label className="flex items-center gap-2">
+              <input
+                type="color"
+                value={styleOptions.frameBgColor || '#1f2937'}
+                onChange={(e) => setStyleOptions({ frameBgColor: e.target.value })}
+                className="w-8 h-8 rounded cursor-pointer"
+              />
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Background</span>
+            </label>
+          )}
+        </div>
+      )}
 
-          {/* Icon Position - only show if an icon is selected */}
-          {styleOptions.frameIcon && styleOptions.frameIcon !== 'none' && (
-            <SelectButtonGroup
-              label="Icon Position"
-              options={iconPositionOptions.filter(o => o.value !== 'none')}
-              value={styleOptions.frameIconPosition || 'left'}
-              onChange={handleIconPositionChange}
-            />
+      {/* Advanced Text Options (collapsible) */}
+      {showLabelInput && (
+        <div>
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            {showAdvanced ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            Text Options
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-3 space-y-3">
+              <SelectButtonGroup
+                label="Font Size"
+                options={fontSizeOptions}
+                value={styleOptions.frameFontSize || 'base'}
+                onChange={handleFontSizeChange}
+              />
+
+              <SelectButtonGroup
+                label="Font Style"
+                options={fontFamilyOptions}
+                value={styleOptions.frameFontFamily || 'sans'}
+                onChange={handleFontFamilyChange}
+              />
+
+              <SelectButtonGroup
+                label="Icon"
+                options={iconOptions as SelectButtonOption<FrameIcon>[]}
+                value={styleOptions.frameIcon || 'none'}
+                onChange={handleIconChange}
+              />
+
+              {styleOptions.frameIcon && styleOptions.frameIcon !== 'none' && (
+                <SelectButtonGroup
+                  label="Icon Position"
+                  options={iconPositionOptions.filter(o => o.value !== 'none')}
+                  value={styleOptions.frameIconPosition || 'left'}
+                  onChange={handleIconPositionChange}
+                />
+              )}
+            </div>
           )}
         </div>
       )}
