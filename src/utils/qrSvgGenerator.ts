@@ -408,7 +408,7 @@ function embedSvgLogo(svgContent: string, x: number, y: number, size: number): s
     // Check for parsing errors
     const parserError = doc.querySelector('parsererror');
     if (parserError) {
-      console.error('Failed to parse SVG logo');
+      if (import.meta.env.DEV) console.error('Failed to parse SVG logo');
       return null;
     }
 
@@ -443,7 +443,7 @@ function embedSvgLogo(svgContent: string, x: number, y: number, size: number): s
 ${innerContent.split('\n').map(line => '      ' + line).join('\n')}
     </g>`;
   } catch (error) {
-    console.error('Error embedding SVG logo:', error);
+    if (import.meta.env.DEV) console.error('Error embedding SVG logo:', error);
     return null;
   }
 }
@@ -491,6 +491,7 @@ async function convertToDataUrl(url: string): Promise<string | null> {
     img.crossOrigin = 'anonymous';
 
     img.onload = () => {
+      clearTimeout(timeoutId);
       try {
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth || img.width;
@@ -498,7 +499,7 @@ async function convertToDataUrl(url: string): Promise<string | null> {
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          console.error('Could not get canvas context for logo conversion');
+          if (import.meta.env.DEV) console.error('Could not get canvas context for logo conversion');
           resolve(null);
           return;
         }
@@ -511,24 +512,25 @@ async function convertToDataUrl(url: string): Promise<string | null> {
         if (dataUrl && dataUrl.startsWith('data:image/')) {
           resolve(dataUrl);
         } else {
-          console.error('Canvas did not produce valid data URL');
+          if (import.meta.env.DEV) console.error('Canvas did not produce valid data URL');
           resolve(null);
         }
       } catch (error) {
-        console.error('Error converting logo to data URL:', error);
+        if (import.meta.env.DEV) console.error('Error converting logo to data URL:', error);
         resolve(null);
       }
     };
 
     img.onerror = () => {
-      console.error('Failed to load logo image for SVG embedding');
+      clearTimeout(timeoutId);
+      if (import.meta.env.DEV) console.error('Failed to load logo image for SVG embedding');
       resolve(null);
     };
 
     // Set a timeout in case the image hangs
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (!img.complete) {
-        console.error('Logo image load timed out');
+        if (import.meta.env.DEV) console.error('Logo image load timed out');
         resolve(null);
       }
     }, 5000);

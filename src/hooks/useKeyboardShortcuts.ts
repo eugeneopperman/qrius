@@ -43,7 +43,8 @@ export function useKeyboardShortcuts(callbacks: KeyboardCallbacks) {
         return;
       }
 
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isMac = (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData?.platform === 'macOS'
+        || /mac/i.test(navigator.platform);
       const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
 
       // Number keys 1-9 to switch QR type (with Ctrl/Cmd)

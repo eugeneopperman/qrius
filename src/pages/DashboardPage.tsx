@@ -8,12 +8,12 @@ import { Button } from '../components/ui/Button';
 import { Plus, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { useOrganizationQRCodes } from '../hooks/useOrganizationQRCodes';
 import type { QRCode } from '../types/database';
 
 export default function DashboardPage() {
   const { currentOrganization, planLimits, profile } = useAuthStore();
-  const [qrCodes, setQrCodes] = useState<QRCode[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { qrCodes, isLoading, deleteQRCode } = useOrganizationQRCodes({ limit: 10 });
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string | null } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [stats, setStats] = useState({
@@ -23,58 +23,47 @@ export default function DashboardPage() {
     teamMembers: 1,
   });
 
-  // Fetch QR codes and stats
+  // Fetch stats in parallel
   useEffect(() => {
-    async function fetchData() {
+    async function fetchStats() {
       if (!currentOrganization) return;
 
-      setIsLoading(true);
-
       try {
-        // Fetch QR codes for the organization
-        const { data: qrData, error: qrError } = await supabase
-          .from('qr_codes')
-          .select('*')
-          .eq('organization_id', currentOrganization.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
 
-        if (qrError) {
-          console.error('Error fetching QR codes:', qrError);
-        } else {
-          setQrCodes(qrData || []);
-        }
+        // Run all stat queries in parallel
+        const [qrCountResult, memberCountResult, scansTodayResult] = await Promise.all([
+          supabase
+            .from('qr_codes')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', currentOrganization.id),
+          supabase
+            .from('organization_members')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', currentOrganization.id),
+          supabase
+            .from('scan_events')
+            .select('*', { count: 'exact', head: true })
+            .eq('organization_id', currentOrganization.id)
+            .gte('scanned_at', todayStart.toISOString()),
+        ]);
 
-        // Get QR code count
-        const { count: qrCount } = await supabase
-          .from('qr_codes')
-          .select('*', { count: 'exact', head: true })
-          .eq('organization_id', currentOrganization.id);
-
-        // Get team member count
-        const { count: memberCount } = await supabase
-          .from('organization_members')
-          .select('*', { count: 'exact', head: true })
-          .eq('organization_id', currentOrganization.id);
-
-        // Calculate scan stats (simplified - in production you'd query scan_events)
-        const totalScans = (qrData || []).reduce((sum: number, qr: { total_scans: number }) => sum + (qr.total_scans || 0), 0);
+        const totalScans = qrCodes.reduce((sum: number, qr: QRCode) => sum + (qr.total_scans || 0), 0);
 
         setStats({
-          qrCodesCount: qrCount || 0,
-          scansToday: Math.round(totalScans * 0.05), // Placeholder
+          qrCodesCount: qrCountResult.count || 0,
+          scansToday: scansTodayResult.count ?? 0,
           scansThisMonth: totalScans,
-          teamMembers: memberCount || 1,
+          teamMembers: memberCountResult.count || 1,
         });
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Error fetching dashboard stats:', error);
       }
     }
 
-    fetchData();
-  }, [currentOrganization]);
+    fetchStats();
+  }, [currentOrganization, qrCodes]);
 
   const handleDeleteClick = useCallback((id: string) => {
     const qrCode = qrCodes.find((qr) => qr.id === id);
@@ -85,28 +74,13 @@ export default function DashboardPage() {
     if (!deleteConfirm) return;
 
     setIsDeleting(true);
-    try {
-      const { error } = await supabase
-        .from('qr_codes')
-        .delete()
-        .eq('id', deleteConfirm.id);
-
-      if (error) {
-        console.error('Error deleting QR code:', error);
-        alert('Failed to delete QR code. Please try again.');
-        return;
-      }
-
-      setQrCodes((prev) => prev.filter((qr) => qr.id !== deleteConfirm.id));
+    const success = await deleteQRCode(deleteConfirm.id);
+    if (success) {
       setStats((prev) => ({ ...prev, qrCodesCount: prev.qrCodesCount - 1 }));
-    } catch (error) {
-      console.error('Error deleting QR code:', error);
-      alert('Failed to delete QR code. Please try again.');
-    } finally {
-      setIsDeleting(false);
-      setDeleteConfirm(null);
     }
-  }, [deleteConfirm]);
+    setIsDeleting(false);
+    setDeleteConfirm(null);
+  }, [deleteConfirm, deleteQRCode]);
 
   const showUpgradePrompt = currentOrganization?.plan === 'free';
 
@@ -175,13 +149,13 @@ export default function DashboardPage() {
 
         {/* Delete confirmation modal */}
         {deleteConfirm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4 shadow-xl">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
                   <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 id="delete-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-white">
                   Delete QR Code
                 </h3>
               </div>

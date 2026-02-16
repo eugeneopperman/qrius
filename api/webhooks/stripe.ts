@@ -126,8 +126,34 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   logger.webhooks.info('Checkout completed', { organizationId, plan });
 }
 
+async function updateSubscription(orgId: string, subscription: Stripe.Subscription) {
+  const priceId = subscription.items.data[0]?.price.id;
+  const plan = priceToPlan[priceId] || 'free';
+
+  // Update organization plan
+  await supabaseAdmin
+    .from('organizations')
+    .update({
+      plan,
+      stripe_subscription_id: subscription.id,
+    })
+    .eq('id', orgId);
+
+  // Upsert subscription record
+  await supabaseAdmin.from('subscriptions').upsert({
+    organization_id: orgId,
+    stripe_subscription_id: subscription.id,
+    stripe_price_id: priceId,
+    status: subscription.status,
+    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+    cancel_at_period_end: subscription.cancel_at_period_end,
+  });
+}
+
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  const organizationId = subscription.metadata?.organization_id;
+  let organizationId = subscription.metadata?.organization_id;
+
   if (!organizationId) {
     // Try to find by customer ID
     const { data: org } = await supabaseAdmin
@@ -141,56 +167,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       return;
     }
 
-    const priceId = subscription.items.data[0]?.price.id;
-    const plan = priceToPlan[priceId] || 'free';
-
-    // Update organization
-    await supabaseAdmin
-      .from('organizations')
-      .update({
-        plan,
-        stripe_subscription_id: subscription.id,
-      })
-      .eq('id', org.id);
-
-    // Update subscription record
-    await supabaseAdmin.from('subscriptions').upsert({
-      organization_id: org.id,
-      stripe_subscription_id: subscription.id,
-      stripe_price_id: priceId,
-      status: subscription.status,
-      current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancel_at_period_end: subscription.cancel_at_period_end,
-    });
-
-    logger.webhooks.info('Subscription updated', { organizationId: org.id, status: subscription.status });
-    return;
+    organizationId = org.id;
   }
 
-  const priceId = subscription.items.data[0]?.price.id;
-  const plan = priceToPlan[priceId] || 'free';
-
-  // Update organization
-  await supabaseAdmin
-    .from('organizations')
-    .update({
-      plan,
-      stripe_subscription_id: subscription.id,
-    })
-    .eq('id', organizationId);
-
-  // Update subscription record
-  await supabaseAdmin.from('subscriptions').upsert({
-    organization_id: organizationId,
-    stripe_subscription_id: subscription.id,
-    stripe_price_id: priceId,
-    status: subscription.status,
-    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-    cancel_at_period_end: subscription.cancel_at_period_end,
-  });
-
+  await updateSubscription(organizationId, subscription);
   logger.webhooks.info('Subscription updated', { organizationId, status: subscription.status });
 }
 

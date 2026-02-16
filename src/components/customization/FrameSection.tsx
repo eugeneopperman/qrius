@@ -15,6 +15,7 @@ import {
 import { Input } from '../ui/Input';
 import { cn } from '../../utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
+import { SelectButtonGroup, type SelectButtonOption } from '../ui/SelectButtonGroup';
 import { FRAME_CONFIG } from '../../config/constants';
 import type { FrameStyle, FrameFontSize, FrameFontFamily, FrameIcon, FrameIconPosition } from '../../types';
 
@@ -176,108 +177,35 @@ export const FrameSection = memo(function FrameSection() {
             {currentLabel.length}/{FRAME_CONFIG.MAX_LABEL_LENGTH} characters
           </p>
 
-          {/* Font Size */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-              Font Size
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {fontSizeOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleFontSizeChange(option.value)}
-                  className={cn(
-                    'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
-                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
-                    (styleOptions.frameFontSize || 'base') === option.value
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <SelectButtonGroup
+            label="Font Size"
+            options={fontSizeOptions}
+            value={styleOptions.frameFontSize || 'base'}
+            onChange={handleFontSizeChange}
+          />
 
-          {/* Font Family */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-              Font Style
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {fontFamilyOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleFontFamilyChange(option.value)}
-                  className={cn(
-                    'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
-                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
-                    option.value === 'serif' && 'font-serif',
-                    option.value === 'mono' && 'font-mono',
-                    (styleOptions.frameFontFamily || 'sans') === option.value
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <SelectButtonGroup
+            label="Font Style"
+            options={fontFamilyOptions}
+            value={styleOptions.frameFontFamily || 'sans'}
+            onChange={handleFontFamilyChange}
+          />
 
-          {/* Icon Selection */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-              Icon
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {iconOptions.map((option) => {
-                const IconComponent = option.icon;
-                return (
-                  <button
-                    key={option.value}
-                    onClick={() => handleIconChange(option.value)}
-                    title={option.label}
-                    className={cn(
-                      'p-2 min-w-[36px] min-h-[36px] rounded-md border transition-colors touch-manipulation flex items-center justify-center',
-                      'focus:outline-none focus:ring-2 focus:ring-orange-400',
-                      (styleOptions.frameIcon || 'none') === option.value
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
-                    )}
-                  >
-                    {IconComponent && <IconComponent className="w-4 h-4" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <SelectButtonGroup
+            label="Icon"
+            options={iconOptions as SelectButtonOption<FrameIcon>[]}
+            value={styleOptions.frameIcon || 'none'}
+            onChange={handleIconChange}
+          />
 
           {/* Icon Position - only show if an icon is selected */}
           {styleOptions.frameIcon && styleOptions.frameIcon !== 'none' && (
-            <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                Icon Position
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {iconPositionOptions.filter(o => o.value !== 'none').map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleIconPositionChange(option.value)}
-                    className={cn(
-                      'px-3 py-2 min-h-[36px] text-xs rounded-md border transition-colors touch-manipulation',
-                      'focus:outline-none focus:ring-2 focus:ring-orange-400',
-                      (styleOptions.frameIconPosition || 'left') === option.value
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <SelectButtonGroup
+              label="Icon Position"
+              options={iconPositionOptions.filter(o => o.value !== 'none')}
+              value={styleOptions.frameIconPosition || 'left'}
+              onChange={handleIconPositionChange}
+            />
           )}
         </div>
       )}

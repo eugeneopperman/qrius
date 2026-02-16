@@ -4,6 +4,7 @@ import { Upload, X, AlertCircle, Square, Circle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
+import { SelectButtonGroup } from '../ui/SelectButtonGroup';
 import { LOGO_CONFIG } from '../../config/constants';
 import type { LogoShape } from '../../types';
 
@@ -161,23 +162,12 @@ export const LogoSection = memo(function LogoSection() {
               }
               className="mb-2"
             />
-            <div className="flex flex-wrap gap-2">
-              {LOGO_CONFIG.SIZE_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setStyleOptions({ logoSize: option.value })}
-                  className={cn(
-                    'px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border transition-colors touch-manipulation',
-                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
-                    (styleOptions.logoSize || LOGO_CONFIG.DEFAULT_SIZE) === option.value
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <SelectButtonGroup
+              options={LOGO_CONFIG.SIZE_OPTIONS.map(o => ({ value: String(o.value), label: o.label }))}
+              value={String(styleOptions.logoSize || LOGO_CONFIG.DEFAULT_SIZE)}
+              onChange={(v) => setStyleOptions({ logoSize: parseFloat(v) })}
+              size="md"
+            />
           </div>
 
           {/* Logo Shape */}
@@ -187,33 +177,16 @@ export const LogoSection = memo(function LogoSection() {
               tooltip="Apply a shape mask to your logo. Circular logos work well for profile pictures or round brand marks."
               className="mb-2"
             />
-            <div className="flex flex-wrap gap-2">
-              {([
+            <SelectButtonGroup
+              options={[
                 { value: 'square' as LogoShape, label: 'Square', icon: Square },
                 { value: 'rounded' as LogoShape, label: 'Rounded', icon: Square },
                 { value: 'circle' as LogoShape, label: 'Circle', icon: Circle },
-              ]).map((option) => {
-                const Icon = option.icon;
-                return (
-                  <button
-                    key={option.value}
-                    onClick={() => setStyleOptions({ logoShape: option.value })}
-                    className={cn(
-                      'flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border transition-colors touch-manipulation',
-                      (styleOptions.logoShape || 'square') === option.value
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400'
-                    )}
-                  >
-                    <Icon className={cn(
-                      "w-3.5 h-3.5",
-                      option.value === 'rounded' && "rounded-sm"
-                    )} />
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
+              ]}
+              value={(styleOptions.logoShape || 'square') as LogoShape}
+              onChange={(v) => setStyleOptions({ logoShape: v as LogoShape })}
+              size="md"
+            />
           </div>
 
           {/* Logo Padding */}
@@ -223,23 +196,12 @@ export const LogoSection = memo(function LogoSection() {
               tooltip="Space between the logo and QR code modules. Less padding makes the logo appear larger but may affect scannability."
               className="mb-2"
             />
-            <div className="flex flex-wrap gap-2">
-              {LOGO_CONFIG.PADDING_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setStyleOptions({ logoMargin: option.value })}
-                  className={cn(
-                    'px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border transition-colors touch-manipulation',
-                    'focus:outline-none focus:ring-2 focus:ring-orange-400',
-                    (styleOptions.logoMargin ?? LOGO_CONFIG.DEFAULT_MARGIN) === option.value
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300'
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+            <SelectButtonGroup
+              options={LOGO_CONFIG.PADDING_OPTIONS.map(o => ({ value: String(o.value), label: o.label }))}
+              value={String(styleOptions.logoMargin ?? LOGO_CONFIG.DEFAULT_MARGIN)}
+              onChange={(v) => setStyleOptions({ logoMargin: parseInt(v) })}
+              size="md"
+            />
           </div>
 
           <Button

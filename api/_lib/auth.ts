@@ -78,12 +78,13 @@ export async function requireApiKey(req: VercelRequest): Promise<{ organizationI
     throw new UnauthorizedError('Invalid API key format');
   }
 
-  const parts = apiKey.split('_');
-  if (parts.length < 3) {
+  // Extract prefix reliably: find the second underscore to split prefix from secret
+  const secondUnderscore = apiKey.indexOf('_', 3); // Start after "qr_"
+  if (secondUnderscore === -1 || secondUnderscore === apiKey.length - 1) {
     throw new UnauthorizedError('Invalid API key format');
   }
 
-  const keyPrefix = `qr_${parts[1]}`;
+  const keyPrefix = apiKey.substring(0, secondUnderscore);
 
   // Hash the full key for comparison
   const crypto = await import('crypto');

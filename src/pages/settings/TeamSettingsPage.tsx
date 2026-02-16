@@ -21,6 +21,20 @@ interface MemberWithUser extends OrganizationMember {
   user: User;
 }
 
+const roleLabels: Record<OrgRole, string> = {
+  owner: 'Owner',
+  admin: 'Admin',
+  editor: 'Editor',
+  viewer: 'Viewer',
+};
+
+const roleColors: Record<OrgRole, string> = {
+  owner: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  admin: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  editor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
+};
+
 export default function TeamSettingsPage() {
   const { currentOrganization, currentRole, user } = useAuthStore();
   const [members, setMembers] = useState<MemberWithUser[]>([]);
@@ -58,20 +72,6 @@ export default function TeamSettingsPage() {
   }, [currentOrganization]);
 
   const canManageTeam = currentRole === 'owner' || currentRole === 'admin';
-
-  const roleLabels: Record<OrgRole, string> = {
-    owner: 'Owner',
-    admin: 'Admin',
-    editor: 'Editor',
-    viewer: 'Viewer',
-  };
-
-  const roleColors: Record<OrgRole, string> = {
-    owner: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    admin: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    editor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
-  };
 
   return (
     <DashboardLayout>

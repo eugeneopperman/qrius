@@ -3,6 +3,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { requireAuth, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth';
+import { setCorsHeaders } from '../_lib/cors';
 import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -22,9 +23,7 @@ interface CheckoutRequest {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(res, 'POST, OPTIONS', req.headers.origin);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();

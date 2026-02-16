@@ -2,12 +2,11 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, toQRCodeResponse, toScanEventResponse, type QRCodeRow, type ScanEventRow } from '../_lib/db';
+import { setCorsHeaders } from '../_lib/cors';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  setCorsHeaders(res, 'GET, OPTIONS', req.headers.origin);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -42,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const qrCode = qrResult[0] as QRCodeRow;
     const baseResponse = toQRCodeResponse(qrCode, baseUrl);
 
-    // Get scan stats
+    // Get scan stats in parallel instead of sequentially (N+1 fix)
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekStart = new Date(todayStart);
@@ -50,61 +49,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const monthStart = new Date(todayStart);
     monthStart.setDate(monthStart.getDate() - 30);
 
-    // Scans today
-    const todayResult = await sql`
-      SELECT COUNT(*) as count FROM scan_events
-      WHERE qr_code_id = ${id} AND scanned_at >= ${todayStart.toISOString()}
-    `;
+    const [
+      todayResult,
+      weekResult,
+      monthResult,
+      countriesResult,
+      devicesResult,
+      recentResult,
+    ] = await Promise.all([
+      sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${todayStart.toISOString()}`,
+      sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${weekStart.toISOString()}`,
+      sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${monthStart.toISOString()}`,
+      sql`SELECT country_code, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND country_code IS NOT NULL GROUP BY country_code ORDER BY count DESC LIMIT 5`,
+      sql`SELECT device_type, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND device_type IS NOT NULL GROUP BY device_type ORDER BY count DESC`,
+      sql`SELECT * FROM scan_events WHERE qr_code_id = ${id} ORDER BY scanned_at DESC LIMIT 10`,
+    ]);
+
     const scansToday = parseInt(todayResult[0].count as string);
-
-    // Scans this week
-    const weekResult = await sql`
-      SELECT COUNT(*) as count FROM scan_events
-      WHERE qr_code_id = ${id} AND scanned_at >= ${weekStart.toISOString()}
-    `;
     const scansThisWeek = parseInt(weekResult[0].count as string);
-
-    // Scans this month
-    const monthResult = await sql`
-      SELECT COUNT(*) as count FROM scan_events
-      WHERE qr_code_id = ${id} AND scanned_at >= ${monthStart.toISOString()}
-    `;
     const scansThisMonth = parseInt(monthResult[0].count as string);
 
-    // Top countries
-    const countriesResult = await sql`
-      SELECT country_code, COUNT(*) as count
-      FROM scan_events
-      WHERE qr_code_id = ${id} AND country_code IS NOT NULL
-      GROUP BY country_code
-      ORDER BY count DESC
-      LIMIT 5
-    `;
     const topCountries = countriesResult.map((row) => ({
       countryCode: row.country_code as string,
       count: parseInt(row.count as string),
     }));
 
-    // Device breakdown
-    const devicesResult = await sql`
-      SELECT device_type, COUNT(*) as count
-      FROM scan_events
-      WHERE qr_code_id = ${id} AND device_type IS NOT NULL
-      GROUP BY device_type
-      ORDER BY count DESC
-    `;
     const deviceBreakdown = devicesResult.map((row) => ({
       deviceType: row.device_type as string,
       count: parseInt(row.count as string),
     }));
 
-    // Recent scans (last 10)
-    const recentResult = await sql`
-      SELECT * FROM scan_events
-      WHERE qr_code_id = ${id}
-      ORDER BY scanned_at DESC
-      LIMIT 10
-    `;
     const recentScans = recentResult.map((row) => toScanEventResponse(row as ScanEventRow));
 
     return res.status(200).json({

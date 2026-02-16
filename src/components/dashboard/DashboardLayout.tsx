@@ -17,8 +17,9 @@ import {
   Building2,
   ChevronDown,
 } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '../ui/Button';
+import { Dropdown } from '../ui/Dropdown';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -33,28 +34,9 @@ const navigation = [
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
-  const orgDropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const { theme, toggleTheme } = useThemeStore();
   const { currentOrganization, organizations, setCurrentOrganization } = useAuthStore();
-
-  // Close org dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (orgDropdownRef.current && !orgDropdownRef.current.contains(event.target as Node)) {
-        setOrgDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleOrgSwitch = async (orgId: string) => {
-    await setCurrentOrganization(orgId);
-    setOrgDropdownOpen(false);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -91,31 +73,35 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Organization Switcher */}
           <div className="px-3 py-4 border-b border-gray-200 dark:border-gray-800">
-            <div ref={orgDropdownRef} className="relative">
-              <button
-                onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-                className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                  <Building2 className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {currentOrganization?.name || 'Select workspace'}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                    {currentOrganization?.plan || 'Free'} plan
-                  </p>
-                </div>
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </button>
-
-              {orgDropdownOpen && organizations.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+            <Dropdown
+              trigger={({ toggle }) => (
+                <button
+                  onClick={toggle}
+                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                    <Building2 className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {currentOrganization?.name || 'Select workspace'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                      {currentOrganization?.plan || 'Free'} plan
+                    </p>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+              children={({ close }) => (
+                <>
                   {organizations.map((membership) => (
                     <button
                       key={membership.organization.id}
-                      onClick={() => handleOrgSwitch(membership.organization.id)}
+                      onClick={async () => {
+                        await setCurrentOrganization(membership.organization.id);
+                        close();
+                      }}
                       className={`w-full flex items-center gap-3 p-3 text-left transition-colors ${
                         currentOrganization?.id === membership.organization.id
                           ? 'bg-orange-50 dark:bg-orange-900/20'
@@ -138,9 +124,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       )}
                     </button>
                   ))}
-                </div>
+                </>
               )}
-            </div>
+            />
           </div>
 
           {/* Navigation */}

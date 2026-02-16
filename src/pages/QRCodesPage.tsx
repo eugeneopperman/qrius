@@ -1,57 +1,9 @@
-import { useEffect, useState } from 'react';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { QRCodeList } from '../components/dashboard/QRCodeList';
-import { useAuthStore } from '../stores/authStore';
-import { supabase } from '../lib/supabase';
-import type { QRCode } from '../types/database';
+import { useOrganizationQRCodes } from '../hooks/useOrganizationQRCodes';
 
 export default function QRCodesPage() {
-  const { currentOrganization } = useAuthStore();
-  const [qrCodes, setQrCodes] = useState<QRCode[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchQRCodes() {
-      if (!currentOrganization) return;
-
-      setIsLoading(true);
-
-      try {
-        const { data, error } = await supabase
-          .from('qr_codes')
-          .select('*')
-          .eq('organization_id', currentOrganization.id)
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching QR codes:', error);
-        } else {
-          setQrCodes(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching QR codes:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchQRCodes();
-  }, [currentOrganization]);
-
-  const handleDeleteQR = async (id: string) => {
-    try {
-      const { error } = await supabase.from('qr_codes').delete().eq('id', id);
-
-      if (error) {
-        console.error('Error deleting QR code:', error);
-        return;
-      }
-
-      setQrCodes(qrCodes.filter((qr) => qr.id !== id));
-    } catch (error) {
-      console.error('Error deleting QR code:', error);
-    }
-  };
+  const { qrCodes, isLoading, deleteQRCode } = useOrganizationQRCodes();
 
   return (
     <DashboardLayout>
@@ -65,7 +17,7 @@ export default function QRCodesPage() {
         </div>
 
         {/* QR Code list */}
-        <QRCodeList qrCodes={qrCodes} isLoading={isLoading} onDelete={handleDeleteQR} />
+        <QRCodeList qrCodes={qrCodes} isLoading={isLoading} onDelete={deleteQRCode} />
       </div>
     </DashboardLayout>
   );

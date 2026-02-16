@@ -6,16 +6,8 @@ import { Tooltip } from '../ui/Tooltip';
 import { InlineToggle } from '../ui/Toggle';
 import { HelpCircle } from 'lucide-react';
 import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '../../config/constants';
+import { getGradientPreview } from '../../utils/gradientUtils';
 import type { GradientOptions, GradientType } from '../../types';
-
-// Pure function moved outside component to avoid recreation
-function getGradientPreview(g: GradientOptions): string {
-  const colors = g.colorStops.map((s) => `${s.color} ${s.offset * 100}%`).join(', ');
-  if (g.type === 'radial') {
-    return `radial-gradient(circle, ${colors})`;
-  }
-  return `linear-gradient(${g.rotation || 0}deg, ${colors})`;
-}
 
 export const ColorSection = memo(function ColorSection() {
   const { styleOptions, setStyleOptions } = useQRStore();

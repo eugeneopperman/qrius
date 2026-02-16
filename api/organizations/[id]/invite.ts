@@ -3,7 +3,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth, requireRole, UnauthorizedError, ForbiddenError } from '../../_lib/auth';
+import { setCorsHeaders } from '../../_lib/cors';
 import crypto from 'crypto';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL || '',
@@ -17,9 +20,7 @@ interface InviteRequest {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(res, 'POST, OPTIONS', req.headers.origin);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -44,6 +45,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!body.email) {
       return res.status(400).json({ error: 'email is required' });
+    }
+
+    if (!EMAIL_REGEX.test(body.email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
     if (!['admin', 'editor', 'viewer'].includes(body.role)) {
@@ -107,7 +112,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // TODO: Send invitation email
     // For now, return the invite link
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!baseUrl) {
+      console.error('NEXT_PUBLIC_APP_URL not configured - cannot generate invite link');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
     const inviteLink = `${baseUrl}/invite/${token}`;
 
     return res.status(201).json({
