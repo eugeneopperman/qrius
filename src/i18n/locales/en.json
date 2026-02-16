@@ -7,7 +7,10 @@
   "nav": {
     "history": "History",
     "shortcuts": "Shortcuts",
-    "settings": "Settings"
+    "settings": "Settings",
+    "templates": "Templates",
+    "language": "Language",
+    "more": "More options"
   },
   "wizard": {
     "step1": "Choose Type",

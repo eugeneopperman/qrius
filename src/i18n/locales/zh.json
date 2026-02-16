@@ -7,7 +7,10 @@
   "nav": {
     "history": "历史记录",
     "shortcuts": "快捷键",
-    "settings": "设置"
+    "settings": "设置",
+    "templates": "模板",
+    "language": "语言",
+    "more": "更多选项"
   },
   "wizard": {
     "step1": "选择类型",

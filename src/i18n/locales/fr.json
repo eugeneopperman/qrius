@@ -7,7 +7,10 @@
   "nav": {
     "history": "Historique",
     "shortcuts": "Raccourcis",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "templates": "Modèles",
+    "language": "Langue",
+    "more": "Plus d'options"
   },
   "wizard": {
     "step1": "Choisir le Type",

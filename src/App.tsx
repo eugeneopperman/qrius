@@ -109,6 +109,7 @@ function App() {
       <Header
         onHistoryClick={() => setShowHistory(true)}
         onSettingsClick={() => setShowSettings(true)}
+        onShortcutsClick={() => setShowShortcuts(true)}
       />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
