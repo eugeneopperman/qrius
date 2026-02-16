@@ -7,7 +7,7 @@ describe('cn (className utility)', () => {
   });
 
   it('handles conditional classes', () => {
-    expect(cn('base', true && 'included', false && 'excluded')).toBe('base included');
+    expect(cn('base', (true as boolean) && 'included', (false as boolean) && 'excluded')).toBe('base included');
   });
 
   it('handles undefined and null values', () => {

@@ -35,6 +35,7 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
   // Process logo with shape mask when logo or shape changes
   useEffect(() => {
     if (!style.logoUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync with external state
       setProcessedLogoUrl(undefined);
       return;
     }
@@ -152,9 +153,10 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
       applyRoundness();
     }
 
+    const container = containerRef.current;
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
   }, [

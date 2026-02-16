@@ -46,7 +46,7 @@ export function validatePhone(phone: string): ValidationResult {
   }
 
   // Remove common formatting characters for validation
-  const cleaned = phone.replace(/[\s\-\(\)\.\+]/g, '');
+  const cleaned = phone.replace(/[\s\-().+]/g, '');
 
   if (!/^\d{7,15}$/.test(cleaned)) {
     return { isValid: false, error: 'Please enter a valid phone number (7-15 digits)' };

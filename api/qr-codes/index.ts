@@ -134,7 +134,7 @@ async function handleCreate(
   let attempts = 0;
   const maxAttempts = 5;
 
-  do {
+  for (;;) {
     shortCode = generateShortCode();
     attempts++;
 
@@ -150,7 +150,7 @@ async function handleCreate(
     if (attempts >= maxAttempts) {
       return res.status(500).json({ error: 'Failed to generate unique short code' });
     }
-  } while (true);
+  }
 
   // Insert new QR code
   const result = await sql`

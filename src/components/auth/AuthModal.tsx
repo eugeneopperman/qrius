@@ -21,6 +21,7 @@ export function AuthModal({ isOpen, onClose, defaultView = 'signin' }: AuthModal
   // Reset view when modal opens
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional prop sync
       setView(defaultView);
     }
   }, [isOpen, defaultView]);

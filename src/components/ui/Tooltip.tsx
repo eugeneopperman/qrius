@@ -56,6 +56,7 @@ export function Tooltip({
       }
 
       if (newPosition !== actualPosition) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional DOM measurement
         setActualPosition(newPosition);
       }
     }

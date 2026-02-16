@@ -189,6 +189,7 @@ export interface TabProps {
  * This component doesn't render its own content; TabList handles rendering.
  * Returns null but TypeScript needs a valid ReactElement return type.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function Tab(_props: TabProps): null {
   // This component doesn't render directly - TabList handles rendering
   return null;
@@ -243,6 +244,7 @@ export function TabPanels({ children, className }: TabPanelsProps) {
  * This component doesn't render its own content; TabPanels handles rendering.
  * Returns null but TypeScript needs the component to be valid.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TabPanel(_props: TabPanelProps): null {
   // This component doesn't render directly - TabPanels handles rendering
   return null;

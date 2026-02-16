@@ -96,6 +96,7 @@ export function getDotTypeForPattern(pattern: QRPattern, roundness: number): Dot
  *
  * @param pattern - 'solid' or 'dots'
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function shouldApplyRoundnessPostProcessing(_pattern: QRPattern): boolean {
   // Disabled - using library's built-in dot types instead
   return false;

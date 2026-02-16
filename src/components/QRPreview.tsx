@@ -196,11 +196,13 @@ export const QRPreview = forwardRef<QRPreviewHandle>((_props, ref) => {
       applyRoundness();
     }
 
+    const container = containerRef.current;
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only initialization
   }, []);
 
   // Update QR code when options change

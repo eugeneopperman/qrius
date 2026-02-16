@@ -77,7 +77,7 @@ function FrameLabel({
   );
 }
 
-interface TopLabelProps extends FrameLabelProps {}
+type TopLabelProps = FrameLabelProps;
 
 export function TopLabel({ label, fontSize, fontFamily, icon, iconPosition }: TopLabelProps) {
   return (
@@ -100,7 +100,7 @@ export function TopLabel({ label, fontSize, fontFamily, icon, iconPosition }: To
   );
 }
 
-interface BadgeLabelProps extends FrameLabelProps {}
+type BadgeLabelProps = FrameLabelProps;
 
 export function BadgeLabel({ label, fontSize, fontFamily, icon, iconPosition }: BadgeLabelProps) {
   return (
@@ -123,7 +123,7 @@ export function BadgeLabel({ label, fontSize, fontFamily, icon, iconPosition }: 
   );
 }
 
-interface BottomLabelProps extends FrameLabelProps {}
+type BottomLabelProps = FrameLabelProps;
 
 export function BottomLabel({ label, fontSize, fontFamily, icon, iconPosition }: BottomLabelProps) {
   return (
@@ -145,6 +145,7 @@ export function BottomLabel({ label, fontSize, fontFamily, icon, iconPosition }:
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- utility co-located with components
 export function getFrameClasses(frameStyle: FrameStyle): string {
   switch (frameStyle) {
     case 'simple':

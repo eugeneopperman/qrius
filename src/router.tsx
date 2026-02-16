@@ -3,7 +3,7 @@ import { lazy, Suspense } from 'react';
 import { useAuthStore } from './stores/authStore';
 import { Loader2 } from 'lucide-react';
 
-// Loading component
+// eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function LoadingSpinner() {
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -32,7 +32,7 @@ const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const CookiesPage = lazy(() => import('./pages/CookiesPage'));
 
-// Root layout
+// eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {
   return (
     <Suspense fallback={<LoadingSpinner />}>

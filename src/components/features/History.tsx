@@ -32,6 +32,7 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
   // Check if we can undo when modal opens
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync undo state on open
       setShowUndo(canUndo());
     }
   }, [isOpen, canUndo]);
@@ -189,6 +190,7 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
   // Fetch scan count if this is a tracked QR and we don't have a recent count
   useEffect(() => {
     if (entry.trackingId && trackingSettings?.enabled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch callback
       setIsLoadingScans(true);
       getTrackableQR(entry.trackingId, trackingSettings.apiBaseUrl || undefined)
         .then((result) => {

@@ -80,10 +80,10 @@ export function classyDotPath(
   const radius = size / 2;
 
   // Classy style: bottom-right corner rounded when exposed
-  let topLeft = 0;
-  let topRight = 0;
+  const topLeft = 0;
+  const topRight = 0;
   let bottomRight = 0;
-  let bottomLeft = 0;
+  const bottomLeft = 0;
 
   if (!neighbors.bottom && !neighbors.right) {
     bottomRight = radius;

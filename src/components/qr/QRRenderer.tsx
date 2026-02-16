@@ -120,12 +120,14 @@ export function QRRenderer({
 
     onQRCodeReady?.(qrCodeRef.current);
 
+    const container = containerRef.current;
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
-  }, []); // Only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only initialization
+  }, []);
 
   // Update QR code when options change
   useEffect(() => {

@@ -85,11 +85,10 @@ class FileReaderMock {
   readAsBinaryString = vi.fn();
   readAsText = vi.fn();
   readAsDataURL = vi.fn().mockImplementation(function (this: FileReaderMock) {
-    const self = this;
     setTimeout(() => {
-      self.result = 'data:image/png;base64,mock';
-      if (self.onloadend) {
-        self.onloadend({ target: self } as unknown as ProgressEvent<FileReader>);
+      this.result = 'data:image/png;base64,mock';
+      if (this.onloadend) {
+        this.onloadend({ target: this } as unknown as ProgressEvent<FileReader>);
       }
     }, 0);
   });

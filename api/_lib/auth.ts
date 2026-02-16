@@ -231,7 +231,7 @@ export async function checkPlanLimit(
   let limit = 0;
 
   switch (limitType) {
-    case 'qr_codes':
+    case 'qr_codes': {
       const { count: qrCount } = await supabaseAdmin
         .from('qr_codes')
         .select('*', { count: 'exact', head: true })
@@ -239,8 +239,9 @@ export async function checkPlanLimit(
       current = qrCount || 0;
       limit = limits.qr_codes_limit;
       break;
+    }
 
-    case 'api_requests':
+    case 'api_requests': {
       // Check today's API usage
       const today = new Date().toISOString().split('T')[0];
       const { data: usage } = await supabaseAdmin
@@ -252,8 +253,9 @@ export async function checkPlanLimit(
       current = usage?.api_requests || 0;
       limit = limits.api_requests_per_day;
       break;
+    }
 
-    case 'scans':
+    case 'scans': {
       const { data: monthUsage } = await supabaseAdmin
         .from('usage_records')
         .select('scans_count')
@@ -263,6 +265,7 @@ export async function checkPlanLimit(
       current = monthUsage?.scans_count || 0;
       limit = limits.scans_per_month;
       break;
+    }
   }
 
   // -1 means unlimited

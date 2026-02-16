@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useWizardStore } from '../../stores/wizardStore';
 import { WizardProgress } from './WizardProgress';
 import { WizardPreview } from './WizardPreview';
@@ -18,9 +18,11 @@ export function WizardContainer({ onPreviewRef }: WizardContainerProps) {
   const previewRef = useRef<QRPreviewHandle>(null);
 
   // Pass the preview ref up for keyboard shortcuts
-  if (onPreviewRef) {
-    onPreviewRef(previewRef);
-  }
+  useEffect(() => {
+    if (onPreviewRef) {
+      onPreviewRef(previewRef);
+    }
+  }, [onPreviewRef]);
 
   const renderStep = () => {
     switch (currentStep) {

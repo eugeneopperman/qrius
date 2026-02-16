@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { Loader2 } from 'lucide-react';
 
@@ -10,15 +10,14 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, fallback, redirectTo }: AuthGuardProps) {
   const { user, isLoading, isInitialized } = useAuthStore();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const shouldRedirect = isInitialized && !user && !!redirectTo;
 
   useEffect(() => {
-    if (isInitialized && !user && redirectTo) {
-      setShouldRedirect(true);
+    if (shouldRedirect && redirectTo) {
       // Use window.location for now until router is set up
       window.location.href = redirectTo;
     }
-  }, [isInitialized, user, redirectTo]);
+  }, [shouldRedirect, redirectTo]);
 
   // Show loading state while initializing
   if (!isInitialized || isLoading) {

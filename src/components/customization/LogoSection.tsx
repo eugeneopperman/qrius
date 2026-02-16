@@ -29,6 +29,34 @@ export const LogoSection = memo(function LogoSection() {
       return;
     }
 
+    // Sanitize SVG content to remove potentially dangerous elements
+    const sanitizeSvg = (svgContent: string): string => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+      const svg = doc.documentElement;
+
+      // Remove script elements
+      svg.querySelectorAll('script').forEach(el => el.remove());
+
+      // Remove event handlers from all elements
+      const allElements = svg.querySelectorAll('*');
+      allElements.forEach(el => {
+        // Remove event handler attributes
+        Array.from(el.attributes).forEach(attr => {
+          if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
+            el.removeAttribute(attr.name);
+          }
+        });
+      });
+
+      // Remove external references (use, image with external href)
+      svg.querySelectorAll('use[href^="http"], use[xlink\\:href^="http"], image[href^="http"], image[xlink\\:href^="http"]').forEach(el => {
+        el.remove();
+      });
+
+      return new XMLSerializer().serializeToString(svg);
+    };
+
     // Check if it's an SVG file
     const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
 
@@ -55,34 +83,6 @@ export const LogoSection = memo(function LogoSection() {
       reader.readAsDataURL(file);
     }
   }, [setStyleOptions]);
-
-  // Sanitize SVG content to remove potentially dangerous elements
-  const sanitizeSvg = (svgContent: string): string => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgContent, 'image/svg+xml');
-    const svg = doc.documentElement;
-
-    // Remove script elements
-    svg.querySelectorAll('script').forEach(el => el.remove());
-
-    // Remove event handlers from all elements
-    const allElements = svg.querySelectorAll('*');
-    allElements.forEach(el => {
-      // Remove event handler attributes
-      Array.from(el.attributes).forEach(attr => {
-        if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
-          el.removeAttribute(attr.name);
-        }
-      });
-    });
-
-    // Remove external references (use, image with external href)
-    svg.querySelectorAll('use[href^="http"], use[xlink\\:href^="http"], image[href^="http"], image[xlink\\:href^="http"]').forEach(el => {
-      el.remove();
-    });
-
-    return new XMLSerializer().serializeToString(svg);
-  };
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();

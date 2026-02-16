@@ -36,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Authenticate user
     const user = await requireAuth(req);
-    const { organizationId, role } = await getUserOrganization(user.id);
+    const { organizationId } = await getUserOrganization(user.id);
 
     // Only owners and admins can manage billing
     await requireRole(user.id, organizationId, ['owner', 'admin']);

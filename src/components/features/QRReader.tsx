@@ -93,7 +93,7 @@ export function QRReader() {
       const decodedText = await scanner.scanFile(file, true);
       setResult(decodedText);
       await scanner.clear();
-    } catch (err) {
+    } catch {
       setError('No QR code found in the image. Please try another image.');
     }
 

@@ -33,7 +33,7 @@ export async function applyLogoMask(
         case 'circle':
           ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
           break;
-        case 'rounded':
+        case 'rounded': {
           // Rounded rectangle with ~20% corner radius
           const radius = size * 0.2;
           ctx.moveTo(radius, 0);
@@ -46,6 +46,7 @@ export async function applyLogoMask(
           ctx.lineTo(0, radius);
           ctx.quadraticCurveTo(0, 0, radius, 0);
           break;
+        }
         case 'square':
         default:
           ctx.rect(0, 0, size, size);

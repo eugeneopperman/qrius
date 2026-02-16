@@ -200,13 +200,12 @@ export function CookieConsent() {
 /**
  * Hook to check if analytics cookies are enabled
  */
+// eslint-disable-next-line react-refresh/only-export-components -- hook co-located with component
 export function useAnalyticsConsent(): boolean {
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
+  const [enabled] = useState(() => {
     const stored = getStoredConsent();
-    setEnabled(stored?.status === 'accepted' && stored.analytics === true);
-  }, []);
+    return stored?.status === 'accepted' && stored.analytics === true;
+  });
 
   return enabled;
 }
@@ -214,6 +213,7 @@ export function useAnalyticsConsent(): boolean {
 /**
  * Reset cookie consent (useful for testing or settings page)
  */
+// eslint-disable-next-line react-refresh/only-export-components -- utility co-located with component
 export function resetCookieConsent(): void {
   try {
     localStorage.removeItem(COOKIE_CONSENT_KEY);
