@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from '@tanstack/react-router';
 import { X, Cookie } from 'lucide-react';
 import { Button } from '../ui/Button';
 
@@ -93,9 +92,9 @@ export function CookieConsent() {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 We use cookies to enhance your experience. Essential cookies are required for the site to work.
                 You can choose to enable analytics cookies to help us improve.{' '}
-                <Link to="/cookies" className="text-orange-600 hover:text-orange-500 underline">
+                <a href="/cookies" className="text-orange-600 hover:text-orange-500 underline">
                   Learn more
-                </Link>
+                </a>
               </p>
             </div>
             <button
