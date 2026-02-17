@@ -12,18 +12,32 @@ import {
   LocationForm,
 } from '../../qr-types';
 import { Button } from '../../ui/Button';
-import { ArrowLeft, ArrowRight, Zap } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Zap,
+  Link,
+  Type,
+  Mail,
+  Phone,
+  MessageSquare,
+  Wifi,
+  User,
+  Calendar,
+  MapPin,
+} from 'lucide-react';
+import type { QRCodeType } from '../../../types';
 
-const typeLabels: Record<string, string> = {
-  url: 'URL',
-  text: 'Text',
-  email: 'Email',
-  phone: 'Phone',
-  sms: 'SMS',
-  wifi: 'WiFi',
-  vcard: 'Contact',
-  event: 'Event',
-  location: 'Location',
+const typeConfig: Record<QRCodeType, { label: string; icon: React.ElementType }> = {
+  url: { label: 'URL', icon: Link },
+  text: { label: 'Plain Text', icon: Type },
+  email: { label: 'Email', icon: Mail },
+  phone: { label: 'Phone Number', icon: Phone },
+  sms: { label: 'SMS Message', icon: MessageSquare },
+  wifi: { label: 'WiFi Network', icon: Wifi },
+  vcard: { label: 'Contact Card', icon: User },
+  event: { label: 'Calendar Event', icon: Calendar },
+  location: { label: 'Location', icon: MapPin },
 };
 
 export function StepContent() {
@@ -55,55 +69,70 @@ export function StepContent() {
     }
   };
 
-  // Check if the form has enough content to proceed
   const hasContent = getQRValue().length > 0;
+  const config = typeConfig[activeType] || typeConfig.url;
+  const Icon = config.icon;
 
   return (
-    <div className="w-full">
-      <div className="mb-6">
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-1">
-          Enter your {typeLabels[activeType] || 'content'}
-        </h2>
-        <p className="text-gray-500 dark:text-gray-400">
-          Fill in the details for your {typeLabels[activeType]?.toLowerCase()} QR code
-        </p>
-      </div>
+    <div className="w-full max-w-xl">
+      <div className="card">
+        {/* Compact header: icon badge + type name */}
+        <div className="flex items-center gap-3 mb-0">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+            <Icon className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white leading-tight">
+              {config.label}
+            </h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Step 2 of 4</p>
+          </div>
+        </div>
 
-      {/* Form content */}
-      <div className="card mb-6">
-        {renderForm()}
-      </div>
+        {/* Divider */}
+        <hr className="-mx-6 my-4 border-gray-100 dark:border-gray-800" />
 
-      {/* Navigation */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-        <Button
-          variant="ghost"
-          onClick={prevStep}
-          className="order-2 sm:order-1"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
+        {/* Form content */}
+        <div>
+          {renderForm()}
+        </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 order-1 sm:order-2">
+        {/* Divider */}
+        <hr className="-mx-6 my-4 border-gray-100 dark:border-gray-800" />
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between">
           <Button
-            variant="secondary"
-            onClick={skipToDownload}
-            disabled={!hasContent}
-            title={!hasContent ? 'Enter content first' : 'Skip styling and download now'}
+            variant="ghost"
+            onClick={prevStep}
+            size="sm"
           >
-            <Zap className="w-4 h-4" />
-            Quick Download
+            <ArrowLeft className="w-4 h-4" />
+            Back
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={nextStep}
-            disabled={!hasContent}
-          >
-            Customize
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={skipToDownload}
+              disabled={!hasContent}
+              size="sm"
+              title={!hasContent ? 'Enter content first' : 'Skip styling and download now'}
+            >
+              <Zap className="w-4 h-4" />
+              <span className="hidden sm:inline">Quick Download</span>
+            </Button>
+
+            <Button
+              variant="primary"
+              onClick={nextStep}
+              disabled={!hasContent}
+              size="sm"
+            >
+              Customize
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

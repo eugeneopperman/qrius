@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
-import { MapPin } from 'lucide-react';
+
 import { validateLatitude, validateLongitude } from '../../utils/validators';
 
 export function LocationForm() {
@@ -13,11 +13,6 @@ export function LocationForm() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-        <MapPin className="w-5 h-5" />
-        <h3 className="font-medium">Geographic Location</h3>
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input
           label="Latitude"

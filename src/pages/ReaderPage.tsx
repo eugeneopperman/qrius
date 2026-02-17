@@ -7,7 +7,7 @@ const QRReader = lazy(() => import('../components/features/QRReader').then(m => 
 export default function ReaderPage() {
   return (
     <DashboardLayout>
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-lg mx-auto animate-slide-up-page">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">QR Code Reader</h1>
           <p className="text-gray-500 dark:text-gray-400">

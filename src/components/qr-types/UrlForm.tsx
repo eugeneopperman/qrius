@@ -6,7 +6,7 @@ import { useSettingsStore } from '../../stores/settingsStore';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Toggle } from '../ui/Toggle';
-import { Link, Shrink, Loader2, Check, AlertCircle, Copy, Link2, Sparkles, BarChart3 } from 'lucide-react';
+import { Shrink, Loader2, Check, AlertCircle, Copy, Link2, Sparkles, BarChart3 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { validateUrl } from '../../utils/validators';
 import { useFormField } from '../../hooks/useFormField';
@@ -141,11 +141,6 @@ export function UrlForm() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-        <Link className="w-5 h-5" />
-        <h3 className="font-medium">Website URL</h3>
-      </div>
-
       <Input
         label="Enter URL"
         type="url"
@@ -364,31 +359,31 @@ export function UrlForm() {
             </div>
           )}
 
-          {/* Active URL indicator */}
-          <div
-            className={cn(
-              'p-3 rounded-lg text-sm',
-              urlData.trackingEnabled && urlData.trackingUrl
-                ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'
-                : urlData.useShortened && urlData.shortened
-                  ? 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800'
-                  : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700'
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
-                QR Code will encode:
-              </span>
-              {urlData.trackingEnabled && urlData.trackingUrl && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300">
-                  Tracked
-                </span>
+          {/* Active URL indicator — only when encoded URL differs from input */}
+          {activeUrl && activeUrl !== urlData.url && (
+            <div
+              className={cn(
+                'p-3 rounded-lg text-sm',
+                urlData.trackingEnabled && urlData.trackingUrl
+                  ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'
+                  : 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800'
               )}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">
+                  QR Code will encode:
+                </span>
+                {urlData.trackingEnabled && urlData.trackingUrl && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300">
+                    Tracked
+                  </span>
+                )}
+              </div>
+              <p className="font-mono text-sm mt-1 break-all text-gray-900 dark:text-gray-100">
+                {activeUrl}
+              </p>
             </div>
-            <p className="font-mono text-sm mt-1 break-all text-gray-900 dark:text-gray-100">
-              {activeUrl || 'Enter a URL above'}
-            </p>
-          </div>
+          )}
         </>
       )}
     </div>

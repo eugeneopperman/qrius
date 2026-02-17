@@ -16,6 +16,8 @@ export const QR_CONFIG = {
   MAX_DATA_LENGTH: 2953,
   /** PDF export size in mm */
   PDF_SIZE_MM: 80,
+  /** Placeholder data for ghost QR preview when no content is entered */
+  GHOST_DATA: 'https://qrius.app',
 } as const;
 
 // ============================================================================

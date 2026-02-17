@@ -1,6 +1,7 @@
 import { createRouter, createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 import { useAuthStore } from './stores/authStore';
+import { isSupabaseMissing } from './lib/supabase';
 import { Loader2 } from 'lucide-react';
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
@@ -35,6 +36,16 @@ const CookiesPage = lazy(() => import('./pages/CookiesPage'));
 function RootLayout() {
   return (
     <Suspense fallback={<LoadingSpinner />}>
+      {import.meta.env.DEV && isSupabaseMissing && (
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-[100] bg-amber-50 dark:bg-amber-900/80 border border-amber-300 dark:border-amber-700 rounded-xl px-4 py-3 shadow-lg text-sm text-amber-800 dark:text-amber-200">
+          <p className="font-medium">Supabase not configured</p>
+          <p className="text-xs mt-1 text-amber-600 dark:text-amber-300">
+            Set <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">VITE_SUPABASE_URL</code> and{' '}
+            <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">VITE_SUPABASE_ANON_KEY</code> in{' '}
+            <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">.env.local</code> to enable auth.
+          </p>
+        </div>
+      )}
       <Outlet />
     </Suspense>
   );

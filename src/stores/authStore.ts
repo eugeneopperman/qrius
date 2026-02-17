@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User as SupabaseUser, Session, Subscription } from '@supabase/supabase-js';
 import type { User, Organization, OrganizationMember, PlanLimits } from '../types/database';
-import { supabase } from '../lib/supabase';
+import { supabase, checkSupabaseConnection } from '../lib/supabase';
 
 // Track the auth listener subscription to clean up on re-init
 let authSubscription: Subscription | null = null;
@@ -15,6 +15,7 @@ export interface AuthState {
   profile: User | null;
   isLoading: boolean;
   isInitialized: boolean;
+  connectionError: string | null;
 
   // Onboarding state
   hasCompletedOnboarding: boolean;
@@ -55,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
       profile: null,
       isLoading: true,
       isInitialized: false,
+      connectionError: null,
       hasCompletedOnboarding: false,
       organizations: [],
       currentOrganization: null,
@@ -68,7 +70,15 @@ export const useAuthStore = create<AuthState>()(
       // Initialize auth state
       initialize: async () => {
         try {
-          set({ isLoading: true });
+          set({ isLoading: true, connectionError: null });
+
+          // Check if Supabase is reachable
+          const connectionCheck = await checkSupabaseConnection();
+          if (!connectionCheck.ok) {
+            console.warn('Supabase connection issue:', connectionCheck.message);
+            set({ isLoading: false, isInitialized: true, connectionError: connectionCheck.message ?? 'Connection failed' });
+            return;
+          }
 
           // Get current session
           const { data: { session }, error } = await supabase.auth.getSession();
@@ -132,6 +142,9 @@ export const useAuthStore = create<AuthState>()(
           return { error: null };
         } catch (error) {
           set({ isLoading: false });
+          if (error instanceof TypeError) {
+            return { error: new Error('Cannot reach the authentication server. Check your internet connection, or the Supabase project may be paused.') };
+          }
           return { error: error as Error };
         }
       },
@@ -158,6 +171,9 @@ export const useAuthStore = create<AuthState>()(
           return { error: null };
         } catch (error) {
           set({ isLoading: false });
+          if (error instanceof TypeError) {
+            return { error: new Error('Cannot reach the authentication server. Check your internet connection, or the Supabase project may be paused.') };
+          }
           return { error: error as Error };
         }
       },
@@ -251,7 +267,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // Fetch user profile
+      // Fetch user profile (auto-provisions if missing — mirrors the handle_new_user trigger)
       fetchProfile: async () => {
         const { user } = get();
         if (!user) return;
@@ -263,12 +279,77 @@ export const useAuthStore = create<AuthState>()(
             .eq('id', user.id)
             .single();
 
-          if (error) {
-            console.error('Error fetching profile:', error);
+          if (data) {
+            set({ profile: data });
             return;
           }
 
-          set({ profile: data });
+          // Profile not found — auto-provision (handles cases where the DB trigger isn't set up)
+          if (error && error.code === 'PGRST116') {
+            console.warn('User profile not found, auto-provisioning...');
+
+            const userName =
+              user.user_metadata?.name ??
+              user.user_metadata?.full_name ??
+              user.email?.split('@')[0] ??
+              'User';
+
+            // 1. Create user profile
+            const { error: insertError } = await supabase.from('users').insert({
+              id: user.id,
+              email: user.email!,
+              name: userName,
+              avatar_url: user.user_metadata?.avatar_url ?? null,
+            });
+
+            if (insertError) {
+              console.error('Error auto-provisioning user profile:', insertError);
+              return;
+            }
+
+            // 2. Create personal organization
+            const orgId = crypto.randomUUID();
+            const { error: orgError } = await supabase.from('organizations').insert({
+              id: orgId,
+              name: `${userName}'s Workspace`,
+              slug: `personal-${user.id.slice(0, 8)}`,
+            });
+
+            if (orgError) {
+              console.error('Error auto-provisioning organization:', orgError);
+              // Profile was created, continue — org can be created later
+            }
+
+            // 3. Add user as owner of their personal org
+            if (!orgError) {
+              const { error: memberError } = await supabase.from('organization_members').insert({
+                organization_id: orgId,
+                user_id: user.id,
+                role: 'owner',
+              });
+
+              if (memberError) {
+                console.error('Error auto-provisioning org membership:', memberError);
+              }
+            }
+
+            // 4. Re-fetch the newly created profile
+            const { data: newProfile } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+
+            if (newProfile) {
+              set({ profile: newProfile });
+            }
+            return;
+          }
+
+          // Other error
+          if (error) {
+            console.error('Error fetching profile:', error);
+          }
         } catch (error) {
           console.error('Error fetching profile:', error);
         }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQRStore } from '../../stores/qrStore';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
-import { User } from 'lucide-react';
+
 import { validateEmail, validatePhone, validateUrl, validateName } from '../../utils/validators';
 
 export function VCardForm() {
@@ -29,11 +29,6 @@ export function VCardForm() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-        <User className="w-5 h-5" />
-        <h3 className="font-medium">Contact Card (vCard)</h3>
-      </div>
-
       {/* Personal Information */}
       <fieldset className="space-y-4">
         <legend className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">

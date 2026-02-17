@@ -299,6 +299,15 @@
   }
 }
 
+@keyframes ghostBreathe {
+  0%, 100% { opacity: 0.12; }
+  50% { opacity: 0.2; }
+}
+
+.animate-ghost-breathe {
+  animation: ghostBreathe 3s ease-in-out infinite;
+}
+
 /* ============================================
    QR PREVIEW
    ============================================ */

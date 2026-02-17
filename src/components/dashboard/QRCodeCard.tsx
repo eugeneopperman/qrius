@@ -50,7 +50,7 @@ export function QRCodeCard({ qrCode, onDelete }: QRCodeCardProps) {
   });
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden card-interactive">
       {/* QR Preview */}
       <div className="aspect-square p-6 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
         <div className="w-full h-full max-w-[200px] max-h-[200px] bg-white rounded-lg flex items-center justify-center">

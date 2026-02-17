@@ -42,7 +42,7 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto animate-slide-up-page">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
           <p className="text-gray-500 dark:text-gray-400">

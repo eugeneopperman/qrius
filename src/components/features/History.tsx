@@ -174,13 +174,13 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
   );
 }
 
-interface HistoryCardProps {
+export interface HistoryCardProps {
   entry: HistoryEntry;
   onRemove: () => void;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
+export function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
   const { setActiveType, setStyleOptions, setUrlData, setTextData, setEmailData, setPhoneData, setSmsData, setWifiData, setVcardData, setEventData, setLocationData } = useQRStore();
   const { trackingSettings } = useSettingsStore();
   const { updateEntry } = useHistoryStore();
@@ -249,8 +249,8 @@ function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
     // Show success message
     toast.success('QR code restored from history');
 
-    // Close the modal
-    onClose();
+    // Close the modal if callback provided
+    onClose?.();
   };
 
   const formatDate = (timestamp: number) => {

@@ -45,7 +45,7 @@ export function WizardContainer({ onPreviewRef }: WizardContainerProps) {
   return (
     <div className="w-full">
       {/* Progress indicator */}
-      <div className="relative mb-10 py-4 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl">
+      <div className="relative mb-6 py-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl">
         <WizardProgress />
       </div>
 
@@ -53,18 +53,11 @@ export function WizardContainer({ onPreviewRef }: WizardContainerProps) {
       <div
         className={cn(
           'transition-all duration-300',
-          showSidePreview && 'lg:grid lg:grid-cols-[1fr_320px] lg:gap-8'
+          showSidePreview && 'lg:grid lg:grid-cols-[1fr_360px] lg:gap-8 lg:items-start'
         )}
       >
         {/* Main content area */}
         <div className="min-w-0">
-          {/* Mobile preview - top position for steps 2 and 3 */}
-          {showSidePreview && (
-            <div className="lg:hidden mb-6">
-              <WizardPreview ref={previewRef} />
-            </div>
-          )}
-
           {/* Step content with animation */}
           <div
             key={currentStep}
@@ -72,6 +65,13 @@ export function WizardContainer({ onPreviewRef }: WizardContainerProps) {
           >
             {renderStep()}
           </div>
+
+          {/* Mobile preview - below form content */}
+          {showSidePreview && (
+            <div className="lg:hidden mt-6">
+              <WizardPreview ref={previewRef} compact />
+            </div>
+          )}
         </div>
 
         {/* Desktop side preview */}

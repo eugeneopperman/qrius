@@ -317,6 +317,40 @@ export const FrameSection = memo(function FrameSection() {
         </div>
       )}
 
+      {/* Border Radius & Padding Sliders */}
+      {selectedFrame !== 'none' && (
+        <div className="space-y-3">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Border Radius</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{styleOptions.frameBorderRadius ?? 8}px</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={32}
+              value={styleOptions.frameBorderRadius ?? 8}
+              onChange={(e) => setStyleOptions({ frameBorderRadius: Number(e.target.value) })}
+              className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+            />
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Padding</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{styleOptions.framePadding ?? 8}px</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={32}
+              value={styleOptions.framePadding ?? 8}
+              onChange={(e) => setStyleOptions({ framePadding: Number(e.target.value) })}
+              className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Advanced Text Options (collapsible) */}
       {showLabelInput && (
         <div>

@@ -296,13 +296,20 @@ ALTER TABLE qr_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scan_events ENABLE ROW LEVEL SECURITY;
 
 -- Users: can read own profile, admins can read all
+DROP POLICY IF EXISTS users_select_own ON users;
 CREATE POLICY users_select_own ON users
     FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS users_insert_own ON users;
+CREATE POLICY users_insert_own ON users
+    FOR INSERT WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS users_update_own ON users;
 CREATE POLICY users_update_own ON users
     FOR UPDATE USING (auth.uid() = id);
 
 -- Organizations: members can read their orgs
+DROP POLICY IF EXISTS organizations_select ON organizations;
 CREATE POLICY organizations_select ON organizations
     FOR SELECT USING (
         EXISTS (
@@ -312,9 +319,11 @@ CREATE POLICY organizations_select ON organizations
         )
     );
 
+DROP POLICY IF EXISTS organizations_insert ON organizations;
 CREATE POLICY organizations_insert ON organizations
     FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS organizations_update ON organizations;
 CREATE POLICY organizations_update ON organizations
     FOR UPDATE USING (
         EXISTS (
@@ -326,6 +335,7 @@ CREATE POLICY organizations_update ON organizations
     );
 
 -- Organization members: members can view their org's members
+DROP POLICY IF EXISTS org_members_select ON organization_members;
 CREATE POLICY org_members_select ON organization_members
     FOR SELECT USING (
         EXISTS (
@@ -335,9 +345,12 @@ CREATE POLICY org_members_select ON organization_members
         )
     );
 
+DROP POLICY IF EXISTS org_members_insert ON organization_members;
 CREATE POLICY org_members_insert ON organization_members
     FOR INSERT WITH CHECK (
-        EXISTS (
+        -- Allow self-provisioning (user adding themselves)
+        user_id = auth.uid()
+        OR EXISTS (
             SELECT 1 FROM organization_members om
             WHERE om.organization_id = organization_members.organization_id
             AND om.user_id = auth.uid()
@@ -346,6 +359,7 @@ CREATE POLICY org_members_insert ON organization_members
     );
 
 -- QR Codes: users can see their own or their org's QR codes
+DROP POLICY IF EXISTS qr_codes_select ON qr_codes;
 CREATE POLICY qr_codes_select ON qr_codes
     FOR SELECT USING (
         user_id = auth.uid()
@@ -356,6 +370,7 @@ CREATE POLICY qr_codes_select ON qr_codes
         )
     );
 
+DROP POLICY IF EXISTS qr_codes_insert ON qr_codes;
 CREATE POLICY qr_codes_insert ON qr_codes
     FOR INSERT WITH CHECK (
         user_id = auth.uid()
@@ -367,6 +382,7 @@ CREATE POLICY qr_codes_insert ON qr_codes
         )
     );
 
+DROP POLICY IF EXISTS qr_codes_update ON qr_codes;
 CREATE POLICY qr_codes_update ON qr_codes
     FOR UPDATE USING (
         user_id = auth.uid()
@@ -378,6 +394,7 @@ CREATE POLICY qr_codes_update ON qr_codes
         )
     );
 
+DROP POLICY IF EXISTS qr_codes_delete ON qr_codes;
 CREATE POLICY qr_codes_delete ON qr_codes
     FOR DELETE USING (
         user_id = auth.uid()
@@ -390,6 +407,7 @@ CREATE POLICY qr_codes_delete ON qr_codes
     );
 
 -- Scan events: users can view scans for their QR codes
+DROP POLICY IF EXISTS scan_events_select ON scan_events;
 CREATE POLICY scan_events_select ON scan_events
     FOR SELECT USING (
         EXISTS (
@@ -407,6 +425,7 @@ CREATE POLICY scan_events_select ON scan_events
     );
 
 -- API Keys: org admins can manage
+DROP POLICY IF EXISTS api_keys_select ON api_keys;
 CREATE POLICY api_keys_select ON api_keys
     FOR SELECT USING (
         EXISTS (
@@ -417,6 +436,7 @@ CREATE POLICY api_keys_select ON api_keys
         )
     );
 
+DROP POLICY IF EXISTS api_keys_insert ON api_keys;
 CREATE POLICY api_keys_insert ON api_keys
     FOR INSERT WITH CHECK (
         EXISTS (
@@ -427,6 +447,7 @@ CREATE POLICY api_keys_insert ON api_keys
         )
     );
 
+DROP POLICY IF EXISTS api_keys_delete ON api_keys;
 CREATE POLICY api_keys_delete ON api_keys
     FOR DELETE USING (
         EXISTS (
@@ -438,6 +459,7 @@ CREATE POLICY api_keys_delete ON api_keys
     );
 
 -- Subscriptions: org owners can view
+DROP POLICY IF EXISTS subscriptions_select ON subscriptions;
 CREATE POLICY subscriptions_select ON subscriptions
     FOR SELECT USING (
         EXISTS (
@@ -448,6 +470,7 @@ CREATE POLICY subscriptions_select ON subscriptions
     );
 
 -- Usage records: org members can view
+DROP POLICY IF EXISTS usage_records_select ON usage_records;
 CREATE POLICY usage_records_select ON usage_records
     FOR SELECT USING (
         EXISTS (
@@ -458,6 +481,7 @@ CREATE POLICY usage_records_select ON usage_records
     );
 
 -- Invitations: org admins can manage, invitees can view their own
+DROP POLICY IF EXISTS invitations_select ON organization_invitations;
 CREATE POLICY invitations_select ON organization_invitations
     FOR SELECT USING (
         email = (SELECT email FROM users WHERE id = auth.uid())
