@@ -3,7 +3,7 @@
 
 import { neon } from '@neondatabase/serverless';
 import { Redis } from '@upstash/redis';
-import { getGeoFromHeaders, getDeviceType, hashIP, getClientIP } from '../_lib/geo';
+import { getGeoFromHeaders, getDeviceType, hashIP, getClientIP } from '../_lib/geo.js';
 
 // Configure as Edge function for faster response
 export const config = {

@@ -2,8 +2,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { requireAuth, requireRole, UnauthorizedError, ForbiddenError } from '../../_lib/auth';
-import { setCorsHeaders } from '../../_lib/cors';
+import { requireAuth, requireRole, UnauthorizedError, ForbiddenError } from '../../_lib/auth.js';
+import { setCorsHeaders } from '../../_lib/cors.js';
 import crypto from 'crypto';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

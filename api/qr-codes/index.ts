@@ -2,18 +2,18 @@
 // GET /api/qr-codes - List all QR codes
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, toQRCodeResponse, type QRCodeRow } from '../_lib/db';
-import { generateShortCode } from '../_lib/shortCode';
-import { setCachedRedirect } from '../_lib/kv';
-import { logger } from '../_lib/logger';
+import { sql, toQRCodeResponse, type QRCodeRow } from '../_lib/db.js';
+import { generateShortCode } from '../_lib/shortCode.js';
+import { setCachedRedirect } from '../_lib/kv.js';
+import { logger } from '../_lib/logger.js';
 import {
   authenticate,
   getUserOrganization,
   checkPlanLimit,
   UnauthorizedError,
   ForbiddenError,
-} from '../_lib/auth';
-import { setCorsHeaders } from '../_lib/cors';
+} from '../_lib/auth.js';
+import { setCorsHeaders } from '../_lib/cors.js';
 
 interface CreateQRCodeRequest {
   destination_url: string;

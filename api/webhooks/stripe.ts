@@ -3,8 +3,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import { notifyPaymentFailed } from '../_lib/notifications';
-import { logger } from '../_lib/logger';
+import { notifyPaymentFailed } from '../_lib/notifications.js';
+import { logger } from '../_lib/logger.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16',

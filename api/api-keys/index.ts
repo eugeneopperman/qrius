@@ -3,8 +3,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { requireAuth, getUserOrganization, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../_lib/auth';
-import { setCorsHeaders } from '../_lib/cors';
+import { requireAuth, getUserOrganization, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
+import { setCorsHeaders } from '../_lib/cors.js';
 import crypto from 'crypto';
 
 const supabaseAdmin = createClient(

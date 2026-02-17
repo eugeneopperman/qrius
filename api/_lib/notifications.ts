@@ -1,6 +1,6 @@
 // Notification utilities for sending alerts to users
 import { createClient } from '@supabase/supabase-js';
-import { logger } from './logger';
+import { logger } from './logger.js';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL || '',
@@ -36,7 +36,7 @@ async function getOrgAdminEmails(organizationId: string): Promise<string[]> {
   }
 
   return members
-    .map((m) => (m.user as { email: string } | null)?.email)
+    .map((m) => (m.user as unknown as { email: string } | null)?.email)
     .filter((email): email is string => !!email);
 }
 

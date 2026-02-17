@@ -2,7 +2,7 @@
 // Used for caching redirect destinations for fast lookups
 
 import { Redis } from '@upstash/redis';
-import { logger } from './logger';
+import { logger } from './logger.js';
 
 // Create Redis client from environment variables
 // In Vercel, these will be available when you add an Upstash Redis integration

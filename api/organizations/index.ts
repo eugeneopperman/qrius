@@ -3,8 +3,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { requireAuth, UnauthorizedError } from '../_lib/auth';
-import { setCorsHeaders } from '../_lib/cors';
+import { requireAuth, UnauthorizedError } from '../_lib/auth.js';
+import { setCorsHeaders } from '../_lib/cors.js';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL || '',

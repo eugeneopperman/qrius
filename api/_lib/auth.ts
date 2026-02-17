@@ -1,7 +1,7 @@
 // Authentication middleware for API routes
 import type { VercelRequest } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { logger } from './logger';
+import { logger } from './logger.js';
 
 // Supabase admin client (uses service role key)
 const supabaseAdmin = createClient(
@@ -111,18 +111,18 @@ export async function requireApiKey(req: VercelRequest): Promise<{ organizationI
   }
 
   // Update last_used_at (fire and forget with error logging)
-  supabaseAdmin
-    .from('api_keys')
-    .update({ last_used_at: new Date().toISOString() })
-    .eq('id', key.id)
-    .then(({ error }) => {
-      if (error) {
-        logger.auth.warn('Failed to update API key last_used_at', { keyId: key.id, error: error.message });
-      }
-    })
-    .catch((err) => {
-      logger.auth.error('Unexpected error updating API key', { keyId: key.id, error: String(err) });
-    });
+  void Promise.resolve(
+    supabaseAdmin
+      .from('api_keys')
+      .update({ last_used_at: new Date().toISOString() })
+      .eq('id', key.id)
+  ).then(({ error }) => {
+    if (error) {
+      logger.auth.warn('Failed to update API key last_used_at', { keyId: key.id, error: error.message });
+    }
+  }).catch((err) => {
+    logger.auth.error('Unexpected error updating API key', { keyId: key.id, error: String(err) });
+  });
 
   return {
     organizationId: key.organization_id,
