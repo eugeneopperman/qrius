@@ -27,6 +27,7 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const ReaderPage = lazy(() => import('./pages/ReaderPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 
 // Legal pages
 const TermsPage = lazy(() => import('./pages/TermsPage'));
@@ -143,7 +144,7 @@ const authCallbackRoute = createRoute({
 const resetPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/auth/reset-password',
-  component: () => import('./pages/ResetPasswordPage').then((m) => <m.default />),
+  component: ResetPasswordPage,
 });
 
 // Legal routes

@@ -232,6 +232,12 @@ export const useAuthStore = create<AuthState>()(
 
           return { error: null };
         } catch (error) {
+          if (error instanceof DOMException && error.name === 'AbortError') {
+            return { error: new Error('Request was interrupted. Please try again.') };
+          }
+          if (error instanceof TypeError) {
+            return { error: new Error('Cannot reach the authentication server. Check your internet connection, or the Supabase project may be paused.') };
+          }
           return { error: error as Error };
         }
       },
