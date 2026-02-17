@@ -485,34 +485,31 @@ export const useAuthStore = create<AuthState>()(
         const { user } = get();
         if (!user) return { data: null, error: new Error('Not authenticated') };
 
-        let createdOrgId: string | null = null;
+        // Generate ID client-side so we can reference it without a SELECT
+        // (the organizations_select RLS policy requires membership, which
+        // doesn't exist yet at INSERT time, so .select() would fail)
+        const orgId = crypto.randomUUID();
+        const slug = name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
+          + '-' + Math.random().toString(36).substring(2, 8);
 
         try {
-          // Generate slug from name
-          const slug = name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '')
-            + '-' + Math.random().toString(36).substring(2, 8);
-
-          // Create organization
-          const { data: org, error: orgError } = await supabase
+          // Create organization (no .select() — RLS blocks reading before membership exists)
+          const { error: orgError } = await supabase
             .from('organizations')
-            .insert({ name, slug })
-            .select()
-            .single();
+            .insert({ id: orgId, name, slug });
 
           if (orgError) {
             return { data: null, error: new Error(orgError.message) };
           }
 
-          createdOrgId = org.id;
-
           // Add user as owner
           const { error: memberError } = await supabase
             .from('organization_members')
             .insert({
-              organization_id: org.id,
+              organization_id: orgId,
               user_id: user.id,
               role: 'owner',
             });
@@ -524,12 +521,12 @@ export const useAuthStore = create<AuthState>()(
                 const { error: deleteError } = await supabase
                   .from('organizations')
                   .delete()
-                  .eq('id', org.id);
+                  .eq('id', orgId);
 
                 if (!deleteError) return;
 
                 console.error(
-                  `Failed to rollback organization ${org.id} (attempt ${i + 1}/${attempts}):`,
+                  `Failed to rollback organization ${orgId} (attempt ${i + 1}/${attempts}):`,
                   deleteError.message
                 );
 
@@ -538,9 +535,8 @@ export const useAuthStore = create<AuthState>()(
                   await new Promise((r) => setTimeout(r, 100 * Math.pow(2, i)));
                 }
               }
-              // Log critical error if all retries fail
               console.error(
-                `CRITICAL: Orphaned organization ${org.id} created but owner membership failed. Manual cleanup required.`
+                `CRITICAL: Orphaned organization ${orgId} created but owner membership failed. Manual cleanup required.`
               );
             };
 
@@ -548,28 +544,37 @@ export const useAuthStore = create<AuthState>()(
             return { data: null, error: new Error(memberError.message) };
           }
 
-          // Success - clear the tracking variable
-          createdOrgId = null;
-
-          // Refresh organizations list
+          // Refresh organizations list (now readable since membership exists)
           await get().fetchOrganizations();
+
+          // Construct org object (matches what fetchOrganizations will return)
+          const org = {
+            id: orgId,
+            name,
+            slug,
+            logo_url: null,
+            plan: 'free' as const,
+            stripe_customer_id: null,
+            stripe_subscription_id: null,
+            settings: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
 
           return { data: org, error: null };
         } catch (error) {
-          // Attempt cleanup if we created an org but something else failed
-          if (createdOrgId) {
-            console.error('Unexpected error during org creation, attempting cleanup:', error);
-            const { error: cleanupError } = await supabase
-              .from('organizations')
-              .delete()
-              .eq('id', createdOrgId);
+          // Attempt cleanup if org was created but something else failed
+          console.error('Unexpected error during org creation, attempting cleanup:', error);
+          const { error: cleanupError } = await supabase
+            .from('organizations')
+            .delete()
+            .eq('id', orgId);
 
-            if (cleanupError) {
-              console.error(
-                `CRITICAL: Failed to cleanup organization ${createdOrgId}:`,
-                cleanupError.message
-              );
-            }
+          if (cleanupError) {
+            console.error(
+              `CRITICAL: Failed to cleanup organization ${orgId}:`,
+              cleanupError.message
+            );
           }
           return { data: null, error: error as Error };
         }
