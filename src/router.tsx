@@ -2,6 +2,7 @@ import { createRouter, createRootRoute, createRoute, Outlet, redirect } from '@t
 import { lazy, Suspense } from 'react';
 import { useAuthStore } from './stores/authStore';
 import { isSupabaseMissing } from './lib/supabase';
+import { APP_VERSION } from './config/constants';
 import { Loader2 } from 'lucide-react';
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
@@ -47,6 +48,9 @@ function RootLayout() {
         </div>
       )}
       <Outlet />
+      <div className="fixed bottom-2 right-2 z-[100] px-2 py-0.5 rounded bg-black/60 text-white text-xs font-mono pointer-events-none select-none">
+        Beta v{APP_VERSION}
+      </div>
     </Suspense>
   );
 }
