@@ -45,6 +45,7 @@ export default function SignInPage() {
             <SignInForm
               onForgotPassword={() => setView('forgot-password')}
               onSignUp={() => navigate({ to: '/signup' })}
+              redirectTo={search.redirect}
             />
           )}
           {view === 'forgot-password' && (

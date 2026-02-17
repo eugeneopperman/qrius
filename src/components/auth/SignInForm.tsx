@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '../../stores/authStore';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -8,14 +9,16 @@ import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 interface SignInFormProps {
   onForgotPassword: () => void;
   onSignUp: () => void;
+  redirectTo?: string;
 }
 
-export function SignInForm({ onForgotPassword, onSignUp }: SignInFormProps) {
+export function SignInForm({ onForgotPassword, onSignUp, redirectTo }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const { signIn, signInWithOAuth, isLoading } = useAuthStore();
+  const { signIn, signInWithOAuth, isLoading, hasCompletedOnboarding } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +32,9 @@ export function SignInForm({ onForgotPassword, onSignUp }: SignInFormProps) {
     const { error } = await signIn(email, password);
     if (error) {
       setError(error.message);
+    } else {
+      const destination = redirectTo || (hasCompletedOnboarding ? '/dashboard' : '/onboarding');
+      navigate({ to: destination });
     }
   };
 
