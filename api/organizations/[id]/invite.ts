@@ -4,6 +4,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth, requireRole, UnauthorizedError, ForbiddenError } from '../../_lib/auth.js';
 import { setCorsHeaders } from '../../_lib/cors.js';
+import { isValidUUID } from '../../_lib/validate.js';
 import crypto from 'crypto';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,8 +35,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const user = await requireAuth(req);
     const organizationId = req.query.id as string;
 
-    if (!organizationId) {
-      return res.status(400).json({ error: 'Organization ID is required' });
+    if (!organizationId || !isValidUUID(organizationId)) {
+      return res.status(400).json({ error: 'A valid Organization ID is required' });
     }
 
     // Check user has permission to invite
@@ -43,16 +44,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const body = req.body as InviteRequest;
 
-    if (!body.email) {
+    if (!body.email || typeof body.email !== 'string') {
       return res.status(400).json({ error: 'email is required' });
+    }
+
+    if (body.email.length > 254) {
+      return res.status(400).json({ error: 'email must be 254 characters or fewer' });
     }
 
     if (!EMAIL_REGEX.test(body.email)) {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    if (!['admin', 'editor', 'viewer'].includes(body.role)) {
-      return res.status(400).json({ error: 'Invalid role' });
+    if (!body.role || !['admin', 'editor', 'viewer'].includes(body.role)) {
+      return res.status(400).json({ error: 'role must be one of: admin, editor, viewer' });
     }
 
     // Check if user is already a member

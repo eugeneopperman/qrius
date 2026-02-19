@@ -4,6 +4,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { requireAuth, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
+import { isValidHttpUrl, validateString } from '../_lib/validate.js';
 import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -43,8 +44,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const body = req.body as CheckoutRequest;
 
-    if (!body.priceId) {
+    if (!body.priceId || typeof body.priceId !== 'string') {
       return res.status(400).json({ error: 'priceId is required' });
+    }
+
+    // Validate priceId format (Stripe price IDs start with "price_")
+    if (!body.priceId.startsWith('price_') || body.priceId.length > 100) {
+      return res.status(400).json({ error: 'Invalid priceId format' });
+    }
+
+    // Validate redirect URLs if provided — only allow http/https
+    if (body.successUrl && !isValidHttpUrl(body.successUrl)) {
+      return res.status(400).json({ error: 'successUrl must be a valid http or https URL' });
+    }
+    if (body.cancelUrl && !isValidHttpUrl(body.cancelUrl)) {
+      return res.status(400).json({ error: 'cancelUrl must be a valid http or https URL' });
     }
 
     // Get organization details

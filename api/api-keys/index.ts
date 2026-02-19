@@ -87,8 +87,31 @@ async function handleCreate(
 ) {
   const body = req.body as CreateKeyRequest;
 
-  if (!body.name || body.name.trim().length === 0) {
+  if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
     return res.status(400).json({ error: 'name is required' });
+  }
+
+  if (body.name.trim().length > 100) {
+    return res.status(400).json({ error: 'name must be 100 characters or fewer' });
+  }
+
+  // Validate expiresIn if provided (1-365 days)
+  if (body.expiresIn !== undefined) {
+    if (typeof body.expiresIn !== 'number' || !Number.isInteger(body.expiresIn) || body.expiresIn < 1 || body.expiresIn > 365) {
+      return res.status(400).json({ error: 'expiresIn must be between 1 and 365 days' });
+    }
+  }
+
+  // Validate scopes if provided
+  if (body.scopes !== undefined) {
+    if (!Array.isArray(body.scopes) || body.scopes.length > 10) {
+      return res.status(400).json({ error: 'scopes must be an array of up to 10 items' });
+    }
+    for (const scope of body.scopes) {
+      if (typeof scope !== 'string' || scope.length > 50) {
+        return res.status(400).json({ error: 'Each scope must be a string of 50 characters or fewer' });
+      }
+    }
   }
 
   // Generate API key: qr_<prefix>_<secret>

@@ -14,6 +14,8 @@ import {
   ForbiddenError,
 } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
+import { checkRateLimit, setRateLimitHeaders } from '../_lib/rateLimit.js';
+import { isValidHttpUrl, validateOptionalString, validateStringArray } from '../_lib/validate.js';
 
 interface CreateQRCodeRequest {
   destination_url: string;
@@ -40,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     // Authenticate request (optional for backward compatibility)
-    let authContext: { userId?: string; organizationId?: string; apiKeyId?: string } | null = null;
+    let authContext: { userId?: string; organizationId?: string; apiKeyId?: string; rateLimitPerDay?: number } | null = null;
 
     try {
       authContext = await authenticate(req);
@@ -51,6 +53,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         authContext = null;
       } else {
         throw error;
+      }
+    }
+
+    // Rate limit API key requests
+    if (authContext?.apiKeyId && authContext.rateLimitPerDay !== undefined) {
+      const rlResult = await checkRateLimit(authContext.apiKeyId, authContext.rateLimitPerDay);
+      setRateLimitHeaders(res, rlResult);
+      if (!rlResult.allowed) {
+        return res.status(429).json({
+          error: 'Rate limit exceeded',
+          limit: rlResult.limit,
+          current: rlResult.current,
+        });
       }
     }
 
@@ -86,15 +101,33 @@ async function handleCreate(
   const body = req.body as CreateQRCodeRequest;
 
   // Validate required fields
-  if (!body.destination_url) {
+  if (!body.destination_url || typeof body.destination_url !== 'string') {
     return res.status(400).json({ error: 'destination_url is required' });
   }
 
-  // Validate URL format
-  try {
-    new URL(body.destination_url);
-  } catch {
-    return res.status(400).json({ error: 'Invalid destination_url format' });
+  // Validate URL format — only http/https allowed
+  if (!isValidHttpUrl(body.destination_url)) {
+    return res.status(400).json({ error: 'destination_url must be a valid http or https URL' });
+  }
+
+  // Validate optional string fields
+  if (body.name !== undefined) {
+    const name = validateOptionalString(body.name, 200);
+    if (name === null) return res.status(400).json({ error: 'name must be 200 characters or fewer' });
+  }
+  if (body.description !== undefined) {
+    const desc = validateOptionalString(body.description, 1000);
+    if (desc === null) return res.status(400).json({ error: 'description must be 1000 characters or fewer' });
+  }
+  if (body.qr_type !== undefined) {
+    const validTypes = ['url', 'text', 'email', 'phone', 'sms', 'wifi', 'vcard', 'event', 'location'];
+    if (typeof body.qr_type !== 'string' || !validTypes.includes(body.qr_type)) {
+      return res.status(400).json({ error: 'Invalid qr_type' });
+    }
+  }
+  if (body.tags !== undefined) {
+    const tags = validateStringArray(body.tags, 20, 50);
+    if (tags === null) return res.status(400).json({ error: 'tags must be an array of up to 20 strings (50 chars each)' });
   }
 
   // Get organization context

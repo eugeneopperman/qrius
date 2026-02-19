@@ -3,6 +3,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, toQRCodeResponse, toScanEventResponse, type QRCodeRow, type ScanEventRow } from '../_lib/db.js';
 import { setCorsHeaders } from '../_lib/cors.js';
+import { isValidUUID } from '../_lib/validate.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
@@ -22,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { id } = req.query;
 
-  if (!id || typeof id !== 'string') {
+  if (!id || typeof id !== 'string' || !isValidUUID(id)) {
     return res.status(400).json({ error: 'Invalid QR code ID' });
   }
 

@@ -3,6 +3,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
+import { isValidUUID } from '../_lib/validate.js';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL || '',
@@ -28,8 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { organizationId } = await getUserOrganization(user.id);
     const keyId = req.query.id as string;
 
-    if (!keyId) {
-      return res.status(400).json({ error: 'API key ID is required' });
+    if (!keyId || !isValidUUID(keyId)) {
+      return res.status(400).json({ error: 'A valid API key ID is required' });
     }
 
     // Only owners and admins can manage API keys

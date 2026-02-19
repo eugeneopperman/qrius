@@ -4,6 +4,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { requireAuth, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
+import { isValidHttpUrl } from '../_lib/validate.js';
 import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -40,6 +41,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await requireRole(user.id, organizationId, ['owner', 'admin']);
 
     const body = req.body as PortalRequest;
+
+    // Validate returnUrl if provided — only allow http/https
+    if (body.returnUrl && !isValidHttpUrl(body.returnUrl)) {
+      return res.status(400).json({ error: 'returnUrl must be a valid http or https URL' });
+    }
 
     // Get organization's Stripe customer ID
     const { data: org, error: orgError } = await supabaseAdmin

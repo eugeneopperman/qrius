@@ -80,11 +80,15 @@ async function handleList(req: VercelRequest, res: VercelResponse, userId: strin
 async function handleCreate(req: VercelRequest, res: VercelResponse, userId: string) {
   const body = req.body as CreateOrgRequest;
 
-  if (!body.name || body.name.trim().length === 0) {
+  if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
     return res.status(400).json({ error: 'name is required' });
   }
 
   const name = body.name.trim();
+
+  if (name.length > 100) {
+    return res.status(400).json({ error: 'name must be 100 characters or fewer' });
+  }
 
   // Generate slug from name
   const baseSlug = name

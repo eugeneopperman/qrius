@@ -66,7 +66,7 @@ export async function requireAuth(req: VercelRequest): Promise<AuthenticatedUser
  * Authenticate request via API key
  * Returns the organization ID or throws UnauthorizedError
  */
-export async function requireApiKey(req: VercelRequest): Promise<{ organizationId: string; keyId: string }> {
+export async function requireApiKey(req: VercelRequest): Promise<{ organizationId: string; keyId: string; rateLimitPerDay: number }> {
   const apiKey = req.headers['x-api-key'] as string;
 
   if (!apiKey) {
@@ -93,7 +93,7 @@ export async function requireApiKey(req: VercelRequest): Promise<{ organizationI
   // Look up the API key
   const { data: key, error } = await supabaseAdmin
     .from('api_keys')
-    .select('id, organization_id, is_active, expires_at')
+    .select('id, organization_id, is_active, expires_at, rate_limit_per_day')
     .eq('key_prefix', keyPrefix)
     .eq('key_hash', keyHash)
     .single();
@@ -127,6 +127,7 @@ export async function requireApiKey(req: VercelRequest): Promise<{ organizationI
   return {
     organizationId: key.organization_id,
     keyId: key.id,
+    rateLimitPerDay: key.rate_limit_per_day ?? -1,
   };
 }
 
@@ -137,12 +138,13 @@ export async function authenticate(req: VercelRequest): Promise<{
   userId?: string;
   organizationId?: string;
   apiKeyId?: string;
+  rateLimitPerDay?: number;
 }> {
   // Try API key first
   const apiKey = req.headers['x-api-key'];
   if (apiKey) {
-    const { organizationId, keyId } = await requireApiKey(req);
-    return { organizationId, apiKeyId: keyId };
+    const { organizationId, keyId, rateLimitPerDay } = await requireApiKey(req);
+    return { organizationId, apiKeyId: keyId, rateLimitPerDay };
   }
 
   // Try JWT
