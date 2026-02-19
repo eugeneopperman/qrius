@@ -1,10 +1,10 @@
-import { createRouter, createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
+import { createRouter, createRootRoute, createRoute, Outlet, redirect, useRouter, type ErrorComponentProps } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import { isSupabaseMissing } from '@/lib/supabase';
 import { APP_VERSION } from '@/config/constants';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { KeyboardShortcutsModal } from '@/components/features/KeyboardShortcuts';
 import { HistoryModal } from '@/components/features/History';
 import { TemplateWizardModal } from '@/components/templates';
@@ -16,6 +16,52 @@ function LoadingSpinner() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+    </div>
+  );
+}
+
+// eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
+function ErrorPage({ error, reset }: ErrorComponentProps) {
+  const router = useRouter();
+  return (
+    <div className="min-h-screen flex items-center justify-center p-8">
+      <div className="max-w-md w-full text-center">
+        <div className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-6">
+          <AlertTriangle className="w-8 h-8 text-red-500" />
+        </div>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          Something went wrong
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          We encountered an unexpected error. Please try again or go back to the home page.
+        </p>
+        {import.meta.env.DEV && error && (
+          <details className="mb-6 text-left">
+            <summary className="cursor-pointer text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+              Error details
+            </summary>
+            <pre className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs text-red-600 dark:text-red-400 overflow-auto max-h-40">
+              {error instanceof Error ? `${error.message}\n\n${error.stack}` : String(error)}
+            </pre>
+          </details>
+        )}
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={() => { reset(); router.invalidate(); }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try Again
+          </button>
+          <button
+            onClick={() => router.navigate({ to: '/' })}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+          >
+            <Home className="w-4 h-4" />
+            Go Home
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -128,6 +174,7 @@ async function requireGuest() {
 // Root route
 const rootRoute = createRootRoute({
   component: RootLayout,
+  errorComponent: ErrorPage,
 });
 
 // Public routes

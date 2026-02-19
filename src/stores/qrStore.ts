@@ -20,7 +20,7 @@ import type {
  * Escape special characters for vCard format
  * vCard requires escaping: backslash, semicolon, comma, newline
  */
-function escapeVCard(str: string | undefined): string {
+export function escapeVCard(str: string | undefined): string {
   if (!str) return '';
   return str
     .replace(/\\/g, '\\\\')
@@ -33,7 +33,7 @@ function escapeVCard(str: string | undefined): string {
  * Escape special characters for WiFi QR format
  * WiFi format requires escaping: backslash, semicolon, colon, comma
  */
-function escapeWiFi(str: string | undefined): string {
+export function escapeWiFi(str: string | undefined): string {
   if (!str) return '';
   return str
     .replace(/\\/g, '\\\\')
@@ -46,7 +46,7 @@ function escapeWiFi(str: string | undefined): string {
  * Escape special characters for iCalendar/vEvent format
  * iCalendar requires escaping: backslash, semicolon, comma, newline
  */
-function escapeICalendar(str: string | undefined): string {
+export function escapeICalendar(str: string | undefined): string {
   if (!str) return '';
   return str
     .replace(/\\/g, '\\\\')

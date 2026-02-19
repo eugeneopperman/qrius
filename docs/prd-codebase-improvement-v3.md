@@ -1,7 +1,7 @@
 # PRD: Codebase Improvement v3
 
 **Date:** 2026-02-19
-**Status:** Quick Wins Complete (items 1-5 shipped in d3972ac)
+**Status:** Quick Wins + Security & Stability Complete (items 1-5 in d3972ac, items 7/10/13 in next commit)
 **Depends on:** Codebase Improvement v2 (committed 88718a0)
 
 ---
@@ -88,11 +88,12 @@ Both `QRPreview.tsx` and `qr/QRRenderer.tsx` independently create `QRCodeStyling
 - QRCodeStyling initialization and updates
 - Container mounting/cleanup
 
-### 7. Add ErrorBoundaries to Protected Routes
+### 7. Add ErrorBoundaries to Protected Routes ✅
 **Impact:** Better UX on crashes (graceful degradation vs white screen)
 **Effort:** Low-medium
 
-Use TanStack Router's `errorComponent` prop on dashboard, QR detail, and settings routes.
+~~Use TanStack Router's `errorComponent` prop on dashboard, QR detail, and settings routes.~~
+**Done:** Added `ErrorPage` component as `errorComponent` on root route — catches errors on all routes.
 
 ### 8. Add API Input Validation
 **Impact:** Security hardening
@@ -106,11 +107,12 @@ API routes cast `req.body` without runtime validation. Add validation at route b
 
 `QRPreview` destructures 13 fields from qrStore — any field change triggers a re-render of the 513-line component. Use granular selectors or `useShallow`.
 
-### 10. Add Escape Function Tests
+### 10. Add Escape Function Tests ✅
 **Impact:** Security confidence
 **Effort:** Low-medium
 
-`escapeVCard`, `escapeWiFi`, `escapeICalendar` in utils are untested security-adjacent code. Add targeted tests.
+~~`escapeVCard`, `escapeWiFi`, `escapeICalendar` in utils are untested security-adjacent code. Add targeted tests.~~
+**Done:** Exported escape functions from `qrStore.ts`, added 24 direct unit tests (378 total, up from 354).
 
 ---
 
@@ -122,8 +124,9 @@ Infrastructure ready (Upstash Redis + `rate_limit_per_day` on API keys). Needs m
 ### 12. Replace `innerHTML = ''` with Safe DOM Cleanup
 7 occurrences across QRPreview, QRRenderer, TemplateWizardPreview. Replace with `while (el.firstChild) el.removeChild(el.firstChild)`.
 
-### 13. Security: Tighten CORS + Fix Open Redirect
-Redirect handler (`/api/r/[shortCode].ts`) doesn't validate `destination_url` protocol. Could redirect to `javascript:` or `data:` URLs.
+### 13. Security: Tighten CORS + Fix Open Redirect ✅
+~~Redirect handler (`/api/r/[shortCode].ts`) doesn't validate `destination_url` protocol. Could redirect to `javascript:` or `data:` URLs.~~
+**Done:** Added `isValidRedirectUrl()` — only allows `http:` and `https:` protocols, returns 400 for invalid URLs.
 
 ### 14. Expand Storybook Coverage
 Only `Button.stories.tsx` exists. Add stories for core UI components.
@@ -133,7 +136,7 @@ Only `Button.stories.tsx` exists. Add stories for core UI components.
 ## Verification Checklist
 
 After each change:
-- [x] `npm run test:run` — 354 tests pass
+- [x] `npm run test:run` — 378 tests pass (354 → 378 after escape function tests)
 - [x] `npm run typecheck` — clean
 - [x] `npm run lint` — clean
 - [x] `npm run build` — succeeds
@@ -142,3 +145,8 @@ After bundle splitting:
 - [x] Verify chunk sizes improved (main chunk 610KB → 329KB)
 - [x] Dashboard page loads correctly
 - [x] Template functionality still works
+
+After security & stability sprint (items 7/10/13):
+- [x] Open redirect rejects `javascript:`, `data:`, and malformed URLs
+- [x] ErrorBoundary catches route-level errors with retry/home buttons
+- [x] 24 new direct escape function tests pass

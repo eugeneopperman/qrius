@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useQRStore } from '../qrStore';
+import { useQRStore, escapeVCard, escapeWiFi, escapeICalendar } from '../qrStore';
 
 const defaultStyleOptions = {
   dotsColor: '#000000',
@@ -984,6 +984,110 @@ describe('qrStore', () => {
         useQRStore.getState().setLocationData({ latitude: '0', longitude: '0' });
         expect(useQRStore.getState().getQRValue()).toBe('geo:0,0');
       });
+    });
+  });
+});
+
+describe('escape functions', () => {
+  describe('escapeVCard', () => {
+    it('returns empty string for undefined', () => {
+      expect(escapeVCard(undefined)).toBe('');
+    });
+
+    it('returns empty string for empty string', () => {
+      expect(escapeVCard('')).toBe('');
+    });
+
+    it('returns plain string unchanged', () => {
+      expect(escapeVCard('John Doe')).toBe('John Doe');
+    });
+
+    it('escapes backslashes', () => {
+      expect(escapeVCard('path\\file')).toBe('path\\\\file');
+    });
+
+    it('escapes semicolons', () => {
+      expect(escapeVCard('a;b')).toBe('a\\;b');
+    });
+
+    it('escapes commas', () => {
+      expect(escapeVCard('a,b')).toBe('a\\,b');
+    });
+
+    it('escapes newlines', () => {
+      expect(escapeVCard('line1\nline2')).toBe('line1\\nline2');
+    });
+
+    it('escapes combined special characters', () => {
+      expect(escapeVCard('a\\b;c,d\ne')).toBe('a\\\\b\\;c\\,d\\ne');
+    });
+  });
+
+  describe('escapeWiFi', () => {
+    it('returns empty string for undefined', () => {
+      expect(escapeWiFi(undefined)).toBe('');
+    });
+
+    it('returns empty string for empty string', () => {
+      expect(escapeWiFi('')).toBe('');
+    });
+
+    it('returns plain string unchanged', () => {
+      expect(escapeWiFi('MyNetwork')).toBe('MyNetwork');
+    });
+
+    it('escapes backslashes', () => {
+      expect(escapeWiFi('net\\work')).toBe('net\\\\work');
+    });
+
+    it('escapes semicolons', () => {
+      expect(escapeWiFi('a;b')).toBe('a\\;b');
+    });
+
+    it('escapes colons', () => {
+      expect(escapeWiFi('a:b')).toBe('a\\:b');
+    });
+
+    it('escapes commas', () => {
+      expect(escapeWiFi('a,b')).toBe('a\\,b');
+    });
+
+    it('escapes combined special characters', () => {
+      expect(escapeWiFi('a\\b;c:d,e')).toBe('a\\\\b\\;c\\:d\\,e');
+    });
+  });
+
+  describe('escapeICalendar', () => {
+    it('returns empty string for undefined', () => {
+      expect(escapeICalendar(undefined)).toBe('');
+    });
+
+    it('returns empty string for empty string', () => {
+      expect(escapeICalendar('')).toBe('');
+    });
+
+    it('returns plain string unchanged', () => {
+      expect(escapeICalendar('Meeting')).toBe('Meeting');
+    });
+
+    it('escapes backslashes', () => {
+      expect(escapeICalendar('path\\event')).toBe('path\\\\event');
+    });
+
+    it('escapes semicolons', () => {
+      expect(escapeICalendar('a;b')).toBe('a\\;b');
+    });
+
+    it('escapes commas', () => {
+      expect(escapeICalendar('a,b')).toBe('a\\,b');
+    });
+
+    it('escapes newlines', () => {
+      expect(escapeICalendar('line1\nline2')).toBe('line1\\nline2');
+    });
+
+    it('escapes combined special characters', () => {
+      expect(escapeICalendar('a\\b;c,d\ne')).toBe('a\\\\b\\;c\\,d\\ne');
     });
   });
 });

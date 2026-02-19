@@ -5,6 +5,16 @@ import { neon } from '@neondatabase/serverless';
 import { Redis } from '@upstash/redis';
 import { getGeoFromHeaders, getDeviceType, hashIP, getClientIP } from '../_lib/geo.js';
 
+/** Only allow http: and https: redirect targets to prevent open redirect attacks */
+function isValidRedirectUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 // Configure as Edge function for faster response
 export const config = {
   runtime: 'edge',
@@ -75,6 +85,11 @@ export default async function handler(req: Request): Promise<Response> {
       if (kv) {
         kv.set(`redirect:${shortCode}`, redirectData, { ex: 86400 }).catch(console.error);
       }
+    }
+
+    // Validate redirect URL protocol before redirecting
+    if (!isValidRedirectUrl(redirectData.destinationUrl)) {
+      return new Response('Invalid redirect URL', { status: 400 });
     }
 
     // Log scan asynchronously (fire-and-forget)
