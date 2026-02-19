@@ -1,13 +1,11 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { applyLogoMask } from '@/utils/logoMask';
 import { toast } from '@/stores/toastStore';
 import { QR_CONFIG } from '@/config/constants';
 import { createQRElementOptions } from '@/utils/gradientUtils';
 import {
-  applyRoundnessToQRSvg,
   getDotTypeForPattern,
-  shouldApplyRoundnessPostProcessing,
   getCornerSquareTypeForRoundness,
   getCornerDotTypeForRoundness,
 } from '@/utils/qrRoundness';
@@ -16,7 +14,7 @@ import type {
   GradientOptions, LogoShape, QRPattern,
 } from '@/types';
 
-export interface QRCodeInstanceOptions {
+interface QRCodeInstanceOptions {
   data: string;
   width?: number;
   height?: number;
@@ -103,8 +101,6 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
     ? getCornerDotTypeForRoundness(qrRoundness)
     : cornersDotType;
 
-  const shouldPostProcess = shouldApplyRoundnessPostProcessing(qrPattern) && qrRoundness !== undefined;
-
   // --- Element options with gradient support ---
   const dotsOptions = useMemo(
     () => createQRElementOptions(effectiveDotType ?? 'square', useGradient, gradient, dotsColor),
@@ -120,15 +116,6 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
     () => createQRElementOptions(effectiveCornerDotType ?? 'square', useGradient, gradient, dotsColor),
     [effectiveCornerDotType, useGradient, gradient, dotsColor],
   );
-
-  // --- Roundness post-processing ---
-  const applyRoundness = useCallback(() => {
-    if (shouldPostProcess && qrRoundness !== undefined) {
-      requestAnimationFrame(() => {
-        applyRoundnessToQRSvg(containerRef.current, qrRoundness);
-      });
-    }
-  }, [qrRoundness, shouldPostProcess]);
 
   // --- Initialize QR code ---
   useEffect(() => {
@@ -153,7 +140,6 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
     if (containerRef.current) {
       clearChildren(containerRef.current);
       qrCodeRef.current.append(containerRef.current);
-      applyRoundness();
     }
 
     const container = containerRef.current;
@@ -180,7 +166,6 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
         },
         image: processedLogoUrl || undefined,
       });
-      applyRoundness();
     }
   }, [
     data,
@@ -192,7 +177,6 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
     logoMargin,
     logoSize,
     processedLogoUrl,
-    applyRoundness,
   ]);
 
   return { containerRef, qrCodeRef, processedLogoUrl };

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Loader2 } from 'lucide-react';
 
 interface AuthGuardProps {
@@ -9,7 +10,7 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, fallback, redirectTo }: AuthGuardProps) {
-  const { user, isLoading, isInitialized } = useAuthStore();
+  const { user, isLoading, isInitialized } = useAuthStore(useShallow((s) => ({ user: s.user, isLoading: s.isLoading, isInitialized: s.isInitialized })));
   const shouldRedirect = isInitialized && !user && !!redirectTo;
 
   useEffect(() => {
@@ -57,7 +58,7 @@ interface GuestGuardProps {
 }
 
 export function GuestGuard({ children, redirectTo }: GuestGuardProps) {
-  const { user, isInitialized } = useAuthStore();
+  const { user, isInitialized } = useAuthStore(useShallow((s) => ({ user: s.user, isInitialized: s.isInitialized })));
 
   useEffect(() => {
     if (isInitialized && user && redirectTo) {

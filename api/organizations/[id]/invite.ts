@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requireAuth, requireRole, UnauthorizedError, ForbiddenError } from '../../_lib/auth.js';
 import { setCorsHeaders } from '../../_lib/cors.js';
 import { isValidUUID } from '../../_lib/validate.js';
+import { logger } from '../../_lib/logger.js';
 import crypto from 'crypto';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -111,7 +112,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .single();
 
     if (error) {
-      console.error('Error creating invitation:', error);
+      logger.organizations.error('Error creating invitation', { error: error.message });
       return res.status(500).json({ error: 'Failed to create invitation' });
     }
 
@@ -119,7 +120,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // For now, return the invite link
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
     if (!baseUrl) {
-      console.error('NEXT_PUBLIC_APP_URL not configured - cannot generate invite link');
+      logger.organizations.error('NEXT_PUBLIC_APP_URL not configured - cannot generate invite link');
       return res.status(500).json({ error: 'Server configuration error' });
     }
     const inviteLink = `${baseUrl}/invite/${token}`;
@@ -140,7 +141,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error instanceof ForbiddenError) {
       return res.status(403).json({ error: error.message });
     }
-    console.error('API error:', error);
+    logger.organizations.error('API error', { error: String(error) });
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

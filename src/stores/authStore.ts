@@ -87,7 +87,7 @@ export const useAuthStore = create<AuthState>()(
           // Check if Supabase is reachable
           const connectionCheck = await checkSupabaseConnection();
           if (!connectionCheck.ok) {
-            console.warn('Supabase connection issue:', connectionCheck.message);
+            if (import.meta.env.DEV) console.warn('Supabase connection issue:', connectionCheck.message);
             set({ isLoading: false, isInitialized: true, connectionError: connectionCheck.message ?? 'Connection failed' });
             return;
           }
@@ -133,7 +133,7 @@ export const useAuthStore = create<AuthState>()(
 
           set({ isLoading: false, isInitialized: true });
         } catch (error) {
-          console.error('Error initializing auth:', error);
+          if (import.meta.env.DEV) console.error('Error initializing auth:', error);
           set({ isLoading: false, isInitialized: true });
         }
       },
@@ -225,7 +225,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         } catch (error) {
-          console.error('Error signing out:', error);
+          if (import.meta.env.DEV) console.error('Error signing out:', error);
           set({ isLoading: false });
         }
       },
@@ -274,13 +274,13 @@ export const useAuthStore = create<AuthState>()(
           const { data: { session }, error } = await supabase.auth.refreshSession();
 
           if (error) {
-            console.error('Error refreshing session:', error);
+            if (import.meta.env.DEV) console.error('Error refreshing session:', error);
             return;
           }
 
           set({ session, user: session?.user ?? null });
         } catch (error) {
-          console.error('Error refreshing session:', error);
+          if (import.meta.env.DEV) console.error('Error refreshing session:', error);
         }
       },
 
@@ -319,7 +319,7 @@ export const useAuthStore = create<AuthState>()(
             });
 
             if (insertError) {
-              console.error('Error auto-provisioning user profile:', insertError);
+              if (import.meta.env.DEV) console.error('Error auto-provisioning user profile:', insertError);
               return;
             }
 
@@ -332,7 +332,7 @@ export const useAuthStore = create<AuthState>()(
             });
 
             if (orgError) {
-              console.error('Error auto-provisioning organization:', orgError);
+              if (import.meta.env.DEV) console.error('Error auto-provisioning organization:', orgError);
               // Profile was created, continue — org can be created later
             }
 
@@ -345,7 +345,7 @@ export const useAuthStore = create<AuthState>()(
               });
 
               if (memberError) {
-                console.error('Error auto-provisioning org membership:', memberError);
+                if (import.meta.env.DEV) console.error('Error auto-provisioning org membership:', memberError);
               }
             }
 
@@ -364,10 +364,10 @@ export const useAuthStore = create<AuthState>()(
 
           // Other error
           if (error) {
-            console.error('Error fetching profile:', error);
+            if (import.meta.env.DEV) console.error('Error fetching profile:', error);
           }
         } catch (error) {
-          console.error('Error fetching profile:', error);
+          if (import.meta.env.DEV) console.error('Error fetching profile:', error);
         }
       },
 
@@ -408,7 +408,7 @@ export const useAuthStore = create<AuthState>()(
             .eq('user_id', user.id);
 
           if (error) {
-            console.error('Error fetching organizations:', error);
+            if (import.meta.env.DEV) console.error('Error fetching organizations:', error);
             return;
           }
 
@@ -434,7 +434,7 @@ export const useAuthStore = create<AuthState>()(
             });
           }
         } catch (error) {
-          console.error('Error fetching organizations:', error);
+          if (import.meta.env.DEV) console.error('Error fetching organizations:', error);
         }
       },
 
@@ -504,7 +504,7 @@ export const useAuthStore = create<AuthState>()(
 
                 if (!deleteError) return;
 
-                console.error(
+                if (import.meta.env.DEV) console.error(
                   `Failed to rollback organization ${orgId} (attempt ${i + 1}/${attempts}):`,
                   deleteError.message
                 );
@@ -514,7 +514,7 @@ export const useAuthStore = create<AuthState>()(
                   await new Promise((r) => setTimeout(r, 100 * Math.pow(2, i)));
                 }
               }
-              console.error(
+              if (import.meta.env.DEV) console.error(
                 `CRITICAL: Orphaned organization ${orgId} created but owner membership failed. Manual cleanup required.`
               );
             };
@@ -543,14 +543,14 @@ export const useAuthStore = create<AuthState>()(
           return { data: org, error: null };
         } catch (error) {
           // Attempt cleanup if org was created but something else failed
-          console.error('Unexpected error during org creation, attempting cleanup:', error);
+          if (import.meta.env.DEV) console.error('Unexpected error during org creation, attempting cleanup:', error);
           const { error: cleanupError } = await supabase
             .from('organizations')
             .delete()
             .eq('id', orgId);
 
           if (cleanupError) {
-            console.error(
+            if (import.meta.env.DEV) console.error(
               `CRITICAL: Failed to cleanup organization ${orgId}:`,
               cleanupError.message
             );

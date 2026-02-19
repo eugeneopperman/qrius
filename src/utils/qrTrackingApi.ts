@@ -12,13 +12,13 @@ export interface CreateTrackableQRRequest {
   originalData?: QRData;
 }
 
-export interface CreateTrackableQRResult {
+interface CreateTrackableQRResult {
   success: boolean;
   qrCode?: TrackableQRCode;
   error?: string;
 }
 
-export interface GetTrackableQRResult {
+interface GetTrackableQRResult {
   success: boolean;
   qrCode?: TrackableQRCodeWithStats;
   error?: string;

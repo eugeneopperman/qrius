@@ -7,7 +7,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  const { hasCompletedOnboarding } = useAuthStore();
+  const hasCompletedOnboarding = useAuthStore((s) => s.hasCompletedOnboarding);
 
   useEffect(() => {
     const handleAuthCallback = async () => {

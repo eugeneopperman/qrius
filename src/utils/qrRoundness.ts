@@ -90,17 +90,6 @@ export function getDotTypeForPattern(pattern: QRPattern, roundness: number): Dot
   return 'extra-rounded'; // Max rounding while staying "solid"
 }
 
-/**
- * Check if we should apply post-processing roundness.
- * We no longer use post-processing - the library's built-in types handle it.
- *
- * @param pattern - 'solid' or 'dots'
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function shouldApplyRoundnessPostProcessing(_pattern: QRPattern): boolean {
-  // Disabled - using library's built-in dot types instead
-  return false;
-}
 
 /**
  * Get corner square type based on roundness.

@@ -157,12 +157,6 @@ export interface QRStyleOptions {
   frameGradientColors?: [string, string];
 }
 
-export interface ExportOptions {
-  format: 'png' | 'svg' | 'jpeg' | 'pdf';
-  size: number;
-  quality?: number;
-}
-
 // Brand Template types (new template wizard feature)
 export interface BrandTemplateStyle extends QRStyleOptions {
   qrRoundness?: number;         // 0-100 (%) - maps to dot type

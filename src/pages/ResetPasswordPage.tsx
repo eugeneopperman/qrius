@@ -12,7 +12,7 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { updatePassword } = useAuthStore();
+  const updatePassword = useAuthStore((s) => s.updatePassword);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {

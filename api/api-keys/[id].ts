@@ -4,6 +4,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { isValidUUID } from '../_lib/validate.js';
+import { setCorsHeaders } from '../_lib/cors.js';
+import { logger } from '../_lib/logger.js';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL || '',
@@ -12,9 +14,7 @@ const supabaseAdmin = createClient(
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(res, 'DELETE, OPTIONS', req.headers.origin as string | undefined);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .eq('id', keyId);
 
     if (deleteError) {
-      console.error('Error deleting API key:', deleteError);
+      logger.apiKeys.error('Error deleting API key', { error: deleteError.message, keyId });
       return res.status(500).json({ error: 'Failed to delete API key' });
     }
 
@@ -70,7 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error instanceof ForbiddenError) {
       return res.status(403).json({ error: error.message });
     }
-    console.error('API error:', error);
+    logger.apiKeys.error('API error', { error: String(error) });
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

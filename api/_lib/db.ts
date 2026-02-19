@@ -8,6 +8,7 @@ import { neon } from '@neondatabase/serverless';
 const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
 if (!connectionString) {
+  // Intentional console.warn: called at module initialization before logger is available
   console.warn('No database connection string found. Set POSTGRES_URL or DATABASE_URL environment variable.');
 }
 

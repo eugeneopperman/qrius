@@ -5,6 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth, UnauthorizedError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
+import { logger } from '../_lib/logger.js';
 
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL || '',
@@ -39,7 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error instanceof UnauthorizedError) {
       return res.status(401).json({ error: error.message });
     }
-    console.error('API error:', error);
+    logger.organizations.error('API error', { error: String(error) });
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -64,7 +65,7 @@ async function handleList(req: VercelRequest, res: VercelResponse, userId: strin
     .order('joined_at', { ascending: true });
 
   if (error) {
-    console.error('Error fetching organizations:', error);
+    logger.organizations.error('Error fetching organizations', { error: error.message });
     return res.status(500).json({ error: 'Failed to fetch organizations' });
   }
 
@@ -109,7 +110,7 @@ async function handleCreate(req: VercelRequest, res: VercelResponse, userId: str
     .single();
 
   if (orgError) {
-    console.error('Error creating organization:', orgError);
+    logger.organizations.error('Error creating organization', { error: orgError.message });
     return res.status(500).json({ error: 'Failed to create organization' });
   }
 
@@ -123,7 +124,7 @@ async function handleCreate(req: VercelRequest, res: VercelResponse, userId: str
   if (memberError) {
     // Rollback org creation
     await supabaseAdmin.from('organizations').delete().eq('id', org.id);
-    console.error('Error adding member:', memberError);
+    logger.organizations.error('Error adding member', { error: memberError.message });
     return res.status(500).json({ error: 'Failed to create organization' });
   }
 

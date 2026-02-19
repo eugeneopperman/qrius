@@ -1,6 +1,6 @@
 import type { RebrandlyConfig, ShortIoConfig } from '@/types';
 
-export interface ShortenResult {
+interface ShortenResult {
   success: boolean;
   shortUrl?: string;
   error?: string;
@@ -57,7 +57,6 @@ export async function shortenWithIsGd(url: string): Promise<ShortenResult> {
 }
 
 export type ShortenerProvider = 'tinyurl' | 'isgd';
-export type BrandedShortenerProvider = 'rebrandly' | 'shortio';
 
 // Rebrandly API integration
 // Docs: https://developers.rebrandly.com/docs/api-endpoints

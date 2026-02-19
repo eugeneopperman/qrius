@@ -208,7 +208,7 @@ export function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
         })
         .catch((error) => {
           // Log error but don't show toast to avoid noise on network issues
-          console.error('Failed to fetch scan count:', error);
+          if (import.meta.env.DEV) console.error('Failed to fetch scan count:', error);
         })
         .finally(() => setIsLoadingScans(false));
     }

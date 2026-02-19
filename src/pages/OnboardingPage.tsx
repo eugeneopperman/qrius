@@ -16,7 +16,7 @@ type OnboardingStep = 1 | 2 | 3 | 4;
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { createOrganization, setOnboardingComplete } = useAuthStore();
+  const { createOrganization, setOnboardingComplete } = useAuthStore(useShallow((s) => ({ createOrganization: s.createOrganization, setOnboardingComplete: s.setOnboardingComplete })));
   const { saveTemplate, updateDraft, updateDraftStyle } = useTemplateStore();
   const { setUrlData, setStyleOptions } = useQRStore(useShallow((s) => ({ setUrlData: s.setUrlData, setStyleOptions: s.setStyleOptions })));
   const [step, setStep] = useState<OnboardingStep>(1);

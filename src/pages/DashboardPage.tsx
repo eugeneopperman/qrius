@@ -4,15 +4,17 @@ import { QuickStats } from '@/components/dashboard/QuickStats';
 import { QRCodeList } from '@/components/dashboard/QRCodeList';
 import { UpgradePrompt, UsageLimitWarning } from '@/components/dashboard/UpgradePrompt';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/Button';
-import { Plus, ArrowRight, AlertTriangle } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Plus, ArrowRight } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useOrganizationQRCodes } from '@/hooks/useOrganizationQRCodes';
 import { useDashboardStats } from '@/hooks/queries/useDashboardStats';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function DashboardPage() {
-  const { currentOrganization, planLimits, profile } = useAuthStore();
+  const { currentOrganization, planLimits, profile } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, planLimits: s.planLimits, profile: s.profile })));
   const { qrCodes, isLoading, deleteQRCode } = useOrganizationQRCodes({ limit: 10 });
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string | null } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -102,44 +104,17 @@ export default function DashboardPage() {
           <QRCodeList qrCodes={qrCodes} isLoading={isLoading} onDelete={handleDeleteClick} />
         </div>
 
-        {/* Delete confirmation modal */}
-        {deleteConfirm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 max-w-md mx-4 shadow-xl">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
-                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
-                </div>
-                <h3 id="delete-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Delete QR Code
-                </h3>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Are you sure you want to delete{' '}
-                <span className="font-medium">
-                  {deleteConfirm.name || 'this QR code'}
-                </span>
-                ? This action cannot be undone and all scan history will be lost.
-              </p>
-              <div className="flex justify-end gap-3">
-                <Button
-                  variant="secondary"
-                  onClick={() => setDeleteConfirm(null)}
-                  disabled={isDeleting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={handleDeleteConfirm}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'Deleting...' : 'Delete'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Delete confirmation dialog */}
+        <ConfirmDialog
+          isOpen={!!deleteConfirm}
+          onClose={() => setDeleteConfirm(null)}
+          onConfirm={handleDeleteConfirm}
+          title="Delete QR Code"
+          message={`Are you sure you want to delete ${deleteConfirm?.name || 'this QR code'}? This action cannot be undone and all scan history will be lost.`}
+          confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
+          cancelLabel="Cancel"
+          variant="danger"
+        />
       </div>
     </DashboardLayout>
   );

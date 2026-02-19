@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { Loader2, Camera, Trash2 } from 'lucide-react';
 
 export function ProfileSettingsContent() {
-  const { user, profile, updateProfile } = useAuthStore();
+  const { user, profile, updateProfile } = useAuthStore(useShallow((s) => ({ user: s.user, profile: s.profile, updateProfile: s.updateProfile })));
   const [name, setName] = useState(profile?.name || '');
   const [isSaving, setIsSaving] = useState(false);
 

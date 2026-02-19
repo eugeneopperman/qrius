@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { useApiKeys, useCreateApiKey, useDeleteApiKey } from '@/hooks/queries/useApiKeys';
 import {
@@ -16,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export function ApiKeysSettingsContent() {
-  const { currentRole, planLimits } = useAuthStore();
+  const { currentRole, planLimits } = useAuthStore(useShallow((s) => ({ currentRole: s.currentRole, planLimits: s.planLimits })));
   const { data: apiKeys = [], isLoading } = useApiKeys();
   const createApiKey = useCreateApiKey();
   const deleteApiKey = useDeleteApiKey();

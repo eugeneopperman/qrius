@@ -167,37 +167,3 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 }
 
-/**
- * Higher-order component to wrap a component with an error boundary.
- *
- * @example
- * ```tsx
- * const SafeComponent = withErrorBoundary(MyComponent);
- * ```
- */
-export function withErrorBoundary<P extends object>(
-  WrappedComponent: React.ComponentType<P>,
-  errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>
-) {
-  const displayName = WrappedComponent.displayName || WrappedComponent.name || 'Component';
-
-  const ComponentWithErrorBoundary = (props: P) => (
-    <ErrorBoundary {...errorBoundaryProps}>
-      <WrappedComponent {...props} />
-    </ErrorBoundary>
-  );
-
-  ComponentWithErrorBoundary.displayName = `withErrorBoundary(${displayName})`;
-
-  return ComponentWithErrorBoundary;
-}
-
-/**
- * Hook to programmatically trigger an error (useful for testing).
- * Note: This must be used within an ErrorBoundary.
- */
-export function useErrorHandler() {
-  return (error: Error) => {
-    throw error;
-  };
-}

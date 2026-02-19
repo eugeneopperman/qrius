@@ -24,7 +24,7 @@ export function QRReader() {
             // Clear releases all resources including camera
             await scannerRef.current.clear();
           } catch (err) {
-            console.error('Error cleaning up QR scanner:', err);
+            if (import.meta.env.DEV) console.error('Error cleaning up QR scanner:', err);
           }
           scannerRef.current = null;
         }
@@ -75,7 +75,7 @@ export function QRReader() {
           await scannerRef.current.stop();
         }
       } catch (err) {
-        console.error('Error stopping scanner:', err);
+        if (import.meta.env.DEV) console.error('Error stopping scanner:', err);
       }
     }
   };
@@ -113,7 +113,7 @@ export function QRReader() {
         }
         copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
       } catch (err) {
-        console.error('Failed to copy to clipboard:', err);
+        if (import.meta.env.DEV) console.error('Failed to copy to clipboard:', err);
       }
     }
   };

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { OAuthButtons } from './OAuthButtons';
@@ -18,7 +19,7 @@ export function SignInForm({ onForgotPassword, onSignUp, redirectTo }: SignInFor
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { signIn, signInWithOAuth, isLoading, hasCompletedOnboarding } = useAuthStore();
+  const { signIn, signInWithOAuth, isLoading, hasCompletedOnboarding } = useAuthStore(useShallow((s) => ({ signIn: s.signIn, signInWithOAuth: s.signInWithOAuth, isLoading: s.isLoading, hasCompletedOnboarding: s.hasCompletedOnboarding })));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,5 +1,5 @@
 import { MoreVertical, ExternalLink, BarChart2, Copy, Trash2, QrCode } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import type { QRCode } from '@/types/database';
 import { toast } from '@/stores/toastStore';
 
@@ -8,7 +8,7 @@ interface QRCodeCardProps {
   onDelete?: (id: string) => void;
 }
 
-export function QRCodeCard({ qrCode, onDelete }: QRCodeCardProps) {
+export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -127,4 +127,4 @@ export function QRCodeCard({ qrCode, onDelete }: QRCodeCardProps) {
       </div>
     </div>
   );
-}
+});

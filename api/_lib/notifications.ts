@@ -103,33 +103,3 @@ export async function notifyPaymentFailed(
   }
 }
 
-/**
- * Send subscription canceled notification
- */
-export async function notifySubscriptionCanceled(
-  organizationId: string,
-  effectiveDate: Date
-): Promise<void> {
-  try {
-    const { data: org } = await supabaseAdmin
-      .from('organizations')
-      .select('name')
-      .eq('id', organizationId)
-      .single();
-
-    const adminEmails = await getOrgAdminEmails(organizationId);
-
-    logger.notifications.info('Subscription canceled notification', {
-      organizationId,
-      organizationName: org?.name,
-      effectiveDate: effectiveDate.toISOString(),
-      recipients: adminEmails,
-    });
-
-  } catch (error) {
-    logger.notifications.error('Failed to send cancellation notification', {
-      organizationId,
-      error: String(error),
-    });
-  }
-}

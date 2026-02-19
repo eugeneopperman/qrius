@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import {
   User,
   Settings,
@@ -28,7 +29,15 @@ export function UserButton({ onSettingsClick }: UserButtonProps) {
     signOut,
     setCurrentOrganization,
     isLoading,
-  } = useAuthStore();
+  } = useAuthStore(useShallow((s) => ({
+    user: s.user,
+    profile: s.profile,
+    currentOrganization: s.currentOrganization,
+    organizations: s.organizations,
+    signOut: s.signOut,
+    setCurrentOrganization: s.setCurrentOrganization,
+    isLoading: s.isLoading,
+  })));
 
   // Close dropdown when clicking outside
   useEffect(() => {

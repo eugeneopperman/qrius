@@ -24,7 +24,7 @@ interface QRMatrix {
 /**
  * Options for SVG export
  */
-export interface SVGExportOptions {
+interface SVGExportOptions {
   qrMatrix: QRMatrix;
   size: number;
   margin: number;

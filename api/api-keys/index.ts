@@ -5,6 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth, getUserOrganization, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
+import { logger } from '../_lib/logger.js';
 import crypto from 'crypto';
 
 const supabaseAdmin = createClient(
@@ -58,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error instanceof ForbiddenError) {
       return res.status(403).json({ error: error.message });
     }
-    console.error('API error:', error);
+    logger.apiKeys.error('API error', { error: String(error) });
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -71,7 +72,7 @@ async function handleList(req: VercelRequest, res: VercelResponse, organizationI
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching API keys:', error);
+    logger.apiKeys.error('Error fetching API keys', { error: error.message });
     return res.status(500).json({ error: 'Failed to fetch API keys' });
   }
 
@@ -148,7 +149,7 @@ async function handleCreate(
     .single();
 
   if (error) {
-    console.error('Error creating API key:', error);
+    logger.apiKeys.error('Error creating API key', { error: error.message });
     return res.status(500).json({ error: 'Failed to create API key' });
   }
 

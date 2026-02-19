@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearch } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { getSession } from '@/lib/supabase';
 import { toast } from '@/stores/toastStore';
 import {
@@ -72,7 +73,7 @@ const plans = [
 ];
 
 export function BillingSettingsContent() {
-  const { currentOrganization, fetchOrganizations } = useAuthStore();
+  const { currentOrganization, fetchOrganizations } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, fetchOrganizations: s.fetchOrganizations })));
   const [isLoading, setIsLoading] = useState(false);
   const currentPlan = currentOrganization?.plan || 'free';
 

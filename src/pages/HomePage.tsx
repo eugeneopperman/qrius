@@ -16,7 +16,7 @@ export default function HomePage() {
   const qrPreviewRef = useRef<QRPreviewHandle | null>(null);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { openWizard } = useTemplateStore();
-  const { user } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
   const { openShortcuts, openHistory, openSettings } = useUIStore();
 
   // Memoized callbacks for keyboard shortcuts to prevent unnecessary re-renders

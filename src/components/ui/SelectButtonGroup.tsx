@@ -54,6 +54,7 @@ export function SelectButtonGroup<T extends string>({
               type="button"
               onClick={() => onChange(option.value)}
               title={option.label}
+              aria-pressed={isSelected}
               className={cn(
                 'rounded-md border transition-colors touch-manipulation font-medium',
                 'focus:outline-none focus:ring-2 focus:ring-orange-400',

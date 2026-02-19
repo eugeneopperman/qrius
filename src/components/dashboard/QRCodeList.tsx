@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from '@tanstack/react-router';
 import { QRCodeCard } from './QRCodeCard';
 import { Button } from '../ui/Button';
@@ -32,7 +32,7 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   // Filter and sort QR codes
-  const filteredQRCodes = qrCodes
+  const filteredQRCodes = useMemo(() => qrCodes
     .filter((qr) => {
       if (!searchQuery) return true;
       const query = searchQuery.toLowerCase();
@@ -57,7 +57,7 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
           break;
       }
       return sortOrder === 'asc' ? comparison : -comparison;
-    });
+    }), [qrCodes, searchQuery, sortField, sortOrder]);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -117,9 +117,11 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
           </div>
 
           {/* View mode toggle */}
-          <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" role="group" aria-label="View mode">
             <button
               onClick={() => setViewMode('grid')}
+              aria-label="Grid view"
+              aria-pressed={viewMode === 'grid'}
               className={`p-2 ${
                 viewMode === 'grid'
                   ? 'bg-gray-100 dark:bg-gray-800'
@@ -130,6 +132,8 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
             </button>
             <button
               onClick={() => setViewMode('list')}
+              aria-label="List view"
+              aria-pressed={viewMode === 'list'}
               className={`p-2 ${
                 viewMode === 'list'
                   ? 'bg-gray-100 dark:bg-gray-800'

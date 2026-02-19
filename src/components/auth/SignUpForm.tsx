@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { OAuthButtons } from './OAuthButtons';
@@ -17,7 +18,7 @@ export function SignUpForm({ onSignIn }: SignUpFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const { signUp, signInWithOAuth, isLoading } = useAuthStore();
+  const { signUp, signInWithOAuth, isLoading } = useAuthStore(useShallow((s) => ({ signUp: s.signUp, signInWithOAuth: s.signInWithOAuth, isLoading: s.isLoading })));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

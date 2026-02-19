@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { useTeamMembers, useInviteMember } from '@/hooks/queries/useTeamMembers';
 import type { OrgRole } from '@/types/database';
@@ -29,7 +30,7 @@ const roleColors: Record<OrgRole, string> = {
 };
 
 export function TeamSettingsContent() {
-  const { currentOrganization, currentRole, user } = useAuthStore();
+  const { currentOrganization, currentRole, user } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, currentRole: s.currentRole, user: s.user })));
   const { data: members = [], isLoading } = useTeamMembers();
   const [showInviteModal, setShowInviteModal] = useState(false);
 
@@ -193,7 +194,7 @@ export default function TeamSettingsPage() {
 }
 
 function InviteMemberModal({ onClose }: { onClose: () => void }) {
-  const { user } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<OrgRole>('editor');
   const inviteMember = useInviteMember();

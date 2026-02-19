@@ -104,7 +104,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const plan = priceToPlan[priceId] || 'free';
 
   // Update organization with subscription info
-  await supabaseAdmin
+  const { error: orgUpdateError } = await supabaseAdmin
     .from('organizations')
     .update({
       plan,
@@ -112,8 +112,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     })
     .eq('id', organizationId);
 
+  if (orgUpdateError) {
+    logger.webhooks.error('Failed to update organization plan', { organizationId, error: orgUpdateError.message });
+  }
+
   // Create or update subscription record
-  await supabaseAdmin.from('subscriptions').upsert({
+  const { error: subUpsertError } = await supabaseAdmin.from('subscriptions').upsert({
     organization_id: organizationId,
     stripe_subscription_id: subscriptionId,
     stripe_price_id: priceId,
@@ -123,6 +127,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     cancel_at_period_end: subscription.cancel_at_period_end,
   });
 
+  if (subUpsertError) {
+    logger.webhooks.error('Failed to upsert subscription record', { organizationId, error: subUpsertError.message });
+  }
+
   logger.webhooks.info('Checkout completed', { organizationId, plan });
 }
 
@@ -131,7 +139,7 @@ async function updateSubscription(orgId: string, subscription: Stripe.Subscripti
   const plan = priceToPlan[priceId] || 'free';
 
   // Update organization plan
-  await supabaseAdmin
+  const { error: orgUpdateError } = await supabaseAdmin
     .from('organizations')
     .update({
       plan,
@@ -139,8 +147,12 @@ async function updateSubscription(orgId: string, subscription: Stripe.Subscripti
     })
     .eq('id', orgId);
 
+  if (orgUpdateError) {
+    logger.webhooks.error('Failed to update organization plan', { orgId, error: orgUpdateError.message });
+  }
+
   // Upsert subscription record
-  await supabaseAdmin.from('subscriptions').upsert({
+  const { error: subUpsertError } = await supabaseAdmin.from('subscriptions').upsert({
     organization_id: orgId,
     stripe_subscription_id: subscription.id,
     stripe_price_id: priceId,
@@ -149,6 +161,10 @@ async function updateSubscription(orgId: string, subscription: Stripe.Subscripti
     current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
     cancel_at_period_end: subscription.cancel_at_period_end,
   });
+
+  if (subUpsertError) {
+    logger.webhooks.error('Failed to upsert subscription record', { orgId, error: subUpsertError.message });
+  }
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -188,7 +204,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   // Downgrade to free plan
-  await supabaseAdmin
+  const { error: orgUpdateError } = await supabaseAdmin
     .from('organizations')
     .update({
       plan: 'free',
@@ -196,11 +212,19 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     })
     .eq('id', sub.organization_id);
 
+  if (orgUpdateError) {
+    logger.webhooks.error('Failed to downgrade organization plan', { organizationId: sub.organization_id, error: orgUpdateError.message });
+  }
+
   // Update subscription status
-  await supabaseAdmin
+  const { error: subUpdateError } = await supabaseAdmin
     .from('subscriptions')
     .update({ status: 'canceled' })
     .eq('stripe_subscription_id', subscription.id);
+
+  if (subUpdateError) {
+    logger.webhooks.error('Failed to update subscription status to canceled', { subscriptionId: subscription.id, error: subUpdateError.message });
+  }
 
   logger.webhooks.info('Subscription deleted', { organizationId: sub.organization_id });
 }
@@ -210,10 +234,14 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!subscriptionId) return;
 
   // Update subscription status to active
-  await supabaseAdmin
+  const { error: subUpdateError } = await supabaseAdmin
     .from('subscriptions')
     .update({ status: 'active' })
     .eq('stripe_subscription_id', subscriptionId);
+
+  if (subUpdateError) {
+    logger.webhooks.error('Failed to update subscription status to active', { subscriptionId, error: subUpdateError.message });
+  }
 
   logger.webhooks.info('Payment succeeded', { subscriptionId });
 }
@@ -223,10 +251,14 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   if (!subscriptionId) return;
 
   // Update subscription status to past_due
-  await supabaseAdmin
+  const { error: subUpdateError } = await supabaseAdmin
     .from('subscriptions')
     .update({ status: 'past_due' })
     .eq('stripe_subscription_id', subscriptionId);
+
+  if (subUpdateError) {
+    logger.webhooks.error('Failed to update subscription status to past_due', { subscriptionId, error: subUpdateError.message });
+  }
 
   logger.webhooks.warn('Payment failed', { subscriptionId });
 

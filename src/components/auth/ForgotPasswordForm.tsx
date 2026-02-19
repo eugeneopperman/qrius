@@ -14,7 +14,7 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { resetPassword } = useAuthStore();
+  const resetPassword = useAuthStore((s) => s.resetPassword);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

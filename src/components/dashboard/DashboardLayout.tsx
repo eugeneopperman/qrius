@@ -1,5 +1,6 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useThemeStore } from '@/stores/themeStore';
 import { UserButton } from '../auth/UserButton';
 import {
@@ -38,7 +39,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const { theme, toggleTheme } = useThemeStore();
-  const { currentOrganization, organizations, setCurrentOrganization } = useAuthStore();
+  const { currentOrganization, organizations, setCurrentOrganization } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, organizations: s.organizations, setCurrentOrganization: s.setCurrentOrganization })));
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">

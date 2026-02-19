@@ -40,9 +40,12 @@ export function Dropdown({ trigger, children, align = 'left', className }: Dropd
 
   return (
     <div ref={containerRef} className={cn('relative', className)}>
-      {trigger({ isOpen, toggle })}
+      <div aria-haspopup="true" aria-expanded={isOpen}>
+        {trigger({ isOpen, toggle })}
+      </div>
       {isOpen && (
         <div
+          role="menu"
           className={cn(
             'absolute top-full mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50',
             align === 'right' ? 'right-0' : 'left-0'

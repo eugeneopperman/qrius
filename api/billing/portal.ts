@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { requireAuth, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { isValidHttpUrl } from '../_lib/validate.js';
+import { logger } from '../_lib/logger.js';
 import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -77,7 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error instanceof ForbiddenError) {
       return res.status(403).json({ error: error.message });
     }
-    console.error('Portal error:', error);
+    logger.billing.error('Portal error', { error: String(error) });
     return res.status(500).json({ error: 'Failed to create portal session' });
   }
 }
