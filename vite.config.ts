@@ -38,7 +38,7 @@ export default defineConfig({
         name: 'Qrius',
         short_name: 'Qrius',
         description: 'Create beautiful, customizable QR codes with analytics',
-        theme_color: '#4f46e5',
+        theme_color: '#f97316',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
