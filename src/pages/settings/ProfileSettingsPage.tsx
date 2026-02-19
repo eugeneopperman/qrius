@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { supabase } from '@/lib/supabase';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, Trash2 } from 'lucide-react';
 
 const AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const AVATAR_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -63,6 +63,34 @@ export function ProfileSettingsContent() {
       setIsUploadingAvatar(false);
       // Reset file input so the same file can be re-selected
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    if (!user || !profile?.avatar_url) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      // List and remove all files in the user's avatar folder
+      const { data: files } = await supabase.storage
+        .from('avatars')
+        .list(user.id);
+
+      if (files && files.length > 0) {
+        const paths = files.map((f) => `${user.id}/${f.name}`);
+        await supabase.storage.from('avatars').remove(paths);
+      }
+
+      const { error } = await updateProfile({ avatar_url: null });
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Avatar removed');
+      }
+    } catch {
+      toast.error('Failed to remove avatar');
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -134,15 +162,29 @@ export function ProfileSettingsContent() {
             />
 
             <div>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploadingAvatar}
-              >
-                {isUploadingAvatar ? 'Uploading...' : 'Change photo'}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                >
+                  {isUploadingAvatar ? 'Uploading...' : 'Change photo'}
+                </Button>
+                {profile?.avatar_url && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleAvatarRemove}
+                    disabled={isUploadingAvatar}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Remove
+                  </Button>
+                )}
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 JPG, PNG, GIF or WebP. Max 2MB.
               </p>
