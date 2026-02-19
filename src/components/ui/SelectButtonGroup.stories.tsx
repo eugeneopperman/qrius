@@ -52,66 +52,68 @@ const defaultOptions = [
 
 const defaultArgs = { options: defaultOptions, value: 'square', onChange: () => {} } as const;
 
+function DefaultDemo() {
+  const [value, setValue] = useState('square');
+  return <SelectButtonGroup options={defaultOptions} value={value} onChange={setValue} />;
+}
+
 export const Default: Story = {
   args: { ...defaultArgs },
-  render: () => {
-    const [value, setValue] = useState('square');
-    return (
-      <SelectButtonGroup
-        options={defaultOptions}
-        value={value}
-        onChange={setValue}
-      />
-    );
-  },
+  render: () => <DefaultDemo />,
 };
+
+function WithLabelDemo() {
+  const [value, setValue] = useState('square');
+  return (
+    <SelectButtonGroup
+      options={defaultOptions}
+      value={value}
+      onChange={setValue}
+      label="Dot Style"
+    />
+  );
+}
 
 export const WithLabel: Story = {
   args: { ...defaultArgs },
-  render: () => {
-    const [value, setValue] = useState('square');
-    return (
+  render: () => <WithLabelDemo />,
+};
+
+function GridLayoutDemo() {
+  const [value, setValue] = useState('square');
+  return (
+    <div style={{ width: 320 }}>
       <SelectButtonGroup
         options={defaultOptions}
         value={value}
         onChange={setValue}
-        label="Dot Style"
+        label="Dot Style (Grid)"
+        layout="grid"
+        gridCols="grid-cols-3"
       />
-    );
-  },
-};
+    </div>
+  );
+}
 
 export const GridLayout: Story = {
   args: { ...defaultArgs },
-  render: () => {
-    const [value, setValue] = useState('square');
-    return (
-      <div style={{ width: 320 }}>
-        <SelectButtonGroup
-          options={defaultOptions}
-          value={value}
-          onChange={setValue}
-          label="Dot Style (Grid)"
-          layout="grid"
-          gridCols="grid-cols-3"
-        />
-      </div>
-    );
-  },
+  render: () => <GridLayoutDemo />,
 };
+
+function SmallSizeDemo() {
+  const [value, setValue] = useState('square');
+  return (
+    <SelectButtonGroup
+      options={defaultOptions}
+      value={value}
+      onChange={setValue}
+      label="Small Buttons"
+      size="sm"
+    />
+  );
+}
 
 export const SmallSize: Story = {
   args: { ...defaultArgs },
-  render: () => {
-    const [value, setValue] = useState('square');
-    return (
-      <SelectButtonGroup
-        options={defaultOptions}
-        value={value}
-        onChange={setValue}
-        label="Small Buttons"
-        size="sm"
-      />
-    );
-  },
+  render: () => <SmallSizeDemo />,
 };

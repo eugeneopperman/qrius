@@ -49,11 +49,11 @@ V4 PRD (22 items) is fully shipped. This plan addresses design system consistenc
 29. Storybook story for NotFoundPage
 
 ## Status
-- [ ] Sprint 1 (items 1-5)
-- [ ] Sprint 2 (items 6-11)
-- [ ] Sprint 3 (items 12-15)
-- [ ] Sprint 4 (items 16-19)
-- [ ] Sprint 5 (items 20-21)
-- [ ] Sprint 6 (items 22-23)
-- [ ] Sprint 7 (items 24-25)
-- [ ] Sprint 8 (items 26-29)
+- [x] Sprint 1 (items 1-5) — Shipped
+- [x] Sprint 2 (items 6-11) — Shipped
+- [x] Sprint 3 (items 12-15) — Shipped
+- [x] Sprint 4 (items 16-19) — Shipped
+- [x] Sprint 5 (items 20-21) — Shipped
+- [x] Sprint 6 (items 22-23) — Shipped
+- [x] Sprint 7 (items 24-25) — Shipped
+- [x] Sprint 8 (items 26-29) — Shipped

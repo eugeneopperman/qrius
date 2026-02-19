@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { cn } from '@/utils/cn';
 
@@ -8,47 +8,60 @@ interface QRMiniPreviewProps {
   className?: string;
 }
 
+export interface QRMiniPreviewHandle {
+  download: (fileName?: string, extension?: 'png' | 'svg' | 'jpeg' | 'webp') => Promise<void>;
+}
+
 function clearChildren(el: HTMLElement) {
   while (el.firstChild) el.removeChild(el.firstChild);
 }
 
-export function QRMiniPreview({ data, size = 160, className }: QRMiniPreviewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const qrRef = useRef<QRCodeStyling | null>(null);
+export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>(
+  function QRMiniPreview({ data, size = 160, className }, ref) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const qrRef = useRef<QRCodeStyling | null>(null);
 
-  useEffect(() => {
-    if (!containerRef.current || !data) return;
+    useImperativeHandle(ref, () => ({
+      download: async (fileName = 'qr-code', extension = 'png') => {
+        if (qrRef.current) {
+          await qrRef.current.download({ name: fileName, extension });
+        }
+      },
+    }));
 
-    if (!qrRef.current) {
-      qrRef.current = new QRCodeStyling({
-        width: size,
-        height: size,
-        data,
-        dotsOptions: { type: 'rounded', color: '#000000' },
-        backgroundOptions: { color: '#ffffff' },
-        cornersSquareOptions: { type: 'extra-rounded' },
-        imageOptions: { crossOrigin: 'anonymous' },
-        qrOptions: { errorCorrectionLevel: 'M' },
-      });
-      qrRef.current.append(containerRef.current);
-    } else {
-      qrRef.current.update({ data, width: size, height: size });
-    }
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container || !data) return;
 
-    return () => {
-      if (containerRef.current) {
-        clearChildren(containerRef.current);
+      if (!qrRef.current) {
+        qrRef.current = new QRCodeStyling({
+          width: size,
+          height: size,
+          data,
+          dotsOptions: { type: 'rounded', color: '#000000' },
+          backgroundOptions: { color: '#ffffff' },
+          cornersSquareOptions: { type: 'extra-rounded' },
+          imageOptions: { crossOrigin: 'anonymous' },
+          qrOptions: { errorCorrectionLevel: 'M' },
+        });
+        qrRef.current.append(container);
+      } else {
+        qrRef.current.update({ data, width: size, height: size });
       }
-      qrRef.current = null;
-    };
-  }, [data, size]);
 
-  if (!data) return null;
+      return () => {
+        clearChildren(container);
+        qrRef.current = null;
+      };
+    }, [data, size]);
 
-  return (
-    <div
-      ref={containerRef}
-      className={cn('flex items-center justify-center', className)}
-    />
-  );
-}
+    if (!data) return null;
+
+    return (
+      <div
+        ref={containerRef}
+        className={cn('flex items-center justify-center', className)}
+      />
+    );
+  }
+);

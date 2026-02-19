@@ -1,9 +1,11 @@
+import { useRef } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/stores/toastStore';
 import { useQRCodeDetail } from '@/hooks/queries/useQRCodeDetail';
 import { QRMiniPreview } from '@/components/ui/QRMiniPreview';
+import type { QRMiniPreviewHandle } from '@/components/ui/QRMiniPreview';
 import {
   ArrowLeft,
   ExternalLink,
@@ -20,6 +22,7 @@ import {
 export default function QRCodeDetailPage() {
   const { id } = useParams({ from: '/qr-codes/$id' });
   const { data, isLoading } = useQRCodeDetail(id);
+  const qrPreviewRef = useRef<QRMiniPreviewHandle>(null);
 
   const qrCode = data?.qrCode ?? null;
   const recentScans = data?.recentScans ?? [];
@@ -88,7 +91,7 @@ export default function QRCodeDetailPage() {
           <div className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
               <div className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
-                <QRMiniPreview data={qrCode.destination_url} size={240} />
+                <QRMiniPreview ref={qrPreviewRef} data={qrCode.destination_url} size={240} />
               </div>
 
               <div className="space-y-3">
@@ -96,7 +99,14 @@ export default function QRCodeDetailPage() {
                   <Copy className="w-4 h-4" />
                   Copy Tracking URL
                 </Button>
-                <Button variant="secondary" className="w-full" disabled title="Coming soon">
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  onClick={() => {
+                    const fileName = qrCode.name || `qr-${qrCode.short_code}`;
+                    qrPreviewRef.current?.download(fileName, 'png');
+                  }}
+                >
                   <Download className="w-4 h-4" />
                   Download QR Code
                 </Button>

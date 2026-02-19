@@ -31,35 +31,43 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+function DefaultDemo() {
+  const [color, setColor] = useState('#3B82F6');
+  return <ColorPicker value={color} onChange={setColor} />;
+}
+
 export const Default: Story = {
   args: { value: '#3B82F6', onChange: () => {} },
-  render: () => {
-    const [color, setColor] = useState('#3B82F6');
-    return <ColorPicker value={color} onChange={setColor} />;
-  },
+  render: () => <DefaultDemo />,
 };
+
+function WithLabelDemo() {
+  const [color, setColor] = useState('#EF4444');
+  return <ColorPicker label="QR Code Color" value={color} onChange={setColor} />;
+}
 
 export const WithLabel: Story = {
   args: { value: '#EF4444', onChange: () => {} },
-  render: () => {
-    const [color, setColor] = useState('#EF4444');
-    return <ColorPicker label="QR Code Color" value={color} onChange={setColor} />;
-  },
+  render: () => <WithLabelDemo />,
 };
+
+function CustomPresetsDemo() {
+  const [color, setColor] = useState('#FF6B6B');
+  const presets = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+  return <ColorPicker label="Brand Color" value={color} onChange={setColor} presets={presets} />;
+}
 
 export const CustomPresets: Story = {
   args: { value: '#FF6B6B', onChange: () => {} },
-  render: () => {
-    const [color, setColor] = useState('#FF6B6B');
-    const presets = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
-    return <ColorPicker label="Brand Color" value={color} onChange={setColor} presets={presets} />;
-  },
+  render: () => <CustomPresetsDemo />,
 };
+
+function DarkColorDemo() {
+  const [color, setColor] = useState('#000000');
+  return <ColorPicker label="Background" value={color} onChange={setColor} />;
+}
 
 export const DarkColor: Story = {
   args: { value: '#000000', onChange: () => {} },
-  render: () => {
-    const [color, setColor] = useState('#000000');
-    return <ColorPicker label="Background" value={color} onChange={setColor} />;
-  },
+  render: () => <DarkColorDemo />,
 };

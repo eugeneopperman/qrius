@@ -1,15 +1,70 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
-import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { Camera, Loader2 } from 'lucide-react';
+
+const AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
+const AVATAR_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 export function ProfileSettingsContent() {
   const { user, profile, updateProfile } = useAuthStore(useShallow((s) => ({ user: s.user, profile: s.profile, updateProfile: s.updateProfile })));
   const [name, setName] = useState(profile?.name || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!AVATAR_ACCEPTED_TYPES.includes(file.type)) {
+      toast.error('Please upload a JPEG, PNG, GIF, or WebP image');
+      return;
+    }
+    if (file.size > AVATAR_MAX_SIZE) {
+      toast.error('Image must be smaller than 2MB');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const filePath = `${user.id}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        toast.error(`Upload failed: ${uploadError.message}`);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Append cache-buster so the browser fetches the new image
+      const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      const { error: profileError } = await updateProfile({ avatar_url: avatarUrl });
+
+      if (profileError) {
+        toast.error(profileError.message);
+      } else {
+        toast.success('Avatar updated');
+      }
+    } catch {
+      toast.error('Failed to upload avatar');
+    } finally {
+      setIsUploadingAvatar(false);
+      // Reset file input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,23 +97,56 @@ export function ProfileSettingsContent() {
           </h2>
 
           <div className="flex items-center gap-6">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={profile.name || 'Avatar'}
-                className="w-20 h-20 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                <span className="text-2xl font-medium text-orange-600 dark:text-orange-400">
-                  {initials}
-                </span>
+            <button
+              type="button"
+              className="relative group w-20 h-20 rounded-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingAvatar}
+            >
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.name || 'Avatar'}
+                  className="w-20 h-20 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <span className="text-2xl font-medium text-orange-600 dark:text-orange-400">
+                    {initials}
+                  </span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                {isUploadingAvatar ? (
+                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-5 h-5 text-white" />
+                )}
               </div>
-            )}
+            </button>
 
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Avatar upload coming soon
-            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+
+            <div>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+              >
+                {isUploadingAvatar ? 'Uploading...' : 'Change photo'}
+              </Button>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                JPG, PNG, GIF or WebP. Max 2MB.
+              </p>
+            </div>
           </div>
         </div>
 
