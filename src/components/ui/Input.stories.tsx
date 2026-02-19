@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Input } from './Input';
+import { Mail, Lock, Search } from 'lucide-react';
 
 const meta = {
   title: 'UI/Input',
@@ -106,6 +107,25 @@ export const AllStates: Story = {
       <Input label="With Error" placeholder="With error" error="This field has an error" />
       <Input label="Disabled" placeholder="Disabled input" disabled />
       <Input label="Required" placeholder="Required field" required />
+    </div>
+  ),
+};
+
+export const WithLeftIcon: Story = {
+  args: {
+    label: 'Email',
+    type: 'email',
+    placeholder: 'you@example.com',
+    leftIcon: <Mail className="w-4 h-4" />,
+  },
+};
+
+export const LeftIconVariants: Story = {
+  render: () => (
+    <div className="space-y-4">
+      <Input label="Email" type="email" placeholder="you@example.com" leftIcon={<Mail className="w-4 h-4" />} />
+      <Input label="Password" type="password" placeholder="Enter password" leftIcon={<Lock className="w-4 h-4" />} />
+      <Input label="Search" placeholder="Search..." leftIcon={<Search className="w-4 h-4" />} />
     </div>
   ),
 };

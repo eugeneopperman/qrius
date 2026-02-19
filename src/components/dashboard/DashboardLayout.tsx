@@ -21,6 +21,7 @@ import {
 import { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Dropdown } from '../ui/Dropdown';
+import { Logo } from '../ui/Logo';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -60,11 +61,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <QrCode className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">Qrius</span>
+            <Link to="/dashboard">
+              <Logo size="sm" />
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}

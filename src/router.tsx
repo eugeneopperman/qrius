@@ -86,6 +86,9 @@ const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const CookiesPage = lazy(() => import('@/pages/CookiesPage'));
 
+// Error pages
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {
   const { isShortcutsOpen, closeShortcuts, isHistoryOpen, closeHistory, isSettingsOpen, closeSettings } = useUIStore();
@@ -175,6 +178,7 @@ async function requireGuest() {
 const rootRoute = createRootRoute({
   component: RootLayout,
   errorComponent: ErrorPage,
+  notFoundComponent: NotFoundPage,
 });
 
 // Public routes

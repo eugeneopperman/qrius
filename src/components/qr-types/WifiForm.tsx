@@ -3,6 +3,7 @@ import { useQRStore } from '@/stores/qrStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
+import { Toggle } from '../ui/Toggle';
 
 import { validateSsid, validateWifiPassword } from '@/utils/validators';
 
@@ -55,15 +56,11 @@ export function WifiForm() {
         />
       )}
 
-      <label className="flex items-center gap-3 cursor-pointer min-h-[44px] touch-manipulation">
-        <input
-          type="checkbox"
-          checked={wifiData.hidden || false}
-          onChange={(e) => setWifiData({ hidden: e.target.checked })}
-          className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-        />
-        <span className="text-sm text-gray-700 dark:text-gray-300">Hidden network</span>
-      </label>
+      <Toggle
+        checked={wifiData.hidden || false}
+        onChange={(checked) => setWifiData({ hidden: checked })}
+        label="Hidden network"
+      />
     </div>
   );
 }

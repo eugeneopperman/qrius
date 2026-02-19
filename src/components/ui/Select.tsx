@@ -1,4 +1,4 @@
-import { forwardRef, type SelectHTMLAttributes } from 'react';
+import { forwardRef, useId, type SelectHTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 
 export interface SelectOption {
@@ -10,34 +10,47 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   options: SelectOption[];
   error?: string;
+  hint?: string;
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, options, error, id, ...props }, ref) => {
-    const selectId = id || label?.toLowerCase().replace(/\s+/g, '-');
+  ({ className, label, options, error, hint, id, required, ...props }, ref) => {
+    const generatedId = useId();
+    const selectId = id || generatedId;
+    const errorId = `${selectId}-error`;
+    const hintId = `${selectId}-hint`;
+
+    const describedBy = [
+      error ? errorId : null,
+      hint && !error ? hintId : null,
+    ]
+      .filter(Boolean)
+      .join(' ') || undefined;
 
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5"
           >
             {label}
+            {required && (
+              <span className="text-red-500 ml-0.5" aria-hidden="true">
+                *
+              </span>
+            )}
           </label>
         )}
         <select
           ref={ref}
           id={selectId}
+          required={required}
           aria-invalid={error ? 'true' : undefined}
-          aria-describedby={error ? `${selectId}-error` : undefined}
+          aria-describedby={describedBy}
           className={cn(
-            'w-full rounded-lg border bg-white px-3 py-2 text-sm transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-1',
-            'dark:bg-gray-800 dark:text-white',
-            error
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-              : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500/20 dark:border-gray-600',
+            'input min-h-[44px]',
+            error && 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20',
             className
           )}
           {...props}
@@ -49,8 +62,13 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ))}
         </select>
         {error && (
-          <p id={`${selectId}-error`} className="mt-1 text-sm text-red-500" role="alert">
+          <p id={errorId} className="mt-1 text-sm text-red-500" role="alert">
             {error}
+          </p>
+        )}
+        {hint && !error && (
+          <p id={hintId} className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {hint}
           </p>
         )}
       </div>

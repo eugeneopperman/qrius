@@ -1,7 +1,8 @@
 import { Link, useSearch, useNavigate } from '@tanstack/react-router';
 import { SignUpForm } from '@/components/auth/SignUpForm';
+import { Logo } from '@/components/ui/Logo';
 import { useThemeStore } from '@/stores/themeStore';
-import { QrCode, Moon, Sun, Check } from 'lucide-react';
+import { Moon, Sun, Check } from 'lucide-react';
 
 export default function SignUpPage() {
   const { theme, toggleTheme } = useThemeStore();
@@ -51,11 +52,8 @@ export default function SignUpPage() {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="p-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <QrCode className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">Qrius</span>
+          <Link to="/">
+            <Logo size="md" />
           </Link>
 
           <button

@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { OAuthButtons } from './OAuthButtons';
+import { Link } from '@tanstack/react-router';
 import { Mail, Lock, User, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface SignUpFormProps {
@@ -96,87 +97,54 @@ export function SignUpForm({ onSignIn }: SignUpFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Name <span className="text-gray-400">(optional)</span>
-          </label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
-              className="pl-10"
-              disabled={isLoading}
-              autoComplete="name"
-            />
-          </div>
-        </div>
+        <Input
+          label="Name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="John Doe"
+          leftIcon={<User className="w-4 h-4" />}
+          disabled={isLoading}
+          autoComplete="name"
+          hint="Optional"
+        />
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="pl-10"
-              disabled={isLoading}
-              autoComplete="email"
-              required
-            />
-          </div>
-        </div>
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          leftIcon={<Mail className="w-4 h-4" />}
+          disabled={isLoading}
+          autoComplete="email"
+          required
+        />
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Password <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="pl-10"
-              disabled={isLoading}
-              autoComplete="new-password"
-              required
-            />
-          </div>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            At least 8 characters
-          </p>
-        </div>
+        <Input
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          leftIcon={<Lock className="w-4 h-4" />}
+          disabled={isLoading}
+          autoComplete="new-password"
+          required
+          hint="At least 8 characters"
+        />
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Confirm password <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              className="pl-10"
-              disabled={isLoading}
-              autoComplete="new-password"
-              required
-            />
-          </div>
-        </div>
+        <Input
+          label="Confirm password"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="••••••••"
+          leftIcon={<Lock className="w-4 h-4" />}
+          disabled={isLoading}
+          autoComplete="new-password"
+          required
+        />
 
         <Button
           type="submit"
@@ -211,13 +179,13 @@ export function SignUpForm({ onSignIn }: SignUpFormProps) {
 
       <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
         By creating an account, you agree to our{' '}
-        <a href="/terms" className="underline hover:text-gray-700 dark:hover:text-gray-300">
+        <Link to="/terms" className="underline hover:text-gray-700 dark:hover:text-gray-300">
           Terms of Service
-        </a>{' '}
+        </Link>{' '}
         and{' '}
-        <a href="/privacy" className="underline hover:text-gray-700 dark:hover:text-gray-300">
+        <Link to="/privacy" className="underline hover:text-gray-700 dark:hover:text-gray-300">
           Privacy Policy
-        </a>
+        </Link>
       </p>
     </div>
   );

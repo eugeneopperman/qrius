@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { QRCodeCard } from './QRCodeCard';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   Search,
   Plus,
@@ -31,11 +32,13 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
   // Filter and sort QR codes
   const filteredQRCodes = useMemo(() => qrCodes
     .filter((qr) => {
-      if (!searchQuery) return true;
-      const query = searchQuery.toLowerCase();
+      if (!debouncedSearch) return true;
+      const query = debouncedSearch.toLowerCase();
       return (
         qr.name?.toLowerCase().includes(query) ||
         qr.destination_url.toLowerCase().includes(query) ||
@@ -57,7 +60,7 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
           break;
       }
       return sortOrder === 'asc' ? comparison : -comparison;
-    }), [qrCodes, searchQuery, sortField, sortOrder]);
+    }), [qrCodes, debouncedSearch, sortField, sortOrder]);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -194,25 +197,27 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                <th scope="col" className="text-left px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Name
                 </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hidden md:table-cell">
+                <th scope="col" className="text-left px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hidden md:table-cell">
                   URL
                 </th>
                 <th
+                  scope="col"
                   className="text-left px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
                   onClick={() => toggleSort('total_scans')}
                 >
                   Scans
                 </th>
                 <th
+                  scope="col"
                   className="text-left px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 hidden sm:table-cell"
                   onClick={() => toggleSort('created_at')}
                 >
                   Created
                 </th>
-                <th className="text-right px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                <th scope="col" className="text-right px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400">
                   Actions
                 </th>
               </tr>
@@ -256,12 +261,13 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <a
-                      href={`/qr-codes/${qrCode.id}`}
+                    <Link
+                      to="/qr-codes/$id"
+                      params={{ id: qrCode.id }}
                       className="text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300"
                     >
                       View
-                    </a>
+                    </Link>
                   </td>
                 </tr>
               ))}

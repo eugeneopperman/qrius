@@ -1,4 +1,4 @@
-import { forwardRef, useId, type InputHTMLAttributes } from 'react';
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
 /**
@@ -12,34 +12,12 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   /** Hint text displayed below the input (hidden when error is shown) */
   hint?: string;
+  /** Icon rendered inside the input on the left side */
+  leftIcon?: ReactNode;
 }
 
-/**
- * A form input component with built-in label, error, and hint support.
- * Automatically handles accessibility attributes (aria-invalid, aria-describedby).
- *
- * @example
- * ```tsx
- * // Basic input with label
- * <Input label="Email" type="email" placeholder="you@example.com" />
- *
- * // Input with error state
- * <Input
- *   label="Password"
- *   type="password"
- *   error="Password must be at least 8 characters"
- * />
- *
- * // Input with hint
- * <Input
- *   label="Username"
- *   hint="Letters and numbers only"
- *   required
- * />
- * ```
- */
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, id, required, ...props }, ref) => {
+  ({ className, label, error, hint, leftIcon, id, required, ...props }, ref) => {
     const generatedId = useId();
     const inputId = id || generatedId;
     const errorId = `${inputId}-error`;
@@ -68,19 +46,27 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             )}
           </label>
         )}
-        <input
-          ref={ref}
-          id={inputId}
-          required={required}
-          aria-invalid={error ? 'true' : undefined}
-          aria-describedby={describedBy}
-          className={cn(
-            'input min-h-[44px]',
-            error && 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20',
-            className
+        <div className="relative">
+          {leftIcon && (
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              {leftIcon}
+            </span>
           )}
-          {...props}
-        />
+          <input
+            ref={ref}
+            id={inputId}
+            required={required}
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={describedBy}
+            className={cn(
+              'input min-h-[44px]',
+              leftIcon && 'pl-10',
+              error && 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20',
+              className
+            )}
+            {...props}
+          />
+        </div>
         {error && (
           <p id={errorId} role="alert" className="mt-1 text-sm text-red-500">
             {error}

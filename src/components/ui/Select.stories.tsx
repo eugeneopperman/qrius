@@ -65,6 +65,22 @@ export const Disabled: Story = {
   },
 };
 
+export const WithHint: Story = {
+  args: {
+    label: 'Size',
+    options: sampleOptions,
+    hint: 'Choose a t-shirt size',
+  },
+};
+
+export const Required: Story = {
+  args: {
+    label: 'Size',
+    options: sampleOptions,
+    required: true,
+  },
+};
+
 export const AllStates: Story = {
   args: {
     options: sampleOptions,
@@ -73,6 +89,8 @@ export const AllStates: Story = {
     <div className="flex flex-col gap-6 w-64">
       <Select options={sampleOptions} />
       <Select label="With Label" options={sampleOptions} />
+      <Select label="With Hint" options={sampleOptions} hint="Choose a size" />
+      <Select label="Required" options={sampleOptions} required />
       <Select label="With Error" options={sampleOptions} error="This field is required" />
       <Select label="Disabled" options={sampleOptions} disabled />
     </div>

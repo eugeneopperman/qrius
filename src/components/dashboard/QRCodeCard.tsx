@@ -1,7 +1,10 @@
-import { MoreVertical, ExternalLink, BarChart2, Copy, Trash2, QrCode } from 'lucide-react';
-import { useState, useRef, useEffect, memo } from 'react';
+import { MoreVertical, ExternalLink, BarChart2, Copy, Trash2 } from 'lucide-react';
+import { memo } from 'react';
+import { Link } from '@tanstack/react-router';
 import type { QRCode } from '@/types/database';
 import { toast } from '@/stores/toastStore';
+import { Dropdown } from '../ui/Dropdown';
+import { QRMiniPreview } from '../ui/QRMiniPreview';
 
 interface QRCodeCardProps {
   qrCode: QRCode;
@@ -9,22 +12,7 @@ interface QRCodeCardProps {
 }
 
 export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeCardProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleCopyUrl = async () => {
+  const handleCopyUrl = async (close: () => void) => {
     const trackingUrl = `${window.location.origin}/r/${qrCode.short_code}`;
     try {
       await navigator.clipboard.writeText(trackingUrl);
@@ -32,14 +20,14 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
     } catch {
       toast.error('Failed to copy to clipboard');
     }
-    setMenuOpen(false);
+    close();
   };
 
-  const handleDelete = () => {
+  const handleDelete = (close: () => void) => {
     if (onDelete) {
       onDelete(qrCode.id);
     }
-    setMenuOpen(false);
+    close();
   };
 
   const formattedDate = new Date(qrCode.created_at).toLocaleDateString('en-US', {
@@ -51,11 +39,13 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden card-interactive">
       {/* QR Preview */}
-      <div className="aspect-square p-6 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
-        <div className="w-full h-full max-w-[200px] max-h-[200px] bg-white rounded-lg flex items-center justify-center">
-          <QrCode className="w-24 h-24 text-gray-400" />
+      <Link to="/qr-codes/$id" params={{ id: qrCode.id }} className="block">
+        <div className="aspect-square p-6 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+          <div className="w-full h-full max-w-[200px] max-h-[200px] bg-white rounded-lg flex items-center justify-center overflow-hidden">
+            <QRMiniPreview data={qrCode.destination_url} size={180} />
+          </div>
         </div>
-      </div>
+      </Link>
 
       {/* Details */}
       <div className="p-4">
@@ -70,23 +60,29 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
           </div>
 
           {/* Menu */}
-          <div ref={menuRef} className="relative">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <MoreVertical className="w-5 h-5 text-gray-400" />
-            </button>
-
-            {menuOpen && (
-              <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10">
-                <a
-                  href={`/qr-codes/${qrCode.id}`}
+          <Dropdown
+            align="right"
+            trigger={({ toggle }) => (
+              <button
+                onClick={toggle}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="QR code actions"
+              >
+                <MoreVertical className="w-5 h-5 text-gray-400" />
+              </button>
+            )}
+          >
+            {({ close }) => (
+              <div className="w-48 py-1">
+                <Link
+                  to="/qr-codes/$id"
+                  params={{ id: qrCode.id }}
+                  onClick={close}
                   className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   <BarChart2 className="w-4 h-4" />
                   View Analytics
-                </a>
+                </Link>
                 <a
                   href={qrCode.destination_url}
                   target="_blank"
@@ -97,7 +93,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                   Open URL
                 </a>
                 <button
-                  onClick={handleCopyUrl}
+                  onClick={() => handleCopyUrl(close)}
                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   <Copy className="w-4 h-4" />
@@ -105,7 +101,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                 </button>
                 <hr className="my-1 border-gray-200 dark:border-gray-700" />
                 <button
-                  onClick={handleDelete}
+                  onClick={() => handleDelete(close)}
                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -113,7 +109,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                 </button>
               </div>
             )}
-          </div>
+          </Dropdown>
         </div>
 
         {/* Stats */}

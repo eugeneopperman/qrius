@@ -5,6 +5,7 @@ import { ColorPicker } from '../ui/ColorPicker';
 import { cn } from '@/utils/cn';
 import { Tooltip } from '../ui/Tooltip';
 import { InlineToggle } from '../ui/Toggle';
+import { Slider } from '../ui/Slider';
 import { HelpCircle } from 'lucide-react';
 import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '@/config/constants';
 import { getGradientPreview } from '@/utils/gradientUtils';
@@ -73,7 +74,7 @@ export const ColorSection = memo(function ColorSection() {
                   className={cn(
                     'flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-colors capitalize',
                     gradient.type === type
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                      ? 'border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
                       : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   )}
                 >
@@ -85,26 +86,17 @@ export const ColorSection = memo(function ColorSection() {
 
           {/* Rotation (only for linear) */}
           {gradient.type === 'linear' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Rotation: {gradient.rotation}°
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="360"
-                value={gradient.rotation || 0}
-                onChange={(e) => updateGradient({ rotation: parseInt(e.target.value) })}
-                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-              />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>0°</span>
-                <span>90°</span>
-                <span>180°</span>
-                <span>270°</span>
-                <span>360°</span>
-              </div>
-            </div>
+            <Slider
+              label="Rotation"
+              min={0}
+              max={360}
+              step={1}
+              value={gradient.rotation || 0}
+              onChange={(val) => updateGradient({ rotation: val })}
+              unit="°"
+              showTicks
+              tickLabels={['0°', '90°', '180°', '270°', '360°']}
+            />
           )}
 
           {/* Color Stops */}
@@ -149,7 +141,7 @@ export const ColorSection = memo(function ColorSection() {
                   key={preset.name}
                   type="button"
                   onClick={() => setStyleOptions({ gradient: preset.gradient })}
-                  className="group relative h-8 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="group relative h-8 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden hover:ring-2 hover:ring-orange-500 transition-all focus:outline-none focus:ring-2 focus:ring-orange-400"
                   title={preset.name}
                 >
                   <div
@@ -181,9 +173,9 @@ export const ColorSection = memo(function ColorSection() {
                   type="button"
                   onClick={() => setStyleOptions({ dotsColor: palette.qrColor, backgroundColor: palette.bgColor })}
                   className={cn(
-                    "group relative h-10 rounded-lg border overflow-hidden hover:ring-2 hover:ring-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-orange-400",
+                    "group relative h-10 rounded-lg border overflow-hidden hover:ring-2 hover:ring-orange-500 transition-all focus:outline-none focus:ring-2 focus:ring-orange-400",
                     styleOptions.dotsColor === palette.qrColor && styleOptions.backgroundColor === palette.bgColor
-                      ? "ring-2 ring-indigo-500"
+                      ? "ring-2 ring-orange-500"
                       : "border-gray-200 dark:border-gray-600"
                   )}
                   title={palette.name}

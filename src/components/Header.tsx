@@ -1,10 +1,11 @@
-import { QrCode, Sun, Moon, Palette, LogIn, MoreVertical, Clock, Settings, Keyboard } from 'lucide-react';
+import { Sun, Moon, Palette, LogIn, MoreVertical, Clock, Settings, Keyboard } from 'lucide-react';
 import { useHistoryStore } from '@/stores/historyStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { useTemplateStore } from '@/stores/templateStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
 import { Dropdown } from './ui/Dropdown';
+import { Logo } from './ui/Logo';
 import { UserButton } from './auth/UserButton';
 import { AuthModal } from './auth/AuthModal';
 import { useState } from 'react';
@@ -65,14 +66,7 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* LEFT: Logo + brand name */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-500 rounded-2xl flex items-center justify-center shadow-sm">
-              <QrCode className="w-5 h-5 text-white" aria-hidden="true" />
-            </div>
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Qrius
-            </h1>
-          </div>
+          <Logo size="md" />
 
           {/* RIGHT: Templates (desktop), Theme toggle, Overflow menu, Auth */}
           <div className="flex items-center gap-1">

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
-import { Loader2, Camera, Trash2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export function ProfileSettingsContent() {
   const { user, profile, updateProfile } = useAuthStore(useShallow((s) => ({ user: s.user, profile: s.profile, updateProfile: s.updateProfile })));
@@ -42,39 +42,23 @@ export function ProfileSettingsContent() {
           </h2>
 
           <div className="flex items-center gap-6">
-            <div className="relative">
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.name || 'Avatar'}
-                  className="w-20 h-20 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                  <span className="text-2xl font-medium text-orange-600 dark:text-orange-400">
-                    {initials}
-                  </span>
-                </div>
-              )}
-              <button
-                type="button"
-                className="absolute bottom-0 right-0 p-1.5 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                <Camera className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              </button>
-            </div>
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.name || 'Avatar'}
+                className="w-20 h-20 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <span className="text-2xl font-medium text-orange-600 dark:text-orange-400">
+                  {initials}
+                </span>
+              </div>
+            )}
 
-            <div className="space-y-2">
-              <Button type="button" variant="secondary" size="sm">
-                Change photo
-              </Button>
-              {profile?.avatar_url && (
-                <Button type="button" variant="ghost" size="sm" className="text-red-600">
-                  <Trash2 className="w-4 h-4" />
-                  Remove
-                </Button>
-              )}
-            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Avatar upload coming soon
+            </p>
           </div>
         </div>
 
@@ -85,40 +69,22 @@ export function ProfileSettingsContent() {
           </h2>
 
           <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Full name
-              </label>
-              <Input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-              />
-            </div>
+            <Input
+              label="Full name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+            />
 
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Email address
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={user?.email || ''}
-                disabled
-                className="bg-gray-50 dark:bg-gray-800"
-              />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Email cannot be changed
-              </p>
-            </div>
+            <Input
+              label="Email address"
+              type="email"
+              value={user?.email || ''}
+              disabled
+              className="bg-gray-50 dark:bg-gray-800"
+              hint="Email cannot be changed"
+            />
           </div>
         </div>
 
@@ -143,11 +109,8 @@ export function ProfileSettingsContent() {
           Danger Zone
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Permanently delete your account and all associated data. This action cannot be undone.
+          To delete your account, please contact support at support@qrius.app.
         </p>
-        <Button variant="ghost" className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
-          Delete account
-        </Button>
       </div>
     </div>
   );

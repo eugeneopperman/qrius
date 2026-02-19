@@ -87,24 +87,16 @@ export function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Email
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="pl-10"
-              disabled={isLoading}
-              autoComplete="email"
-            />
-          </div>
-        </div>
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          leftIcon={<Mail className="w-4 h-4" />}
+          disabled={isLoading}
+          autoComplete="email"
+        />
 
         <Button
           type="submit"

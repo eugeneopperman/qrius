@@ -59,7 +59,7 @@ const Slider = forwardRef<HTMLInputElement, SliderProps>(
           <div className="flex items-center justify-between mb-2">
             <label
               htmlFor={sliderId}
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="block text-sm font-semibold text-gray-800 dark:text-gray-200"
             >
               {label}
             </label>
@@ -83,13 +83,13 @@ const Slider = forwardRef<HTMLInputElement, SliderProps>(
           className={cn(
             'w-full h-2 rounded-lg appearance-none cursor-pointer',
             'bg-gray-200 dark:bg-gray-700',
-            'accent-indigo-600 dark:accent-indigo-400',
+            'accent-orange-500 dark:accent-orange-400',
             '[&::-webkit-slider-thumb]:appearance-none',
             '[&::-webkit-slider-thumb]:w-4',
             '[&::-webkit-slider-thumb]:h-4',
             '[&::-webkit-slider-thumb]:rounded-full',
-            '[&::-webkit-slider-thumb]:bg-indigo-600',
-            '[&::-webkit-slider-thumb]:dark:bg-indigo-400',
+            '[&::-webkit-slider-thumb]:bg-orange-500',
+            '[&::-webkit-slider-thumb]:dark:bg-orange-400',
             '[&::-webkit-slider-thumb]:cursor-pointer',
             '[&::-webkit-slider-thumb]:shadow-md',
             '[&::-webkit-slider-thumb]:transition-transform',
@@ -97,15 +97,15 @@ const Slider = forwardRef<HTMLInputElement, SliderProps>(
             '[&::-moz-range-thumb]:w-4',
             '[&::-moz-range-thumb]:h-4',
             '[&::-moz-range-thumb]:rounded-full',
-            '[&::-moz-range-thumb]:bg-indigo-600',
-            '[&::-moz-range-thumb]:dark:bg-indigo-400',
+            '[&::-moz-range-thumb]:bg-orange-500',
+            '[&::-moz-range-thumb]:dark:bg-orange-400',
             '[&::-moz-range-thumb]:border-0',
             '[&::-moz-range-thumb]:cursor-pointer',
-            'focus:outline-none focus:ring-2 focus:ring-indigo-500/20',
+            'focus:outline-none focus:ring-2 focus:ring-orange-400/20',
             className
           )}
           style={{
-            background: `linear-gradient(to right, rgb(99, 102, 241) 0%, rgb(99, 102, 241) ${percentage}%, rgb(229, 231, 235) ${percentage}%, rgb(229, 231, 235) 100%)`,
+            background: `linear-gradient(to right, rgb(249, 115, 22) 0%, rgb(249, 115, 22) ${percentage}%, rgb(229, 231, 235) ${percentage}%, rgb(229, 231, 235) 100%)`,
           }}
           {...props}
         />

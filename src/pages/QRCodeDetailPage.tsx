@@ -3,6 +3,7 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/stores/toastStore';
 import { useQRCodeDetail } from '@/hooks/queries/useQRCodeDetail';
+import { QRMiniPreview } from '@/components/ui/QRMiniPreview';
 import {
   ArrowLeft,
   ExternalLink,
@@ -86,8 +87,8 @@ export default function QRCodeDetailPage() {
           {/* QR Code preview */}
           <div className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
-              <div className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6">
-                <QrCode className="w-32 h-32 text-gray-400" />
+              <div className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
+                <QRMiniPreview data={qrCode.destination_url} size={240} />
               </div>
 
               <div className="space-y-3">
@@ -95,7 +96,7 @@ export default function QRCodeDetailPage() {
                   <Copy className="w-4 h-4" />
                   Copy Tracking URL
                 </Button>
-                <Button variant="secondary" className="w-full">
+                <Button variant="secondary" className="w-full" disabled title="Coming soon">
                   <Download className="w-4 h-4" />
                   Download QR Code
                 </Button>
@@ -172,7 +173,7 @@ export default function QRCodeDetailPage() {
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
                 <Calendar className="w-5 h-5 text-orange-500 mb-2" />
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {Math.round(qrCode.total_scans * 0.1)}
+                  —
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Today</p>
               </div>
