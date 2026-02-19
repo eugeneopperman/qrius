@@ -50,4 +50,4 @@ npm run storybook      # Component docs
 
 ## Status
 
-Beta v0.04 — 354 unit tests passing, deployed to Vercel production.
+Beta v0.05 — 354 unit tests passing, deployed to Vercel production.
