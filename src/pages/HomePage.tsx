@@ -1,29 +1,24 @@
-import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import { useRef, useMemo, useCallback, useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Header } from '../components/Header';
 import { WizardContainer } from '../components/wizard';
-import { KeyboardShortcutsModal } from '../components/features/KeyboardShortcuts';
-import { HistoryModal } from '../components/features/History';
-import { TemplateWizardModal } from '../components/templates';
-import { SettingsModal } from '../components/settings';
-import { ToastContainer } from '../components/ui/Toast';
+import { PublicFooter } from '../components/layout/PublicFooter';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useThemeStore } from '../stores/themeStore';
 import { useTemplateStore } from '../stores/templateStore';
 import { useAuthStore } from '../stores/authStore';
+import { useUIStore } from '../stores/uiStore';
 import { toast } from '../stores/toastStore';
-import { Keyboard, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { QRPreviewHandle } from '../components/QRPreview';
 
 export default function HomePage() {
-  const [showShortcuts, setShowShortcuts] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const qrPreviewRef = useRef<QRPreviewHandle | null>(null);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { hasMigrated, migrateFromBrandKits, openWizard } = useTemplateStore();
   const { user } = useAuthStore();
+  const { openShortcuts, openHistory, openSettings } = useUIStore();
 
   // Migrate from BrandKits on first load
   useEffect(() => {
@@ -48,14 +43,6 @@ export default function HomePage() {
     qrPreviewRef.current?.copy();
   }, []);
 
-  const handleShowShortcuts = useCallback(() => {
-    setShowShortcuts(true);
-  }, []);
-
-  const handleOpenHistory = useCallback(() => {
-    setShowHistory(true);
-  }, []);
-
   const handleOpenTemplates = useCallback(() => {
     openWizard();
   }, [openWizard]);
@@ -66,16 +53,16 @@ export default function HomePage() {
     onDownloadWithPicker: handleDownloadWithPicker,
     onCopy: handleCopy,
     onToggleDarkMode: toggleTheme,
-    onShowHelp: handleShowShortcuts,
-    onOpenHistory: handleOpenHistory,
+    onShowHelp: openShortcuts,
+    onOpenHistory: openHistory,
     onOpenTemplates: handleOpenTemplates,
   }), [
     handleDownload,
     handleDownloadWithPicker,
     handleCopy,
     toggleTheme,
-    handleShowShortcuts,
-    handleOpenHistory,
+    openShortcuts,
+    openHistory,
     handleOpenTemplates,
   ]);
 
@@ -89,9 +76,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen transition-colors">
       <Header
-        onHistoryClick={() => setShowHistory(true)}
-        onSettingsClick={() => setShowSettings(true)}
-        onShortcutsClick={() => setShowShortcuts(true)}
+        onHistoryClick={openHistory}
+        onSettingsClick={openSettings}
+        onShortcutsClick={openShortcuts}
       />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -122,70 +109,7 @@ export default function HomePage() {
 
       </main>
 
-      {/* Footer */}
-      <footer className="glass-header mt-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                &copy; {new Date().getFullYear()} Qrius
-              </p>
-              <div className="flex items-center gap-4 text-sm">
-                <Link
-                  to="/terms"
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Terms
-                </Link>
-                <Link
-                  to="/privacy"
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Privacy
-                </Link>
-                <Link
-                  to="/cookies"
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  Cookies
-                </Link>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowShortcuts(true)}
-              className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <Keyboard className="w-4 h-4" />
-              <span className="hidden sm:inline">Shortcuts</span>
-              <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded-lg font-medium">?</kbd>
-            </button>
-          </div>
-        </div>
-      </footer>
-
-      {/* Keyboard Shortcuts Modal */}
-      <KeyboardShortcutsModal
-        isOpen={showShortcuts}
-        onClose={() => setShowShortcuts(false)}
-      />
-
-      {/* History Modal */}
-      <HistoryModal
-        isOpen={showHistory}
-        onClose={() => setShowHistory(false)}
-      />
-
-      {/* Template Wizard Modal */}
-      <TemplateWizardModal />
-
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-      />
-
-      {/* Toast Notifications */}
-      <ToastContainer />
+      <PublicFooter />
     </div>
   );
 }

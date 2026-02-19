@@ -1,9 +1,15 @@
 import { createRouter, createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 import { useAuthStore } from './stores/authStore';
+import { useUIStore } from './stores/uiStore';
 import { isSupabaseMissing } from './lib/supabase';
 import { APP_VERSION } from './config/constants';
 import { Loader2 } from 'lucide-react';
+import { KeyboardShortcutsModal } from './components/features/KeyboardShortcuts';
+import { HistoryModal } from './components/features/History';
+import { TemplateWizardModal } from './components/templates';
+import { SettingsModal } from './components/settings';
+import { ToastContainer } from './components/ui/Toast';
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function LoadingSpinner() {
@@ -36,6 +42,8 @@ const CookiesPage = lazy(() => import('./pages/CookiesPage'));
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {
+  const { isShortcutsOpen, closeShortcuts, isHistoryOpen, closeHistory, isSettingsOpen, closeSettings } = useUIStore();
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
       {import.meta.env.DEV && isSupabaseMissing && (
@@ -49,6 +57,14 @@ function RootLayout() {
         </div>
       )}
       <Outlet />
+
+      {/* Global modals */}
+      <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={closeShortcuts} />
+      <HistoryModal isOpen={isHistoryOpen} onClose={closeHistory} />
+      <TemplateWizardModal />
+      <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
+      <ToastContainer />
+
       <div className="fixed bottom-2 right-2 z-[100] px-2 py-0.5 rounded bg-black/60 text-white text-xs font-mono pointer-events-none select-none">
         Beta v{APP_VERSION}
       </div>

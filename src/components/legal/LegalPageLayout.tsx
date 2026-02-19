@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { QrCode, Moon, Sun, ArrowLeft } from 'lucide-react';
 import { useThemeStore } from '../../stores/themeStore';
+import { PublicFooter } from '../layout/PublicFooter';
 
 interface LegalPageLayoutProps {
   title: string;
@@ -64,36 +65,7 @@ export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayou
         </article>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              &copy; {new Date().getFullYear()} Qrius. All rights reserved.
-            </p>
-            <div className="flex items-center gap-6 text-sm">
-              <Link
-                to="/terms"
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                Terms
-              </Link>
-              <Link
-                to="/privacy"
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                Privacy
-              </Link>
-              <Link
-                to="/cookies"
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                Cookies
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900" />
     </div>
   );
 }

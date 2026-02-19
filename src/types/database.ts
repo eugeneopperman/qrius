@@ -49,6 +49,7 @@ export interface Database {
           onboarding_completed?: boolean;
           updated_at?: string;
         };
+        Relationships: [];
       };
       organizations: {
         Row: {
@@ -85,6 +86,7 @@ export interface Database {
           settings?: Json;
           updated_at?: string;
         };
+        Relationships: [];
       };
       organization_members: {
         Row: {
@@ -110,6 +112,22 @@ export interface Database {
         Update: {
           role?: OrgRole;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'organization_members_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'organization_members_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       organization_invitations: {
         Row: {
@@ -137,6 +155,22 @@ export interface Database {
         Update: {
           accepted_at?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'organization_invitations_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'organization_invitations_invited_by_fkey';
+            columns: ['invited_by'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       api_keys: {
         Row: {
@@ -175,6 +209,15 @@ export interface Database {
           expires_at?: string | null;
           is_active?: boolean;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'api_keys_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       subscriptions: {
         Row: {
@@ -210,6 +253,15 @@ export interface Database {
           cancel_at_period_end?: boolean;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'subscriptions_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       usage_records: {
         Row: {
@@ -241,6 +293,15 @@ export interface Database {
           storage_bytes?: number;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'usage_records_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       qr_codes: {
         Row: {
@@ -288,6 +349,22 @@ export interface Database {
           metadata?: Json;
           updated_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'qr_codes_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'qr_codes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       scan_events: {
         Row: {
@@ -311,6 +388,15 @@ export interface Database {
           ip_hash?: string | null;
         };
         Update: never;
+        Relationships: [
+          {
+            foreignKeyName: 'scan_events_qr_code_id_fkey';
+            columns: ['qr_code_id'];
+            isOneToOne: false;
+            referencedRelation: 'qr_codes';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       plan_limits: {
         Row: {
@@ -326,8 +412,10 @@ export interface Database {
         };
         Insert: never;
         Update: never;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
     Functions: {
       get_user_organization: {
         Args: { p_user_id: string };
@@ -342,6 +430,8 @@ export interface Database {
         Returns: boolean;
       };
     };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 

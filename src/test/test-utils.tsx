@@ -6,13 +6,22 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { type ReactElement, type PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 /**
  * Custom render function that wraps components with necessary providers.
- * Extend this to add your own providers (e.g., i18n, theme, etc.)
  */
 function AllTheProviders({ children }: PropsWithChildren) {
-  return <>{children}</>;
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
 }
 
 /**

@@ -8,6 +8,18 @@ import { supabase, checkSupabaseConnection } from '../lib/supabase';
 // Track the auth listener subscription to clean up on re-init
 let authSubscription: Subscription | null = null;
 
+const DEFAULT_FREE_PLAN_LIMITS: PlanLimits = {
+  plan: 'free',
+  qr_codes_limit: 10,
+  scans_per_month: 1000,
+  scan_history_days: 30,
+  team_members: 1,
+  api_requests_per_day: 0,
+  custom_branding: false,
+  white_label: false,
+  priority_support: false,
+};
+
 export interface AuthState {
   // Auth state
   session: Session | null;
@@ -421,23 +433,10 @@ export const useAuthStore = create<AuthState>()(
               console.error('Error fetching plan limits:', limitsError);
             }
 
-            // Default limits for free plan if fetch fails
-            const defaultLimits: PlanLimits = {
-              plan: 'free',
-              qr_codes_limit: 10,
-              scans_per_month: 1000,
-              scan_history_days: 30,
-              team_members: 1,
-              api_requests_per_day: 0,
-              custom_branding: false,
-              white_label: false,
-              priority_support: false,
-            };
-
             set({
               currentOrganization: defaultOrg.organization,
               currentRole: defaultOrg.role,
-              planLimits: limits || defaultLimits,
+              planLimits: limits || DEFAULT_FREE_PLAN_LIMITS,
             });
           }
         } catch (error) {
@@ -466,23 +465,10 @@ export const useAuthStore = create<AuthState>()(
           console.error('Error fetching plan limits:', limitsError);
         }
 
-        // Default limits for free plan if fetch fails
-        const defaultLimits: PlanLimits = {
-          plan: 'free',
-          qr_codes_limit: 10,
-          scans_per_month: 1000,
-          scan_history_days: 30,
-          team_members: 1,
-          api_requests_per_day: 0,
-          custom_branding: false,
-          white_label: false,
-          priority_support: false,
-        };
-
         set({
           currentOrganization: membership.organization,
           currentRole: membership.role,
-          planLimits: limits || defaultLimits,
+          planLimits: limits || DEFAULT_FREE_PLAN_LIMITS,
         });
       },
 

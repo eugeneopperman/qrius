@@ -6,64 +6,19 @@ import { UpgradePrompt, UsageLimitWarning } from '../components/dashboard/Upgrad
 import { useAuthStore } from '../stores/authStore';
 import { Button } from '../components/ui/Button';
 import { Plus, ArrowRight, AlertTriangle } from 'lucide-react';
-import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState, useCallback } from 'react';
 import { useOrganizationQRCodes } from '../hooks/useOrganizationQRCodes';
-import type { QRCode } from '../types/database';
+import { useDashboardStats } from '../hooks/queries/useDashboardStats';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function DashboardPage() {
   const { currentOrganization, planLimits, profile } = useAuthStore();
   const { qrCodes, isLoading, deleteQRCode } = useOrganizationQRCodes({ limit: 10 });
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string | null } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [stats, setStats] = useState({
-    qrCodesCount: 0,
-    scansToday: 0,
-    scansThisMonth: 0,
-    teamMembers: 1,
-  });
+  const queryClient = useQueryClient();
 
-  // Fetch stats in parallel
-  useEffect(() => {
-    async function fetchStats() {
-      if (!currentOrganization) return;
-
-      try {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-
-        // Run all stat queries in parallel
-        const [qrCountResult, memberCountResult, scansTodayResult] = await Promise.all([
-          supabase
-            .from('qr_codes')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', currentOrganization.id),
-          supabase
-            .from('organization_members')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', currentOrganization.id),
-          supabase
-            .from('scan_events')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', currentOrganization.id)
-            .gte('scanned_at', todayStart.toISOString()),
-        ]);
-
-        const totalScans = qrCodes.reduce((sum: number, qr: QRCode) => sum + (qr.total_scans || 0), 0);
-
-        setStats({
-          qrCodesCount: qrCountResult.count || 0,
-          scansToday: scansTodayResult.count ?? 0,
-          scansThisMonth: totalScans,
-          teamMembers: memberCountResult.count || 1,
-        });
-      } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
-      }
-    }
-
-    fetchStats();
-  }, [currentOrganization, qrCodes]);
+  const { data: stats } = useDashboardStats(qrCodes);
 
   const handleDeleteClick = useCallback((id: string) => {
     const qrCode = qrCodes.find((qr) => qr.id === id);
@@ -76,11 +31,11 @@ export default function DashboardPage() {
     setIsDeleting(true);
     const success = await deleteQRCode(deleteConfirm.id);
     if (success) {
-      setStats((prev) => ({ ...prev, qrCodesCount: prev.qrCodesCount - 1 }));
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     }
     setIsDeleting(false);
     setDeleteConfirm(null);
-  }, [deleteConfirm, deleteQRCode]);
+  }, [deleteConfirm, deleteQRCode, queryClient]);
 
   const showUpgradePrompt = currentOrganization?.plan === 'free';
 
@@ -114,7 +69,7 @@ export default function DashboardPage() {
         )}
 
         {/* Usage warning */}
-        {planLimits && planLimits.qr_codes_limit > 0 && (
+        {planLimits && planLimits.qr_codes_limit > 0 && stats && (
           <UsageLimitWarning
             current={stats.qrCodesCount}
             limit={planLimits.qr_codes_limit}
@@ -124,10 +79,10 @@ export default function DashboardPage() {
 
         {/* Quick stats */}
         <QuickStats
-          qrCodesCount={stats.qrCodesCount}
-          scansToday={stats.scansToday}
-          scansThisMonth={stats.scansThisMonth}
-          teamMembers={stats.teamMembers}
+          qrCodesCount={stats?.qrCodesCount ?? 0}
+          scansToday={stats?.scansToday ?? 0}
+          scansThisMonth={stats?.scansThisMonth ?? 0}
+          teamMembers={stats?.teamMembers ?? 1}
         />
 
         {/* Recent QR codes */}

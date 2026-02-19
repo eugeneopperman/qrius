@@ -1,8 +1,8 @@
 {
-  "name": "qr-code-generator",
+  "name": "qrius",
   "private": true,
-  "version": "1.0.0",
-  "description": "Internal QR Code Generator with advanced customization options",
+  "version": "0.2.0",
+  "description": "QR Code Generator SaaS with advanced customization and analytics",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,16 +18,15 @@
     "e2e:debug": "playwright test --debug",
     "e2e:report": "playwright show-report",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
     "@stripe/stripe-js": "^2.4.0",
-    "@supabase/auth-helpers-react": "^0.5.0",
     "@supabase/supabase-js": "^2.45.0",
     "@tanstack/react-query": "^5.62.0",
     "@tanstack/react-router": "^1.93.0",
-    "@testing-library/dom": "^10.4.1",
     "@upstash/redis": "^1.36.1",
     "@vercel/kv": "^3.0.0",
     "@vercel/node": "^5.5.28",
@@ -57,6 +56,9 @@
     "@storybook/react": "^8.6.14",
     "@storybook/react-vite": "^8.6.14",
     "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/router-devtools": "^1.93.0",
+    "@tanstack/router-plugin": "^1.93.0",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -74,8 +76,6 @@
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "@tanstack/router-devtools": "^1.93.0",
-    "@tanstack/router-plugin": "^1.93.0",
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^3.2.4"

@@ -1,5 +1,6 @@
 // Supabase client configuration
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -13,9 +14,7 @@ if (isSupabaseMissing) {
   );
 }
 
-// Using generic client without strict types for flexibility
-// In production, you can add Database types once Supabase generates them
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-key',
   {

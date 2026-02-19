@@ -2,7 +2,6 @@ import { Link, useLocation } from '@tanstack/react-router';
 import { useAuthStore } from '../../stores/authStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { UserButton } from '../auth/UserButton';
-import { ToastContainer } from '../ui/Toast';
 import {
   QrCode,
   LayoutDashboard,
@@ -202,8 +201,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Page content */}
         <main className="p-6 lg:p-8">{children}</main>
       </div>
-
-      <ToastContainer />
     </div>
   );
 }
