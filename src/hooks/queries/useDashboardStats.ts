@@ -14,6 +14,9 @@ async function fetchDashboardStats(orgId: string, qrCodes: QRCode[]): Promise<Da
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
+  // Get QR code IDs for this org to query scans (scan_events has no organization_id column)
+  const qrCodeIds = qrCodes.map((qr) => qr.id);
+
   const [qrCountResult, memberCountResult, scansTodayResult] = await Promise.all([
     supabase
       .from('qr_codes')
@@ -23,11 +26,13 @@ async function fetchDashboardStats(orgId: string, qrCodes: QRCode[]): Promise<Da
       .from('organization_members')
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', orgId),
-    supabase
-      .from('scan_events')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId)
-      .gte('scanned_at', todayStart.toISOString()),
+    qrCodeIds.length > 0
+      ? supabase
+          .from('scan_events')
+          .select('*', { count: 'exact', head: true })
+          .in('qr_code_id', qrCodeIds)
+          .gte('scanned_at', todayStart.toISOString())
+      : Promise.resolve({ count: 0 }),
   ]);
 
   const totalScans = qrCodes.reduce((sum, qr) => sum + (qr.total_scans || 0), 0);

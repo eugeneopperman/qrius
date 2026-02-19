@@ -1,4 +1,4 @@
-import { useRef, useMemo, useCallback, useEffect } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Header } from '../components/Header';
 import { WizardContainer } from '../components/wizard';
@@ -9,26 +9,15 @@ import { useThemeStore } from '../stores/themeStore';
 import { useTemplateStore } from '../stores/templateStore';
 import { useAuthStore } from '../stores/authStore';
 import { useUIStore } from '../stores/uiStore';
-import { toast } from '../stores/toastStore';
 import { ArrowRight } from 'lucide-react';
 import type { QRPreviewHandle } from '../components/QRPreview';
 
 export default function HomePage() {
   const qrPreviewRef = useRef<QRPreviewHandle | null>(null);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
-  const { hasMigrated, migrateFromBrandKits, openWizard } = useTemplateStore();
+  const { openWizard } = useTemplateStore();
   const { user } = useAuthStore();
   const { openShortcuts, openHistory, openSettings } = useUIStore();
-
-  // Migrate from BrandKits on first load
-  useEffect(() => {
-    if (!hasMigrated) {
-      const migratedCount = migrateFromBrandKits();
-      if (migratedCount > 0) {
-        toast.success(`Migrated ${migratedCount} brand kit${migratedCount > 1 ? 's' : ''} to templates`);
-      }
-    }
-  }, [hasMigrated, migrateFromBrandKits]);
 
   // Memoized callbacks for keyboard shortcuts to prevent unnecessary re-renders
   const handleDownload = useCallback(() => {

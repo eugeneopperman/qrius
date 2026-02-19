@@ -11,7 +11,7 @@ async function fetchApiKeys(orgId: string): Promise<ApiKey[]> {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching API keys:', error);
+    if (import.meta.env.DEV) console.error('Error fetching API keys:', error);
     return [];
   }
 

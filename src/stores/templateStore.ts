@@ -1,13 +1,12 @@
 /**
  * Template Store for Brand Template Wizard
- * Manages wizard state, template CRUD, and migration from legacy BrandKits
+ * Manages wizard state and template CRUD
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { BrandTemplate, BrandTemplateStyle, BrandKit, DotType, CornerSquareType } from '../types';
+import type { BrandTemplate, BrandTemplateStyle, DotType, CornerSquareType } from '../types';
 import { useQRStore } from './qrStore';
-import { useSettingsStore } from './settingsStore';
 
 // ============================================================================
 // Types
@@ -47,10 +46,6 @@ interface TemplateStore {
 
   // Application
   applyTemplate: (id: string) => void;
-
-  // Migration
-  migrateFromBrandKits: () => number;
-  hasMigrated: boolean;
 }
 
 // ============================================================================
@@ -124,7 +119,6 @@ export const useTemplateStore = create<TemplateStore>()(
       currentStep: 1,
       editingTemplateId: null,
       draft: getEmptyDraft(),
-      hasMigrated: false,
 
       // Templates
       templates: [],
@@ -316,46 +310,11 @@ export const useTemplateStore = create<TemplateStore>()(
         // The QRPreview will handle the roundness post-processing
         qrStore.setStyleOptions({ ...style });
       },
-
-      // Migration
-      migrateFromBrandKits: () => {
-        const settingsStore = useSettingsStore.getState();
-        const existingKits = settingsStore.brandKits;
-
-        if (existingKits.length === 0) {
-          set({ hasMigrated: true });
-          return 0;
-        }
-
-        const now = Date.now();
-        const migratedTemplates: BrandTemplate[] = existingKits.map((kit: BrandKit) => ({
-          id: crypto.randomUUID(),
-          name: kit.name,
-          createdAt: kit.createdAt,
-          updatedAt: now,
-          style: {
-            ...DEFAULT_TEMPLATE_STYLE,
-            ...kit.style,
-            // Infer roundness from existing dot type
-            qrRoundness: kit.style.dotsType
-              ? dotTypeToRoundness(kit.style.dotsType)
-              : 0,
-          },
-        }));
-
-        set((state) => ({
-          templates: [...state.templates, ...migratedTemplates],
-          hasMigrated: true,
-        }));
-
-        return migratedTemplates.length;
-      },
     }),
     {
       name: 'qr-templates-storage',
       partialize: (state) => ({
         templates: state.templates,
-        hasMigrated: state.hasMigrated,
       }),
     }
   )

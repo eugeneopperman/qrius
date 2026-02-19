@@ -17,7 +17,7 @@ async function fetchTeamMembers(orgId: string): Promise<MemberWithUser[]> {
     .eq('organization_id', orgId);
 
   if (error) {
-    console.error('Error fetching members:', error);
+    if (import.meta.env.DEV) console.error('Error fetching members:', error);
     return [];
   }
 

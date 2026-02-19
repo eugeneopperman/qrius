@@ -49,7 +49,6 @@ describe('templateStore', () => {
         style: { ...DEFAULT_STYLE },
       },
       templates: [],
-      hasMigrated: false,
     });
   });
 

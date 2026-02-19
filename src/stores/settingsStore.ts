@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type {
-  BrandKit,
   BrandedUrlSettings,
   BrandedUrlProvider,
   RebrandlyConfig,
@@ -20,12 +19,6 @@ const defaultTrackingSettings: TrackingSettings = {
 };
 
 interface SettingsStore {
-  /**
-   * @deprecated Legacy brand kits — read only by templateStore migration.
-   * Will be removed once all users have migrated to templates.
-   */
-  brandKits: BrandKit[];
-
   // Branded URL Settings
   brandedUrlSettings: BrandedUrlSettings;
   setBrandedUrlProvider: (provider: BrandedUrlProvider) => void;
@@ -43,8 +36,6 @@ interface SettingsStore {
 export const useSettingsStore = create<SettingsStore>()(
   persist(
     (set) => ({
-      brandKits: [],
-
       // Branded URL Settings
       brandedUrlSettings: defaultBrandedUrlSettings,
 

@@ -163,13 +163,6 @@ export interface ExportOptions {
   quality?: number;
 }
 
-export interface BrandKit {
-  id: string;
-  name: string;
-  createdAt: number;
-  style: Partial<QRStyleOptions>;
-}
-
 // Brand Template types (new template wizard feature)
 export interface BrandTemplateStyle extends QRStyleOptions {
   qrRoundness?: number;         // 0-100 (%) - maps to dot type

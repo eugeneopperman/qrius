@@ -15,7 +15,7 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     .single();
 
   if (qrError) {
-    console.error('Error fetching QR code:', qrError);
+    if (import.meta.env.DEV) console.error('Error fetching QR code:', qrError);
     return null;
   }
 
@@ -27,7 +27,7 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     .limit(10);
 
   if (scansError) {
-    console.error('Error fetching scans:', scansError);
+    if (import.meta.env.DEV) console.error('Error fetching scans:', scansError);
   }
 
   return {
