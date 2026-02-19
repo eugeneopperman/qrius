@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { HistoryEntry, QRCodeType, QRData } from '../types';
+import type { HistoryEntry, QRCodeType, QRData } from '@/types';
 
 const MAX_HISTORY_ENTRIES = 20;
 const UNDO_TIMEOUT_MS = 10000; // 10 seconds to undo

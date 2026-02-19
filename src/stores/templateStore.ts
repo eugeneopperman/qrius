@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { BrandTemplate, BrandTemplateStyle, DotType, CornerSquareType } from '../types';
+import type { BrandTemplate, BrandTemplateStyle, DotType, CornerSquareType } from '@/types';
 import { useQRStore } from './qrStore';
 
 // ============================================================================

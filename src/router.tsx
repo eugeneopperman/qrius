@@ -1,15 +1,15 @@
 import { createRouter, createRootRoute, createRoute, Outlet, redirect } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
-import { useAuthStore } from './stores/authStore';
-import { useUIStore } from './stores/uiStore';
-import { isSupabaseMissing } from './lib/supabase';
-import { APP_VERSION } from './config/constants';
+import { useAuthStore } from '@/stores/authStore';
+import { useUIStore } from '@/stores/uiStore';
+import { isSupabaseMissing } from '@/lib/supabase';
+import { APP_VERSION } from '@/config/constants';
 import { Loader2 } from 'lucide-react';
-import { KeyboardShortcutsModal } from './components/features/KeyboardShortcuts';
-import { HistoryModal } from './components/features/History';
-import { TemplateWizardModal } from './components/templates';
-import { SettingsModal } from './components/settings';
-import { ToastContainer } from './components/ui/Toast';
+import { KeyboardShortcutsModal } from '@/components/features/KeyboardShortcuts';
+import { HistoryModal } from '@/components/features/History';
+import { TemplateWizardModal } from '@/components/templates';
+import { SettingsModal } from '@/components/settings';
+import { ToastContainer } from '@/components/ui/Toast';
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function LoadingSpinner() {
@@ -21,24 +21,24 @@ function LoadingSpinner() {
 }
 
 // Lazy load pages for code splitting
-const HomePage = lazy(() => import('./pages/HomePage'));
-const SignInPage = lazy(() => import('./pages/SignInPage'));
-const SignUpPage = lazy(() => import('./pages/SignUpPage'));
-const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const QRCodesPage = lazy(() => import('./pages/QRCodesPage'));
-const QRCodeDetailPage = lazy(() => import('./pages/QRCodeDetailPage'));
-const CreateQRPage = lazy(() => import('./pages/CreateQRPage'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
-const HistoryPage = lazy(() => import('./pages/HistoryPage'));
-const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
-const ReaderPage = lazy(() => import('./pages/ReaderPage'));
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const HomePage = lazy(() => import('@/pages/HomePage'));
+const SignInPage = lazy(() => import('@/pages/SignInPage'));
+const SignUpPage = lazy(() => import('@/pages/SignUpPage'));
+const AuthCallbackPage = lazy(() => import('@/pages/AuthCallbackPage'));
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const QRCodesPage = lazy(() => import('@/pages/QRCodesPage'));
+const QRCodeDetailPage = lazy(() => import('@/pages/QRCodeDetailPage'));
+const CreateQRPage = lazy(() => import('@/pages/CreateQRPage'));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const HistoryPage = lazy(() => import('@/pages/HistoryPage'));
+const OnboardingPage = lazy(() => import('@/pages/OnboardingPage'));
+const ReaderPage = lazy(() => import('@/pages/ReaderPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
 
 // Legal pages
-const TermsPage = lazy(() => import('./pages/TermsPage'));
-const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
-const CookiesPage = lazy(() => import('./pages/CookiesPage'));
+const TermsPage = lazy(() => import('@/pages/TermsPage'));
+const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
+const CookiesPage = lazy(() => import('@/pages/CookiesPage'));
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {

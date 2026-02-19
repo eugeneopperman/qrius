@@ -1,4 +1,4 @@
-import { useQRStore } from '../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import {
   UrlForm,
   TextForm,

@@ -5,7 +5,7 @@ import type {
   FrameFontSize,
   FrameFontFamily,
   FrameIcon,
-} from '../types';
+} from '@/types';
 import {
   getDotPath,
   cornerSquarePaths,

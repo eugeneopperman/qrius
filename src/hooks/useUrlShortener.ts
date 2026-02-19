@@ -4,9 +4,9 @@ import {
   shortenWithRebrandly,
   shortenWithShortIo,
   type ShortenerProvider,
-} from '../utils/urlShorteners';
-import { useSettingsStore } from '../stores/settingsStore';
-import type { BrandedUrlProvider } from '../types';
+} from '@/utils/urlShorteners';
+import { useSettingsStore } from '@/stores/settingsStore';
+import type { BrandedUrlProvider } from '@/types';
 
 interface UseUrlShortenerResult {
   shorten: (url: string, customSlug?: string) => Promise<string | null>;

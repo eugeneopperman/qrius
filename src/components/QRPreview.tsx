@@ -1,27 +1,27 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
 import QRCodeStyling from 'qr-code-styling';
-import { useQRStore } from '../stores/qrStore';
-import { useHistoryStore } from '../stores/historyStore';
-import { toast } from '../stores/toastStore';
+import { useQRStore } from '@/stores/qrStore';
+import { useHistoryStore } from '@/stores/historyStore';
+import { toast } from '@/stores/toastStore';
 import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from './ui/Button';
-import { cn } from '../utils/cn';
-import { applyLogoMask } from '../utils/logoMask';
+import { cn } from '@/utils/cn';
+import { applyLogoMask } from '@/utils/logoMask';
 import {
   applyRoundnessToQRSvg,
   getDotTypeForPattern,
   shouldApplyRoundnessPostProcessing,
   getCornerSquareTypeForRoundness,
   getCornerDotTypeForRoundness,
-} from '../utils/qrRoundness';
+} from '@/utils/qrRoundness';
 import {
   TopLabel, BadgeLabel, BottomLabel, BannerLabel, RibbonLabel,
   FallbackUrl, getFrameClasses, getFrameInlineStyles,
   SpeechBubblePointer, DecorativeCorners, MinimalLine,
 } from './qr';
-import { QR_CONFIG } from '../config/constants';
-import { createQRElementOptions } from '../utils/gradientUtils';
-import { useQRDownload } from '../hooks/useQRDownload';
+import { QR_CONFIG } from '@/config/constants';
+import { createQRElementOptions } from '@/utils/gradientUtils';
+import { useQRDownload } from '@/hooks/useQRDownload';
 
 export interface QRPreviewHandle {
   download: () => void;

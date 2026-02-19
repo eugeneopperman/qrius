@@ -3,7 +3,7 @@
  * 25 fonts organized by category for professional QR code frame typography.
  */
 
-import type { GoogleFontOption, GoogleFontCategory } from '../types';
+import type { GoogleFontOption, GoogleFontCategory } from '@/types';
 
 // ============================================================================
 // Curated Google Fonts List

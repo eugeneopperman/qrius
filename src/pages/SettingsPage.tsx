@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useSearch, useNavigate } from '@tanstack/react-router';
-import { DashboardLayout } from '../components/dashboard/DashboardLayout';
-import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '../components/ui/Tabs';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@/components/ui/Tabs';
 import { User, Users, CreditCard, Key, Loader2 } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 

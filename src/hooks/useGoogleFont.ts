@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { isSystemFont, getGoogleFontUrl, getFontByName } from '../config/fonts';
+import { isSystemFont, getGoogleFontUrl, getFontByName } from '@/config/fonts';
 
 /**
  * Cache to track loaded fonts to avoid duplicate requests

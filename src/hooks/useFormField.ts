@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { ValidationResult } from '../utils/validators';
+import type { ValidationResult } from '@/utils/validators';
 
 /**
  * Hook for managing a form field with validation.

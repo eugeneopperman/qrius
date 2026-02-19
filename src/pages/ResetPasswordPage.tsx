@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useAuthStore } from '../stores/authStore';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
+import { useAuthStore } from '@/stores/authStore';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { QrCode, Lock, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function ResetPasswordPage() {

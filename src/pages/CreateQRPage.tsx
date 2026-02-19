@@ -1,6 +1,6 @@
-import { DashboardLayout } from '../components/dashboard/DashboardLayout';
-import { WizardContainer } from '../components/wizard';
-import { ErrorBoundary } from '../components/ErrorBoundary';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { WizardContainer } from '@/components/wizard';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function CreateQRPage() {
   return (

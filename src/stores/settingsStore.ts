@@ -6,7 +6,7 @@ import type {
   RebrandlyConfig,
   ShortIoConfig,
   TrackingSettings,
-} from '../types';
+} from '@/types';
 
 const defaultBrandedUrlSettings: BrandedUrlSettings = {
   provider: 'none',

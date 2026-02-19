@@ -1,7 +1,7 @@
 # PRD: Codebase Improvement v3
 
 **Date:** 2026-02-19
-**Status:** In Progress
+**Status:** Quick Wins Complete (items 1-5 shipped in d3972ac)
 **Depends on:** Codebase Improvement v2 (committed 88718a0)
 
 ---
@@ -12,7 +12,7 @@ Continue improving code quality, performance, and security. V3 focuses on dead d
 
 ---
 
-## Quick Wins (This Session)
+## Quick Wins (Completed — d3972ac)
 
 ### 1. Remove 4 Dead Dependencies
 **Impact:** Smaller install, cleaner dependency tree
@@ -133,12 +133,12 @@ Only `Button.stories.tsx` exists. Add stories for core UI components.
 ## Verification Checklist
 
 After each change:
-- [ ] `npm run test:run` — 354+ tests pass
-- [ ] `npm run typecheck` — clean
-- [ ] `npm run lint` — clean
-- [ ] `npm run build` — succeeds
+- [x] `npm run test:run` — 354 tests pass
+- [x] `npm run typecheck` — clean
+- [x] `npm run lint` — clean
+- [x] `npm run build` — succeeds
 
 After bundle splitting:
-- [ ] Verify chunk sizes improved (no single chunk > 500KB ideally)
-- [ ] Dashboard page loads correctly
-- [ ] Template functionality still works
+- [x] Verify chunk sizes improved (main chunk 610KB → 329KB)
+- [x] Dashboard page loads correctly
+- [x] Template functionality still works

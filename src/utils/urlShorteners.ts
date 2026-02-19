@@ -1,4 +1,4 @@
-import type { RebrandlyConfig, ShortIoConfig } from '../types';
+import type { RebrandlyConfig, ShortIoConfig } from '@/types';
 
 export interface ShortenResult {
   success: boolean;

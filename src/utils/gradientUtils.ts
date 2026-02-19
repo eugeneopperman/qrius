@@ -1,4 +1,4 @@
-import type { GradientOptions } from '../types';
+import type { GradientOptions } from '@/types';
 
 /**
  * Generate a CSS gradient string for previewing a gradient configuration

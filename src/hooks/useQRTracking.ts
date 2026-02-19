@@ -3,9 +3,9 @@ import {
   createTrackableQR,
   getTrackableQR,
   type CreateTrackableQRRequest,
-} from '../utils/qrTrackingApi';
-import { useSettingsStore } from '../stores/settingsStore';
-import type { TrackableQRCode, TrackableQRCodeWithStats } from '../types';
+} from '@/utils/qrTrackingApi';
+import { useSettingsStore } from '@/stores/settingsStore';
+import type { TrackableQRCode, TrackableQRCodeWithStats } from '@/types';
 
 interface UseQRTrackingResult {
   // Create a tracked QR code

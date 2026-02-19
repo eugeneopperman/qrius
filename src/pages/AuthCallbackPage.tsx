@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { supabase } from '../lib/supabase';
-import { useAuthStore } from '../stores/authStore';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/stores/authStore';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function AuthCallbackPage() {

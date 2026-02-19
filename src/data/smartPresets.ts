@@ -1,4 +1,4 @@
-import type { QRCodeType, QRStyleOptions, URLData, WiFiData, VCardData, EventData } from '../types';
+import type { QRCodeType, QRStyleOptions, URLData, WiFiData, VCardData, EventData } from '@/types';
 
 export interface SmartPreset {
   id: string;

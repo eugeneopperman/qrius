@@ -12,7 +12,7 @@ import type {
   VCardData,
   EventData,
   LocationData,
-} from '../types';
+} from '@/types';
 
 // Escape functions for QR code formats
 

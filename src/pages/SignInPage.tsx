@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useSearch, useNavigate } from '@tanstack/react-router';
-import { SignInForm } from '../components/auth/SignInForm';
-import { ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
-import { useThemeStore } from '../stores/themeStore';
+import { SignInForm } from '@/components/auth/SignInForm';
+import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
+import { useThemeStore } from '@/stores/themeStore';
 import { QrCode, Moon, Sun } from 'lucide-react';
 
 type View = 'signin' | 'forgot-password';

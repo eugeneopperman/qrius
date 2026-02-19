@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 // Mock Supabase before importing the store
-vi.mock('../../lib/supabase', () => ({
+vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
       getSession: vi.fn(),
@@ -31,8 +31,8 @@ vi.mock('../../lib/supabase', () => ({
 }));
 
 import { useAuthStore } from '../authStore';
-import { supabase } from '../../lib/supabase';
-import type { Organization, OrganizationMember } from '../../types/database';
+import { supabase } from '@/lib/supabase';
+import type { Organization, OrganizationMember } from '@/types/database';
 
 // Helper to build a mock organization
 function makeOrganization(overrides: Partial<Organization> = {}): Organization {

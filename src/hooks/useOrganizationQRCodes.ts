@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
-import { toast } from '../stores/toastStore';
-import { useAuthStore } from '../stores/authStore';
-import type { QRCode } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import { toast } from '@/stores/toastStore';
+import { useAuthStore } from '@/stores/authStore';
+import type { QRCode } from '@/types/database';
 
 interface UseOrganizationQRCodesOptions {
   limit?: number;

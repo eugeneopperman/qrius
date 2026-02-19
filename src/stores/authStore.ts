@@ -2,8 +2,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User as SupabaseUser, Session, Subscription } from '@supabase/supabase-js';
-import type { User, Organization, OrganizationMember, PlanLimits } from '../types/database';
-import { supabase, checkSupabaseConnection } from '../lib/supabase';
+import type { User, Organization, OrganizationMember, PlanLimits } from '@/types/database';
+import { supabase, checkSupabaseConnection } from '@/lib/supabase';
 
 // Track the auth listener subscription to clean up on re-init
 let authSubscription: Subscription | null = null;

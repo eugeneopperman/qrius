@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { DashboardLayout } from '../components/dashboard/DashboardLayout';
-import { useHistoryStore } from '../stores/historyStore';
-import { toast } from '../stores/toastStore';
-import { Button } from '../components/ui/Button';
-import { ConfirmDialog } from '../components/ui/ConfirmDialog';
-import { HistoryCard } from '../components/features/History';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { useHistoryStore } from '@/stores/historyStore';
+import { toast } from '@/stores/toastStore';
+import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { HistoryCard } from '@/components/features/History';
 import { Clock, Trash2, Undo2 } from 'lucide-react';
 
 export default function HistoryPage() {

@@ -1,16 +1,16 @@
 import { useRef, useMemo, useCallback } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Header } from '../components/Header';
-import { WizardContainer } from '../components/wizard';
-import { PublicFooter } from '../components/layout/PublicFooter';
-import { ErrorBoundary } from '../components/ErrorBoundary';
-import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
-import { useThemeStore } from '../stores/themeStore';
-import { useTemplateStore } from '../stores/templateStore';
-import { useAuthStore } from '../stores/authStore';
-import { useUIStore } from '../stores/uiStore';
+import { Header } from '@/components/Header';
+import { WizardContainer } from '@/components/wizard';
+import { PublicFooter } from '@/components/layout/PublicFooter';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useThemeStore } from '@/stores/themeStore';
+import { useTemplateStore } from '@/stores/templateStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useUIStore } from '@/stores/uiStore';
 import { ArrowRight } from 'lucide-react';
-import type { QRPreviewHandle } from '../components/QRPreview';
+import type { QRPreviewHandle } from '@/components/QRPreview';
 
 export default function HomePage() {
   const qrPreviewRef = useRef<QRPreviewHandle | null>(null);

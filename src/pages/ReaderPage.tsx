@@ -1,8 +1,8 @@
 import { lazy, Suspense } from 'react';
-import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { ScanLine, Loader2 } from 'lucide-react';
 
-const QRReader = lazy(() => import('../components/features/QRReader').then(m => ({ default: m.QRReader })));
+const QRReader = lazy(() => import('@/components/features/QRReader').then(m => ({ default: m.QRReader })));
 
 export default function ReaderPage() {
   return (

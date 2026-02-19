@@ -73,9 +73,9 @@ api/
 7. **Subscription Billing**: Free/Pro/Business tiers via Stripe
 8. **Brand Templates**: Save, apply, export/import style presets
 9. **Template Wizard**: Step-by-step QR creation with use-case templates
-10. **Testing**: Vitest unit tests (162 passing)
-12. **PWA**: Offline support, installable app
-13. **Keyboard Shortcuts**: Ctrl+S (download), Ctrl+C (copy), etc.
+10. **Testing**: Vitest unit tests (354 passing across 13 test files)
+11. **PWA**: Offline support, installable app
+12. **Keyboard Shortcuts**: Ctrl+S (download), Ctrl+C (copy), etc.
 
 ## Database Schema
 Run `api/schema.sql` followed by `api/schema-saas.sql` to set up:
@@ -101,14 +101,17 @@ Run `api/schema.sql` followed by `api/schema-saas.sql` to set up:
 
 ## Commands
 ```bash
-npm run dev        # Start development server
-npm run build      # Production build
-npm run preview    # Preview production build
-npm run test       # Run unit tests (Vitest)
-npm run e2e        # Run E2E tests (Playwright)
-npm run storybook  # Start Storybook component docs
-npm run lint       # Run ESLint
-npm run typecheck  # Run TypeScript type checking
+npm run dev          # Start development server
+npm run build        # Production build
+npm run preview      # Preview production build
+npm run test         # Run unit tests in watch mode (Vitest)
+npm run test:run     # Run unit tests once (CI-friendly)
+npm run test:coverage # Run tests with coverage report
+npm run test:ui      # Vitest browser UI
+npm run e2e          # Run E2E tests (Playwright)
+npm run storybook    # Start Storybook component docs
+npm run lint         # Run ESLint
+npm run typecheck    # Run TypeScript type checking
 ```
 
 ## Environment Variables
@@ -132,17 +135,23 @@ Copy `.env.example` to `.env.local` and configure:
 - `/signup` - Sign up
 - `/auth/callback` - OAuth callback
 - `/auth/reset-password` - Password reset
+- `/terms` - Terms of service
+- `/privacy` - Privacy policy
+- `/cookies` - Cookie policy
 
 **Protected:**
 - `/dashboard` - Dashboard overview
 - `/qr-codes` - QR code list
 - `/qr-codes/:id` - QR code detail & analytics
 - `/create` - Create new QR code
-- `/settings` - Settings overview
-- `/settings/profile` - Profile settings
-- `/settings/team` - Team management
-- `/settings/billing` - Subscription management
-- `/settings/api-keys` - API key management
+- `/settings` - Tabbed settings page (profile, team, billing, api-keys)
+- `/settings/profile` - Redirects to `/settings?tab=profile`
+- `/settings/team` - Redirects to `/settings?tab=team`
+- `/settings/billing` - Redirects to `/settings?tab=billing`
+- `/settings/api-keys` - Redirects to `/settings?tab=api-keys`
+- `/history` - QR code history
+- `/reader` - QR code reader
+- `/onboarding` - Onboarding wizard
 
 ## Deployment
 - **Frontend**: Vercel at `https://design-sandbox-theta.vercel.app`
@@ -173,5 +182,7 @@ Copy `.env.example` to `.env.local` and configure:
 ## Known Issues
 - Mobile testing requires network access (use `npm run dev -- --host 0.0.0.0`)
 - PWA icons are placeholder solid colors
-- API rate limiting not yet implemented at application level
+- API rate limiting not yet implemented at application level (infrastructure ready via Upstash Redis)
 - Stripe integration requires configuration (works without for dev)
+- Open redirect risk in `api/r/[shortCode].ts` — destination URL protocol not validated
+- No ErrorBoundaries on protected routes — unhandled errors show white screen

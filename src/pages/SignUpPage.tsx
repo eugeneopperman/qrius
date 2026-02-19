@@ -1,6 +1,6 @@
 import { Link, useSearch, useNavigate } from '@tanstack/react-router';
-import { SignUpForm } from '../components/auth/SignUpForm';
-import { useThemeStore } from '../stores/themeStore';
+import { SignUpForm } from '@/components/auth/SignUpForm';
+import { useThemeStore } from '@/stores/themeStore';
 import { QrCode, Moon, Sun, Check } from 'lucide-react';
 
 export default function SignUpPage() {

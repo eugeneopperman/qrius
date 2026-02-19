@@ -4,7 +4,7 @@ import type {
   TrackableQRCode,
   TrackableQRCodeWithStats,
   QRData,
-} from '../types';
+} from '@/types';
 
 export interface CreateTrackableQRRequest {
   destinationUrl: string;

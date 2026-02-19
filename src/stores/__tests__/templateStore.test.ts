@@ -5,7 +5,7 @@ import {
   roundnessToCornerSquareType,
   dotTypeToRoundness,
 } from '../templateStore';
-import type { BrandTemplate, BrandTemplateStyle } from '../../types';
+import type { BrandTemplate, BrandTemplateStyle } from '@/types';
 
 // ============================================================================
 // Helpers

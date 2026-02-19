@@ -1,4 +1,4 @@
-import { LegalPageLayout } from '../components/legal/LegalPageLayout';
+import { LegalPageLayout } from '@/components/legal/LegalPageLayout';
 
 export default function CookiesPage() {
   return (

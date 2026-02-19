@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useQRStore } from '../stores/qrStore';
-import { QR_TYPES } from '../config/constants';
-import type { QRCodeType } from '../types';
+import { useQRStore } from '@/stores/qrStore';
+import { QR_TYPES } from '@/config/constants';
+import type { QRCodeType } from '@/types';
 
 interface KeyboardCallbacks {
   onDownload?: () => void;
@@ -124,4 +124,4 @@ export function useKeyboardShortcuts(callbacks: KeyboardCallbacks) {
 }
 
 // Re-export shortcuts from constants for backwards compatibility
-export { SHORTCUTS as shortcuts } from '../config/constants';
+export { SHORTCUTS as shortcuts } from '@/config/constants';

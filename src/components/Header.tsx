@@ -1,8 +1,8 @@
 import { QrCode, Sun, Moon, Palette, LogIn, MoreVertical, Clock, Settings, Keyboard } from 'lucide-react';
-import { useHistoryStore } from '../stores/historyStore';
-import { useThemeStore } from '../stores/themeStore';
-import { useTemplateStore } from '../stores/templateStore';
-import { useAuthStore } from '../stores/authStore';
+import { useHistoryStore } from '@/stores/historyStore';
+import { useThemeStore } from '@/stores/themeStore';
+import { useTemplateStore } from '@/stores/templateStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Dropdown } from './ui/Dropdown';
 import { UserButton } from './auth/UserButton';
 import { AuthModal } from './auth/AuthModal';

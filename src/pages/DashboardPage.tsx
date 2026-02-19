@@ -1,14 +1,14 @@
 import { Link } from '@tanstack/react-router';
-import { DashboardLayout } from '../components/dashboard/DashboardLayout';
-import { QuickStats } from '../components/dashboard/QuickStats';
-import { QRCodeList } from '../components/dashboard/QRCodeList';
-import { UpgradePrompt, UsageLimitWarning } from '../components/dashboard/UpgradePrompt';
-import { useAuthStore } from '../stores/authStore';
-import { Button } from '../components/ui/Button';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { QuickStats } from '@/components/dashboard/QuickStats';
+import { QRCodeList } from '@/components/dashboard/QRCodeList';
+import { UpgradePrompt, UsageLimitWarning } from '@/components/dashboard/UpgradePrompt';
+import { useAuthStore } from '@/stores/authStore';
+import { Button } from '@/components/ui/Button';
 import { Plus, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useState, useCallback } from 'react';
-import { useOrganizationQRCodes } from '../hooks/useOrganizationQRCodes';
-import { useDashboardStats } from '../hooks/queries/useDashboardStats';
+import { useOrganizationQRCodes } from '@/hooks/useOrganizationQRCodes';
+import { useDashboardStats } from '@/hooks/queries/useDashboardStats';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function DashboardPage() {

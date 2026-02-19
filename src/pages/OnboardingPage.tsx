@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useAuthStore } from '../stores/authStore';
-import { useTemplateStore } from '../stores/templateStore';
-import { useQRStore } from '../stores/qrStore';
-import { toast } from '../stores/toastStore';
-import { Button } from '../components/ui/Button';
+import { useAuthStore } from '@/stores/authStore';
+import { useTemplateStore } from '@/stores/templateStore';
+import { useQRStore } from '@/stores/qrStore';
+import { toast } from '@/stores/toastStore';
+import { Button } from '@/components/ui/Button';
 import { QrCode, ArrowRight, ArrowLeft } from 'lucide-react';
-import { OnboardingWelcome } from '../components/onboarding/OnboardingWelcome';
-import { OnboardingBrandTemplate } from '../components/onboarding/OnboardingBrandTemplate';
-import { OnboardingFirstQR } from '../components/onboarding/OnboardingFirstQR';
-import { OnboardingComplete } from '../components/onboarding/OnboardingComplete';
+import { OnboardingWelcome } from '@/components/onboarding/OnboardingWelcome';
+import { OnboardingBrandTemplate } from '@/components/onboarding/OnboardingBrandTemplate';
+import { OnboardingFirstQR } from '@/components/onboarding/OnboardingFirstQR';
+import { OnboardingComplete } from '@/components/onboarding/OnboardingComplete';
 
 type OnboardingStep = 1 | 2 | 3 | 4;
 

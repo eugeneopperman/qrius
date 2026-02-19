@@ -9,7 +9,7 @@
  * so we post-process the SVG to apply custom border-radius values for smooth transitions.
  */
 
-import type { QRPattern, DotType } from '../types';
+import type { QRPattern, DotType } from '@/types';
 
 /**
  * Apply smooth roundness to QR code module rect elements in an SVG.

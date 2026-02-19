@@ -1,4 +1,4 @@
-import type { DotType, CornerSquareType, CornerDotType } from '../types';
+import type { DotType, CornerSquareType, CornerDotType } from '@/types';
 
 /**
  * Neighbor information for connected dot styles

@@ -1,6 +1,6 @@
-import { DashboardLayout } from '../components/dashboard/DashboardLayout';
-import { QRCodeList } from '../components/dashboard/QRCodeList';
-import { useOrganizationQRCodes } from '../hooks/useOrganizationQRCodes';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { QRCodeList } from '@/components/dashboard/QRCodeList';
+import { useOrganizationQRCodes } from '@/hooks/useOrganizationQRCodes';
 
 export default function QRCodesPage() {
   const { qrCodes, isLoading, deleteQRCode } = useOrganizationQRCodes();

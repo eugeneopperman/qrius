@@ -1,4 +1,4 @@
-import type { LogoShape } from '../types';
+import type { LogoShape } from '@/types';
 
 /**
  * Applies a shape mask to a logo image and returns a data URL.

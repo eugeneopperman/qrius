@@ -1,8 +1,8 @@
 import { Link, useParams } from '@tanstack/react-router';
-import { DashboardLayout } from '../components/dashboard/DashboardLayout';
-import { Button } from '../components/ui/Button';
-import { toast } from '../stores/toastStore';
-import { useQRCodeDetail } from '../hooks/queries/useQRCodeDetail';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { Button } from '@/components/ui/Button';
+import { toast } from '@/stores/toastStore';
+import { useQRCodeDetail } from '@/hooks/queries/useQRCodeDetail';
 import {
   ArrowLeft,
   ExternalLink,

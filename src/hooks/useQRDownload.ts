@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type QRCodeStyling from 'qr-code-styling';
-import { toast } from '../stores/toastStore';
-import { generateIllustratorSVG, downloadSVG } from '../utils/qrSvgGenerator';
-import { QR_CONFIG } from '../config/constants';
-import type { QRStyleOptions } from '../types';
+import { toast } from '@/stores/toastStore';
+import { generateIllustratorSVG, downloadSVG } from '@/utils/qrSvgGenerator';
+import { QR_CONFIG } from '@/config/constants';
+import type { QRStyleOptions } from '@/types';
 
 interface UseQRDownloadOptions {
   qrCodeRef: React.MutableRefObject<QRCodeStyling | null>;
