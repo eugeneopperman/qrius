@@ -138,12 +138,22 @@ Copy `.env.example` to `.env.local` and configure:
 - `/settings/billing` - Subscription management
 - `/settings/api-keys` - API key management
 
+## Deployment
+- **Frontend**: Vercel at `https://design-sandbox-theta.vercel.app`
+- **Auth/DB**: Supabase (Postgres + Auth)
+- **QR/Scans DB**: Neon Postgres (via `POSTGRES_URL`)
+- **Deploy**: `npx vercel --prod` (or git push triggers auto-deploy)
+- **Version**: Beta version badge shown bottom-right on all pages, tracked in `src/config/constants.ts` (`APP_VERSION`)
+- **Env vars**: Must be set in Vercel dashboard (Settings > Environment Variables) — `.env.local` is local only
+
 ## Development Notes
 - Auth state managed in `authStore` with Supabase session sync
+- `fetchProfile()` auto-provisions user/org/membership if DB trigger hasn't run
+- `checkSupabaseConnection()` in `src/lib/supabase.ts` detects paused projects
 - Dashboard layout uses persistent sidebar with org switcher
 - API routes support both JWT (browser) and API key authentication
 - Stripe webhooks handle subscription lifecycle events
-- Row Level Security (RLS) policies in database for data isolation
+- Row Level Security (RLS) policies in database for data isolation — schema is idempotent (DROP IF EXISTS before CREATE)
 - QR codes without user/org ownership are public (backward compatibility)
 
 ## Testing
@@ -157,3 +167,4 @@ Copy `.env.example` to `.env.local` and configure:
 - PWA icons are placeholder solid colors
 - API rate limiting not yet implemented at application level
 - Stripe integration requires configuration (works without for dev)
+- API serverless functions: `.js` extensions added for `--moduleResolution node16` (fixed in `f3f3b12`)
