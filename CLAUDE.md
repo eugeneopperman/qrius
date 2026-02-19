@@ -174,10 +174,70 @@ Copy `.env.example` to `.env.local` and configure:
 - Row Level Security (RLS) policies in database for data isolation — schema is idempotent (DROP IF EXISTS before CREATE)
 - QR codes without user/org ownership are public (backward compatibility)
 
+## Architecture Decisions
+
+- **Supabase Auth** over Clerk/Auth0 — native Postgres integration with RLS, free tier supports 50K MAUs
+- **TanStack Router** over React Router — type-safe routing with built-in code splitting and search param types
+- **Zustand** over Redux/Jotai — already established in codebase, simple API with persist middleware
+- **Dual database** — Supabase for auth/users, Neon for QR tracking (both Postgres, could consolidate later)
+- **Upstash Redis** — caching redirect lookups with 24-hour TTL
+
+## File Naming Conventions
+
+- **Pages**: `src/pages/XxxPage.tsx` (PascalCase with Page suffix)
+- **Components**: `src/components/category/ComponentName.tsx`
+- **Stores**: `src/stores/xxxStore.ts` (camelCase with Store suffix)
+- **Hooks**: `src/hooks/useXxx.ts` (camelCase with use prefix)
+- **API routes**: `api/resource/index.ts` or `api/resource/[param].ts`
+
+## Common Tasks
+
+### Adding a New Protected Page
+1. Create page component in `src/pages/`
+2. Add route in `src/router.tsx` with `beforeLoad: requireAuth`
+3. Use `DashboardLayout` wrapper for consistent UI
+
+### Adding a New API Endpoint
+1. Create handler in `api/` directory
+2. Import auth helpers from `api/_lib/auth.ts`
+3. Use `authenticate()` for flexible auth or `requireAuth()` for JWT-only
+4. Check plan limits with `checkPlanLimit()` if needed
+
+### Modifying Database Schema
+1. Write migration SQL
+2. Run in Supabase SQL Editor
+3. Update types in `src/types/database.ts`
+4. Update RLS policies if needed
+
+## Debugging Tips
+
+- **Auth issues**: Check Supabase Dashboard > Authentication > Users; verify redirect URLs; check `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+- **Database issues**: Check RLS policies aren't blocking queries; test in Supabase SQL Editor; verify `handle_new_user` trigger exists
+- **API issues**: Check Vercel function logs; verify env vars in Vercel dashboard; test with `curl` to isolate frontend vs backend
+
+## Security Notes
+
+- Never expose `SUPABASE_SERVICE_ROLE_KEY` to the browser
+- API keys are hashed before storage (SHA-256)
+- IP addresses are hashed for privacy in scan logs
+- RLS policies enforce data isolation at database level
+- CORS headers set on all API routes
+
 ## Testing
 - **Unit Tests**: 354 tests passing across 13 test files (Vitest)
 - **Test command**: `npm run test:run` (single run) or `npm run test` (watch mode)
 - **Coverage**: Utilities (cn, validators, scannability), stores (auth, qr, template, theme, toast, wizard), UI components (Button, Input), hooks (useClickOutside, useDebounce)
+
+## Documentation & Filing
+
+- `CLAUDE.md` — Source of truth for project reference (root)
+- `README.md` — Project overview and quick start (root)
+- `docs/` — Active PRDs and reference runbooks
+- `docs/archive/` — Completed PRDs and historical documents
+- `docs/research/` — Architecture research and technical exploration
+- **Naming**: `kebab-case.md` for all doc files
+- **PRD lifecycle**: Create in `docs/`, move to `docs/archive/` when fully shipped
+- **No floating `.md` files at root** except CLAUDE.md and README.md
 
 ## Known Issues
 - Mobile testing requires network access (use `npm run dev -- --host 0.0.0.0`)

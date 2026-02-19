@@ -1,73 +1,53 @@
-# React + TypeScript + Vite
+# Qrius
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Full-featured SaaS QR code generator with user authentication, multi-tenancy, subscription billing, and API access.
 
-Currently, two official plugins are available:
+**Live:** [design-sandbox-theta.vercel.app](https://design-sandbox-theta.vercel.app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Quick Start
 
-## React Compiler
+```bash
+# Clone and install
+git clone <repo-url> && cd Qrius
+npm install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# Configure environment
+cp .env.example .env.local
+# Edit .env.local with your Supabase, Stripe, and database credentials
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Frontend:** React 19 + TypeScript + Vite + Tailwind CSS 4
+- **Routing:** TanStack Router (type-safe, code-split)
+- **State:** Zustand (persist middleware) + TanStack Query (server state)
+- **Auth:** Supabase Auth (email/password + OAuth)
+- **Database:** Supabase Postgres (users/orgs) + Neon Postgres (QR/scans)
+- **Payments:** Stripe (Free / Pro / Business tiers)
+- **Serverless:** Vercel Functions
+- **QR Engine:** qr-code-styling + html5-qrcode (reader)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Commands
+
+```bash
+npm run dev            # Development server
+npm run build          # Production build
+npm run test:run       # Run tests once
+npm run test           # Tests in watch mode
+npm run lint           # ESLint
+npm run typecheck      # TypeScript checking
+npm run storybook      # Component docs
 ```
+
+## Documentation
+
+- **[CLAUDE.md](./CLAUDE.md)** — Full project reference (structure, schema, routes, env vars, conventions)
+- **[docs/](./docs/)** — Active PRDs and reference runbooks
+- **[docs/archive/](./docs/archive/)** — Completed PRDs and historical documents
+
+## Status
+
+Beta v0.04 — 354 unit tests passing, deployed to Vercel production.
