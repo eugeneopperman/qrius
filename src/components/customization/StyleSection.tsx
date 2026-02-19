@@ -1,5 +1,6 @@
 import { memo, useCallback, type ReactNode } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Eye, HelpCircle } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { LabelWithTooltip, Tooltip } from '../ui/Tooltip';
@@ -161,7 +162,7 @@ function OptionGroup<T extends string>({
 }
 
 export const StyleSection = memo(function StyleSection() {
-  const { styleOptions, setStyleOptions } = useQRStore();
+  const { styleOptions, setStyleOptions } = useQRStore(useShallow((s) => ({ styleOptions: s.styleOptions, setStyleOptions: s.setStyleOptions })));
 
   // Handle unified style change - sets both dots and corner squares
   const handleStyleChange = useCallback((dotType: DotType) => {

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Input } from '../ui/Input';
 
 import { validateLatitude, validateLongitude } from '@/utils/validators';
 
 export function LocationForm() {
-  const { locationData, setLocationData } = useQRStore();
+  const { locationData, setLocationData } = useQRStore(useShallow((s) => ({ locationData: s.locationData, setLocationData: s.setLocationData })));
   const [touched, setTouched] = useState({ latitude: false, longitude: false });
 
   const latValidation = touched.latitude ? validateLatitude(locationData.latitude) : { isValid: true };

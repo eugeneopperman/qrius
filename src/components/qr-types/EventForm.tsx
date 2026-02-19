@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 
 import { validateEventTitle, validateEventDate } from '@/utils/validators';
 
 export function EventForm() {
-  const { eventData, setEventData } = useQRStore();
+  const { eventData, setEventData } = useQRStore(useShallow((s) => ({ eventData: s.eventData, setEventData: s.setEventData })));
   const [touched, setTouched] = useState({ title: false, startDate: false, endDate: false });
 
   const titleValidation = touched.title ? validateEventTitle(eventData.title) : { isValid: true };

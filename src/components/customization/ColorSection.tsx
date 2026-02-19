@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { ColorPicker } from '../ui/ColorPicker';
 import { cn } from '@/utils/cn';
 import { Tooltip } from '../ui/Tooltip';
@@ -10,7 +11,7 @@ import { getGradientPreview } from '@/utils/gradientUtils';
 import type { GradientOptions, GradientType } from '@/types';
 
 export const ColorSection = memo(function ColorSection() {
-  const { styleOptions, setStyleOptions } = useQRStore();
+  const { styleOptions, setStyleOptions } = useQRStore(useShallow((s) => ({ styleOptions: s.styleOptions, setStyleOptions: s.setStyleOptions })));
 
   const useGradient = styleOptions.useGradient ?? false;
   const gradient = styleOptions.gradient ?? DEFAULT_GRADIENT;

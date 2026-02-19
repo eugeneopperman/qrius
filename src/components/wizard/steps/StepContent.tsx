@@ -1,4 +1,5 @@
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useWizardStore } from '@/stores/wizardStore';
 import {
   UrlForm,
@@ -41,7 +42,7 @@ const typeConfig: Record<QRCodeType, { label: string; icon: React.ElementType }>
 };
 
 export function StepContent() {
-  const { activeType, getQRValue } = useQRStore();
+  const { activeType, getQRValue } = useQRStore(useShallow((s) => ({ activeType: s.activeType, getQRValue: s.getQRValue })));
   const { nextStep, prevStep, skipToDownload } = useWizardStore();
 
   const renderForm = () => {

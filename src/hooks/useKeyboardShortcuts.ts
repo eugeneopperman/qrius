@@ -15,7 +15,7 @@ interface KeyboardCallbacks {
 }
 
 export function useKeyboardShortcuts(callbacks: KeyboardCallbacks) {
-  const { setActiveType } = useQRStore();
+  const setActiveType = useQRStore((s) => s.setActiveType);
 
   // Use refs to store callbacks to avoid re-subscribing on every render
   const callbacksRef = useRef<KeyboardCallbacks>(callbacks);

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useWizardStore } from '@/stores/wizardStore';
 import type { QRCodeType } from '@/types';
 
@@ -35,7 +36,7 @@ const typeOptions: TypeOption[] = [
 ];
 
 export function StepType() {
-  const { activeType, setActiveType } = useQRStore();
+  const { activeType, setActiveType } = useQRStore(useShallow((s) => ({ activeType: s.activeType, setActiveType: s.setActiveType })));
   const { nextStep } = useWizardStore();
 
   const handleSelect = (typeId: QRCodeType) => {

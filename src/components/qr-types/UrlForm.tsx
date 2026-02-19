@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useUrlShortener } from '@/hooks/useUrlShortener';
 import { useQRTracking } from '@/hooks/useQRTracking';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -12,7 +13,7 @@ import { validateUrl } from '@/utils/validators';
 import { useFormField } from '@/hooks/useFormField';
 
 export function UrlForm() {
-  const { urlData, setUrlData } = useQRStore();
+  const { urlData, setUrlData } = useQRStore(useShallow((s) => ({ urlData: s.urlData, setUrlData: s.setUrlData })));
   const { shorten, isLoading, error, isBrandedConfigured, brandedDomain } = useUrlShortener();
   const { createTracked, isLoading: isTrackingLoading, error: trackingError } = useQRTracking();
   const { trackingSettings } = useSettingsStore();

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 
@@ -12,7 +13,7 @@ const encryptionOptions = [
 ];
 
 export function WifiForm() {
-  const { wifiData, setWifiData } = useQRStore();
+  const { wifiData, setWifiData } = useQRStore(useShallow((s) => ({ wifiData: s.wifiData, setWifiData: s.setWifiData })));
   const [touched, setTouched] = useState({ ssid: false, password: false });
 
   const ssidValidation = touched.ssid ? validateSsid(wifiData.ssid) : { isValid: true };

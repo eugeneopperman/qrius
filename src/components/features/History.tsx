@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Trash2, Clock, RotateCcw, Undo2, BarChart3, Loader2 } from 'lucide-react';
 import { useHistoryStore, getTypeLabel, getDataSummary } from '@/stores/historyStore';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -181,7 +182,12 @@ export interface HistoryCardProps {
 }
 
 export function HistoryCard({ entry, onRemove, onClose }: HistoryCardProps) {
-  const { setActiveType, setStyleOptions, setUrlData, setTextData, setEmailData, setPhoneData, setSmsData, setWifiData, setVcardData, setEventData, setLocationData } = useQRStore();
+  const { setActiveType, setStyleOptions, setUrlData, setTextData, setEmailData, setPhoneData, setSmsData, setWifiData, setVcardData, setEventData, setLocationData } = useQRStore(useShallow((s) => ({
+    setActiveType: s.setActiveType, setStyleOptions: s.setStyleOptions, setUrlData: s.setUrlData,
+    setTextData: s.setTextData, setEmailData: s.setEmailData, setPhoneData: s.setPhoneData,
+    setSmsData: s.setSmsData, setWifiData: s.setWifiData, setVcardData: s.setVcardData,
+    setEventData: s.setEventData, setLocationData: s.setLocationData,
+  })));
   const { trackingSettings } = useSettingsStore();
   const { updateEntry } = useHistoryStore();
   const [scanCount, setScanCount] = useState<number | null>(entry.totalScans ?? null);

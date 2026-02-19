@@ -14,6 +14,7 @@ import {
 import { useState, useRef, useEffect } from 'react';
 import { smartPresets, type SmartPreset } from '@/data/smartPresets';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { cn } from '@/utils/cn';
 
@@ -84,7 +85,11 @@ export function SmartPresets({ onApply }: SmartPresetsProps) {
     setWifiData,
     setVcardData,
     setEventData,
-  } = useQRStore();
+  } = useQRStore(useShallow((s) => ({
+    setActiveType: s.setActiveType, setStyleOptions: s.setStyleOptions,
+    setUrlData: s.setUrlData, setWifiData: s.setWifiData,
+    setVcardData: s.setVcardData, setEventData: s.setEventData,
+  })));
 
   // Cleanup timeout on unmount to prevent memory leaks
   useEffect(() => {

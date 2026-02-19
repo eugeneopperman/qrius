@@ -24,7 +24,7 @@ interface WizardPreviewProps {
 export const WizardPreview = forwardRef<QRPreviewHandle, WizardPreviewProps>(
   function WizardPreview({ className, compact }, ref) {
     const { currentStep } = useWizardStore();
-    const { activeType } = useQRStore();
+    const activeType = useQRStore((s) => s.activeType);
 
     // Don't show preview on Step 1 (Type selection) or Step 4 (Download has its own preview)
     if (currentStep === 1 || currentStep === 4) {

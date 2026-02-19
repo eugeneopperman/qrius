@@ -1,5 +1,6 @@
 import { memo, useCallback, useState } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import {
   Type,
   QrCode,
@@ -117,7 +118,7 @@ function FrameMiniPreview({ frameId, isActive }: { frameId: string; isActive: bo
 }
 
 export const FrameSection = memo(function FrameSection() {
-  const { styleOptions, setStyleOptions } = useQRStore();
+  const { styleOptions, setStyleOptions } = useQRStore(useShallow((s) => ({ styleOptions: s.styleOptions, setStyleOptions: s.setStyleOptions })));
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const selectedFrame = styleOptions.frameStyle || 'none';

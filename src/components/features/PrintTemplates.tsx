@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { createQRElementOptions } from '@/utils/gradientUtils';
 import { Printer, Check, FileImage, FileText } from 'lucide-react';
@@ -94,7 +95,7 @@ const printTemplates: PrintTemplate[] = [
 ];
 
 export function PrintTemplates() {
-  const { styleOptions, getQRValue } = useQRStore();
+  const { styleOptions, getQRValue } = useQRStore(useShallow((s) => ({ styleOptions: s.styleOptions, getQRValue: s.getQRValue })));
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [success, setSuccess] = useState(false);

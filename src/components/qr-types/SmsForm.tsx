@@ -1,4 +1,5 @@
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Input } from '../ui/Input';
 
 import { validatePhone } from '@/utils/validators';
@@ -6,7 +7,7 @@ import { cn } from '@/utils/cn';
 import { useFormField } from '@/hooks/useFormField';
 
 export function SmsForm() {
-  const { smsData, setSmsData } = useQRStore();
+  const { smsData, setSmsData } = useQRStore(useShallow((s) => ({ smsData: s.smsData, setSmsData: s.setSmsData })));
   const phoneField = useFormField(smsData.phone, validatePhone);
   const messageLength = (smsData.message || '').length;
 

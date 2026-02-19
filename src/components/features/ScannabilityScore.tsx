@@ -1,5 +1,6 @@
 import { useMemo, memo } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { analyzeScannability } from '@/utils/scannabilityAnalyzer';
 import { useDebounce } from '@/hooks/useDebounce';
 import { CheckCircle, AlertTriangle, XCircle, Info, ChevronRight } from 'lucide-react';
@@ -7,7 +8,7 @@ import { cn } from '@/utils/cn';
 import { TIMING } from '@/config/constants';
 
 export const ScannabilityScore = memo(function ScannabilityScore() {
-  const { styleOptions, getQRValue } = useQRStore();
+  const { styleOptions, getQRValue } = useQRStore(useShallow((s) => ({ styleOptions: s.styleOptions, getQRValue: s.getQRValue })));
   const qrValue = getQRValue();
 
   // Debounce inputs to avoid recalculating on every keystroke

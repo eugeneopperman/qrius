@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import type { QRCodeType } from '@/types';
 
 interface TypeOption {
@@ -34,7 +35,7 @@ const typeOptions: TypeOption[] = [
 ] as const;
 
 export function TypeSelector() {
-  const { activeType, setActiveType } = useQRStore();
+  const { activeType, setActiveType } = useQRStore(useShallow((s) => ({ activeType: s.activeType, setActiveType: s.setActiveType })));
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);

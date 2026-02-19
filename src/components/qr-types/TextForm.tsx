@@ -1,10 +1,11 @@
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 
 import { validateText } from '@/utils/validators';
 import { Textarea } from '../ui/Textarea';
 
 export function TextForm() {
-  const { textData, setTextData } = useQRStore();
+  const { textData, setTextData } = useQRStore(useShallow((s) => ({ textData: s.textData, setTextData: s.setTextData })));
 
   const validation = validateText(textData.text);
   const textLength = textData.text.length;

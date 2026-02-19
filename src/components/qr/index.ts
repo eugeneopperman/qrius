@@ -1,4 +1,3 @@
-export { QRRenderer } from './QRRenderer';
 export { QRActions, type QRActionsHandle } from './QRActions';
 export { EmptyState } from './EmptyState';
 export {

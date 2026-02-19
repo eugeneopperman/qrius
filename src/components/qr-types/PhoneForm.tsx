@@ -1,11 +1,12 @@
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Input } from '../ui/Input';
 
 import { validatePhone } from '@/utils/validators';
 import { useFormField } from '@/hooks/useFormField';
 
 export function PhoneForm() {
-  const { phoneData, setPhoneData } = useQRStore();
+  const { phoneData, setPhoneData } = useQRStore(useShallow((s) => ({ phoneData: s.phoneData, setPhoneData: s.setPhoneData })));
   const phoneField = useFormField(phoneData.phone, validatePhone);
 
   return (

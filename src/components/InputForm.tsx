@@ -12,7 +12,7 @@ import {
 } from './qr-types';
 
 export function InputForm() {
-  const { activeType } = useQRStore();
+  const activeType = useQRStore((s) => s.activeType);
 
   const renderForm = () => {
     switch (activeType) {

@@ -1,11 +1,12 @@
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Input } from '../ui/Input';
 
 import { validateEmail } from '@/utils/validators';
 import { useFormField } from '@/hooks/useFormField';
 
 export function EmailForm() {
-  const { emailData, setEmailData } = useQRStore();
+  const { emailData, setEmailData } = useQRStore(useShallow((s) => ({ emailData: s.emailData, setEmailData: s.setEmailData })));
   const emailField = useFormField(emailData.email, validateEmail);
 
   return (

@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useTemplateStore } from '@/stores/templateStore';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { Button } from '@/components/ui/Button';
 import { QrCode, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -17,7 +18,7 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { createOrganization, setOnboardingComplete } = useAuthStore();
   const { saveTemplate, updateDraft, updateDraftStyle } = useTemplateStore();
-  const { setUrlData, setStyleOptions } = useQRStore();
+  const { setUrlData, setStyleOptions } = useQRStore(useShallow((s) => ({ setUrlData: s.setUrlData, setStyleOptions: s.setStyleOptions })));
   const [step, setStep] = useState<OnboardingStep>(1);
   const [orgName, setOrgName] = useState('');
   const [brandColor, setBrandColor] = useState('#6366F1');

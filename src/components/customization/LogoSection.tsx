@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, memo } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Upload, X, AlertCircle, Square, Circle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { cn } from '@/utils/cn';
@@ -9,7 +10,7 @@ import { LOGO_CONFIG } from '@/config/constants';
 import type { LogoShape } from '@/types';
 
 export const LogoSection = memo(function LogoSection() {
-  const { styleOptions, setStyleOptions } = useQRStore();
+  const { styleOptions, setStyleOptions } = useQRStore(useShallow((s) => ({ styleOptions: s.styleOptions, setStyleOptions: s.setStyleOptions })));
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);

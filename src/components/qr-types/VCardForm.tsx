@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 
 import { validateEmail, validatePhone, validateUrl, validateName } from '@/utils/validators';
 
 export function VCardForm() {
-  const { vcardData, setVcardData } = useQRStore();
+  const { vcardData, setVcardData } = useQRStore(useShallow((s) => ({ vcardData: s.vcardData, setVcardData: s.setVcardData })));
   const [touched, setTouched] = useState({
     name: false,
     phone: false,

@@ -8,7 +8,7 @@ import type { BrandTemplate } from '@/types';
 
 export function TemplatePickerSection() {
   const { templates, applyTemplate, openWizard } = useTemplateStore();
-  const { styleOptions } = useQRStore();
+  const styleOptions = useQRStore((s) => s.styleOptions);
 
   const handleApply = (template: BrandTemplate) => {
     applyTemplate(template.id);

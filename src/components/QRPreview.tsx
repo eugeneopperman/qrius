@@ -1,27 +1,18 @@
-import { useEffect, useRef, useState, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
-import QRCodeStyling from 'qr-code-styling';
+import { useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { useQRStore } from '@/stores/qrStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useHistoryStore } from '@/stores/historyStore';
-import { toast } from '@/stores/toastStore';
 import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '@/utils/cn';
-import { applyLogoMask } from '@/utils/logoMask';
-import {
-  applyRoundnessToQRSvg,
-  getDotTypeForPattern,
-  shouldApplyRoundnessPostProcessing,
-  getCornerSquareTypeForRoundness,
-  getCornerDotTypeForRoundness,
-} from '@/utils/qrRoundness';
 import {
   TopLabel, BadgeLabel, BottomLabel, BannerLabel, RibbonLabel,
   FallbackUrl, getFrameClasses, getFrameInlineStyles,
   SpeechBubblePointer, DecorativeCorners, MinimalLine,
 } from './qr';
 import { QR_CONFIG } from '@/config/constants';
-import { createQRElementOptions } from '@/utils/gradientUtils';
 import { useQRDownload } from '@/hooks/useQRDownload';
+import { useQRCodeInstance } from '@/hooks/useQRCodeInstance';
 
 export interface QRPreviewHandle {
   download: () => void;
@@ -35,14 +26,15 @@ interface QRPreviewProps {
 }
 
 export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActions, displaySize }, ref) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const frameContainerRef = useRef<HTMLDivElement>(null);
-  const qrCodeRef = useRef<QRCodeStyling | null>(null);
   const [showFormatMenu, setShowFormatMenu] = useState(false);
-  const [processedLogoUrl, setProcessedLogoUrl] = useState<string | undefined>(undefined);
   const { getQRValue, styleOptions, activeType, getCurrentData,
     urlData, textData, emailData, phoneData, smsData, wifiData, vcardData, eventData, locationData,
-  } = useQRStore();
+  } = useQRStore(useShallow((s) => ({
+    getQRValue: s.getQRValue, styleOptions: s.styleOptions, activeType: s.activeType, getCurrentData: s.getCurrentData,
+    urlData: s.urlData, textData: s.textData, emailData: s.emailData, phoneData: s.phoneData,
+    smsData: s.smsData, wifiData: s.wifiData, vcardData: s.vcardData, eventData: s.eventData, locationData: s.locationData,
+  })));
   const { addEntry, updateThumbnail } = useHistoryStore();
 
   const qrValue = getQRValue();
@@ -68,90 +60,24 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
   // Calculate zoom factor for displaySize — zoom scales both visual AND layout
   const zoomFactor = displaySize ? displaySize / QR_CONFIG.SIZE : undefined;
 
-  // Process logo with shape mask when logo or shape changes
-  useEffect(() => {
-    if (!styleOptions.logoUrl) {
-      setProcessedLogoUrl(undefined);
-      return;
-    }
-
-    const shape = styleOptions.logoShape || 'square';
-
-    // Only apply mask for non-square shapes
-    if (shape === 'square') {
-      setProcessedLogoUrl(styleOptions.logoUrl);
-      return;
-    }
-
-    applyLogoMask(styleOptions.logoUrl, shape)
-      .then(setProcessedLogoUrl)
-      .catch(() => {
-        toast.error('Failed to apply logo shape. Using original image.');
-        setProcessedLogoUrl(styleOptions.logoUrl);
-      });
-  }, [styleOptions.logoUrl, styleOptions.logoShape]);
-
-  // Get roundness and pattern values for smooth transitions
-  const qrRoundness = styleOptions.qrRoundness;
-  const qrPattern = styleOptions.qrPattern ?? 'solid';
-
-  // Determine effective dot/corner types based on pattern:
-  // - Solid pattern: Use 'square' and post-process with smooth roundness
-  // - Dots pattern: Use discrete dot types for individual separated dots
-  const effectiveDotType = qrRoundness !== undefined
-    ? getDotTypeForPattern(qrPattern, qrRoundness)
-    : styleOptions.dotsType;
-
-  const effectiveCornerSquareType = qrRoundness !== undefined
-    ? getCornerSquareTypeForRoundness(qrRoundness)
-    : styleOptions.cornersSquareType;
-
-  const effectiveCornerDotType = qrRoundness !== undefined
-    ? getCornerDotTypeForRoundness(qrRoundness)
-    : styleOptions.cornersDotType;
-
-  // Only apply post-processing for solid pattern
-  const shouldPostProcess = shouldApplyRoundnessPostProcessing(qrPattern) && qrRoundness !== undefined;
-
-  // Build QR element options with gradient support
-  const dotsOptions = useMemo(
-    () => createQRElementOptions(
-      effectiveDotType,
-      styleOptions.useGradient || false,
-      styleOptions.gradient,
-      styleOptions.dotsColor
-    ),
-    [effectiveDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
-  );
-
-  const cornersSquareOptions = useMemo(
-    () => createQRElementOptions(
-      effectiveCornerSquareType,
-      styleOptions.useGradient || false,
-      styleOptions.gradient,
-      styleOptions.dotsColor
-    ),
-    [effectiveCornerSquareType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
-  );
-
-  const cornersDotOptions = useMemo(
-    () => createQRElementOptions(
-      effectiveCornerDotType,
-      styleOptions.useGradient || false,
-      styleOptions.gradient,
-      styleOptions.dotsColor
-    ),
-    [effectiveCornerDotType, styleOptions.useGradient, styleOptions.gradient, styleOptions.dotsColor]
-  );
-
-  // Apply smooth roundness to SVG (only for solid pattern)
-  const applyRoundness = useCallback(() => {
-    if (shouldPostProcess && qrRoundness !== undefined) {
-      requestAnimationFrame(() => {
-        applyRoundnessToQRSvg(containerRef.current, qrRoundness);
-      });
-    }
-  }, [qrRoundness, shouldPostProcess]);
+  // QR code instance — handles logo, gradients, roundness, init/update/cleanup
+  const { containerRef, qrCodeRef, processedLogoUrl } = useQRCodeInstance({
+    data: displayValue,
+    dotsType: styleOptions.dotsType,
+    dotsColor: styleOptions.dotsColor,
+    cornersSquareType: styleOptions.cornersSquareType,
+    cornersDotType: styleOptions.cornersDotType,
+    backgroundColor: styleOptions.backgroundColor,
+    errorCorrectionLevel: styleOptions.errorCorrectionLevel,
+    useGradient: styleOptions.useGradient,
+    gradient: styleOptions.gradient,
+    logoUrl: styleOptions.logoUrl,
+    logoShape: styleOptions.logoShape,
+    logoMargin: styleOptions.logoMargin,
+    logoSize: styleOptions.logoSize,
+    qrRoundness: styleOptions.qrRoundness,
+    qrPattern: styleOptions.qrPattern,
+  });
 
   // Save to history with thumbnail
   const saveToHistory = useCallback(async () => {
@@ -194,73 +120,7 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
         // Thumbnail generation is non-critical; history entry saved regardless
       }
     }
-  }, [activeType, getCurrentData, styleOptions, qrValue, addEntry, updateThumbnail]);
-
-  // Initialize QR code
-  useEffect(() => {
-    qrCodeRef.current = new QRCodeStyling({
-      width: QR_CONFIG.SIZE,
-      height: QR_CONFIG.SIZE,
-      type: 'svg',
-      data: displayValue,
-      dotsOptions,
-      cornersSquareOptions,
-      cornersDotOptions,
-      backgroundOptions: {
-        color: styleOptions.backgroundColor,
-      },
-      qrOptions: {
-        errorCorrectionLevel: styleOptions.errorCorrectionLevel,
-      },
-      imageOptions: {
-        crossOrigin: 'anonymous',
-        margin: styleOptions.logoMargin ?? 5,
-        imageSize: styleOptions.logoSize || 0.3,
-      },
-      image: processedLogoUrl,
-    });
-
-    if (containerRef.current) {
-      containerRef.current.innerHTML = '';
-      qrCodeRef.current.append(containerRef.current);
-      // Apply smooth roundness after initial render
-      applyRoundness();
-    }
-
-    const container = containerRef.current;
-    return () => {
-      if (container) {
-        container.innerHTML = '';
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only initialization
-  }, []);
-
-  // Update QR code when options change
-  useEffect(() => {
-    if (qrCodeRef.current) {
-      qrCodeRef.current.update({
-        data: displayValue,
-        dotsOptions,
-        cornersSquareOptions,
-        cornersDotOptions,
-        backgroundOptions: {
-          color: styleOptions.backgroundColor,
-        },
-        qrOptions: {
-          errorCorrectionLevel: styleOptions.errorCorrectionLevel,
-        },
-        imageOptions: {
-          crossOrigin: 'anonymous',
-          margin: styleOptions.logoMargin ?? 5,
-          imageSize: styleOptions.logoSize || 0.3,
-        },
-        image: processedLogoUrl || undefined,
-      });
-      // Apply smooth roundness after update
-      applyRoundness();
-    }
-  }, [displayValue, styleOptions, dotsOptions, cornersSquareOptions, cornersDotOptions, processedLogoUrl, qrRoundness, qrPattern, applyRoundness]);
+  }, [activeType, getCurrentData, styleOptions, qrValue, addEntry, updateThumbnail, qrCodeRef]);
 
   const frameStyle = styleOptions.frameStyle || 'none';
   const hasFrame = frameStyle !== 'none';

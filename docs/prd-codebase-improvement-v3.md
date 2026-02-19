@@ -1,7 +1,7 @@
 # PRD: Codebase Improvement v3
 
 **Date:** 2026-02-19
-**Status:** Quick Wins + Security & Stability Complete (items 1-5 in d3972ac, items 7/10/13 in next commit)
+**Status:** Complete — all actionable items shipped (1-5, 6, 7, 9, 10, 12, 13)
 **Depends on:** Codebase Improvement v2 (committed 88718a0)
 
 ---
@@ -76,17 +76,13 @@ Wrap with `if (import.meta.env.DEV)` guard.
 
 ## Medium Effort (Future Sessions)
 
-### 6. Consolidate QRPreview/QRRenderer
+### 6. Consolidate QRPreview/QRRenderer ✅
 **Impact:** ~200 lines deduplication
 **Effort:** Medium
 
-Both `QRPreview.tsx` and `qr/QRRenderer.tsx` independently create `QRCodeStyling` instances with identical config. `TemplateWizardPreview.tsx` also duplicates this pattern.
+~~Both `QRPreview.tsx` and `qr/QRRenderer.tsx` independently create `QRCodeStyling` instances with identical config. `TemplateWizardPreview.tsx` also duplicates this pattern.~~
 
-**Approach:** Extract shared `useQRCodeInstance()` hook that handles:
-- Logo processing with shape mask
-- QR element options with gradient support
-- QRCodeStyling initialization and updates
-- Container mounting/cleanup
+**Done:** Extracted `useQRCodeInstance()` hook (`src/hooks/useQRCodeInstance.ts`) handling logo processing, gradient element options, QR init/update/cleanup, and roundness post-processing. Refactored `QRPreview.tsx` and `TemplateWizardPreview.tsx` to use it. Deleted unused `QRRenderer.tsx` (zero imports). Also replaced all `innerHTML = ''` with safe DOM cleanup in the hook.
 
 ### 7. Add ErrorBoundaries to Protected Routes ✅
 **Impact:** Better UX on crashes (graceful degradation vs white screen)
@@ -101,11 +97,12 @@ Both `QRPreview.tsx` and `qr/QRRenderer.tsx` independently create `QRCodeStyling
 
 API routes cast `req.body` without runtime validation. Add validation at route boundaries.
 
-### 9. Optimize QR Store Selectors
+### 9. Optimize QR Store Selectors ✅
 **Impact:** Fewer unnecessary re-renders
 **Effort:** Medium
 
-`QRPreview` destructures 13 fields from qrStore — any field change triggers a re-render of the 513-line component. Use granular selectors or `useShallow`.
+~~`QRPreview` destructures 13 fields from qrStore — any field change triggers a re-render of the 513-line component. Use granular selectors or `useShallow`.~~
+**Done:** Added `useShallow` selectors to all 22 multi-property `useQRStore()` consumers. Converted 4 single-property consumers to simple selectors. Zero bare `useQRStore()` calls remain.
 
 ### 10. Add Escape Function Tests ✅
 **Impact:** Security confidence
@@ -121,8 +118,9 @@ API routes cast `req.body` without runtime validation. Add validation at route b
 ### 11. Implement API Rate Limiting
 Infrastructure ready (Upstash Redis + `rate_limit_per_day` on API keys). Needs middleware in API routes.
 
-### 12. Replace `innerHTML = ''` with Safe DOM Cleanup
-7 occurrences across QRPreview, QRRenderer, TemplateWizardPreview. Replace with `while (el.firstChild) el.removeChild(el.firstChild)`.
+### 12. Replace `innerHTML = ''` with Safe DOM Cleanup ✅
+~~7 occurrences across QRPreview, QRRenderer, TemplateWizardPreview. Replace with `while (el.firstChild) el.removeChild(el.firstChild)`.~~
+**Done:** All 6 occurrences eliminated by consolidating QR logic into `useQRCodeInstance()` hook which uses safe `clearChildren()` helper. `QRRenderer.tsx` deleted (unused).
 
 ### 13. Security: Tighten CORS + Fix Open Redirect ✅
 ~~Redirect handler (`/api/r/[shortCode].ts`) doesn't validate `destination_url` protocol. Could redirect to `javascript:` or `data:` URLs.~~
@@ -150,3 +148,13 @@ After security & stability sprint (items 7/10/13):
 - [x] Open redirect rejects `javascript:`, `data:`, and malformed URLs
 - [x] ErrorBoundary catches route-level errors with retry/home buttons
 - [x] 24 new direct escape function tests pass
+
+After medium effort sprint (items 6/9/12):
+- [x] `useQRCodeInstance()` hook extracts shared QR logic from QRPreview + TemplateWizardPreview
+- [x] Unused `QRRenderer.tsx` deleted
+- [x] All 6 `innerHTML = ''` replaced with safe DOM cleanup via `clearChildren()`
+- [x] All 26 `useQRStore()` consumers use `useShallow` selectors or simple selectors
+- [x] Zero bare `useQRStore()` calls remain
+- [x] `npm run typecheck` — clean
+- [x] `npm run test:run` — 378 tests pass
+- [x] `npm run build` — succeeds
