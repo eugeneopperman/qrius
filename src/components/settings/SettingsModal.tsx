@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { X, Settings } from 'lucide-react';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { BrandedUrlSettings } from './BrandedUrlSettings';
 
 interface SettingsModalProps {

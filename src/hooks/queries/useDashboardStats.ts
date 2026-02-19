@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { useAuthStore } from '../../stores/authStore';
-import type { QRCode } from '../../types/database';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/stores/authStore';
+import type { QRCode } from '@/types/database';
 
 interface DashboardStats {
   qrCodesCount: number;

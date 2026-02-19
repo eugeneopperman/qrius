@@ -1,8 +1,8 @@
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Input } from '../ui/Input';
 
-import { validatePhone } from '../../utils/validators';
-import { useFormField } from '../../hooks/useFormField';
+import { validatePhone } from '@/utils/validators';
+import { useFormField } from '@/hooks/useFormField';
 
 export function PhoneForm() {
   const { phoneData, setPhoneData } = useQRStore();

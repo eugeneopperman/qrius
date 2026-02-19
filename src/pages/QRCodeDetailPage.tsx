@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { Button } from '../components/ui/Button';
-import { supabase } from '../lib/supabase';
 import { toast } from '../stores/toastStore';
-import type { QRCode, ScanEvent } from '../types/database';
+import { useQRCodeDetail } from '../hooks/queries/useQRCodeDetail';
 import {
   ArrowLeft,
   ExternalLink,
@@ -20,53 +18,10 @@ import {
 
 export default function QRCodeDetailPage() {
   const { id } = useParams({ from: '/qr-codes/$id' });
-  const [qrCode, setQrCode] = useState<QRCode | null>(null);
-  const [recentScans, setRecentScans] = useState<ScanEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading } = useQRCodeDetail(id);
 
-  useEffect(() => {
-    async function fetchQRCode() {
-      if (!id) return;
-
-      setIsLoading(true);
-
-      try {
-        // Fetch QR code
-        const { data: qrData, error: qrError } = await supabase
-          .from('qr_codes')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (qrError) {
-          console.error('Error fetching QR code:', qrError);
-          return;
-        }
-
-        setQrCode(qrData);
-
-        // Fetch recent scans
-        const { data: scansData, error: scansError } = await supabase
-          .from('scan_events')
-          .select('*')
-          .eq('qr_code_id', id)
-          .order('scanned_at', { ascending: false })
-          .limit(10);
-
-        if (scansError) {
-          console.error('Error fetching scans:', scansError);
-        } else {
-          setRecentScans(scansData || []);
-        }
-      } catch (error) {
-        console.error('Error fetching QR code:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchQRCode();
-  }, [id]);
+  const qrCode = data?.qrCode ?? null;
+  const recentScans = data?.recentScans ?? [];
 
   const handleCopyUrl = async () => {
     if (!qrCode) return;
@@ -74,8 +29,7 @@ export default function QRCodeDetailPage() {
     try {
       await navigator.clipboard.writeText(trackingUrl);
       toast.success('Tracking URL copied to clipboard');
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+    } catch {
       toast.error('Failed to copy to clipboard');
     }
   };

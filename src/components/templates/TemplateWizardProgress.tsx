@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Check } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import type { WizardStep } from '../../stores/templateStore';
+import { cn } from '@/utils/cn';
+import type { WizardStep } from '@/stores/templateStore';
 
 interface TemplateWizardProgressProps {
   currentStep: WizardStep;

@@ -1,8 +1,8 @@
 import { memo, useState } from 'react';
 import { Edit2, Copy, Trash2, Check, MoreVertical } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { useGoogleFont, getFontFamily } from '../../hooks/useGoogleFont';
-import type { BrandTemplate } from '../../types';
+import { cn } from '@/utils/cn';
+import { useGoogleFont, getFontFamily } from '@/hooks/useGoogleFont';
+import type { BrandTemplate } from '@/types';
 
 interface TemplateCardProps {
   template: BrandTemplate;

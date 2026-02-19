@@ -1,5 +1,5 @@
 import { forwardRef, useId, type InputHTMLAttributes } from 'react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 
 /**
  * Props for the Input component.

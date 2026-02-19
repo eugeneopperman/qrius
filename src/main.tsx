@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
-import './i18n';
 import { router } from './router';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { CookieConsent } from './components/legal';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, CheckCircle, XCircle, Info, AlertTriangle } from 'lucide-react';
-import { useToastStore, type Toast as ToastType, type ToastType as ToastVariant } from '../../stores/toastStore';
-import { cn } from '../../utils/cn';
+import { useToastStore, type Toast as ToastType, type ToastType as ToastVariant } from '@/stores/toastStore';
+import { cn } from '@/utils/cn';
 
 const icons: Record<ToastVariant, React.ReactNode> = {
   success: <CheckCircle className="w-5 h-5" />,

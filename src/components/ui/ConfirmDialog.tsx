@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import { Button } from './Button';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface ConfirmDialogProps {
   isOpen: boolean;

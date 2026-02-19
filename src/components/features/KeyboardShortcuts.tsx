@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { X, Keyboard } from 'lucide-react';
-import { shortcuts } from '../../hooks/useKeyboardShortcuts';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { shortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface KeyboardShortcutsProps {
   isOpen: boolean;

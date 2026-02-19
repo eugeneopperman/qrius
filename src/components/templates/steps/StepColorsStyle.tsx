@@ -1,11 +1,11 @@
 import { memo, useCallback } from 'react';
 import { Palette, Square, Circle } from 'lucide-react';
-import { ColorPicker } from '../../ui/ColorPicker';
-import { Slider } from '../../ui/Slider';
-import { InlineToggle } from '../../ui/Toggle';
-import { cn } from '../../../utils/cn';
-import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '../../../config/constants';
-import type { BrandTemplateStyle, GradientOptions, GradientType, QRPattern } from '../../../types';
+import { ColorPicker } from '@/components/ui/ColorPicker';
+import { Slider } from '@/components/ui/Slider';
+import { InlineToggle } from '@/components/ui/Toggle';
+import { cn } from '@/utils/cn';
+import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '@/config/constants';
+import type { BrandTemplateStyle, GradientOptions, GradientType, QRPattern } from '@/types';
 
 interface StepColorsStyleProps {
   style: BrandTemplateStyle;

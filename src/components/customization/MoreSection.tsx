@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Sparkles, Palette, Printer, ChevronRight } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 import { SmartPresets } from '../features/SmartPresets';
 import { PrintTemplates } from '../features/PrintTemplates';
 import { TemplateList } from '../templates/TemplateList';

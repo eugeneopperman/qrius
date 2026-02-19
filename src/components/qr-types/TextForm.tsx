@@ -1,6 +1,6 @@
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 
-import { validateText } from '../../utils/validators';
+import { validateText } from '@/utils/validators';
 import { Textarea } from '../ui/Textarea';
 
 export function TextForm() {

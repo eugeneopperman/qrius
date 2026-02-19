@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useSettingsStore } from '../../stores/settingsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { Toggle } from '../ui/Toggle';
@@ -13,9 +13,9 @@ import {
   AlertCircle,
   Loader2,
 } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { shortenWithRebrandly, shortenWithShortIo } from '../../utils/urlShorteners';
-import type { BrandedUrlProvider } from '../../types';
+import { cn } from '@/utils/cn';
+import { shortenWithRebrandly, shortenWithShortIo } from '@/utils/urlShorteners';
+import type { BrandedUrlProvider } from '@/types';
 
 const providerOptions = [
   { value: 'none', label: 'None (use generic shorteners)' },

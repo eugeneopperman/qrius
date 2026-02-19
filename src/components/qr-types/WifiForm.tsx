@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 
-import { validateSsid, validateWifiPassword } from '../../utils/validators';
+import { validateSsid, validateWifiPassword } from '@/utils/validators';
 
 const encryptionOptions = [
   { value: 'WPA', label: 'WPA/WPA2/WPA3' },

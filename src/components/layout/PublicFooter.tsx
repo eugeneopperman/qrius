@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Keyboard } from 'lucide-react';
-import { useUIStore } from '../../stores/uiStore';
+import { useUIStore } from '@/stores/uiStore';
 
 interface PublicFooterProps {
   className?: string;

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 
-import { validateEmail, validatePhone, validateUrl, validateName } from '../../utils/validators';
+import { validateEmail, validatePhone, validateUrl, validateName } from '@/utils/validators';
 
 export function VCardForm() {
   const { vcardData, setVcardData } = useQRStore();

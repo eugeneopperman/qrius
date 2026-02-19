@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAuthStore } from '../../stores/authStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Loader2 } from 'lucide-react';
 
 interface AuthGuardProps {

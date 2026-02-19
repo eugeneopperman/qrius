@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Trash2, Clock, RotateCcw, Undo2, BarChart3, Loader2 } from 'lucide-react';
-import { useHistoryStore, getTypeLabel, getDataSummary } from '../../stores/historyStore';
-import { useQRStore } from '../../stores/qrStore';
-import { toast } from '../../stores/toastStore';
+import { useHistoryStore, getTypeLabel, getDataSummary } from '@/stores/historyStore';
+import { useQRStore } from '@/stores/qrStore';
+import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { getTrackableQR } from '../../utils/qrTrackingApi';
-import { useSettingsStore } from '../../stores/settingsStore';
-import type { HistoryEntry } from '../../types';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { getTrackableQR } from '@/utils/qrTrackingApi';
+import { useSettingsStore } from '@/stores/settingsStore';
+import type { HistoryEntry } from '@/types';
 
 interface HistoryModalProps {
   isOpen: boolean;

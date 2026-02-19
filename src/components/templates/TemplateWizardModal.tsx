@@ -1,17 +1,17 @@
 import { useRef, useCallback, useMemo } from 'react';
 import { X, ChevronLeft, ChevronRight, Save } from 'lucide-react';
-import { useTemplateStore, selectIsEditing } from '../../stores/templateStore';
-import { toast } from '../../stores/toastStore';
+import { useTemplateStore, selectIsEditing } from '@/stores/templateStore';
+import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { cn } from '../../utils/cn';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { cn } from '@/utils/cn';
 import { TemplateWizardProgress } from './TemplateWizardProgress';
 import { TemplateWizardPreview } from './TemplateWizardPreview';
 import { StepBasicInfo } from './steps/StepBasicInfo';
 import { StepColorsStyle } from './steps/StepColorsStyle';
 import { StepFrameTypography } from './steps/StepFrameTypography';
 import { StepLogoSave } from './steps/StepLogoSave';
-import type { BrandTemplateStyle } from '../../types';
+import type { BrandTemplateStyle } from '@/types';
 
 // Default values for required BrandTemplateStyle fields
 const DEFAULT_TEMPLATE_STYLE: BrandTemplateStyle = {

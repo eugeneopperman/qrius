@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { useAuthStore } from '../../stores/authStore';
-import { toast } from '../../stores/toastStore';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { useAuthStore } from '@/stores/authStore';
+import { toast } from '@/stores/toastStore';
 import { Loader2, Camera, Trash2 } from 'lucide-react';
 
 export function ProfileSettingsContent() {

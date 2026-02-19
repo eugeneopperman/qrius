@@ -31,9 +31,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
-        name: 'QR Code Generator',
-        short_name: 'QR Gen',
-        description: 'Create beautiful, customizable QR codes instantly',
+        name: 'Qrius',
+        short_name: 'Qrius',
+        description: 'Create beautiful, customizable QR codes with analytics',
         theme_color: '#4f46e5',
         background_color: '#ffffff',
         display: 'standalone',

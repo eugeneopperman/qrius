@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { useQRStore } from '../../stores/qrStore';
-import { useUrlShortener } from '../../hooks/useUrlShortener';
-import { useQRTracking } from '../../hooks/useQRTracking';
-import { useSettingsStore } from '../../stores/settingsStore';
+import { useQRStore } from '@/stores/qrStore';
+import { useUrlShortener } from '@/hooks/useUrlShortener';
+import { useQRTracking } from '@/hooks/useQRTracking';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Toggle } from '../ui/Toggle';
 import { Shrink, Loader2, Check, AlertCircle, Copy, Link2, Sparkles, BarChart3 } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { validateUrl } from '../../utils/validators';
-import { useFormField } from '../../hooks/useFormField';
+import { cn } from '@/utils/cn';
+import { validateUrl } from '@/utils/validators';
+import { useFormField } from '@/hooks/useFormField';
 
 export function UrlForm() {
   const { urlData, setUrlData } = useQRStore();
@@ -77,8 +77,8 @@ export function UrlForm() {
           clearTimeout(copiedTimeoutRef.current);
         }
         copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy to clipboard:', err);
+      } catch {
+        // Clipboard API not available
       }
     }
   };
@@ -122,8 +122,8 @@ export function UrlForm() {
           clearTimeout(trackingCopiedTimeoutRef.current);
         }
         trackingCopiedTimeoutRef.current = setTimeout(() => setTrackingCopied(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy to clipboard:', err);
+      } catch {
+        // Clipboard API not available
       }
     }
   };

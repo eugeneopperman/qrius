@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { QrCode, Moon, Sun, ArrowLeft } from 'lucide-react';
-import { useThemeStore } from '../../stores/themeStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { PublicFooter } from '../layout/PublicFooter';
 
 interface LegalPageLayoutProps {

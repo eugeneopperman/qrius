@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 
 /**
  * Props for the Toggle component.

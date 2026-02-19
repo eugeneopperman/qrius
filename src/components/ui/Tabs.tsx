@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useRef, useEffect, useCallback, type ReactNode, isValidElement, type ReactElement } from 'react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 
 // Context for tab state
 interface TabContextValue {

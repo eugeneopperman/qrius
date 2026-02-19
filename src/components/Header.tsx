@@ -1,5 +1,4 @@
-import { QrCode, Sun, Moon, Palette, LogIn, MoreVertical, Clock, Settings, Keyboard, Check } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { QrCode, Sun, Moon, Palette, LogIn, MoreVertical, Clock, Settings, Keyboard } from 'lucide-react';
 import { useHistoryStore } from '../stores/historyStore';
 import { useThemeStore } from '../stores/themeStore';
 import { useTemplateStore } from '../stores/templateStore';
@@ -8,8 +7,6 @@ import { Dropdown } from './ui/Dropdown';
 import { UserButton } from './auth/UserButton';
 import { AuthModal } from './auth/AuthModal';
 import { useState } from 'react';
-import { supportedLanguages, type SupportedLanguage } from '../i18n';
-import i18n from '../i18n';
 
 interface HeaderProps {
   onHistoryClick?: () => void;
@@ -54,7 +51,6 @@ function OverflowMenuItem({
 }
 
 export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: HeaderProps) {
-  const { t } = useTranslation();
   const { resolvedTheme, toggleTheme } = useThemeStore();
   const isDark = resolvedTheme === 'dark';
   const historyCount = useHistoryStore((state) => state.entries.length);
@@ -62,12 +58,6 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
   const openWizard = useTemplateStore((state) => state.openWizard);
   const { user, isInitialized } = useAuthStore();
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  const currentLanguage = (i18n.language?.split('-')[0] ?? 'en') as SupportedLanguage;
-
-  const changeLanguage = (lang: SupportedLanguage) => {
-    i18n.changeLanguage(lang);
-  };
 
   return (
     <header className="glass-header sticky top-0 z-50">
@@ -89,10 +79,10 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
             <button
               onClick={() => openWizard()}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-full transition-colors"
-              aria-label={t('nav.templates', 'Templates')}
+              aria-label="Templates"
             >
               <Palette className="w-3.5 h-3.5" />
-              {t('nav.templates', 'Templates')}
+              Templates
               {templateCount > 0 && (
                 <span className="ml-0.5 px-1.5 py-0.5 text-[10px] bg-indigo-600 dark:bg-indigo-500 text-white rounded-full">
                   {templateCount}
@@ -116,7 +106,7 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
                 <button
                   onClick={toggle}
                   className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
-                  aria-label={t('nav.more', 'More options')}
+                  aria-label="More options"
                 >
                   <MoreVertical className="w-5 h-5" />
                 </button>
@@ -128,7 +118,7 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
                   <div className="sm:hidden">
                     <OverflowMenuItem
                       icon={Palette}
-                      label={t('nav.templates', 'Templates')}
+                      label="Templates"
                       badge={templateCount}
                       onClick={() => { close(); openWizard(); }}
                     />
@@ -136,47 +126,23 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
 
                   <OverflowMenuItem
                     icon={Clock}
-                    label={t('nav.history', 'History')}
+                    label="History"
                     badge={historyCount}
                     onClick={() => { close(); onHistoryClick?.(); }}
                   />
 
                   <OverflowMenuItem
                     icon={Settings}
-                    label={t('nav.settings', 'Settings')}
+                    label="Settings"
                     onClick={() => { close(); onSettingsClick?.(); }}
                   />
 
                   <OverflowMenuItem
                     icon={Keyboard}
-                    label={t('nav.shortcuts', 'Shortcuts')}
+                    label="Shortcuts"
                     kbd="?"
                     onClick={() => { close(); onShortcutsClick?.(); }}
                   />
-
-                  {/* Divider */}
-                  <div className="my-1 border-t border-gray-200 dark:border-gray-700" />
-
-                  {/* Language section */}
-                  <div className="px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                    {t('nav.language', 'Language')}
-                  </div>
-                  {(Object.entries(supportedLanguages) as [SupportedLanguage, { name: string; nativeName: string }][]).map(
-                    ([code, { nativeName }]) => (
-                      <button
-                        key={code}
-                        onClick={() => { changeLanguage(code); close(); }}
-                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <span className="w-4 h-4 flex items-center justify-center">
-                          {code === currentLanguage && (
-                            <Check className="w-3.5 h-3.5 text-orange-500" />
-                          )}
-                        </span>
-                        <span>{nativeName}</span>
-                      </button>
-                    )
-                  )}
                 </div>
               )}
             </Dropdown>

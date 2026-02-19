@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { GOOGLE_FONTS, FONT_CATEGORY_LABELS, FONT_WEIGHT_LABELS, getFontWeights } from '../../config/fonts';
-import { useGoogleFont, getFontFamily, preloadFonts } from '../../hooks/useGoogleFont';
-import type { GoogleFontCategory } from '../../types';
+import { cn } from '@/utils/cn';
+import { GOOGLE_FONTS, FONT_CATEGORY_LABELS, FONT_WEIGHT_LABELS, getFontWeights } from '@/config/fonts';
+import { useGoogleFont, getFontFamily, preloadFonts } from '@/hooks/useGoogleFont';
+import type { GoogleFontCategory } from '@/types';
 
 export interface GoogleFontSelectorProps {
   /** Currently selected font name */

@@ -1,12 +1,12 @@
-import { useWizardStore } from '../../../stores/wizardStore';
-import { ColorSection } from '../../customization/ColorSection';
-import { LogoSection } from '../../customization/LogoSection';
-import { StyleSection } from '../../customization/StyleSection';
-import { FrameSection } from '../../customization/FrameSection';
-import { MoreSection } from '../../customization/MoreSection';
-import { TemplatePickerSection } from '../../customization/TemplatePickerSection';
-import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '../../ui/Tabs';
-import { Button } from '../../ui/Button';
+import { useWizardStore } from '@/stores/wizardStore';
+import { ColorSection } from '@/components/customization/ColorSection';
+import { LogoSection } from '@/components/customization/LogoSection';
+import { StyleSection } from '@/components/customization/StyleSection';
+import { FrameSection } from '@/components/customization/FrameSection';
+import { MoreSection } from '@/components/customization/MoreSection';
+import { TemplatePickerSection } from '@/components/customization/TemplatePickerSection';
+import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@/components/ui/Tabs';
+import { Button } from '@/components/ui/Button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Layers, Palette, Image, Shapes, Frame, Sparkles } from 'lucide-react';
 

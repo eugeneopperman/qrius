@@ -13,7 +13,7 @@ import {
   QrCode,
   Loader2,
 } from 'lucide-react';
-import type { QRCode } from '../../types/database';
+import type { QRCode } from '@/types/database';
 
 type ViewMode = 'grid' | 'list';
 type SortField = 'created_at' | 'total_scans' | 'name';

@@ -8,8 +8,8 @@ import {
   ScanLine,
   Fingerprint,
 } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import type { FrameStyle, FrameFontSize, FrameFontFamily, FrameIcon, QRStyleOptions } from '../../types';
+import { cn } from '@/utils/cn';
+import type { FrameStyle, FrameFontSize, FrameFontFamily, FrameIcon, QRStyleOptions } from '@/types';
 
 // Icon mapping for frame labels
 const frameIconComponents: Record<FrameIcon, React.ComponentType<{ className?: string }> | null> = {

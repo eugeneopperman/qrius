@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 
 interface DropdownProps {
   trigger: (props: { isOpen: boolean; toggle: () => void }) => ReactNode;

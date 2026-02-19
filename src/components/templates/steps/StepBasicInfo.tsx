@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { FileText, Sparkles } from 'lucide-react';
-import { Input } from '../../ui/Input';
-import { cn } from '../../../utils/cn';
+import { Input } from '@/components/ui/Input';
+import { cn } from '@/utils/cn';
 
 interface StepBasicInfoProps {
   name: string;

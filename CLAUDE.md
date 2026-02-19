@@ -24,13 +24,20 @@ src/
 │   ├── auth/              # SignIn, SignUp, AuthModal, UserButton
 │   ├── customization/     # Color, Logo, Style, Frame sections
 │   ├── dashboard/         # DashboardLayout, Sidebar, QRCodeList
-│   ├── features/          # ScannabilityScore, QRReader, BrandKit
+│   ├── features/          # ScannabilityScore, QRReader, PrintTemplates
 │   ├── qr-types/          # Form components for each QR type
 │   ├── settings/          # SettingsModal, BrandedUrlSettings
 │   ├── templates/         # TemplateWizard, TemplateCard
 │   ├── wizard/            # Main QR creation wizard
-│   └── ui/                # Button, Input, Toast, etc.
+│   ├── layout/            # PublicFooter
+│   ├── onboarding/        # OnboardingWizard, steps
+│   ├── qr/                # QRRenderer, QRActions, QRPreview
+│   ├── legal/             # LegalPageLayout
+│   └── ui/                # Button, Input, Toast, Tabs, etc.
+├── config/                # constants.ts (app version, limits, palettes)
+├── data/                  # QR type definitions, use-case templates
 ├── hooks/                 # useUrlShortener, useKeyboardShortcuts
+│   └── queries/           # TanStack Query hooks (useDashboardStats, useQRCodeDetail, etc.)
 ├── lib/                   # Supabase client configuration
 ├── pages/                 # Route pages (Dashboard, Settings, etc.)
 │   └── settings/          # Profile, Team, Billing, API Keys pages
@@ -66,8 +73,7 @@ api/
 7. **Subscription Billing**: Free/Pro/Business tiers via Stripe
 8. **Brand Templates**: Save, apply, export/import style presets
 9. **Template Wizard**: Step-by-step QR creation with use-case templates
-10. **Internationalization**: i18n support with English/Spanish/French/German
-11. **Testing**: Vitest unit tests, Playwright E2E, Storybook component docs
+10. **Testing**: Vitest unit tests (162 passing)
 12. **PWA**: Offline support, installable app
 13. **Keyboard Shortcuts**: Ctrl+S (download), Ctrl+C (copy), etc.
 
@@ -147,6 +153,9 @@ Copy `.env.example` to `.env.local` and configure:
 - **Env vars**: Must be set in Vercel dashboard (Settings > Environment Variables) — `.env.local` is local only
 
 ## Development Notes
+- **Import convention**: Use `@/` path alias for all imports from `src/` (e.g., `@/stores/authStore`). Single-level `../` is acceptable within the same directory group.
+- **TanStack Query pattern**: Server state fetched via custom hooks in `src/hooks/queries/`. Reference: `useDashboardStats.ts`, `useOrganizationQRCodes.ts`, `useQRCodeDetail.ts`, `useTeamMembers.ts`, `useApiKeys.ts`. Use `useQuery` for reads, `useMutation` + `queryClient.invalidateQueries` for writes.
+- **Global modals**: Driven by `uiStore.ts` (Zustand), rendered in `RootLayout` (`router.tsx`).
 - Auth state managed in `authStore` with Supabase session sync
 - `fetchProfile()` auto-provisions user/org/membership if DB trigger hasn't run
 - `checkSupabaseConnection()` in `src/lib/supabase.ts` detects paused projects
@@ -157,14 +166,12 @@ Copy `.env.example` to `.env.local` and configure:
 - QR codes without user/org ownership are public (backward compatibility)
 
 ## Testing
-- **Unit Tests**: 166 tests passing with Vitest
-- **E2E Tests**: Playwright for critical user flows
-- **Component Docs**: Storybook for UI component documentation
-- **Coverage**: Core utilities, stores, and components
+- **Unit Tests**: 354 tests passing across 13 test files (Vitest)
+- **Test command**: `npm run test:run` (single run) or `npm run test` (watch mode)
+- **Coverage**: Utilities (cn, validators, scannability), stores (auth, qr, template, theme, toast, wizard), UI components (Button, Input), hooks (useClickOutside, useDebounce)
 
 ## Known Issues
 - Mobile testing requires network access (use `npm run dev -- --host 0.0.0.0`)
 - PWA icons are placeholder solid colors
 - API rate limiting not yet implemented at application level
 - Stripe integration requires configuration (works without for dev)
-- API serverless functions: `.js` extensions added for `--moduleResolution node16` (fixed in `f3f3b12`)

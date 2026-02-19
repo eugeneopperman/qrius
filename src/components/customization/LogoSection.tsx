@@ -1,12 +1,12 @@
 import { useRef, useState, useCallback, memo } from 'react';
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Upload, X, AlertCircle, Square, Circle } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
 import { SelectButtonGroup } from '../ui/SelectButtonGroup';
-import { LOGO_CONFIG } from '../../config/constants';
-import type { LogoShape } from '../../types';
+import { LOGO_CONFIG } from '@/config/constants';
+import type { LogoShape } from '@/types';
 
 export const LogoSection = memo(function LogoSection() {
   const { styleOptions, setStyleOptions } = useQRStore();

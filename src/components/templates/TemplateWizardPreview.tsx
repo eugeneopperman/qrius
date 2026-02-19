@@ -1,17 +1,17 @@
 import { useEffect, useRef, useMemo, memo, useState, useCallback } from 'react';
 import QRCodeStyling from 'qr-code-styling';
-import { cn } from '../../utils/cn';
-import { createQRElementOptions } from '../../utils/gradientUtils';
-import { useGoogleFont, getFontFamily } from '../../hooks/useGoogleFont';
-import { applyLogoMask } from '../../utils/logoMask';
+import { cn } from '@/utils/cn';
+import { createQRElementOptions } from '@/utils/gradientUtils';
+import { useGoogleFont, getFontFamily } from '@/hooks/useGoogleFont';
+import { applyLogoMask } from '@/utils/logoMask';
 import {
   applyRoundnessToQRSvg,
   getDotTypeForPattern,
   shouldApplyRoundnessPostProcessing,
   getCornerSquareTypeForRoundness,
   getCornerDotTypeForRoundness,
-} from '../../utils/qrRoundness';
-import type { BrandTemplateStyle } from '../../types';
+} from '@/utils/qrRoundness';
+import type { BrandTemplateStyle } from '@/types';
 
 interface TemplateWizardPreviewProps {
   style: BrandTemplateStyle;
@@ -50,8 +50,7 @@ export const TemplateWizardPreview = memo(function TemplateWizardPreview({
 
     applyLogoMask(style.logoUrl, shape)
       .then(setProcessedLogoUrl)
-      .catch((error) => {
-        console.error('Failed to apply logo mask:', error);
+      .catch(() => {
         setProcessedLogoUrl(style.logoUrl);
       });
   }, [style.logoUrl, style.logoShape]);

@@ -1,5 +1,5 @@
-import { useQRStore } from '../../../stores/qrStore';
-import { useWizardStore } from '../../../stores/wizardStore';
+import { useQRStore } from '@/stores/qrStore';
+import { useWizardStore } from '@/stores/wizardStore';
 import {
   UrlForm,
   TextForm,
@@ -10,8 +10,8 @@ import {
   VCardForm,
   EventForm,
   LocationForm,
-} from '../../qr-types';
-import { Button } from '../../ui/Button';
+} from '@/components/qr-types';
+import { Button } from '@/components/ui/Button';
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,7 +26,7 @@ import {
   Calendar,
   MapPin,
 } from 'lucide-react';
-import type { QRCodeType } from '../../../types';
+import type { QRCodeType } from '@/types';
 
 const typeConfig: Record<QRCodeType, { label: string; icon: React.ElementType }> = {
   url: { label: 'URL', icon: Link },

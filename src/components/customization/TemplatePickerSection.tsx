@@ -1,10 +1,10 @@
-import { useTemplateStore } from '../../stores/templateStore';
-import { useQRStore } from '../../stores/qrStore';
-import { toast } from '../../stores/toastStore';
+import { useTemplateStore } from '@/stores/templateStore';
+import { useQRStore } from '@/stores/qrStore';
+import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 import { Plus, Check, Palette } from 'lucide-react';
-import type { BrandTemplate } from '../../types';
+import type { BrandTemplate } from '@/types';
 
 export function TemplatePickerSection() {
   const { templates, applyTemplate, openWizard } = useTemplateStore();

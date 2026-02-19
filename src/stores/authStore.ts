@@ -96,7 +96,6 @@ export const useAuthStore = create<AuthState>()(
           const { data: { session }, error } = await supabase.auth.getSession();
 
           if (error) {
-            console.error('Error getting session:', error);
             set({ isLoading: false, isInitialized: true });
             return;
           }
@@ -304,7 +303,6 @@ export const useAuthStore = create<AuthState>()(
 
           // Profile not found — auto-provision (handles cases where the DB trigger isn't set up)
           if (error && error.code === 'PGRST116') {
-            console.warn('User profile not found, auto-provisioning...');
 
             const userName =
               user.user_metadata?.name ??
@@ -423,15 +421,11 @@ export const useAuthStore = create<AuthState>()(
             const defaultOrg = organizations[0];
 
             // Fetch plan limits for the default organization
-            const { data: limits, error: limitsError } = await supabase
+            const { data: limits } = await supabase
               .from('plan_limits')
               .select('*')
               .eq('plan', defaultOrg.organization.plan)
               .single();
-
-            if (limitsError) {
-              console.error('Error fetching plan limits:', limitsError);
-            }
 
             set({
               currentOrganization: defaultOrg.organization,
@@ -449,21 +443,14 @@ export const useAuthStore = create<AuthState>()(
         const { organizations } = get();
         const membership = organizations.find((m) => m.organization.id === orgId);
 
-        if (!membership) {
-          console.error('Organization not found');
-          return;
-        }
+        if (!membership) return;
 
-        // Fetch plan limits with error handling
-        const { data: limits, error: limitsError } = await supabase
+        // Fetch plan limits
+        const { data: limits } = await supabase
           .from('plan_limits')
           .select('*')
           .eq('plan', membership.organization.plan)
           .single();
-
-        if (limitsError) {
-          console.error('Error fetching plan limits:', limitsError);
-        }
 
         set({
           currentOrganization: membership.organization,

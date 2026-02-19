@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { useAuthStore } from '../../stores/authStore';
-import { supabase } from '../../lib/supabase';
-import { toast } from '../../stores/toastStore';
-import type { OrganizationMember, User, OrgRole } from '../../types/database';
+import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { useAuthStore } from '@/stores/authStore';
+import { toast } from '@/stores/toastStore';
+import { useTeamMembers, useInviteMember } from '@/hooks/queries/useTeamMembers';
+import type { OrgRole } from '@/types/database';
 import {
   Loader2,
   UserPlus,
@@ -13,10 +13,6 @@ import {
   Shield,
   X,
 } from 'lucide-react';
-
-interface MemberWithUser extends OrganizationMember {
-  user: User;
-}
 
 const roleLabels: Record<OrgRole, string> = {
   owner: 'Owner',
@@ -34,39 +30,8 @@ const roleColors: Record<OrgRole, string> = {
 
 export function TeamSettingsContent() {
   const { currentOrganization, currentRole, user } = useAuthStore();
-  const [members, setMembers] = useState<MemberWithUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: members = [], isLoading } = useTeamMembers();
   const [showInviteModal, setShowInviteModal] = useState(false);
-
-  useEffect(() => {
-    async function fetchMembers() {
-      if (!currentOrganization) return;
-
-      setIsLoading(true);
-
-      try {
-        const { data, error } = await supabase
-          .from('organization_members')
-          .select(`
-            *,
-            user:users(*)
-          `)
-          .eq('organization_id', currentOrganization.id);
-
-        if (error) {
-          console.error('Error fetching members:', error);
-        } else {
-          setMembers(data as MemberWithUser[]);
-        }
-      } catch (error) {
-        console.error('Error fetching members:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchMembers();
-  }, [currentOrganization]);
 
   const canManageTeam = currentRole === 'owner' || currentRole === 'admin';
 
@@ -228,92 +193,25 @@ export default function TeamSettingsPage() {
 }
 
 function InviteMemberModal({ onClose }: { onClose: () => void }) {
-  const { currentOrganization, user } = useAuthStore();
+  const { user } = useAuthStore();
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<OrgRole>('editor');
-  const [isLoading, setIsLoading] = useState(false);
+  const inviteMember = useInviteMember();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!currentOrganization || !user) {
+    if (!user) {
       toast.error('Not authenticated');
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Check if user is already a member
-      const { data: existingMember } = await supabase
-        .from('organization_members')
-        .select('id')
-        .eq('organization_id', currentOrganization.id)
-        .eq('user_id', (
-          await supabase
-            .from('users')
-            .select('id')
-            .eq('email', email.toLowerCase())
-            .single()
-        ).data?.id || '')
-        .single();
-
-      if (existingMember) {
-        toast.error('This user is already a member of the organization');
-        setIsLoading(false);
-        return;
-      }
-
-      // Check if invitation already exists
-      const { data: existingInvite } = await supabase
-        .from('organization_invitations')
-        .select('id')
-        .eq('organization_id', currentOrganization.id)
-        .eq('email', email.toLowerCase())
-        .is('accepted_at', null)
-        .single();
-
-      if (existingInvite) {
-        toast.error('An invitation has already been sent to this email');
-        setIsLoading(false);
-        return;
-      }
-
-      // Generate secure token
-      const token = crypto.randomUUID();
-
-      // Calculate expiry (7 days from now)
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
-
-      // Create invitation
-      const { error: inviteError } = await supabase
-        .from('organization_invitations')
-        .insert({
-          organization_id: currentOrganization.id,
-          email: email.toLowerCase(),
-          role: role,
-          token: token,
-          invited_by: user.id,
-          expires_at: expiresAt.toISOString(),
-        });
-
-      if (inviteError) {
-        console.error('Error creating invitation:', inviteError);
-        toast.error('Failed to send invitation');
-        setIsLoading(false);
-        return;
-      }
-
-      // Note: In production, you would send an email here with the invitation link
-      // For now, we just show success message
+      await inviteMember.mutateAsync({ email, role, invitedBy: user.id });
       toast.success(`Invitation sent to ${email}`);
       onClose();
     } catch (error) {
-      console.error('Error sending invitation:', error);
-      toast.error('Failed to send invitation');
-    } finally {
-      setIsLoading(false);
+      toast.error(error instanceof Error ? error.message : 'Failed to send invitation');
     }
   };
 
@@ -369,8 +267,8 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
             <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? (
+            <Button type="submit" disabled={inviteMember.isPending} className="flex-1">
+              {inviteMember.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Sending...

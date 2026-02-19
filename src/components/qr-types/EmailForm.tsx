@@ -1,8 +1,8 @@
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Input } from '../ui/Input';
 
-import { validateEmail } from '../../utils/validators';
-import { useFormField } from '../../hooks/useFormField';
+import { validateEmail } from '@/utils/validators';
+import { useFormField } from '@/hooks/useFormField';
 
 export function EmailForm() {
   const { emailData, setEmailData } = useQRStore();

@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
-import { useWizardStore } from '../../../stores/wizardStore';
-import { QRPreview, type QRPreviewHandle } from '../../QRPreview';
-import { Button } from '../../ui/Button';
+import { useWizardStore } from '@/stores/wizardStore';
+import { QRPreview, type QRPreviewHandle } from '@/components/QRPreview';
+import { Button } from '@/components/ui/Button';
 import { ArrowLeft, Download, Copy, RotateCcw, Check, Settings2 } from 'lucide-react';
 
 export function StepDownload() {

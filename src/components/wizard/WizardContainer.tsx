@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { useWizardStore } from '../../stores/wizardStore';
+import { useWizardStore } from '@/stores/wizardStore';
 import { WizardProgress } from './WizardProgress';
 import { WizardPreview } from './WizardPreview';
 import { StepType } from './steps/StepType';
@@ -7,7 +7,7 @@ import { StepContent } from './steps/StepContent';
 import { StepCustomize } from './steps/StepCustomize';
 import { StepDownload } from './steps/StepDownload';
 import type { QRPreviewHandle } from '../QRPreview';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 
 interface WizardContainerProps {
   onPreviewRef?: (ref: React.RefObject<QRPreviewHandle | null>) => void;

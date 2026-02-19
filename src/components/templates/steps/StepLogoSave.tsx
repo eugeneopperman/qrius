@@ -1,9 +1,9 @@
 import { memo, useRef, useState, useCallback } from 'react';
 import { Upload, X, AlertCircle, Square, Circle, Save, CheckCircle } from 'lucide-react';
-import { Button } from '../../ui/Button';
-import { cn } from '../../../utils/cn';
-import { LOGO_CONFIG } from '../../../config/constants';
-import type { BrandTemplateStyle, LogoShape } from '../../../types';
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/utils/cn';
+import { LOGO_CONFIG } from '@/config/constants';
+import type { BrandTemplateStyle, LogoShape } from '@/types';
 
 interface StepLogoSaveProps {
   style: BrandTemplateStyle;

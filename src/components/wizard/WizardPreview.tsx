@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
 import { QRPreview, type QRPreviewHandle } from '../QRPreview';
 import { ScannabilityScore } from '../features/ScannabilityScore';
-import { useWizardStore } from '../../stores/wizardStore';
-import { useQRStore } from '../../stores/qrStore';
+import { useWizardStore } from '@/stores/wizardStore';
+import { useQRStore } from '@/stores/qrStore';
 
 const typeLabels: Record<string, string> = {
   url: 'URL QR',

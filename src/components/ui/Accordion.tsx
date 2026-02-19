@@ -1,6 +1,6 @@
 import { useState, useId, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 
 interface AccordionItemProps {
   title: string;

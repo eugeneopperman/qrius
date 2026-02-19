@@ -1,5 +1,5 @@
 import { forwardRef, useId, type InputHTMLAttributes } from 'react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 
 export interface SliderProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'onChange'> {
   /** Label text displayed above the slider */

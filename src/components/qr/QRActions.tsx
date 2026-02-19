@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { toast } from '../../stores/toastStore';
-import { generateIllustratorSVG, downloadSVG } from '../../utils/qrSvgGenerator';
-import type { QRStyleOptions } from '../../types';
+import { toast } from '@/stores/toastStore';
+import { generateIllustratorSVG, downloadSVG } from '@/utils/qrSvgGenerator';
+import type { QRStyleOptions } from '@/types';
 import type QRCodeStyling from 'qr-code-styling';
 
 interface QRActionsProps {
@@ -68,8 +68,7 @@ export function QRActions({
         toast.success(`QR code downloaded as ${format.toUpperCase()}`);
       }
       onSaveToHistory();
-    } catch (error) {
-      console.error('Failed to download:', error);
+    } catch {
       toast.error('Failed to download QR code. Please try again.');
     }
     setShowFormatMenu(false);
@@ -114,8 +113,7 @@ export function QRActions({
       reader.readAsDataURL(rawData);
 
       onSaveToHistory();
-    } catch (error) {
-      console.error('Failed to generate PDF:', error);
+    } catch {
       toast.error('Failed to generate PDF. Please try again.');
       setIsDownloading(false);
     }
@@ -141,8 +139,7 @@ export function QRActions({
       } else {
         toast.error('Failed to copy QR code. Please try again.');
       }
-    } catch (error) {
-      console.error('Failed to copy:', error);
+    } catch {
       toast.error('Failed to copy to clipboard. Your browser may not support this feature.');
     }
   };

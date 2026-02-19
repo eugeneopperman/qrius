@@ -1,11 +1,11 @@
 import { memo, useCallback } from 'react';
 import { Frame, Type } from 'lucide-react';
-import { Input } from '../../ui/Input';
-import { Slider } from '../../ui/Slider';
-import { GoogleFontSelector } from '../../ui/GoogleFontSelector';
-import { cn } from '../../../utils/cn';
-import { FRAME_CONFIG } from '../../../config/constants';
-import type { BrandTemplateStyle, FrameStyle, FrameFontSize } from '../../../types';
+import { Input } from '@/components/ui/Input';
+import { Slider } from '@/components/ui/Slider';
+import { GoogleFontSelector } from '@/components/ui/GoogleFontSelector';
+import { cn } from '@/utils/cn';
+import { FRAME_CONFIG } from '@/config/constants';
+import type { BrandTemplateStyle, FrameStyle, FrameFontSize } from '@/types';
 
 interface StepFrameTypographyProps {
   style: BrandTemplateStyle;

@@ -85,8 +85,7 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
 
     applyLogoMask(styleOptions.logoUrl, shape)
       .then(setProcessedLogoUrl)
-      .catch((error) => {
-        console.error('Failed to apply logo mask:', error);
+      .catch(() => {
         toast.error('Failed to apply logo shape. Using original image.');
         setProcessedLogoUrl(styleOptions.logoUrl);
       });
@@ -191,8 +190,8 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
           };
           reader.readAsDataURL(rawData);
         }
-      } catch (error) {
-        console.error('Failed to generate thumbnail:', error);
+      } catch {
+        // Thumbnail generation is non-critical; history entry saved regardless
       }
     }
   }, [activeType, getCurrentData, styleOptions, qrValue, addEntry, updateThumbnail]);

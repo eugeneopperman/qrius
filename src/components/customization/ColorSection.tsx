@@ -1,13 +1,13 @@
 import { memo, useCallback, useMemo } from 'react';
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { ColorPicker } from '../ui/ColorPicker';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 import { Tooltip } from '../ui/Tooltip';
 import { InlineToggle } from '../ui/Toggle';
 import { HelpCircle } from 'lucide-react';
-import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '../../config/constants';
-import { getGradientPreview } from '../../utils/gradientUtils';
-import type { GradientOptions, GradientType } from '../../types';
+import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '@/config/constants';
+import { getGradientPreview } from '@/utils/gradientUtils';
+import type { GradientOptions, GradientType } from '@/types';
 
 export const ColorSection = memo(function ColorSection() {
   const { styleOptions, setStyleOptions } = useQRStore();

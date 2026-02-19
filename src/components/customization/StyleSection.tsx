@@ -1,10 +1,10 @@
 import { memo, useCallback, type ReactNode } from 'react';
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Eye, HelpCircle } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 import { LabelWithTooltip, Tooltip } from '../ui/Tooltip';
 import { InlineToggle } from '../ui/Toggle';
-import type { DotType, CornerSquareType } from '../../types';
+import type { DotType, CornerSquareType } from '@/types';
 
 interface StyleOption<T> {
   value: T;

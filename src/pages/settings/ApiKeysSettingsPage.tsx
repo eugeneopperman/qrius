@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { useAuthStore } from '../../stores/authStore';
-import { supabase } from '../../lib/supabase';
-import { toast } from '../../stores/toastStore';
-import type { ApiKey } from '../../types/database';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { useAuthStore } from '@/stores/authStore';
+import { toast } from '@/stores/toastStore';
+import { useApiKeys, useCreateApiKey, useDeleteApiKey } from '@/hooks/queries/useApiKeys';
 import {
   Loader2,
   Plus,
@@ -17,117 +16,40 @@ import {
 } from 'lucide-react';
 
 export function ApiKeysSettingsContent() {
-  const { currentOrganization, currentRole, planLimits } = useAuthStore();
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { currentRole, planLimits } = useAuthStore();
+  const { data: apiKeys = [], isLoading } = useApiKeys();
+  const createApiKey = useCreateApiKey();
+  const deleteApiKey = useDeleteApiKey();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
 
   const canManageKeys = currentRole === 'owner' || currentRole === 'admin';
   const hasApiAccess = planLimits && planLimits.api_requests_per_day > 0;
 
-  useEffect(() => {
-    async function fetchApiKeys() {
-      if (!currentOrganization) return;
-
-      setIsLoading(true);
-
-      try {
-        const { data, error } = await supabase
-          .from('api_keys')
-          .select('*')
-          .eq('organization_id', currentOrganization.id)
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching API keys:', error);
-        } else {
-          setApiKeys(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching API keys:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchApiKeys();
-  }, [currentOrganization]);
-
   const handleCopyKey = async (key: string) => {
     try {
       await navigator.clipboard.writeText(key);
       toast.success('API key copied to clipboard');
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+    } catch {
       toast.error('Failed to copy to clipboard');
     }
   };
 
   const handleDeleteKey = async (keyId: string) => {
     try {
-      const { error } = await supabase.from('api_keys').delete().eq('id', keyId);
-
-      if (error) {
-        toast.error('Failed to delete API key');
-        return;
-      }
-
-      setApiKeys(apiKeys.filter((k) => k.id !== keyId));
+      await deleteApiKey.mutateAsync(keyId);
       toast.success('API key deleted');
-    } catch (error) {
-      console.error('Error deleting API key:', error);
+    } catch {
       toast.error('Failed to delete API key');
     }
   };
 
   const handleCreateKey = async (name: string) => {
-    if (!currentOrganization) {
-      toast.error('No organization selected');
-      return;
-    }
-
     try {
-      // Generate API key: qr_<prefix>_<secret>
-      const prefix = crypto.randomUUID().replace(/-/g, '').substring(0, 8);
-      const secret = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
-      const fullKey = `qr_${prefix}_${secret}`;
-
-      // Hash the key for storage using Web Crypto API
-      const encoder = new TextEncoder();
-      const data = encoder.encode(fullKey);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const keyHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-      // Store in database
-      const { data: newApiKey, error } = await supabase
-        .from('api_keys')
-        .insert({
-          organization_id: currentOrganization.id,
-          name: name,
-          key_hash: keyHash,
-          key_prefix: `qr_${prefix}`,
-          scopes: ['qr:read', 'qr:write'],
-          rate_limit_per_day: planLimits?.api_requests_per_day || 1000,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating API key:', error);
-        toast.error('Failed to create API key');
-        return;
-      }
-
-      // Add to local state
-      setApiKeys([newApiKey, ...apiKeys]);
-
-      // Show the full key (only time user will see it)
-      setNewKey(fullKey);
+      const result = await createApiKey.mutateAsync(name);
+      setNewKey(result.fullKey);
       toast.success('API key created');
-    } catch (error) {
-      console.error('Error creating API key:', error);
+    } catch {
       toast.error('Failed to create API key');
     }
   };

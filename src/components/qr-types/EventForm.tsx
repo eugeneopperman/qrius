@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/Textarea';
 
-import { validateEventTitle, validateEventDate } from '../../utils/validators';
+import { validateEventTitle, validateEventDate } from '@/utils/validators';
 
 export function EventForm() {
   const { eventData, setEventData } = useQRStore();

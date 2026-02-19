@@ -1,5 +1,5 @@
 import { memo, useCallback, useState } from 'react';
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import {
   Type,
   QrCode,
@@ -15,11 +15,11 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { Input } from '../ui/Input';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
 import { SelectButtonGroup, type SelectButtonOption } from '../ui/SelectButtonGroup';
-import { FRAME_CONFIG, FRAME_CATEGORIES } from '../../config/constants';
-import type { FrameStyle, FrameFontSize, FrameFontFamily, FrameIcon, FrameIconPosition } from '../../types';
+import { FRAME_CONFIG, FRAME_CATEGORIES } from '@/config/constants';
+import type { FrameStyle, FrameFontSize, FrameFontFamily, FrameIcon, FrameIconPosition } from '@/types';
 
 // Frame types that support labels
 const LABEL_FRAMES: FrameStyle[] = [

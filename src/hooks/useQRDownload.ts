@@ -152,8 +152,7 @@ export function useQRDownload({
           toast.success(`QR code downloaded as ${format.toUpperCase()}`);
         }
         onSuccess?.();
-      } catch (error) {
-        console.error('Failed to download:', error);
+      } catch {
         toast.error('Failed to download QR code. Please try again.');
       } finally {
         setIsDownloading(false);
@@ -220,8 +219,7 @@ export function useQRDownload({
       pdf.save('qrcode.pdf');
       toast.success('QR code downloaded as PDF');
       onSuccess?.();
-    } catch (error) {
-      console.error('Failed to generate PDF:', error);
+    } catch {
       toast.error('Failed to generate PDF. Please try again.');
     } finally {
       setIsDownloading(false);
@@ -264,8 +262,7 @@ export function useQRDownload({
       } else {
         toast.error('Failed to copy QR code. Please try again.');
       }
-    } catch (error) {
-      console.error('Failed to copy:', error);
+    } catch {
       toast.error('Failed to copy to clipboard. Your browser may not support this feature.');
     }
   }, [qrCodeRef, frameContainerRef, hasFrame, captureFrameAsCanvas, onSuccess]);

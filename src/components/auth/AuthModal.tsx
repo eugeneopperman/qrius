@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { SignInForm } from './SignInForm';
 import { SignUpForm } from './SignUpForm';
 import { ForgotPasswordForm } from './ForgotPasswordForm';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 type AuthView = 'signin' | 'signup' | 'forgot-password';
 

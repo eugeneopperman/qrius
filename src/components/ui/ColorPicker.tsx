@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { cn } from '../../utils/cn';
-import { useClickOutside } from '../../hooks/useClickOutside';
+import { cn } from '@/utils/cn';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 interface ColorPickerProps {
   label?: string;

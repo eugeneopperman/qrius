@@ -12,10 +12,10 @@ import {
   QrCode
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { smartPresets, type SmartPreset } from '../../data/smartPresets';
-import { useQRStore } from '../../stores/qrStore';
-import { toast } from '../../stores/toastStore';
-import { cn } from '../../utils/cn';
+import { smartPresets, type SmartPreset } from '@/data/smartPresets';
+import { useQRStore } from '@/stores/qrStore';
+import { toast } from '@/stores/toastStore';
+import { cn } from '@/utils/cn';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wifi,

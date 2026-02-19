@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearch } from '@tanstack/react-router';
-import { Button } from '../../components/ui/Button';
-import { useAuthStore } from '../../stores/authStore';
-import { getSession } from '../../lib/supabase';
-import { toast } from '../../stores/toastStore';
+import { Button } from '@/components/ui/Button';
+import { useAuthStore } from '@/stores/authStore';
+import { getSession } from '@/lib/supabase';
+import { toast } from '@/stores/toastStore';
 import {
   Check,
   CreditCard,
@@ -126,7 +126,6 @@ export function BillingSettingsContent() {
         window.location.href = data.url;
       }
     } catch (error) {
-      console.error('Checkout error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to start checkout');
     } finally {
       setIsLoading(false);
@@ -162,7 +161,6 @@ export function BillingSettingsContent() {
         window.location.href = data.url;
       }
     } catch (error) {
-      console.error('Portal error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to open billing portal');
     } finally {
       setIsLoading(false);

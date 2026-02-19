@@ -1,7 +1,7 @@
 import { MoreVertical, ExternalLink, BarChart2, Copy, Trash2, QrCode } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import type { QRCode } from '../../types/database';
-import { toast } from '../../stores/toastStore';
+import type { QRCode } from '@/types/database';
+import { toast } from '@/stores/toastStore';
 
 interface QRCodeCardProps {
   qrCode: QRCode;
@@ -29,8 +29,7 @@ export function QRCodeCard({ qrCode, onDelete }: QRCodeCardProps) {
     try {
       await navigator.clipboard.writeText(trackingUrl);
       toast.success('URL copied to clipboard');
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+    } catch {
       toast.error('Failed to copy to clipboard');
     }
     setMenuOpen(false);

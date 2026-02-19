@@ -1,9 +1,9 @@
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Input } from '../ui/Input';
 
-import { validatePhone } from '../../utils/validators';
-import { cn } from '../../utils/cn';
-import { useFormField } from '../../hooks/useFormField';
+import { validatePhone } from '@/utils/validators';
+import { cn } from '@/utils/cn';
+import { useFormField } from '@/hooks/useFormField';
 
 export function SmsForm() {
   const { smsData, setSmsData } = useQRStore();

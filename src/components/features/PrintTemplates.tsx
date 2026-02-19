@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { useQRStore } from '../../stores/qrStore';
-import { toast } from '../../stores/toastStore';
-import { createQRElementOptions } from '../../utils/gradientUtils';
+import { useQRStore } from '@/stores/qrStore';
+import { toast } from '@/stores/toastStore';
+import { createQRElementOptions } from '@/utils/gradientUtils';
 import { Printer, Check, FileImage, FileText } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/cn';
 import { LabelWithTooltip } from '../ui/Tooltip';
 
 interface PrintTemplate {
@@ -274,8 +274,7 @@ export function PrintTemplates() {
       }
       successTimeoutRef.current = setTimeout(() => setSuccess(false), 2000);
       toast.success(`Print-ready ${exportFormat.toUpperCase()} downloaded for ${template.name}`);
-    } catch (error) {
-      console.error('Failed to generate print-ready QR:', error);
+    } catch {
       toast.error('Failed to generate print-ready file. Please try again.');
     } finally {
       setIsGenerating(false);

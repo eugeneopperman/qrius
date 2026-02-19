@@ -79,8 +79,7 @@ export function useUrlShortener(): UseUrlShortenerResult {
             return null;
           }
 
-          // Continue to fallback with generic provider
-          console.warn('Branded URL shortening failed, falling back to generic:', result?.error);
+          // Fallback to generic provider
         }
 
         // Use generic provider (TinyURL or is.gd)

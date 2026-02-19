@@ -9,10 +9,10 @@ import {
   Calendar,
   MapPin,
 } from 'lucide-react';
-import { cn } from '../../../utils/cn';
-import { useQRStore } from '../../../stores/qrStore';
-import { useWizardStore } from '../../../stores/wizardStore';
-import type { QRCodeType } from '../../../types';
+import { cn } from '@/utils/cn';
+import { useQRStore } from '@/stores/qrStore';
+import { useWizardStore } from '@/stores/wizardStore';
+import type { QRCodeType } from '@/types';
 
 interface TypeOption {
   id: QRCodeType;

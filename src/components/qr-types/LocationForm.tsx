@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useQRStore } from '../../stores/qrStore';
+import { useQRStore } from '@/stores/qrStore';
 import { Input } from '../ui/Input';
 
-import { validateLatitude, validateLongitude } from '../../utils/validators';
+import { validateLatitude, validateLongitude } from '@/utils/validators';
 
 export function LocationForm() {
   const { locationData, setLocationData } = useQRStore();

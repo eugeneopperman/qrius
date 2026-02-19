@@ -1,10 +1,10 @@
 import { useEffect, useRef, useMemo } from 'react';
 import QRCodeStyling from 'qr-code-styling';
-import { applyLogoMask } from '../../utils/logoMask';
-import { toast } from '../../stores/toastStore';
-import { QR_CONFIG } from '../../config/constants';
-import { createQRElementOptions } from '../../utils/gradientUtils';
-import type { QRStyleOptions } from '../../types';
+import { applyLogoMask } from '@/utils/logoMask';
+import { toast } from '@/stores/toastStore';
+import { QR_CONFIG } from '@/config/constants';
+import { createQRElementOptions } from '@/utils/gradientUtils';
+import type { QRStyleOptions } from '@/types';
 
 interface QRRendererProps {
   qrValue: string;
@@ -43,8 +43,7 @@ export function QRRenderer({
 
     applyLogoMask(styleOptions.logoUrl, shape)
       .then((processedUrl) => onProcessedLogoChange?.(processedUrl))
-      .catch((error) => {
-        console.error('Failed to apply logo mask:', error);
+      .catch(() => {
         toast.error('Failed to apply logo shape. Using original image.');
         onProcessedLogoChange?.(styleOptions.logoUrl);
       });

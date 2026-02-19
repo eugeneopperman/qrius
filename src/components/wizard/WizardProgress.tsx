@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { useWizardStore, type WizardStep } from '../../stores/wizardStore';
+import { cn } from '@/utils/cn';
+import { useWizardStore, type WizardStep } from '@/stores/wizardStore';
 
 const steps: { step: WizardStep; label: string }[] = [
   { step: 1, label: 'Type' },

@@ -1,7 +1,7 @@
 import { memo, useRef, useState, useCallback } from 'react';
 import { Plus, Download, Upload, Palette } from 'lucide-react';
-import { useTemplateStore } from '../../stores/templateStore';
-import { toast } from '../../stores/toastStore';
+import { useTemplateStore } from '@/stores/templateStore';
+import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { TemplateCard } from './TemplateCard';
