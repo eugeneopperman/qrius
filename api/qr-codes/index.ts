@@ -326,6 +326,26 @@ async function handleList(
   const qrCodes = result.map((row) => toQRCodeResponse(row as QRCodeRow, baseUrl));
   const total = parseInt(countResult[0].count as string);
 
+  // Fetch monthly scan count from usage_records if we have an organization
+  let monthlyScans = 0;
+  const orgId = authContext?.organizationId || (authContext?.userId ? null : null);
+  // Derive orgId from the first QR code if available, or from auth context
+  const effectiveOrgId = orgId || (result.length > 0 ? (result[0] as QRCodeRow).organization_id : null);
+  if (effectiveOrgId && sql) {
+    try {
+      const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+      const usageResult = await sql`
+        SELECT scans_count FROM usage_records
+        WHERE organization_id = ${effectiveOrgId} AND month = ${currentMonth}
+      `;
+      if (usageResult.length > 0) {
+        monthlyScans = parseInt(usageResult[0].scans_count as string) || 0;
+      }
+    } catch {
+      // Non-critical — stats just show 0
+    }
+  }
+
   return res.status(200).json({
     qrCodes,
     pagination: {
@@ -333,6 +353,9 @@ async function handleList(
       limit,
       offset,
       hasMore: offset + limit < total,
+    },
+    stats: {
+      monthlyScans,
     },
   });
 }

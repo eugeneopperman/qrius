@@ -10,47 +10,39 @@ interface DashboardStats {
   teamMembers: number;
 }
 
-async function fetchDashboardStats(orgId: string, qrCodes: QRCode[]): Promise<DashboardStats> {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+interface DashboardStatsInput {
+  qrCodes: QRCode[];
+  totalCount: number;
+  monthlyScans: number;
+}
 
-  // Get QR code IDs for this org to query scans (scan_events has no organization_id column)
-  const qrCodeIds = qrCodes.map((qr) => qr.id);
+async function fetchDashboardStats(
+  orgId: string,
+  { qrCodes, totalCount, monthlyScans }: DashboardStatsInput
+): Promise<DashboardStats> {
+  // Team members count comes from Supabase (correct database for org data)
+  const { count: memberCount } = await supabase
+    .from('organization_members')
+    .select('*', { count: 'exact', head: true })
+    .eq('organization_id', orgId);
 
-  const [qrCountResult, memberCountResult, scansTodayResult] = await Promise.all([
-    supabase
-      .from('qr_codes')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId),
-    supabase
-      .from('organization_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId),
-    qrCodeIds.length > 0
-      ? supabase
-          .from('scan_events')
-          .select('*', { count: 'exact', head: true })
-          .in('qr_code_id', qrCodeIds)
-          .gte('scanned_at', todayStart.toISOString())
-      : Promise.resolve({ count: 0 }),
-  ]);
-
+  // Total scans across all QR codes (all-time)
   const totalScans = qrCodes.reduce((sum, qr) => sum + (qr.total_scans || 0), 0);
 
   return {
-    qrCodesCount: qrCountResult.count || 0,
-    scansToday: scansTodayResult.count ?? 0,
-    scansThisMonth: totalScans,
-    teamMembers: memberCountResult.count || 1,
+    qrCodesCount: totalCount,
+    scansToday: 0, // Requires scan_events query from Neon — deferred
+    scansThisMonth: monthlyScans || totalScans,
+    teamMembers: memberCount || 1,
   };
 }
 
-export function useDashboardStats(qrCodes: QRCode[]) {
+export function useDashboardStats(input: DashboardStatsInput) {
   const currentOrganization = useAuthStore((s) => s.currentOrganization);
 
   return useQuery({
-    queryKey: ['dashboard-stats', currentOrganization?.id, qrCodes.map((q) => q.id).join(',')],
-    queryFn: () => fetchDashboardStats(currentOrganization!.id, qrCodes),
+    queryKey: ['dashboard-stats', currentOrganization?.id, input.totalCount],
+    queryFn: () => fetchDashboardStats(currentOrganization!.id, input),
     enabled: !!currentOrganization,
     placeholderData: {
       qrCodesCount: 0,

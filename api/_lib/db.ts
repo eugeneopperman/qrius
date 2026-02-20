@@ -23,6 +23,12 @@ export interface QRCodeRow {
   original_data: unknown;
   is_active: boolean;
   total_scans: number;
+  user_id: string | null;
+  organization_id: string | null;
+  name: string | null;
+  description: string | null;
+  tags: string[];
+  metadata: unknown;
   created_at: Date;
   updated_at: Date;
 }
@@ -42,15 +48,21 @@ export interface ScanEventRow {
 export function toQRCodeResponse(row: QRCodeRow, baseUrl: string) {
   return {
     id: row.id,
-    shortCode: row.short_code,
-    trackingUrl: `${baseUrl}/r/${row.short_code}`,
-    destinationUrl: row.destination_url,
-    qrType: row.qr_type,
-    originalData: row.original_data,
-    isActive: row.is_active,
-    totalScans: row.total_scans,
-    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
-    updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
+    short_code: row.short_code,
+    tracking_url: `${baseUrl}/r/${row.short_code}`,
+    destination_url: row.destination_url,
+    qr_type: row.qr_type,
+    original_data: row.original_data,
+    is_active: row.is_active,
+    total_scans: row.total_scans,
+    user_id: row.user_id,
+    organization_id: row.organization_id,
+    name: row.name,
+    description: row.description,
+    tags: row.tags || [],
+    metadata: row.metadata || {},
+    created_at: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+    updated_at: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
   };
 }
 
