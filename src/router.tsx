@@ -86,6 +86,9 @@ const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const CookiesPage = lazy(() => import('@/pages/CookiesPage'));
 
+// Templates
+const TemplatesPage = lazy(() => import('@/pages/TemplatesPage'));
+
 // Invitation
 const InviteAcceptPage = lazy(() => import('@/pages/InviteAcceptPage'));
 
@@ -284,6 +287,14 @@ const historyRoute = createRoute({
   errorComponent: ErrorPage,
 });
 
+const templatesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/templates',
+  beforeLoad: requireAuth,
+  component: TemplatesPage,
+  errorComponent: ErrorPage,
+});
+
 const onboardingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/onboarding',
@@ -358,6 +369,7 @@ const routeTree = rootRoute.addChildren([
   qrCodeDetailRoute,
   createQRRoute,
   historyRoute,
+  templatesRoute,
   onboardingRoute,
   readerRoute,
   settingsRoute,
