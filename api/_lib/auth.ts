@@ -4,22 +4,31 @@ import { createClient } from '@supabase/supabase-js';
 import { logger } from './logger.js';
 
 // Supabase admin client (uses service role key)
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-);
+// Guard: createClient throws if key is empty string — defer to null when unconfigured
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const supabaseAdmin = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : null;
 
 export interface AuthenticatedUser {
   id: string;
   email: string;
   organizationId?: string;
   role?: string;
+}
+
+function getSupabaseAdmin() {
+  if (!supabaseAdmin) {
+    throw new Error('Supabase admin client not configured — set SUPABASE_SERVICE_ROLE_KEY env var');
+  }
+  return supabaseAdmin;
 }
 
 export class UnauthorizedError extends Error {
@@ -50,7 +59,7 @@ export async function requireAuth(req: VercelRequest): Promise<AuthenticatedUser
   const token = authHeader.replace('Bearer ', '');
 
   // Verify the JWT token with Supabase
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+  const { data: { user }, error } = await getSupabaseAdmin().auth.getUser(token);
 
   if (error || !user) {
     throw new UnauthorizedError('Invalid or expired token');
@@ -91,7 +100,7 @@ export async function requireApiKey(req: VercelRequest): Promise<{ organizationI
   const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
 
   // Look up the API key
-  const { data: key, error } = await supabaseAdmin
+  const { data: key, error } = await getSupabaseAdmin()
     .from('api_keys')
     .select('id, organization_id, is_active, expires_at, rate_limit_per_day')
     .eq('key_prefix', keyPrefix)
@@ -112,7 +121,7 @@ export async function requireApiKey(req: VercelRequest): Promise<{ organizationI
 
   // Update last_used_at (fire and forget with error logging)
   void Promise.resolve(
-    supabaseAdmin
+    getSupabaseAdmin()
       .from('api_keys')
       .update({ last_used_at: new Date().toISOString() })
       .eq('id', key.id)
@@ -164,7 +173,7 @@ export async function getUserOrganization(
   userId: string,
   organizationId?: string
 ): Promise<{ organizationId: string; role: string }> {
-  let query = supabaseAdmin
+  let query = getSupabaseAdmin()
     .from('organization_members')
     .select('organization_id, role')
     .eq('user_id', userId);
@@ -208,7 +217,7 @@ export async function checkPlanLimit(
   limitType: 'qr_codes' | 'scans' | 'api_requests' | 'team_members'
 ): Promise<{ allowed: boolean; current: number; limit: number }> {
   // Get organization plan
-  const { data: org, error: orgError } = await supabaseAdmin
+  const { data: org, error: orgError } = await getSupabaseAdmin()
     .from('organizations')
     .select('plan')
     .eq('id', organizationId)
@@ -219,7 +228,7 @@ export async function checkPlanLimit(
   }
 
   // Get plan limits
-  const { data: limits, error: limitsError } = await supabaseAdmin
+  const { data: limits, error: limitsError } = await getSupabaseAdmin()
     .from('plan_limits')
     .select('*')
     .eq('plan', org.plan)
@@ -234,7 +243,7 @@ export async function checkPlanLimit(
 
   switch (limitType) {
     case 'qr_codes': {
-      const { count: qrCount } = await supabaseAdmin
+      const { count: qrCount } = await getSupabaseAdmin()
         .from('qr_codes')
         .select('*', { count: 'exact', head: true })
         .eq('organization_id', organizationId);
@@ -246,7 +255,7 @@ export async function checkPlanLimit(
     case 'api_requests': {
       // Check today's API usage
       const today = new Date().toISOString().split('T')[0];
-      const { data: usage } = await supabaseAdmin
+      const { data: usage } = await getSupabaseAdmin()
         .from('usage_records')
         .select('api_requests')
         .eq('organization_id', organizationId)
@@ -258,7 +267,7 @@ export async function checkPlanLimit(
     }
 
     case 'scans': {
-      const { data: monthUsage } = await supabaseAdmin
+      const { data: monthUsage } = await getSupabaseAdmin()
         .from('usage_records')
         .select('scans_count')
         .eq('organization_id', organizationId)
@@ -270,7 +279,7 @@ export async function checkPlanLimit(
     }
 
     case 'team_members': {
-      const { count: memberCount } = await supabaseAdmin
+      const { count: memberCount } = await getSupabaseAdmin()
         .from('organization_members')
         .select('*', { count: 'exact', head: true })
         .eq('organization_id', organizationId);
