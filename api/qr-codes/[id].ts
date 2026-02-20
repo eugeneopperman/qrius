@@ -69,7 +69,7 @@ async function handleGet(
     return res.status(404).json({ error: 'QR code not found' });
   }
 
-  const qrCode = qrResult[0] as QRCodeRow & { organization_id: string | null };
+  const qrCode = qrResult[0] as QRCodeRow;
   const baseResponse = toQRCodeResponse(qrCode, baseUrl);
 
   // Look up scan_history_days from plan limits (default 30 for free)
@@ -161,7 +161,7 @@ async function handlePatch(
     return res.status(404).json({ error: 'QR code not found' });
   }
 
-  const qrCode = qrResult[0] as QRCodeRow & { user_id: string | null; organization_id: string | null; short_code: string };
+  const qrCode = qrResult[0] as QRCodeRow;
 
   // Check ownership: user owns it directly or through org membership
   if (qrCode.user_id === user.id) {
@@ -252,7 +252,7 @@ async function handlePatch(
     await invalidateCachedRedirect(qrCode.short_code);
   }
 
-  const updated = result[0] as QRCodeRow;
+  const updated = result[0] as unknown as QRCodeRow;
   return res.status(200).json(toQRCodeResponse(updated, baseUrl));
 }
 
