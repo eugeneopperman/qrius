@@ -5,6 +5,7 @@ import { ProBadge } from '../ui/ProBadge';
 import { toast } from '@/stores/toastStore';
 import { usePlanGate } from '@/hooks/usePlanGate';
 import { generateIllustratorSVG, downloadSVG } from '@/utils/qrSvgGenerator';
+import { rasterizeQRToBlob, downloadBlob } from '@/utils/qrDownloadHelper';
 import type { QRStyleOptions } from '@/types';
 import type QRCodeStyling from 'qr-code-styling';
 
@@ -64,14 +65,18 @@ export function QRActions({
         }
         toast.success('SVG downloaded (Illustrator ready)');
       } else {
-        await qrCodeRef.current.download({
-          name: 'qrcode',
-          extension: format,
-        });
+        // PNG/JPEG: use robust rasterization (avoids library's btoa bug)
+        const blob = await rasterizeQRToBlob(
+          qrCodeRef.current,
+          format,
+          format === 'jpeg' ? 0.92 : undefined,
+        );
+        downloadBlob(blob, `qrcode.${format}`);
         toast.success(`QR code downloaded as ${format.toUpperCase()}`);
       }
       onSaveToHistory();
-    } catch {
+    } catch (error) {
+      if (import.meta.env.DEV) console.error('Download failed:', error);
       toast.error('Failed to download QR code. Please try again.');
     }
     setShowFormatMenu(false);
@@ -83,40 +88,35 @@ export function QRActions({
     setIsDownloading(true);
     try {
       const { jsPDF } = await import('jspdf');
-      const rawData = await qrCodeRef.current.getRawData('png');
-      if (!rawData || !(rawData instanceof Blob)) {
-        toast.error('Failed to generate PDF. Please try again.');
-        setIsDownloading(false);
-        return;
-      }
+      const blob = await rasterizeQRToBlob(qrCodeRef.current);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
 
-      // Convert blob to data URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
+      // Create A4 PDF with QR code centered
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
 
-        // Create A4 PDF with QR code centered
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4',
-        });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const qrSize = 80; // 80mm QR code
+      const x = (pageWidth - qrSize) / 2;
+      const y = (pageHeight - qrSize) / 2;
 
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const qrSize = 80; // 80mm QR code
-        const x = (pageWidth - qrSize) / 2;
-        const y = (pageHeight - qrSize) / 2;
-
-        pdf.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
-        pdf.save('qrcode.pdf');
-        toast.success('QR code downloaded as PDF');
-        setIsDownloading(false);
-      };
-      reader.readAsDataURL(rawData);
+      pdf.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
+      pdf.save('qrcode.pdf');
+      toast.success('QR code downloaded as PDF');
+      setIsDownloading(false);
 
       onSaveToHistory();
-    } catch {
+    } catch (error) {
+      if (import.meta.env.DEV) console.error('PDF download failed:', error);
       toast.error('Failed to generate PDF. Please try again.');
       setIsDownloading(false);
     }
@@ -127,21 +127,17 @@ export function QRActions({
     if (!qrCodeRef.current) return;
 
     try {
-      const rawData = await qrCodeRef.current.getRawData('png');
-      if (rawData && rawData instanceof Blob) {
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': rawData }),
-        ]);
-        setCopied(true);
-        if (copiedTimeoutRef.current) {
-          clearTimeout(copiedTimeoutRef.current);
-        }
-        copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-        toast.success('QR code copied to clipboard');
-        onSaveToHistory();
-      } else {
-        toast.error('Failed to copy QR code. Please try again.');
+      const blob = await rasterizeQRToBlob(qrCodeRef.current);
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob }),
+      ]);
+      setCopied(true);
+      if (copiedTimeoutRef.current) {
+        clearTimeout(copiedTimeoutRef.current);
       }
+      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      toast.success('QR code copied to clipboard');
+      onSaveToHistory();
     } catch {
       toast.error('Failed to copy to clipboard. Your browser may not support this feature.');
     }

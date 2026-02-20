@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type QRCodeStyling from 'qr-code-styling';
 import { toast } from '@/stores/toastStore';
 import { generateIllustratorSVG, downloadSVG } from '@/utils/qrSvgGenerator';
+import { rasterizeQRToBlob, downloadBlob } from '@/utils/qrDownloadHelper';
 import { QR_CONFIG } from '@/config/constants';
 import type { QRStyleOptions } from '@/types';
 
@@ -87,12 +88,7 @@ export function useQRDownload({
             canvas.toBlob(
               (blob) => {
                 if (blob) {
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = `qrcode.${format}`;
-                  link.click();
-                  URL.revokeObjectURL(url);
+                  downloadBlob(blob, `qrcode.${format}`);
                   toast.success(`QR code with frame downloaded as ${format.toUpperCase()}`);
                   onSuccess?.();
                 } else {
@@ -144,15 +140,18 @@ export function useQRDownload({
             toast.info('Note: SVG export does not include frame styling');
           }
         } else {
-          // Fallback to QR-only download
-          await qrCodeRef.current.download({
-            name: 'qrcode',
-            extension: format,
-          });
+          // PNG/JPEG: use robust rasterization (avoids library's btoa bug)
+          const blob = await rasterizeQRToBlob(
+            qrCodeRef.current,
+            format,
+            format === 'jpeg' ? 0.92 : undefined,
+          );
+          downloadBlob(blob, `qrcode.${format}`);
           toast.success(`QR code downloaded as ${format.toUpperCase()}`);
         }
         onSuccess?.();
-      } catch {
+      } catch (error) {
+        if (import.meta.env.DEV) console.error('Download failed:', error);
         toast.error('Failed to download QR code. Please try again.');
       } finally {
         setIsDownloading(false);
@@ -176,31 +175,13 @@ export function useQRDownload({
         if (canvas) {
           dataUrl = canvas.toDataURL('image/png');
         } else {
-          // Fallback to QR-only
-          const rawData = await qrCodeRef.current.getRawData('png');
-          if (!rawData || !(rawData instanceof Blob)) {
-            toast.error('Failed to generate PDF. Please try again.');
-            setIsDownloading(false);
-            return;
-          }
-          dataUrl = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(rawData);
-          });
+          // Fallback to QR-only via robust rasterization
+          const blob = await rasterizeQRToBlob(qrCodeRef.current);
+          dataUrl = await blobToDataUrl(blob);
         }
       } else {
-        const rawData = await qrCodeRef.current.getRawData('png');
-        if (!rawData || !(rawData instanceof Blob)) {
-          toast.error('Failed to generate PDF. Please try again.');
-          setIsDownloading(false);
-          return;
-        }
-        dataUrl = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(rawData);
-        });
+        const blob = await rasterizeQRToBlob(qrCodeRef.current);
+        dataUrl = await blobToDataUrl(blob);
       }
 
       const pdf = new jsPDF({
@@ -219,7 +200,8 @@ export function useQRDownload({
       pdf.save('qrcode.pdf');
       toast.success('QR code downloaded as PDF');
       onSuccess?.();
-    } catch {
+    } catch (error) {
+      if (import.meta.env.DEV) console.error('PDF download failed:', error);
       toast.error('Failed to generate PDF. Please try again.');
     } finally {
       setIsDownloading(false);
@@ -242,12 +224,9 @@ export function useQRDownload({
         }
       }
 
-      // Fallback to QR-only
+      // Fallback to QR-only via robust rasterization
       if (!blob) {
-        const rawData = await qrCodeRef.current.getRawData('png');
-        if (rawData && rawData instanceof Blob) {
-          blob = rawData;
-        }
+        blob = await rasterizeQRToBlob(qrCodeRef.current);
       }
 
       if (blob) {
@@ -274,4 +253,14 @@ export function useQRDownload({
     handlePdfDownload,
     handleCopy,
   };
+}
+
+/** Convert a Blob to a data URL string. */
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
