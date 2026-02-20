@@ -73,7 +73,9 @@ api/
 7. **Subscription Billing**: Free/Pro/Business tiers via Stripe
 8. **Brand Templates**: Save, apply, export/import style presets
 9. **Template Wizard**: Step-by-step QR creation with use-case templates
-10. **Testing**: Vitest unit tests (354 passing across 13 test files)
+10. **Campaign Names**: Optional labels for QR codes, shown on dashboard instead of raw URLs
+11. **Styled Thumbnails**: Dashboard QR previews render with saved colors, gradients, logos, and dot patterns
+12. **Testing**: Vitest unit tests (432 passing across 17 test files)
 11. **PWA**: Offline support, installable app
 12. **Keyboard Shortcuts**: Ctrl+S (download), Ctrl+C (copy), etc.
 
@@ -177,6 +179,8 @@ Copy `.env.example` to `.env.local` and configure:
 - Stripe webhooks handle subscription lifecycle events
 - Row Level Security (RLS) policies in database for data isolation — schema is idempotent (DROP IF EXISTS before CREATE)
 - QR codes without user/org ownership are public (backward compatibility)
+- **Style metadata**: QR code style options (colors, gradients, logos, dot patterns) are saved in the `metadata` JSONB column as `{ style_options: {...} }`. The `QRStyleOptionsForPreview` type (exported from `QRMiniPreview.tsx`) defines the shape. `QRMiniPreview` accepts an optional `styleOptions` prop to render styled thumbnails.
+- **Campaign Name**: `qrStore.campaignName` is an optional label set in wizard step 2 (StepContent). Used as the QR code `name` on save; falls back to auto-generated name if empty.
 
 ## Architecture Decisions
 
