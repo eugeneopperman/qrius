@@ -23,14 +23,20 @@ const plans = [
   {
     id: 'free',
     name: 'Free',
-    price: 0,
-    interval: 'forever',
+    monthlyPrice: 0,
+    annualPrice: 0,
     features: [
-      '10 QR codes',
-      '1,000 scans/month',
+      '15 dynamic QR codes',
+      'Unlimited static QR codes',
+      '5,000 scans/month',
       '30-day scan history',
       '1 team member',
-      'Basic customization',
+      'All 9 QR types',
+      'Full customization',
+      '3 brand templates',
+      'PNG download',
+      'QR code reader',
+      'Scannability score',
     ],
     cta: 'Current plan',
     popular: false,
@@ -38,15 +44,20 @@ const plans = [
   {
     id: 'pro',
     name: 'Pro',
-    price: 12,
-    interval: 'month',
+    monthlyPrice: 9,
+    annualPrice: 7,
     features: [
-      '100 QR codes',
-      '50,000 scans/month',
+      '250 dynamic QR codes',
+      'Unlimited static QR codes',
+      '100,000 scans/month',
       '1-year scan history',
       '5 team members',
+      'All 9 QR types',
       'Full customization',
-      '1,000 API requests/day',
+      'Unlimited brand templates',
+      'PNG, SVG, PDF download',
+      'API access (1,000 req/day)',
+      'Advanced analytics',
       'Email support',
     ],
     cta: 'Upgrade to Pro',
@@ -55,17 +66,23 @@ const plans = [
   {
     id: 'business',
     name: 'Business',
-    price: 39,
-    interval: 'month',
+    monthlyPrice: 29,
+    annualPrice: 24,
     features: [
-      'Unlimited QR codes',
-      '500,000 scans/month',
-      '2-year scan history',
+      'Unlimited dynamic QR codes',
+      'Unlimited static QR codes',
+      'Unlimited scans',
+      'Unlimited scan history',
       '25 team members',
+      'All 9 QR types',
+      'Full customization',
+      'Unlimited brand templates',
+      'PNG, SVG, PDF download',
+      'API access (10,000 req/day)',
+      'Advanced analytics',
       'White-label branding',
-      '10,000 API requests/day',
+      'CSV analytics export',
       'Priority support',
-      'Custom integrations',
     ],
     cta: 'Upgrade to Business',
     popular: false,
@@ -75,6 +92,7 @@ const plans = [
 export function BillingSettingsContent() {
   const { currentOrganization, fetchOrganizations } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, fetchOrganizations: s.fetchOrganizations })));
   const [isLoading, setIsLoading] = useState(false);
+  const [isAnnual, setIsAnnual] = useState(false);
   const currentPlan = currentOrganization?.plan || 'free';
 
   // Handle success/cancel URL params from Stripe redirect
@@ -203,10 +221,41 @@ export function BillingSettingsContent() {
         </div>
       </div>
 
+      {/* Billing toggle */}
+      <div className="flex items-center justify-center gap-3 mb-8">
+        <span className={`text-sm font-medium ${!isAnnual ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+          Monthly
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={isAnnual}
+          onClick={() => setIsAnnual(!isAnnual)}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+            isAnnual ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'
+          }`}
+        >
+          <span
+            className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+              isAnnual ? 'translate-x-6' : 'translate-x-1'
+            }`}
+          />
+        </button>
+        <span className={`text-sm font-medium ${isAnnual ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+          Annual
+        </span>
+        {isAnnual && (
+          <span className="ml-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded-full">
+            Save 22%
+          </span>
+        )}
+      </div>
+
       {/* Plans */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => {
           const isCurrent = plan.id === currentPlan;
+          const displayPrice = isAnnual ? plan.annualPrice : plan.monthlyPrice;
 
           return (
             <div
@@ -234,12 +283,17 @@ export function BillingSettingsContent() {
                 </h3>
                 <div className="mt-2">
                   <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                    ${plan.price}
+                    ${displayPrice}
                   </span>
-                  {plan.price > 0 && (
-                    <span className="text-gray-500 dark:text-gray-400">/{plan.interval}</span>
+                  {displayPrice > 0 && (
+                    <span className="text-gray-500 dark:text-gray-400">/month</span>
                   )}
                 </div>
+                {isAnnual && plan.monthlyPrice > 0 && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    ${plan.annualPrice * 12}/year (billed annually)
+                  </p>
+                )}
               </div>
 
               <ul className="space-y-3 mb-6">

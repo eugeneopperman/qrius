@@ -167,9 +167,9 @@ CREATE TABLE IF NOT EXISTS plan_limits (
 -- Insert plan limits
 INSERT INTO plan_limits (plan, qr_codes_limit, scans_per_month, scan_history_days, team_members, api_requests_per_day, custom_branding, white_label, priority_support)
 VALUES
-    ('free', 10, 1000, 30, 1, 0, false, false, false),
-    ('pro', 100, 50000, 365, 5, 1000, true, false, false),
-    ('business', -1, 500000, 730, 25, 10000, true, true, true)
+    ('free', 15, 5000, 30, 1, 0, false, false, false),
+    ('pro', 250, 100000, 365, 5, 1000, true, false, false),
+    ('business', -1, -1, -1, 25, 10000, true, true, true)
 ON CONFLICT (plan) DO UPDATE SET
     qr_codes_limit = EXCLUDED.qr_codes_limit,
     scans_per_month = EXCLUDED.scans_per_month,

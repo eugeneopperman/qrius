@@ -91,13 +91,17 @@ Run `api/schema.sql` followed by `api/schema-saas.sql` to set up:
 - `plan_limits` - Tier limits reference
 
 ## Subscription Tiers
-| Feature | Free | Pro ($12/mo) | Business ($39/mo) |
-|---------|------|--------------|-------------------|
-| QR codes | 10 | 100 | Unlimited |
-| Scans/month | 1,000 | 50,000 | 500,000 |
-| History | 30 days | 1 year | 2 years |
+| Feature | Free | Pro ($9/mo) | Business ($29/mo) |
+|---------|------|-------------|-------------------|
+| Dynamic QR codes | 15 | 250 | Unlimited |
+| Scans/month | 5,000 | 100,000 | Unlimited |
+| History | 30 days | 1 year | Unlimited |
 | Team | 1 | 5 | 25 |
 | API | No | 1K req/day | 10K req/day |
+| Downloads | PNG | PNG, SVG, PDF | PNG, SVG, PDF |
+| Brand templates | 3 | Unlimited | Unlimited |
+| White-label | No | No | Yes |
+| Support | Community | Email | Priority |
 
 ## Commands
 ```bash
