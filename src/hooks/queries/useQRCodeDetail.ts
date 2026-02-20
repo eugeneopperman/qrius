@@ -68,7 +68,7 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     short_code: data.short_code,
     destination_url: data.destination_url,
     qr_type: data.qr_type,
-    original_data: data.original_data,
+    original_data: data.original_data as QRCode['original_data'],
     is_active: data.is_active,
     total_scans: data.total_scans,
     user_id: data.user_id,
@@ -76,7 +76,7 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     name: data.name,
     description: data.description,
     tags: data.tags || [],
-    metadata: data.metadata || {},
+    metadata: (data.metadata || {}) as QRCode['metadata'],
     created_at: data.created_at,
     updated_at: data.updated_at,
   };

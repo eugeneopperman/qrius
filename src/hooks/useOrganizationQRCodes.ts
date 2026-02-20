@@ -47,7 +47,7 @@ function mapAPIToQRCode(api: APIQRCode): QRCode {
     short_code: api.short_code,
     destination_url: api.destination_url,
     qr_type: api.qr_type,
-    original_data: api.original_data,
+    original_data: api.original_data as QRCode['original_data'],
     is_active: api.is_active,
     total_scans: api.total_scans,
     user_id: api.user_id,
@@ -55,7 +55,7 @@ function mapAPIToQRCode(api: APIQRCode): QRCode {
     name: api.name,
     description: api.description,
     tags: api.tags || [],
-    metadata: api.metadata || {},
+    metadata: (api.metadata || {}) as QRCode['metadata'],
     created_at: api.created_at,
     updated_at: api.updated_at,
   };
