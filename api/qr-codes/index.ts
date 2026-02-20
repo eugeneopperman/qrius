@@ -260,7 +260,7 @@ async function handleList(
   if (authContext?.organizationId) {
     // API key auth - filter by organization
     result = await sql`
-      SELECT id, short_code, destination_url, qr_type, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
+      SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
       FROM qr_codes
       WHERE organization_id = ${authContext.organizationId}
       ORDER BY created_at DESC
@@ -277,7 +277,7 @@ async function handleList(
     try {
       const orgMembership = await getUserOrganization(authContext.userId);
       result = await sql`
-        SELECT id, short_code, destination_url, qr_type, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
+        SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
         FROM qr_codes
         WHERE organization_id = ${orgMembership.organizationId}
         ORDER BY created_at DESC
@@ -292,7 +292,7 @@ async function handleList(
     } catch {
       // User has no organization - return only their personal QR codes
       result = await sql`
-        SELECT id, short_code, destination_url, qr_type, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
+        SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
         FROM qr_codes
         WHERE user_id = ${authContext.userId} AND organization_id IS NULL
         ORDER BY created_at DESC
@@ -309,7 +309,7 @@ async function handleList(
     // Unauthenticated - return all public QR codes (backward compatibility)
     // In production, you may want to require authentication here
     result = await sql`
-      SELECT id, short_code, destination_url, qr_type, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
+      SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
       FROM qr_codes
       WHERE organization_id IS NULL AND user_id IS NULL
       ORDER BY created_at DESC

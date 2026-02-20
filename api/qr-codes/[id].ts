@@ -236,7 +236,9 @@ async function handlePatch(
     return `${field} = $${i + 2}`;
   }).join(', ');
 
-  const result = await sql(
+  // neon() supports sql(string, params) at runtime but TS types only expose tagged templates
+  const rawSql = sql as unknown as (query: string, params: unknown[]) => Promise<Record<string, unknown>[]>;
+  const result = await rawSql(
     `UPDATE qr_codes SET ${setClauses}, updated_at = NOW() WHERE id = $1 RETURNING *`,
     [id, ...values]
   );
