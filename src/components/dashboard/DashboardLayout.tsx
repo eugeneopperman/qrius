@@ -9,7 +9,6 @@ import {
   Plus,
   Settings,
   Clock,
-  Layers,
   ScanLine,
   Sun,
   Moon,
@@ -30,9 +29,9 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'QR Codes', href: '/qr-codes', icon: QrCode },
+  { name: 'Create', href: '/create', icon: Plus },
   { name: 'History', href: '/history', icon: Clock },
   { name: 'Reader', href: '/reader', icon: ScanLine },
-  { name: 'Templates', href: '/create', icon: Layers },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
