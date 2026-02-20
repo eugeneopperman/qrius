@@ -66,6 +66,10 @@ interface QRStore {
   activeType: QRCodeType;
   setActiveType: (type: QRCodeType) => void;
 
+  // Campaign name (optional label for the QR code)
+  campaignName: string;
+  setCampaignName: (name: string) => void;
+
   // Data for each type
   urlData: URLData;
   textData: TextData;
@@ -114,6 +118,9 @@ const defaultStyleOptions: QRStyleOptions = {
 export const useQRStore = create<QRStore>((set, get) => ({
   activeType: 'url',
   setActiveType: (type) => set({ activeType: type }),
+
+  campaignName: '',
+  setCampaignName: (name) => set({ campaignName: name }),
 
   // Default data values
   urlData: { url: '', useShortened: false },
@@ -201,7 +208,7 @@ export const useQRStore = create<QRStore>((set, get) => ({
 
   // Reset to default options
   resetToDefaults: () =>
-    set({ styleOptions: defaultStyleOptions }),
+    set({ styleOptions: defaultStyleOptions, campaignName: '' }),
 
   // Get current data based on active type
   getCurrentData: () => {

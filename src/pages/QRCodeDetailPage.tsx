@@ -7,7 +7,15 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { toast } from '@/stores/toastStore';
 import { useQRCodeDetail } from '@/hooks/queries/useQRCodeDetail';
 import { QRMiniPreview } from '@/components/ui/QRMiniPreview';
-import type { QRMiniPreviewHandle } from '@/components/ui/QRMiniPreview';
+import type { QRMiniPreviewHandle, QRStyleOptionsForPreview } from '@/components/ui/QRMiniPreview';
+import type { Json } from '@/types/database';
+
+function extractStyleOptions(metadata: Json | undefined): QRStyleOptionsForPreview | undefined {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return undefined;
+  const m = metadata as Record<string, unknown>;
+  if (!m.style_options || typeof m.style_options !== 'object' || Array.isArray(m.style_options)) return undefined;
+  return m.style_options as QRStyleOptionsForPreview;
+}
 import { getSession } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -216,6 +224,7 @@ export default function QRCodeDetailPage() {
 
   const trackingUrl = `${window.location.origin}/r/${qrCode.short_code}`;
   const isUrlType = qrCode.qr_type === 'url' || !qrCode.qr_type;
+  const savedStyle = extractStyleOptions(qrCode.metadata);
 
   return (
     <DashboardLayout>
@@ -295,7 +304,7 @@ export default function QRCodeDetailPage() {
           <div className="lg:col-span-1">
             <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 ${!qrCode.is_active ? 'opacity-60' : ''}`}>
               <div className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
-                <QRMiniPreview ref={qrPreviewRef} data={qrCode.destination_url} size={240} />
+                <QRMiniPreview ref={qrPreviewRef} data={qrCode.destination_url} size={240} styleOptions={savedStyle} />
               </div>
 
               <div className="space-y-3">

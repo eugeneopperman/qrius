@@ -24,6 +24,7 @@ interface CreateQRCodeRequest {
   name?: string;
   description?: string;
   tags?: string[];
+  style_options?: Record<string, unknown>;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -135,6 +136,14 @@ async function handleCreate(
     const tags = validateStringArray(body.tags, 20, 50);
     if (tags === null) return res.status(400).json({ error: 'tags must be an array of up to 20 strings (50 chars each)' });
   }
+  if (body.style_options !== undefined) {
+    if (typeof body.style_options !== 'object' || body.style_options === null || Array.isArray(body.style_options)) {
+      return res.status(400).json({ error: 'style_options must be an object' });
+    }
+    if (JSON.stringify(body.style_options).length > 4096) {
+      return res.status(400).json({ error: 'style_options must be 4KB or less' });
+    }
+  }
 
   // Get organization context
   let organizationId: string | null = null;
@@ -191,6 +200,11 @@ async function handleCreate(
     }
   }
 
+  // Build metadata JSON (merge style_options if provided)
+  const metadata = body.style_options
+    ? JSON.stringify({ style_options: body.style_options })
+    : null;
+
   // Insert new QR code
   const result = await sql`
     INSERT INTO qr_codes (
@@ -202,7 +216,8 @@ async function handleCreate(
       organization_id,
       name,
       description,
-      tags
+      tags,
+      metadata
     )
     VALUES (
       ${shortCode},
@@ -213,7 +228,8 @@ async function handleCreate(
       ${organizationId},
       ${body.name || null},
       ${body.description || null},
-      ${body.tags || []}
+      ${body.tags || []},
+      ${metadata}
     )
     RETURNING *
   `;
@@ -260,7 +276,7 @@ async function handleList(
   if (authContext?.organizationId) {
     // API key auth - filter by organization
     result = await sql`
-      SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
+      SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at
       FROM qr_codes
       WHERE organization_id = ${authContext.organizationId}
       ORDER BY created_at DESC
@@ -277,7 +293,7 @@ async function handleList(
     try {
       const orgMembership = await getUserOrganization(authContext.userId);
       result = await sql`
-        SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
+        SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at
         FROM qr_codes
         WHERE organization_id = ${orgMembership.organizationId}
         ORDER BY created_at DESC
@@ -292,7 +308,7 @@ async function handleList(
     } catch {
       // User has no organization - return only their personal QR codes
       result = await sql`
-        SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
+        SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at
         FROM qr_codes
         WHERE user_id = ${authContext.userId} AND organization_id IS NULL
         ORDER BY created_at DESC
@@ -309,7 +325,7 @@ async function handleList(
     // Unauthenticated - return all public QR codes (backward compatibility)
     // In production, you may want to require authentication here
     result = await sql`
-      SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, is_active, total_scans, user_id, organization_id, created_at, updated_at
+      SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at
       FROM qr_codes
       WHERE organization_id IS NULL AND user_id IS NULL
       ORDER BY created_at DESC

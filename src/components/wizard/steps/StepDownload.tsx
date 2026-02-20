@@ -53,6 +53,29 @@ export function StepDownload() {
 
       const qrValue = getQRValue();
       const currentData = getCurrentData();
+      const { campaignName, styleOptions } = useQRStore.getState();
+
+      // Determine name: use campaignName if provided, otherwise auto-generate
+      const name = campaignName.trim()
+        || (activeType === 'url' ? (currentData.data as { url?: string }).url?.slice(0, 100) : `${activeType.toUpperCase()} QR Code`);
+
+      // Serialize rendering-relevant style options (exclude frame/transient fields)
+      const style_options: Record<string, unknown> = {
+        dotsColor: styleOptions.dotsColor,
+        backgroundColor: styleOptions.backgroundColor,
+        dotsType: styleOptions.dotsType,
+        cornersSquareType: styleOptions.cornersSquareType,
+        cornersDotType: styleOptions.cornersDotType,
+        errorCorrectionLevel: styleOptions.errorCorrectionLevel,
+      };
+      if (styleOptions.useGradient) style_options.useGradient = true;
+      if (styleOptions.gradient) style_options.gradient = styleOptions.gradient;
+      if (styleOptions.logoUrl) style_options.logoUrl = styleOptions.logoUrl;
+      if (styleOptions.logoShape) style_options.logoShape = styleOptions.logoShape;
+      if (styleOptions.logoMargin !== undefined) style_options.logoMargin = styleOptions.logoMargin;
+      if (styleOptions.logoSize !== undefined) style_options.logoSize = styleOptions.logoSize;
+      if (styleOptions.qrRoundness !== undefined) style_options.qrRoundness = styleOptions.qrRoundness;
+      if (styleOptions.qrPattern) style_options.qrPattern = styleOptions.qrPattern;
 
       const response = await fetch('/api/qr-codes', {
         method: 'POST',
@@ -64,7 +87,8 @@ export function StepDownload() {
           destination_url: qrValue,
           qr_type: activeType,
           original_data: currentData.data,
-          name: activeType === 'url' ? (currentData.data as { url?: string }).url?.slice(0, 100) : `${activeType.toUpperCase()} QR Code`,
+          name,
+          style_options,
         }),
       });
 

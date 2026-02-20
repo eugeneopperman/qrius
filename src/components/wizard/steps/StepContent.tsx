@@ -13,6 +13,7 @@ import {
   LocationForm,
 } from '@/components/qr-types';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import {
   ArrowLeft,
   ArrowRight,
@@ -42,7 +43,12 @@ const typeConfig: Record<QRCodeType, { label: string; icon: React.ElementType }>
 };
 
 export function StepContent() {
-  const { activeType, getQRValue } = useQRStore(useShallow((s) => ({ activeType: s.activeType, getQRValue: s.getQRValue })));
+  const { activeType, getQRValue, campaignName, setCampaignName } = useQRStore(useShallow((s) => ({
+    activeType: s.activeType,
+    getQRValue: s.getQRValue,
+    campaignName: s.campaignName,
+    setCampaignName: s.setCampaignName,
+  })));
   const { nextStep, prevStep, skipToDownload } = useWizardStore();
 
   const renderForm = () => {
@@ -92,6 +98,18 @@ export function StepContent() {
 
         {/* Divider */}
         <hr className="-mx-6 my-4 border-gray-100 dark:border-gray-800" />
+
+        {/* Campaign Name */}
+        <div className="mb-4">
+          <Input
+            label="Campaign Name"
+            placeholder="e.g. Summer Sale 2026"
+            value={campaignName}
+            onChange={(e) => setCampaignName(e.target.value)}
+            maxLength={200}
+          />
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Optional — give your QR code a memorable name</p>
+        </div>
 
         {/* Form content */}
         <div>

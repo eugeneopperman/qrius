@@ -5,6 +5,14 @@ import type { QRCode } from '@/types/database';
 import { toast } from '@/stores/toastStore';
 import { Dropdown } from '../ui/Dropdown';
 import { QRMiniPreview } from '../ui/QRMiniPreview';
+import type { QRStyleOptionsForPreview } from '../ui/QRMiniPreview';
+
+function extractStyleOptions(metadata: QRCode['metadata']): QRStyleOptionsForPreview | undefined {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return undefined;
+  const m = metadata as Record<string, unknown>;
+  if (!m.style_options || typeof m.style_options !== 'object' || Array.isArray(m.style_options)) return undefined;
+  return m.style_options as QRStyleOptionsForPreview;
+}
 
 interface QRCodeCardProps {
   qrCode: QRCode;
@@ -37,6 +45,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
   });
 
   const isDynamic = !!qrCode.short_code;
+  const savedStyle = extractStyleOptions(qrCode.metadata);
 
   return (
     <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden card-interactive ${!qrCode.is_active ? 'opacity-60' : ''}`}>
@@ -44,7 +53,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
       <Link to="/qr-codes/$id" params={{ id: qrCode.id }} className="block">
         <div className="aspect-square p-6 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
           <div className="w-full h-full max-w-[200px] max-h-[200px] bg-white rounded-lg flex items-center justify-center overflow-hidden">
-            <QRMiniPreview data={qrCode.destination_url} size={180} />
+            <QRMiniPreview data={qrCode.destination_url} size={180} styleOptions={savedStyle} />
           </div>
         </div>
       </Link>
