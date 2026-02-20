@@ -1,6 +1,8 @@
 import { memo, useRef, useState, useCallback } from 'react';
 import { Plus, Download, Upload, Palette } from 'lucide-react';
 import { useTemplateStore } from '@/stores/templateStore';
+import { usePlanGate } from '@/hooks/usePlanGate';
+import { ProBadge } from '../ui/ProBadge';
 import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -22,6 +24,9 @@ export const TemplateList = memo(function TemplateList({
     exportTemplates,
     importTemplates,
   } = useTemplateStore();
+
+  const { templateLimit, isAuthenticated, isFree } = usePlanGate();
+  const isAtLimit = templateLimit !== -1 && templates.length >= templateLimit;
 
   const [deleteConfirm, setDeleteConfirm] = useState<{
     id: string;
@@ -114,15 +119,30 @@ export const TemplateList = memo(function TemplateList({
     <div className="space-y-4">
       {/* Actions */}
       <div className="flex items-center justify-between gap-2">
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => openWizard()}
-          className="flex-1 sm:flex-none"
-        >
-          <Plus className="w-4 h-4" />
-          New Template
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              if (isAtLimit) {
+                toast.info('Upgrade to Pro for unlimited templates');
+                return;
+              }
+              openWizard();
+            }}
+            disabled={isAtLimit}
+            className="flex-1 sm:flex-none"
+          >
+            <Plus className="w-4 h-4" />
+            New Template
+          </Button>
+          {isAuthenticated && isFree && templateLimit !== -1 && (
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {templates.length}/{templateLimit} templates
+            </span>
+          )}
+          {isAtLimit && <ProBadge />}
+        </div>
 
         {templates.length > 0 && (
           <div className="flex gap-1">

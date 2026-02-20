@@ -2,7 +2,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { requireAuth, requireRole, UnauthorizedError, ForbiddenError } from '../../_lib/auth.js';
+import { requireAuth, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../../_lib/auth.js';
 import { setCorsHeaders } from '../../_lib/cors.js';
 import { isValidUUID } from '../../_lib/validate.js';
 import { logger } from '../../_lib/logger.js';
@@ -42,6 +42,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Check user has permission to invite
     await requireRole(user.id, organizationId, ['owner', 'admin']);
+
+    // Check team member limit
+    const { allowed, current, limit } = await checkPlanLimit(organizationId, 'team_members');
+    // Also count pending invites toward the limit
+    const { count: pendingInvites } = await supabaseAdmin
+      .from('organization_invitations')
+      .select('*', { count: 'exact', head: true })
+      .eq('organization_id', organizationId)
+      .is('accepted_at', null);
+    const totalMembers = current + (pendingInvites || 0);
+    if (limit !== -1 && totalMembers >= limit) {
+      return res.status(403).json({
+        error: 'Team member limit reached',
+        current: totalMembers,
+        limit,
+      });
+    }
 
     const body = req.body as InviteRequest;
 

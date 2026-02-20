@@ -64,10 +64,7 @@ export default function DashboardPage() {
 
         {/* Upgrade prompt for free users */}
         {showUpgradePrompt && (
-          <UpgradePrompt
-            title="Unlock more features"
-            description="Upgrade to Pro for unlimited QR codes, advanced analytics, and team collaboration."
-          />
+          <UpgradePrompt title="Unlock more features" />
         )}
 
         {/* Usage warning */}

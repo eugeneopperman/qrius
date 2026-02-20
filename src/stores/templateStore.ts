@@ -7,6 +7,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { BrandTemplate, BrandTemplateStyle, DotType, CornerSquareType } from '@/types';
 import { useQRStore } from './qrStore';
+import { useAuthStore } from './authStore';
+
+const FREE_TEMPLATE_LIMIT = 3;
+
+function isAtTemplateLimit(): boolean {
+  const { user, currentOrganization } = useAuthStore.getState();
+  if (!user) return false; // unauthenticated = no limit
+  const plan = currentOrganization?.plan ?? 'free';
+  return plan === 'free';
+}
 
 // ============================================================================
 // Types
@@ -212,6 +222,11 @@ export const useTemplateStore = create<TemplateStore>()(
           }));
           return state.editingTemplateId;
         } else {
+          // Check free plan template limit
+          if (isAtTemplateLimit() && state.templates.length >= FREE_TEMPLATE_LIMIT) {
+            return '';
+          }
+
           // Create new template
           const newId = crypto.randomUUID();
           const newTemplate: BrandTemplate = {
@@ -238,6 +253,9 @@ export const useTemplateStore = create<TemplateStore>()(
       duplicateTemplate: (id: string) => {
         const template = get().templates.find((t) => t.id === id);
         if (!template) return;
+
+        // Check free plan template limit
+        if (isAtTemplateLimit() && get().templates.length >= FREE_TEMPLATE_LIMIT) return;
 
         const now = Date.now();
         const duplicated: BrandTemplate = {
@@ -277,6 +295,14 @@ export const useTemplateStore = create<TemplateStore>()(
           );
 
           if (validTemplates.length === 0) return false;
+
+          // Check free plan template limit
+          if (isAtTemplateLimit()) {
+            const currentCount = get().templates.length;
+            const remaining = FREE_TEMPLATE_LIMIT - currentCount;
+            if (remaining <= 0) return false;
+            validTemplates.splice(remaining);
+          }
 
           // Add with new IDs to avoid conflicts
           const now = Date.now();

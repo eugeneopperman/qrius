@@ -1,5 +1,7 @@
 import { useTemplateStore } from '@/stores/templateStore';
 import { useQRStore } from '@/stores/qrStore';
+import { usePlanGate } from '@/hooks/usePlanGate';
+import { ProBadge } from '../ui/ProBadge';
 import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
 import { cn } from '@/utils/cn';
@@ -9,6 +11,8 @@ import type { BrandTemplate } from '@/types';
 export function TemplatePickerSection() {
   const { templates, applyTemplate, openWizard } = useTemplateStore();
   const styleOptions = useQRStore((s) => s.styleOptions);
+  const { templateLimit } = usePlanGate();
+  const isAtLimit = templateLimit !== -1 && templates.length >= templateLimit;
 
   const handleApply = (template: BrandTemplate) => {
     applyTemplate(template.id);
@@ -35,10 +39,11 @@ export function TemplatePickerSection() {
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
           Save your favorite styles as reusable templates
         </p>
-        <Button variant="secondary" size="sm" onClick={() => openWizard()}>
+        <Button variant="secondary" size="sm" onClick={() => openWizard()} disabled={isAtLimit}>
           <Plus className="w-4 h-4" />
           Create Template
         </Button>
+        {isAtLimit && <div className="mt-2"><ProBadge /></div>}
       </div>
     );
   }
@@ -84,11 +89,26 @@ export function TemplatePickerSection() {
 
         {/* Create New */}
         <button
-          onClick={() => openWizard()}
-          className="p-3 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-orange-400 hover:bg-orange-50/50 dark:hover:bg-orange-900/10 transition-all flex flex-col items-center justify-center gap-1 min-h-[80px]"
+          onClick={() => {
+            if (isAtLimit) {
+              toast.info('Upgrade to Pro for unlimited templates');
+              return;
+            }
+            openWizard();
+          }}
+          disabled={isAtLimit}
+          className={cn(
+            'p-3 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-1 min-h-[80px]',
+            isAtLimit
+              ? 'border-gray-200 dark:border-gray-800 opacity-50 cursor-not-allowed'
+              : 'border-gray-300 dark:border-gray-700 hover:border-orange-400 hover:bg-orange-50/50 dark:hover:bg-orange-900/10'
+          )}
         >
           <Plus className="w-5 h-5 text-gray-400" />
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">New</span>
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            {isAtLimit ? 'Limit reached' : 'New'}
+          </span>
+          {isAtLimit && <ProBadge />}
         </button>
       </div>
     </div>

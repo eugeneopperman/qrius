@@ -71,8 +71,8 @@ function makeMembership(
 
 const DEFAULT_FREE_PLAN_LIMITS = {
   plan: 'free' as const,
-  qr_codes_limit: 10,
-  scans_per_month: 1000,
+  qr_codes_limit: 15,
+  scans_per_month: 5000,
   scan_history_days: 30,
   team_members: 1,
   api_requests_per_day: 0,

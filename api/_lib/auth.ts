@@ -205,7 +205,7 @@ export async function requireRole(
  */
 export async function checkPlanLimit(
   organizationId: string,
-  limitType: 'qr_codes' | 'scans' | 'api_requests'
+  limitType: 'qr_codes' | 'scans' | 'api_requests' | 'team_members'
 ): Promise<{ allowed: boolean; current: number; limit: number }> {
   // Get organization plan
   const { data: org, error: orgError } = await supabaseAdmin
@@ -266,6 +266,16 @@ export async function checkPlanLimit(
         .single();
       current = monthUsage?.scans_count || 0;
       limit = limits.scans_per_month;
+      break;
+    }
+
+    case 'team_members': {
+      const { count: memberCount } = await supabaseAdmin
+        .from('organization_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId);
+      current = memberCount || 0;
+      limit = limits.team_members;
       break;
     }
   }

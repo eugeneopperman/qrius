@@ -4,7 +4,7 @@
  */
 
 /** App version — bump by 0.01 with each release */
-export const APP_VERSION = '0.15';
+export const APP_VERSION = '0.16';
 
 // ============================================================================
 // QR Code Configuration

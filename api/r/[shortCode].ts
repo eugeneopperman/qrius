@@ -24,6 +24,7 @@ export const config = {
 interface CachedRedirect {
   destinationUrl: string;
   qrCodeId: string;
+  organizationId: string | null;
 }
 
 export default async function handler(req: Request): Promise<Response> {
@@ -67,7 +68,7 @@ export default async function handler(req: Request): Promise<Response> {
     // Cache miss - query database
     if (!redirectData) {
       const result = await sql`
-        SELECT id, destination_url, is_active
+        SELECT id, destination_url, is_active, organization_id
         FROM qr_codes
         WHERE short_code = ${shortCode}
       `;
@@ -87,6 +88,7 @@ export default async function handler(req: Request): Promise<Response> {
       redirectData = {
         destinationUrl: row.destination_url as string,
         qrCodeId: row.id as string,
+        organizationId: (row.organization_id as string) || null,
       };
 
       // Cache for next time (non-blocking)
@@ -104,7 +106,7 @@ export default async function handler(req: Request): Promise<Response> {
     }
 
     // Log scan asynchronously (fire-and-forget)
-    logScanEvent(sql, req, redirectData.qrCodeId).catch((error) => {
+    logScanEvent(sql, req, redirectData.qrCodeId, redirectData.organizationId).catch((error) => {
       logger.redirect.error('Scan event logging failed', { shortCode, error: String(error) });
     });
 
@@ -121,7 +123,8 @@ export default async function handler(req: Request): Promise<Response> {
 async function logScanEvent(
   sql: ReturnType<typeof neon>,
   req: Request,
-  qrCodeId: string
+  qrCodeId: string,
+  organizationId: string | null
 ): Promise<void> {
   try {
     const headers = req.headers;
@@ -142,6 +145,17 @@ async function logScanEvent(
         ${ipHash}
       )
     `;
+
+    // Increment scan count in usage_records for billing tracking
+    if (organizationId) {
+      const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+      await sql`
+        INSERT INTO usage_records (organization_id, month, scans_count)
+        VALUES (${organizationId}, ${currentMonth}, 1)
+        ON CONFLICT (organization_id, month)
+        DO UPDATE SET scans_count = usage_records.scans_count + 1, updated_at = NOW()
+      `;
+    }
   } catch (error) {
     // Log but don't fail the redirect
     logger.redirect.error('Failed to log scan event', { qrCodeId, error: String(error) });

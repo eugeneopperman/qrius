@@ -13,6 +13,8 @@ import {
 import { QR_CONFIG } from '@/config/constants';
 import { useQRDownload } from '@/hooks/useQRDownload';
 import { useQRCodeInstance } from '@/hooks/useQRCodeInstance';
+import { usePlanGate } from '@/hooks/usePlanGate';
+import { ProBadge } from './ui/ProBadge';
 
 export interface QRPreviewHandle {
   download: () => void;
@@ -124,6 +126,8 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
 
   const frameStyle = styleOptions.frameStyle || 'none';
   const hasFrame = frameStyle !== 'none';
+
+  const { canUse } = usePlanGate();
 
   // Use the download hook
   const { copied, isDownloading, handleDownload, handlePdfDownload, handleCopy } = useQRDownload({
@@ -315,10 +319,12 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
                 </button>
                 <button
                   role="menuitem"
-                  onClick={() => downloadWithMenuClose('svg')}
-                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
+                  onClick={() => canUse('svg_download') ? downloadWithMenuClose('svg') : undefined}
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px] flex items-center justify-between"
+                  disabled={!canUse('svg_download')}
                 >
-                  SVG (Illustrator Ready)
+                  <span className={!canUse('svg_download') ? 'opacity-50' : ''}>SVG (Illustrator Ready)</span>
+                  {!canUse('svg_download') && <ProBadge />}
                 </button>
                 <button
                   role="menuitem"
@@ -330,10 +336,12 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
                 <div className="border-t border-gray-200 dark:border-gray-700 my-1" role="separator" />
                 <button
                   role="menuitem"
-                  onClick={pdfDownloadWithMenuClose}
-                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
+                  onClick={() => canUse('pdf_download') ? pdfDownloadWithMenuClose() : undefined}
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px] flex items-center justify-between"
+                  disabled={!canUse('pdf_download')}
                 >
-                  PDF (Print Ready)
+                  <span className={!canUse('pdf_download') ? 'opacity-50' : ''}>PDF (Print Ready)</span>
+                  {!canUse('pdf_download') && <ProBadge />}
                 </button>
               </div>
             )}

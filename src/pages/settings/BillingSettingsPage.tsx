@@ -12,6 +12,9 @@ import {
   Loader2,
   Sparkles,
 } from 'lucide-react';
+import { ComingSoonBadge } from '@/components/ui/ProBadge';
+
+const COMING_SOON_FEATURES = ['White-label branding', 'CSV analytics export', 'Advanced analytics'];
 
 // Stripe price IDs from environment variables
 const STRIPE_PRICES = {
@@ -301,6 +304,7 @@ export function BillingSettingsContent() {
                   <li key={index} className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
                     <span className="text-gray-600 dark:text-gray-400">{feature}</span>
+                    {COMING_SOON_FEATURES.includes(feature) && <ComingSoonBadge />}
                   </li>
                 ))}
               </ul>

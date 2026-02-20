@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
+import { UsageLimitWarning } from '@/components/dashboard/UpgradePrompt';
 import { useTeamMembers, useInviteMember } from '@/hooks/queries/useTeamMembers';
 import type { OrgRole } from '@/types/database';
 import {
@@ -30,11 +31,13 @@ const roleColors: Record<OrgRole, string> = {
 };
 
 export function TeamSettingsContent() {
-  const { currentOrganization, currentRole, user } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, currentRole: s.currentRole, user: s.user })));
+  const { currentOrganization, currentRole, user, planLimits } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, currentRole: s.currentRole, user: s.user, planLimits: s.planLimits })));
   const { data: members = [], isLoading } = useTeamMembers();
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   const canManageTeam = currentRole === 'owner' || currentRole === 'admin';
+  const teamLimit = planLimits?.team_members ?? 1;
+  const isAtLimit = teamLimit !== -1 && members.length >= teamLimit;
 
   return (
     <div className="max-w-4xl">
@@ -48,13 +51,22 @@ export function TeamSettingsContent() {
             </p>
           </div>
           {canManageTeam && (
-            <Button onClick={() => setShowInviteModal(true)}>
+            <Button onClick={() => setShowInviteModal(true)} disabled={isAtLimit} title={isAtLimit ? `Team member limit reached (${teamLimit})` : undefined}>
               <UserPlus className="w-4 h-4" />
               Invite member
             </Button>
           )}
         </div>
       </div>
+
+      {/* Team member limit warning */}
+      {planLimits && teamLimit > 0 && members.length > 0 && (
+        <UsageLimitWarning
+          current={members.length}
+          limit={teamLimit}
+          type="team_members"
+        />
+      )}
 
       {/* Members list */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">

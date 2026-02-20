@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { ProBadge } from '../ui/ProBadge';
 import { toast } from '@/stores/toastStore';
+import { usePlanGate } from '@/hooks/usePlanGate';
 import { generateIllustratorSVG, downloadSVG } from '@/utils/qrSvgGenerator';
 import type { QRStyleOptions } from '@/types';
 import type QRCodeStyling from 'qr-code-styling';
@@ -23,6 +25,7 @@ export function QRActions({
   const [showFormatMenu, setShowFormatMenu] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { canUse } = usePlanGate();
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -187,10 +190,12 @@ export function QRActions({
               </button>
               <button
                 role="menuitem"
-                onClick={() => handleDownload('svg')}
-                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
+                onClick={() => canUse('svg_download') ? handleDownload('svg') : undefined}
+                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px] flex items-center justify-between"
+                disabled={!canUse('svg_download')}
               >
-                SVG (Illustrator Ready)
+                <span className={!canUse('svg_download') ? 'opacity-50' : ''}>SVG (Illustrator Ready)</span>
+                {!canUse('svg_download') && <ProBadge />}
               </button>
               <button
                 role="menuitem"
@@ -202,10 +207,12 @@ export function QRActions({
               <div className="border-t border-gray-200 dark:border-gray-700 my-1" role="separator" />
               <button
                 role="menuitem"
-                onClick={handlePdfDownload}
-                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px]"
+                onClick={() => canUse('pdf_download') ? handlePdfDownload() : undefined}
+                className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 min-h-[44px] flex items-center justify-between"
+                disabled={!canUse('pdf_download')}
               >
-                PDF (Print Ready)
+                <span className={!canUse('pdf_download') ? 'opacity-50' : ''}>PDF (Print Ready)</span>
+                {!canUse('pdf_download') && <ProBadge />}
               </button>
             </div>
           )}
