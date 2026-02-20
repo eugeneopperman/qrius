@@ -4,6 +4,7 @@
 import { neon } from '@neondatabase/serverless';
 import { Redis } from '@upstash/redis';
 import { getGeoFromHeaders, getDeviceType, hashIP, getClientIP } from '../_lib/geo.js';
+import { logger } from '../_lib/logger.js';
 
 /** Only allow http: and https: redirect targets to prevent open redirect attacks */
 function isValidRedirectUrl(url: string): boolean {
@@ -26,11 +27,13 @@ interface CachedRedirect {
 }
 
 export default async function handler(req: Request): Promise<Response> {
+  const start = Date.now();
   const url = new URL(req.url);
   const pathParts = url.pathname.split('/');
   const shortCode = pathParts[pathParts.length - 1];
 
   if (!shortCode) {
+    logger.redirect.warn('Missing short code in path', { path: url.pathname });
     return new Response('Not Found', { status: 404 });
   }
 
@@ -40,6 +43,7 @@ export default async function handler(req: Request): Promise<Response> {
   const redisToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!connectionString) {
+    logger.redirect.error('Database not configured');
     return new Response('Database not configured', { status: 500 });
   }
 
@@ -48,13 +52,15 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     let redirectData: CachedRedirect | null = null;
+    let cacheHit = false;
 
     // Try KV cache first (fast path)
     if (kv) {
       try {
         redirectData = await kv.get<CachedRedirect>(`redirect:${shortCode}`);
+        if (redirectData) cacheHit = true;
       } catch (error) {
-        console.error('KV cache error:', error);
+        logger.kv.warn('Cache read error', { shortCode, error: String(error) });
       }
     }
 
@@ -67,12 +73,14 @@ export default async function handler(req: Request): Promise<Response> {
       `;
 
       if (result.length === 0) {
+        logger.redirect.warn('QR code not found', { shortCode });
         return new Response('QR code not found', { status: 404 });
       }
 
       const row = result[0];
 
       if (!row.is_active) {
+        logger.redirect.warn('QR code inactive', { shortCode });
         return new Response('QR code is inactive', { status: 410 });
       }
 
@@ -83,22 +91,29 @@ export default async function handler(req: Request): Promise<Response> {
 
       // Cache for next time (non-blocking)
       if (kv) {
-        kv.set(`redirect:${shortCode}`, redirectData, { ex: 86400 }).catch(console.error);
+        kv.set(`redirect:${shortCode}`, redirectData, { ex: 86400 }).catch((error) => {
+          logger.kv.warn('Cache write error', { shortCode, error: String(error) });
+        });
       }
     }
 
     // Validate redirect URL protocol before redirecting
     if (!isValidRedirectUrl(redirectData.destinationUrl)) {
+      logger.redirect.warn('Invalid redirect URL blocked', { shortCode, url: redirectData.destinationUrl });
       return new Response('Invalid redirect URL', { status: 400 });
     }
 
     // Log scan asynchronously (fire-and-forget)
-    logScanEvent(sql, req, redirectData.qrCodeId).catch(console.error);
+    logScanEvent(sql, req, redirectData.qrCodeId).catch((error) => {
+      logger.redirect.error('Scan event logging failed', { shortCode, error: String(error) });
+    });
+
+    logger.redirect.info('Redirect', { shortCode, cacheHit, ms: Date.now() - start });
 
     // Return fast redirect
     return Response.redirect(redirectData.destinationUrl, 302);
   } catch (error) {
-    console.error('Redirect error:', error);
+    logger.redirect.error('Redirect error', { shortCode, error: String(error), ms: Date.now() - start });
     return new Response('Internal server error', { status: 500 });
   }
 }
@@ -129,6 +144,6 @@ async function logScanEvent(
     `;
   } catch (error) {
     // Log but don't fail the redirect
-    console.error('Failed to log scan event:', error);
+    logger.redirect.error('Failed to log scan event', { qrCodeId, error: String(error) });
   }
 }

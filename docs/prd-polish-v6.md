@@ -20,6 +20,6 @@ V5 PRD (29 items) fully shipped. This plan covers remaining polish: wiring disab
 
 ## Status
 - [x] Sprint 1 (items 1-3) — Shipped
-- [ ] Sprint 2 (item 4)
-- [ ] Sprint 3 (item 5)
-- [ ] Sprint 4 (items 6-7)
+- [x] Sprint 2 (item 4) — Shipped
+- [x] Sprint 3 (item 5) — Shipped
+- [~] Sprint 4: Item 7 (edge logging) — Shipped; Item 6 (Stripe) — Deferred
