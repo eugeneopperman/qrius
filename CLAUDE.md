@@ -224,9 +224,12 @@ Copy `.env.example` to `.env.local` and configure:
 - CORS headers set on all API routes
 
 ## Testing
-- **Unit Tests**: 354 tests passing across 13 test files (Vitest)
-- **Test command**: `npm run test:run` (single run) or `npm run test` (watch mode)
-- **Coverage**: Utilities (cn, validators, scannability), stores (auth, qr, template, theme, toast, wizard), UI components (Button, Input), hooks (useClickOutside, useDebounce)
+- **Unit Tests**: 432 tests passing across 17 test files (Vitest)
+- **E2E Tests**: 62 tests across 7 Playwright test files (app, navigation, 404, theme, keyboard, wizard, mobile)
+- **Unit command**: `npm run test:run` (single run) or `npm run test` (watch mode)
+- **E2E command**: `npm run e2e` (all browsers) or `npx playwright test --project=chromium` (fast)
+- **Unit coverage**: Utilities (cn, validators, scannability, gradients, qrRoundness), stores (auth, qr, template, theme, toast, wizard, history), UI components (Button, Input), hooks (useClickOutside, useDebounce, useFormField)
+- **E2E coverage**: Navigation, legal pages, auth pages, wizard flow (all 9 QR types), keyboard shortcuts, theme toggle persistence, 404 pages, mobile viewport
 
 ## Documentation & Filing
 
@@ -241,8 +244,4 @@ Copy `.env.example` to `.env.local` and configure:
 
 ## Known Issues
 - Mobile testing requires network access (use `npm run dev -- --host 0.0.0.0`)
-- PWA icons are placeholder solid colors
-- API rate limiting not yet implemented at application level (infrastructure ready via Upstash Redis)
 - Stripe integration requires configuration (works without for dev)
-- Open redirect risk in `api/r/[shortCode].ts` — destination URL protocol not validated
-- No ErrorBoundaries on protected routes — unhandled errors show white screen

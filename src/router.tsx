@@ -233,12 +233,13 @@ const cookiesRoute = createRoute({
   component: CookiesPage,
 });
 
-// Protected routes
+// Protected routes — all include errorComponent to prevent white-screen crashes
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
   beforeLoad: requireAuth,
   component: DashboardPage,
+  errorComponent: ErrorPage,
 });
 
 const qrCodesRoute = createRoute({
@@ -246,6 +247,7 @@ const qrCodesRoute = createRoute({
   path: '/qr-codes',
   beforeLoad: requireAuth,
   component: QRCodesPage,
+  errorComponent: ErrorPage,
 });
 
 const qrCodeDetailRoute = createRoute({
@@ -253,6 +255,7 @@ const qrCodeDetailRoute = createRoute({
   path: '/qr-codes/$id',
   beforeLoad: requireAuth,
   component: QRCodeDetailPage,
+  errorComponent: ErrorPage,
 });
 
 const createQRRoute = createRoute({
@@ -260,6 +263,7 @@ const createQRRoute = createRoute({
   path: '/create',
   beforeLoad: requireAuth,
   component: CreateQRPage,
+  errorComponent: ErrorPage,
 });
 
 const historyRoute = createRoute({
@@ -267,6 +271,7 @@ const historyRoute = createRoute({
   path: '/history',
   beforeLoad: requireAuth,
   component: HistoryPage,
+  errorComponent: ErrorPage,
 });
 
 const onboardingRoute = createRoute({
@@ -274,6 +279,7 @@ const onboardingRoute = createRoute({
   path: '/onboarding',
   beforeLoad: requireAuth,
   component: OnboardingPage,
+  errorComponent: ErrorPage,
 });
 
 const readerRoute = createRoute({
@@ -281,6 +287,7 @@ const readerRoute = createRoute({
   path: '/reader',
   beforeLoad: requireAuth,
   component: ReaderPage,
+  errorComponent: ErrorPage,
 });
 
 // Settings routes — single tabbed page
@@ -289,6 +296,7 @@ const settingsRoute = createRoute({
   path: '/settings',
   beforeLoad: requireAuth,
   component: SettingsPage,
+  errorComponent: ErrorPage,
 });
 
 // Redirects for old settings sub-routes
