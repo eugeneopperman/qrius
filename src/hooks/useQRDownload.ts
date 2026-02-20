@@ -42,33 +42,39 @@ export function useQRDownload({
   }, []);
 
   /**
-   * Capture the frame container as a canvas using html2canvas
+   * Try to capture the frame container as a canvas using html2canvas.
+   * Returns null if html2canvas fails (e.g. Tailwind v4 oklch colors).
    */
   const captureFrameAsCanvas = useCallback(async (scale = 2): Promise<HTMLCanvasElement | null> => {
     if (!frameContainerRef?.current) return null;
 
-    const html2canvas = (await import('html2canvas')).default;
-    const container = frameContainerRef.current;
-
-    // Temporarily remove animation and hover classes for clean capture
-    const originalClassName = container.className;
-    container.className = container.className
-      .replace('animate-scale-in', '')
-      .replace('qr-preview-glow', '')
-      .replace('hover:shadow-md', '');
-
     try {
-      const canvas = await html2canvas(container, {
-        scale,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
-        logging: false,
-      });
-      return canvas;
-    } finally {
-      // Restore original classes
-      container.className = originalClassName;
+      const html2canvas = (await import('html2canvas')).default;
+      const container = frameContainerRef.current;
+
+      // Temporarily remove animation and hover classes for clean capture
+      const originalClassName = container.className;
+      container.className = container.className
+        .replace('animate-scale-in', '')
+        .replace('qr-preview-glow', '')
+        .replace('hover:shadow-md', '');
+
+      try {
+        const canvas = await html2canvas(container, {
+          scale,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          logging: false,
+        });
+        return canvas;
+      } finally {
+        container.className = originalClassName;
+      }
+    } catch (error) {
+      // html2canvas can't handle Tailwind v4 oklch() colors — fall through
+      console.warn('html2canvas frame capture failed:', error);
+      return null;
     }
   }, [frameContainerRef]);
 
@@ -78,7 +84,7 @@ export function useQRDownload({
 
       setIsDownloading(true);
       try {
-        // For PNG and JPEG, capture the frame if present
+        // For PNG and JPEG, try to capture the frame if present
         if ((format === 'png' || format === 'jpeg') && hasFrame && frameContainerRef?.current) {
           const canvas = await captureFrameAsCanvas(2);
           if (canvas) {
@@ -101,26 +107,23 @@ export function useQRDownload({
             );
             return;
           }
+          // html2canvas failed — fall through to QR-only download
         }
 
         // SVG export (doesn't include HTML frame)
         if (format === 'svg') {
-          // Access internal QR matrix for custom SVG generation
-          // Use type guard to safely validate the internal structure exists
           const qrInstance = qrCodeRef.current as unknown as Record<string, unknown>;
           const qrMatrix = qrInstance._qr as {
             getModuleCount?: () => number;
             isDark?: (row: number, col: number) => boolean;
           } | undefined;
 
-          // Validate that the internal QR matrix has the required methods
           const hasValidQrMatrix =
             qrMatrix &&
             typeof qrMatrix.getModuleCount === 'function' &&
             typeof qrMatrix.isDark === 'function';
 
           if (!hasValidQrMatrix) {
-            // Fallback to library's built-in SVG download
             await qrCodeRef.current.download({
               name: 'qrcode',
               extension: 'svg',
@@ -140,7 +143,7 @@ export function useQRDownload({
             toast.info('Note: SVG export does not include frame styling');
           }
         } else {
-          // PNG/JPEG: use robust rasterization (avoids library's btoa bug)
+          // PNG/JPEG: use robust rasterization
           const blob = await rasterizeQRToBlob(
             qrCodeRef.current,
             format,
@@ -148,6 +151,9 @@ export function useQRDownload({
           );
           downloadBlob(blob, `qrcode.${format}`);
           toast.success(`QR code downloaded as ${format.toUpperCase()}`);
+          if (hasFrame) {
+            toast.info('Note: Frame styling is not included in this download');
+          }
         }
         onSuccess?.();
       } catch (error) {
@@ -169,14 +175,15 @@ export function useQRDownload({
       const { jsPDF } = await import('jspdf');
 
       let dataUrl: string;
+      let frameIncluded = false;
 
-      // Capture frame if present
+      // Try to capture frame if present
       if (hasFrame && frameContainerRef?.current) {
-        const canvas = await captureFrameAsCanvas(3); // Higher scale for PDF quality
+        const canvas = await captureFrameAsCanvas(3);
         if (canvas) {
           dataUrl = canvas.toDataURL('image/png');
+          frameIncluded = true;
         } else {
-          // Fallback to QR-only via robust rasterization
           const blob = await rasterizeQRToBlob(qrCodeRef.current);
           dataUrl = await blobToDataUrl(blob);
         }
@@ -200,6 +207,9 @@ export function useQRDownload({
       pdf.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
       pdf.save('qrcode.pdf');
       toast.success('QR code downloaded as PDF');
+      if (hasFrame && !frameIncluded) {
+        toast.info('Note: Frame styling is not included in this download');
+      }
       onSuccess?.();
     } catch (error) {
       console.error('PDF download failed:', error);
@@ -215,14 +225,16 @@ export function useQRDownload({
 
     try {
       let blob: Blob | null = null;
+      let frameIncluded = false;
 
-      // Capture frame if present
+      // Try to capture frame if present
       if (hasFrame && frameContainerRef?.current) {
         const canvas = await captureFrameAsCanvas(2);
         if (canvas) {
           blob = await new Promise<Blob | null>((resolve) => {
             canvas.toBlob((b) => resolve(b), 'image/png');
           });
+          frameIncluded = true;
         }
       }
 
@@ -238,7 +250,7 @@ export function useQRDownload({
           clearTimeout(copiedTimeoutRef.current);
         }
         copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-        toast.success(hasFrame ? 'QR code with frame copied to clipboard' : 'QR code copied to clipboard');
+        toast.success(frameIncluded ? 'QR code with frame copied to clipboard' : 'QR code copied to clipboard');
         onSuccess?.();
       } else {
         toast.error('Failed to copy QR code. Please try again.');
