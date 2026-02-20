@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSession } from '@/lib/supabase';
 import { toast } from '@/stores/toastStore';
 import { useAuthStore } from '@/stores/authStore';
 import type { QRCode } from '@/types/database';
@@ -42,8 +42,24 @@ export function useOrganizationQRCodes({ limit }: UseOrganizationQRCodesOptions 
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('qr_codes').delete().eq('id', id);
-      if (error) throw error;
+      // Use API endpoint for deletion (handles cache cleanup, scan events, etc.)
+      const session = await getSession();
+      if (!session?.access_token) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await fetch(`/api/qr-codes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete');
+      }
+
       return id;
     },
     onSuccess: (deletedId) => {

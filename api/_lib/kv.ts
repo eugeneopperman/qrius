@@ -20,6 +20,7 @@ const CACHE_TTL = 60 * 60 * 24; // 24 hours in seconds
 export interface CachedRedirect {
   destinationUrl: string;
   qrCodeId: string;
+  organizationId: string | null;
 }
 
 /**

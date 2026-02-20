@@ -82,7 +82,10 @@ export default async function handler(req: Request): Promise<Response> {
 
       if (!row.is_active) {
         logger.redirect.warn('QR code inactive', { shortCode });
-        return new Response('QR code is inactive', { status: 410 });
+        return new Response(
+          '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QR Code Inactive</title></head><body style="font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f9fafb;color:#374151;text-align:center"><div><h1 style="font-size:1.5rem;margin-bottom:0.5rem">QR Code Inactive</h1><p style="color:#6b7280">This QR code has been deactivated by its owner.</p></div></body></html>',
+          { status: 410, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+        );
       }
 
       redirectData = {

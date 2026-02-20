@@ -18,8 +18,14 @@ const COMING_SOON_FEATURES = ['White-label branding', 'CSV analytics export', 'A
 
 // Stripe price IDs from environment variables
 const STRIPE_PRICES = {
-  pro: import.meta.env.VITE_STRIPE_PRICE_PRO || '',
-  business: import.meta.env.VITE_STRIPE_PRICE_BUSINESS || '',
+  pro: {
+    monthly: import.meta.env.VITE_STRIPE_PRICE_PRO || '',
+    annual: import.meta.env.VITE_STRIPE_PRICE_PRO_ANNUAL || '',
+  },
+  business: {
+    monthly: import.meta.env.VITE_STRIPE_PRICE_BUSINESS || '',
+    annual: import.meta.env.VITE_STRIPE_PRICE_BUSINESS_ANNUAL || '',
+  },
 };
 
 const plans = [
@@ -114,9 +120,12 @@ export function BillingSettingsContent() {
   const handleUpgrade = async (planId: string) => {
     if (planId === 'free') return;
 
-    const priceId = STRIPE_PRICES[planId as keyof typeof STRIPE_PRICES];
+    const prices = STRIPE_PRICES[planId as keyof typeof STRIPE_PRICES];
+    const priceId = prices ? (isAnnual ? prices.annual : prices.monthly) : '';
     if (!priceId) {
-      toast.error('Stripe is not configured. Please contact support.');
+      toast.error(isAnnual
+        ? 'Annual billing is not yet available. Please select monthly billing or contact support.'
+        : 'Stripe is not configured. Please contact support.');
       return;
     }
 
@@ -369,6 +378,17 @@ export function BillingSettingsContent() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Support */}
+      <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        Need help? Contact us at{' '}
+        <a
+          href="mailto:support@qrius.app"
+          className="text-orange-600 dark:text-orange-400 hover:underline"
+        >
+          support@qrius.app
+        </a>
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await requireRole(user.id, organizationId, ['owner', 'admin']);
 
     // Check team member limit
-    const { allowed, current, limit } = await checkPlanLimit(organizationId, 'team_members');
+    const { current, limit } = await checkPlanLimit(organizationId, 'team_members');
     // Also count pending invites toward the limit
     const { count: pendingInvites } = await supabaseAdmin
       .from('organization_invitations')
@@ -140,7 +140,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       logger.organizations.error('NEXT_PUBLIC_APP_URL not configured - cannot generate invite link');
       return res.status(500).json({ error: 'Server configuration error' });
     }
-    const inviteLink = `${baseUrl}/invite/${token}`;
+    const inviteLink = `${baseUrl}/invite/accept?token=${token}`;
 
     return res.status(201).json({
       invitation: {

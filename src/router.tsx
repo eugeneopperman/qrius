@@ -86,6 +86,9 @@ const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const CookiesPage = lazy(() => import('@/pages/CookiesPage'));
 
+// Invitation
+const InviteAcceptPage = lazy(() => import('@/pages/InviteAcceptPage'));
+
 // Error pages
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
@@ -233,6 +236,13 @@ const cookiesRoute = createRoute({
   component: CookiesPage,
 });
 
+// Invitation route (public — shows details, auth required to accept)
+const inviteAcceptRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/invite/accept',
+  component: InviteAcceptPage,
+});
+
 // Protected routes — all include errorComponent to prevent white-screen crashes
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -342,6 +352,7 @@ const routeTree = rootRoute.addChildren([
   termsRoute,
   privacyRoute,
   cookiesRoute,
+  inviteAcceptRoute,
   dashboardRoute,
   qrCodesRoute,
   qrCodeDetailRoute,

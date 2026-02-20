@@ -36,8 +36,10 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
     year: 'numeric',
   });
 
+  const isDynamic = !!qrCode.short_code;
+
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden card-interactive">
+    <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden card-interactive ${!qrCode.is_active ? 'opacity-60' : ''}`}>
       {/* QR Preview */}
       <Link to="/qr-codes/$id" params={{ id: qrCode.id }} className="block">
         <div className="aspect-square p-6 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
@@ -51,9 +53,16 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-gray-900 dark:text-white truncate">
-              {qrCode.name || `QR Code ${qrCode.short_code}`}
-            </h3>
+            <div className="flex items-center gap-2 mb-0.5">
+              <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                {qrCode.name || `QR Code ${qrCode.short_code}`}
+              </h3>
+              {!qrCode.is_active && (
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex-shrink-0">
+                  Inactive
+                </span>
+              )}
+            </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
               {qrCode.destination_url}
             </p>
@@ -114,10 +123,21 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
 
         {/* Stats */}
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="text-gray-500 dark:text-gray-400">{formattedDate}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500 dark:text-gray-400">{formattedDate}</span>
+            {isDynamic ? (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+                Dynamic
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                Static
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
             <BarChart2 className="w-4 h-4" />
-            <span className="font-medium">{qrCode.total_scans} scans</span>
+            <span className="font-medium">{isDynamic ? `${qrCode.total_scans} scans` : '—'}</span>
           </div>
         </div>
       </div>

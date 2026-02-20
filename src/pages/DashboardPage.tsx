@@ -11,7 +11,40 @@ import { Plus, ArrowRight } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { useOrganizationQRCodes } from '@/hooks/useOrganizationQRCodes';
 import { useDashboardStats } from '@/hooks/queries/useDashboardStats';
+import { useUsageStats } from '@/hooks/queries/useUsageStats';
 import { useQueryClient } from '@tanstack/react-query';
+
+function UsageBar({ label, used, limit }: { label: string; used: number; limit: number }) {
+  const isUnlimited = limit === -1;
+  const percentage = isUnlimited ? 0 : Math.min((used / limit) * 100, 100);
+  const isWarning = !isUnlimited && percentage >= 80;
+  const isCritical = !isUnlimited && percentage >= 95;
+
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {used.toLocaleString()} / {isUnlimited ? 'Unlimited' : limit.toLocaleString()}
+        </span>
+      </div>
+      {!isUnlimited && (
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div
+            className={`h-2 rounded-full transition-all ${
+              isCritical
+                ? 'bg-red-500'
+                : isWarning
+                ? 'bg-amber-500'
+                : 'bg-orange-500'
+            }`}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { currentOrganization, planLimits, profile } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, planLimits: s.planLimits, profile: s.profile })));
@@ -21,6 +54,7 @@ export default function DashboardPage() {
   const queryClient = useQueryClient();
 
   const { data: stats } = useDashboardStats(qrCodes);
+  const { data: usageStats } = useUsageStats();
 
   const handleDeleteClick = useCallback((id: string) => {
     const qrCode = qrCodes.find((qr) => qr.id === id);
@@ -83,6 +117,22 @@ export default function DashboardPage() {
           scansThisMonth={stats?.scansThisMonth ?? 0}
           teamMembers={stats?.teamMembers ?? 1}
         />
+
+        {/* Usage overview */}
+        {usageStats && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <UsageBar
+              label="Scans this month"
+              used={usageStats.scansUsed}
+              limit={usageStats.scansLimit}
+            />
+            <UsageBar
+              label="Dynamic QR codes"
+              used={usageStats.qrCodesUsed}
+              limit={usageStats.qrCodesLimit}
+            />
+          </div>
+        )}
 
         {/* Recent QR codes */}
         <div>

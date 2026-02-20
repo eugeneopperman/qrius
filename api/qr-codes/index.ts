@@ -105,9 +105,15 @@ async function handleCreate(
     return res.status(400).json({ error: 'destination_url is required' });
   }
 
-  // Validate URL format — only http/https allowed
-  if (!isValidHttpUrl(body.destination_url)) {
+  // Validate URL format — only http/https allowed for URL-type QR codes
+  // Non-URL types (wifi, vcard, etc.) store their content string as destination_url
+  const isUrlType = !body.qr_type || body.qr_type === 'url';
+  if (isUrlType && !isValidHttpUrl(body.destination_url)) {
     return res.status(400).json({ error: 'destination_url must be a valid http or https URL' });
+  }
+
+  if (body.destination_url.length > 4096) {
+    return res.status(400).json({ error: 'destination_url must be 4096 characters or fewer' });
   }
 
   // Validate optional string fields
@@ -230,6 +236,7 @@ async function handleCreate(
   await setCachedRedirect(shortCode, {
     destinationUrl: body.destination_url,
     qrCodeId: row.id,
+    organizationId,
   });
 
   return res.status(201).json(toQRCodeResponse(row, baseUrl));
