@@ -122,7 +122,7 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
     qrCodeRef.current = new QRCodeStyling({
       width,
       height,
-      type: 'svg',
+      type: 'canvas',
       data,
       dotsOptions,
       cornersSquareOptions,

@@ -76,8 +76,9 @@ export function QRActions({
       }
       onSaveToHistory();
     } catch (error) {
-      if (import.meta.env.DEV) console.error('Download failed:', error);
-      toast.error('Failed to download QR code. Please try again.');
+      console.error('Download failed:', error);
+      const detail = error instanceof Error ? error.message : String(error);
+      toast.error(`Failed to download QR code: ${detail}`);
     }
     setShowFormatMenu(false);
   };
@@ -116,8 +117,9 @@ export function QRActions({
 
       onSaveToHistory();
     } catch (error) {
-      if (import.meta.env.DEV) console.error('PDF download failed:', error);
-      toast.error('Failed to generate PDF. Please try again.');
+      console.error('PDF download failed:', error);
+      const detail = error instanceof Error ? error.message : String(error);
+      toast.error(`Failed to generate PDF: ${detail}`);
       setIsDownloading(false);
     }
     setShowFormatMenu(false);

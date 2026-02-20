@@ -1,39 +1,63 @@
 import type QRCodeStyling from 'qr-code-styling';
 
 /**
- * Robust QR code rasterization that avoids the btoa() bug in qr-code-styling.
+ * Robust QR code rasterization with multiple fallbacks.
  *
- * The library's internal SVG→canvas pipeline uses btoa(svgString) which throws
- * DOMException when the SVG contains non-Latin1 characters. Our fallback uses
- * Blob URL → Image → Canvas which bypasses btoa() entirely.
+ * 1. Try library's getRawData (canvas.toBlob — works when type is 'canvas')
+ * 2. Fallback: access internal canvas directly and export
+ * 3. Fallback: serialize SVG to Blob URL and rasterize (avoids btoa)
  */
 export async function rasterizeQRToBlob(
   qrInstance: QRCodeStyling,
   format: 'png' | 'jpeg' = 'png',
   quality?: number
 ): Promise<Blob> {
-  // First, try the library's getRawData (uses internal canvas pipeline)
+  const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+
+  // Approach 1: library's getRawData (uses canvas.toBlob directly for canvas type)
   try {
     const rawData = await qrInstance.getRawData(format);
     if (rawData && rawData instanceof Blob) {
       return rawData;
     }
-  } catch {
-    // Library method failed (likely btoa issue), fall through to manual conversion
+  } catch (e) {
+    console.warn('QR getRawData failed, trying fallback:', e);
   }
 
-  // Fallback: convert SVG → Blob URL → Image → Canvas → Blob
   const instance = qrInstance as unknown as {
     _svg?: SVGElement;
+    _domCanvas?: HTMLCanvasElement;
     _svgDrawingPromise?: Promise<void>;
+    _canvasDrawingPromise?: Promise<void>;
   };
 
+  // Approach 2: access internal canvas directly
+  if (instance._canvasDrawingPromise) {
+    try {
+      await instance._canvasDrawingPromise;
+    } catch { /* ignore */ }
+  }
+
+  if (instance._domCanvas) {
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => {
+        instance._domCanvas!.toBlob((b) => resolve(b), mimeType, quality);
+      });
+      if (blob) return blob;
+    } catch (e) {
+      console.warn('QR canvas.toBlob failed, trying SVG fallback:', e);
+    }
+  }
+
+  // Approach 3: SVG → Blob URL → Image → Canvas → Blob (avoids btoa)
   if (instance._svgDrawingPromise) {
-    await instance._svgDrawingPromise;
+    try {
+      await instance._svgDrawingPromise;
+    } catch { /* ignore */ }
   }
 
   const svg = instance._svg;
-  if (!svg) throw new Error('QR code SVG not available');
+  if (!svg) throw new Error('No QR canvas or SVG available');
 
   const svgString = new XMLSerializer().serializeToString(svg);
   const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
@@ -53,7 +77,6 @@ export async function rasterizeQRToBlob(
           if (!ctx) { reject(new Error('Canvas context unavailable')); return; }
           ctx.drawImage(img, 0, 0, w, h);
 
-          const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
           canvas.toBlob(
             (blob) => blob ? resolve(blob) : reject(new Error('Blob creation failed')),
             mimeType,

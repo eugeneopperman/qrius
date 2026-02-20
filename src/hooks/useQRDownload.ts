@@ -151,8 +151,9 @@ export function useQRDownload({
         }
         onSuccess?.();
       } catch (error) {
-        if (import.meta.env.DEV) console.error('Download failed:', error);
-        toast.error('Failed to download QR code. Please try again.');
+        console.error('Download failed:', error);
+        const detail = error instanceof Error ? error.message : String(error);
+        toast.error(`Failed to download QR code: ${detail}`);
       } finally {
         setIsDownloading(false);
       }
@@ -201,8 +202,9 @@ export function useQRDownload({
       toast.success('QR code downloaded as PDF');
       onSuccess?.();
     } catch (error) {
-      if (import.meta.env.DEV) console.error('PDF download failed:', error);
-      toast.error('Failed to generate PDF. Please try again.');
+      console.error('PDF download failed:', error);
+      const detail = error instanceof Error ? error.message : String(error);
+      toast.error(`Failed to generate PDF: ${detail}`);
     } finally {
       setIsDownloading(false);
     }
