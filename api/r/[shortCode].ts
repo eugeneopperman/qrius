@@ -3,6 +3,7 @@
 
 import { neon } from '@neondatabase/serverless';
 import { Redis } from '@upstash/redis';
+import { waitUntil } from '@vercel/functions';
 import { getGeoFromHeaders, getDeviceType, hashIP, getClientIP } from '../_lib/geo.js';
 import { logger } from '../_lib/logger.js';
 
@@ -27,10 +28,7 @@ interface CachedRedirect {
   organizationId: string | null;
 }
 
-export default async function handler(
-  req: Request,
-  context: { waitUntil: (p: Promise<unknown>) => void }
-): Promise<Response> {
+export default async function handler(req: Request): Promise<Response> {
   const start = Date.now();
   const url = new URL(req.url);
   const pathParts = url.pathname.split('/');
@@ -115,7 +113,7 @@ export default async function handler(
     const scanPromise = logScanEvent(sql, req, redirectData.qrCodeId, redirectData.organizationId).catch((error) => {
       logger.redirect.error('Scan event logging failed', { shortCode, error: String(error) });
     });
-    context.waitUntil(scanPromise);
+    waitUntil(scanPromise);
 
     logger.redirect.info('Redirect', { shortCode, cacheHit, ms: Date.now() - start });
 
@@ -169,12 +167,6 @@ async function logScanEvent(
         ${Number.isFinite(lat) ? lat : null},
         ${Number.isFinite(lng) ? lng : null}
       )
-    `;
-
-    // Explicitly increment total_scans (trigger may not exist in Neon)
-    await sql`
-      UPDATE qr_codes SET total_scans = total_scans + 1, updated_at = NOW()
-      WHERE id = ${qrCodeId}
     `;
 
     // Increment scan count in usage_records for billing tracking

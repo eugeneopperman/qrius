@@ -217,7 +217,8 @@ export async function checkPlanLimit(
   organizationId: string,
   limitType: 'qr_codes' | 'scans' | 'api_requests' | 'team_members'
 ): Promise<{ allowed: boolean; current: number; limit: number }> {
-  // Get organization plan
+  // Fetch org plan from Supabase, then plan limits — parallelize where possible
+  // Step 1: Get org plan (needed to look up limits)
   const { data: org, error: orgError } = await getSupabaseAdmin()
     .from('organizations')
     .select('plan')
@@ -228,71 +229,66 @@ export async function checkPlanLimit(
     throw new Error('Organization not found');
   }
 
-  // Get plan limits
-  const { data: limits, error: limitsError } = await getSupabaseAdmin()
+  // Step 2: Fetch plan limits + current usage in parallel
+  const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+
+  // Build parallel promises: plan limits + the usage query for the requested limitType
+  const limitsPromise = getSupabaseAdmin()
     .from('plan_limits')
     .select('*')
     .eq('plan', org.plan)
     .single();
 
-  if (limitsError || !limits) {
+  let usagePromise: Promise<number>;
+
+  switch (limitType) {
+    case 'qr_codes':
+      usagePromise = sql
+        ? sql`SELECT COUNT(*) as count FROM qr_codes WHERE organization_id = ${organizationId}`
+            .then(r => parseInt(r[0].count as string) || 0)
+        : Promise.resolve(0);
+      break;
+
+    case 'api_requests':
+      usagePromise = sql
+        ? sql`SELECT api_requests FROM usage_records WHERE organization_id = ${organizationId} AND month = ${currentMonth}`
+            .then(r => r.length > 0 ? (parseInt(r[0].api_requests as string) || 0) : 0)
+        : Promise.resolve(0);
+      break;
+
+    case 'scans':
+      usagePromise = sql
+        ? sql`SELECT scans_count FROM usage_records WHERE organization_id = ${organizationId} AND month = ${currentMonth}`
+            .then(r => r.length > 0 ? (parseInt(r[0].scans_count as string) || 0) : 0)
+        : Promise.resolve(0);
+      break;
+
+    case 'team_members':
+      usagePromise = getSupabaseAdmin()
+        .from('organization_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .then(({ count }) => count || 0);
+      break;
+  }
+
+  const [limitsResult, current] = await Promise.all([limitsPromise, usagePromise]);
+
+  if (limitsResult.error || !limitsResult.data) {
     throw new Error('Plan limits not found');
   }
 
-  let current = 0;
-  let limit = 0;
+  const limits = limitsResult.data;
 
-  switch (limitType) {
-    case 'qr_codes': {
-      // QR codes live in Neon, not Supabase — query Neon directly
-      if (sql) {
-        const countResult = await sql`
-          SELECT COUNT(*) as count FROM qr_codes WHERE organization_id = ${organizationId}
-        `;
-        current = parseInt(countResult[0].count as string) || 0;
-      }
-      limit = limits.qr_codes_limit;
-      break;
-    }
+  // Map limitType to the corresponding column in plan_limits
+  const limitMap: Record<typeof limitType, number> = {
+    qr_codes: limits.qr_codes_limit,
+    api_requests: limits.api_requests_per_day,
+    scans: limits.scans_per_month,
+    team_members: limits.team_members,
+  };
 
-    case 'api_requests': {
-      // usage_records lives in Neon, not Supabase — query Neon directly
-      if (sql) {
-        const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
-        const usageResult = await sql`
-          SELECT api_requests FROM usage_records
-          WHERE organization_id = ${organizationId} AND month = ${currentMonth}
-        `;
-        current = usageResult.length > 0 ? (parseInt(usageResult[0].api_requests as string) || 0) : 0;
-      }
-      limit = limits.api_requests_per_day;
-      break;
-    }
-
-    case 'scans': {
-      // usage_records lives in Neon, not Supabase — query Neon directly
-      if (sql) {
-        const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
-        const usageResult = await sql`
-          SELECT scans_count FROM usage_records
-          WHERE organization_id = ${organizationId} AND month = ${currentMonth}
-        `;
-        current = usageResult.length > 0 ? (parseInt(usageResult[0].scans_count as string) || 0) : 0;
-      }
-      limit = limits.scans_per_month;
-      break;
-    }
-
-    case 'team_members': {
-      const { count: memberCount } = await getSupabaseAdmin()
-        .from('organization_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId);
-      current = memberCount || 0;
-      limit = limits.team_members;
-      break;
-    }
-  }
+  const limit = limitMap[limitType];
 
   // -1 means unlimited
   const allowed = limit === -1 || current < limit;

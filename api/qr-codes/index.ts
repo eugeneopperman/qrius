@@ -248,8 +248,8 @@ async function handleCreate(
     return res.status(500).json({ error: 'Failed to create QR code' });
   }
 
-  // Pre-populate cache for fast redirects
-  await setCachedRedirect(shortCode, {
+  // Pre-populate cache for fast redirects (non-blocking — don't delay the response)
+  void setCachedRedirect(shortCode, {
     destinationUrl: body.destination_url,
     qrCodeId: row.id,
     organizationId,
