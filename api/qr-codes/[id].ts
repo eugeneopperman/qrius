@@ -7,6 +7,7 @@ import { isValidHttpUrl, isValidUUID, validateOptionalString } from '../_lib/val
 import { invalidateCachedRedirect } from '../_lib/kv.js';
 import { requireAuth, getUserOrganization, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { logger } from '../_lib/logger.js';
+import { parseUserAgent } from '../_lib/userAgentParser.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   setCorsHeaders(res, 'GET, PATCH, DELETE, OPTIONS', req.headers.origin);
@@ -99,6 +100,16 @@ async function handleGet(
     : new Date(now.getTime() - scanHistoryDays * 24 * 60 * 60 * 1000);
   const historyCutoffISO = historyCutoff.toISOString();
 
+  // 30-day window for daily chart
+  const thirtyDaysAgo = new Date(todayStart);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
+
+  // 7-day window for hourly chart
+  const sevenDaysAgo = new Date(todayStart);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const sevenDaysAgoISO = sevenDaysAgo.toISOString();
+
   const [
     todayResult,
     weekResult,
@@ -106,13 +117,28 @@ async function handleGet(
     countriesResult,
     devicesResult,
     recentResult,
+    referrerResult,
+    hourlyResult,
+    dailyResult,
+    regionsResult,
+    userAgentResult,
   ] = await Promise.all([
     sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${todayStart.toISOString()}`,
     sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${weekStart.toISOString()}`,
     sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${monthStart.toISOString()}`,
-    sql`SELECT country_code, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND country_code IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY country_code ORDER BY count DESC LIMIT 5`,
+    sql`SELECT country_code, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND country_code IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY country_code ORDER BY count DESC LIMIT 10`,
     sql`SELECT device_type, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND device_type IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY device_type ORDER BY count DESC`,
     sql`SELECT * FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${historyCutoffISO} ORDER BY scanned_at DESC LIMIT 10`,
+    // Referrer breakdown — null = "Direct"
+    sql`SELECT referrer, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${historyCutoffISO} GROUP BY referrer ORDER BY count DESC LIMIT 11`,
+    // Hourly distribution (last 7 days)
+    sql`SELECT EXTRACT(HOUR FROM scanned_at) as hour, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${sevenDaysAgoISO} GROUP BY hour ORDER BY hour`,
+    // Daily scans (last 30 days)
+    sql`SELECT DATE(scanned_at) as day, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${thirtyDaysAgoISO} GROUP BY day ORDER BY day`,
+    // Regions for top country
+    sql`SELECT country_code, region, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND region IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY country_code, region ORDER BY count DESC LIMIT 20`,
+    // Raw user agents for JS-side parsing
+    sql`SELECT user_agent, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND user_agent IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY user_agent ORDER BY count DESC LIMIT 100`,
   ]);
 
   const scansToday = parseInt(todayResult[0].count as string);
@@ -131,6 +157,65 @@ async function handleGet(
 
   const recentScans = recentResult.map((row) => toScanEventResponse(row as ScanEventRow));
 
+  // Referrer breakdown — map null to "Direct"
+  const referrerBreakdown = referrerResult.map((row) => ({
+    referrer: (row.referrer as string | null) || 'Direct',
+    count: parseInt(row.count as string),
+  }));
+
+  // Hourly distribution — fill 24 hours with zeros
+  const hourlyMap = new Map<number, number>();
+  hourlyResult.forEach((row) => {
+    hourlyMap.set(parseInt(row.hour as string), parseInt(row.count as string));
+  });
+  const scansByHour = Array.from({ length: 24 }, (_, i) => ({
+    hour: i,
+    count: hourlyMap.get(i) || 0,
+  }));
+
+  // Daily distribution — fill 30 days with zeros
+  const dailyMap = new Map<string, number>();
+  dailyResult.forEach((row) => {
+    const dayStr = row.day instanceof Date
+      ? row.day.toISOString().slice(0, 10)
+      : String(row.day).slice(0, 10);
+    dailyMap.set(dayStr, parseInt(row.count as string));
+  });
+  const scansByDay: { date: string; count: number }[] = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(todayStart);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    scansByDay.push({ date: key, count: dailyMap.get(key) || 0 });
+  }
+
+  // Regions — extract top regions for #1 country
+  const topCountryCode = topCountries.length > 0 ? topCountries[0].countryCode : null;
+  const topRegions = regionsResult
+    .filter((row) => row.country_code === topCountryCode)
+    .map((row) => ({
+      region: row.region as string,
+      count: parseInt(row.count as string),
+    }));
+
+  // Browser/OS breakdown from user agent strings
+  const browserMap = new Map<string, number>();
+  const osMap = new Map<string, number>();
+  userAgentResult.forEach((row) => {
+    const count = parseInt(row.count as string);
+    const parsed = parseUserAgent(row.user_agent as string);
+    browserMap.set(parsed.browser, (browserMap.get(parsed.browser) || 0) + count);
+    osMap.set(parsed.os, (osMap.get(parsed.os) || 0) + count);
+  });
+
+  const browserBreakdown = Array.from(browserMap.entries())
+    .map(([browser, count]) => ({ browser, count }))
+    .sort((a, b) => b.count - a.count);
+
+  const osBreakdown = Array.from(osMap.entries())
+    .map(([os, count]) => ({ os, count }))
+    .sort((a, b) => b.count - a.count);
+
   return res.status(200).json({
     ...baseResponse,
     scansToday,
@@ -139,6 +224,13 @@ async function handleGet(
     topCountries,
     deviceBreakdown,
     recentScans,
+    browserBreakdown,
+    osBreakdown,
+    referrerBreakdown,
+    scansByHour,
+    scansByDay,
+    topRegions,
+    topCountryForRegions: topCountryCode,
   });
 }
 

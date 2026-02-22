@@ -75,7 +75,8 @@ api/
 9. **Template Wizard**: Step-by-step QR creation with use-case templates
 10. **Campaign Names**: Optional labels for QR codes, shown on dashboard instead of raw URLs
 11. **Styled Thumbnails**: Dashboard QR previews render with saved colors, gradients, logos, and dot patterns
-12. **Testing**: Vitest unit tests (432 passing across 17 test files)
+12. **Scan Analytics Dashboard**: 4-tab analytics (Overview with daily/hourly charts, Geography with country/region bars, Technology with browser/OS/device breakdown, Sources with referrer tracking) — pure CSS, no charting library
+13. **Testing**: Vitest unit tests (450 passing across 18 test files)
 11. **PWA**: Offline support, installable app
 12. **Keyboard Shortcuts**: Ctrl+S (download), Ctrl+C (copy), etc.
 

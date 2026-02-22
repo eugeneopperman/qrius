@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback } from 'react';
 import { Link, useParams, useNavigate } from '@tanstack/react-router';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { AnalyticsCharts } from '@/components/dashboard/AnalyticsCharts';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -23,10 +24,8 @@ import {
   ExternalLink,
   Copy,
   Download,
-  BarChart2,
   Globe,
   Smartphone,
-  Calendar,
   Loader2,
   QrCode,
   Pencil,
@@ -431,37 +430,22 @@ export default function QRCodeDetailPage() {
               </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
-                <BarChart2 className="w-5 h-5 text-orange-500 mb-2" />
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {qrCode.total_scans}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Scans</p>
-              </div>
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
-                <Calendar className="w-5 h-5 text-orange-500 mb-2" />
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {data?.scansToday ?? '—'}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Today</p>
-              </div>
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
-                <Globe className="w-5 h-5 text-orange-500 mb-2" />
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {new Set(recentScans.map((s) => s.country_code).filter(Boolean)).size || '-'}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Countries</p>
-              </div>
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
-                <Smartphone className="w-5 h-5 text-orange-500 mb-2" />
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {recentScans.filter((s) => s.device_type === 'mobile').length || '-'}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Mobile</p>
-              </div>
-            </div>
+            {/* Analytics */}
+            <AnalyticsCharts
+              totalScans={qrCode.total_scans}
+              scansToday={data?.scansToday ?? 0}
+              scansThisWeek={data?.scansThisWeek ?? 0}
+              scansThisMonth={data?.scansThisMonth ?? 0}
+              topCountries={data?.topCountries ?? []}
+              deviceBreakdown={data?.deviceBreakdown ?? []}
+              browserBreakdown={data?.browserBreakdown ?? []}
+              osBreakdown={data?.osBreakdown ?? []}
+              referrerBreakdown={data?.referrerBreakdown ?? []}
+              scansByHour={data?.scansByHour ?? []}
+              scansByDay={data?.scansByDay ?? []}
+              topRegions={data?.topRegions ?? []}
+              topCountryForRegions={data?.topCountryForRegions ?? null}
+            />
 
             {/* Recent scans */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
@@ -488,17 +472,23 @@ export default function QRCodeDetailPage() {
                             <Globe className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                           )}
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
                             {scan.city || 'Unknown location'}
                             {scan.country_code && `, ${scan.country_code}`}
+                            {scan.region && ` (${scan.region})`}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {scan.device_type || 'Unknown device'}
+                            {scan.referrer && (
+                              <span className="ml-2">
+                                via <span className="text-gray-600 dark:text-gray-300">{scan.referrer}</span>
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                      <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">
                         {new Date(scan.scanned_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',

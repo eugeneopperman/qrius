@@ -376,6 +376,10 @@ export interface Database {
           device_type: string | null;
           user_agent: string | null;
           ip_hash: string | null;
+          referrer: string | null;
+          region: string | null;
+          latitude: number | null;
+          longitude: number | null;
         };
         Insert: {
           id?: string;
@@ -386,6 +390,10 @@ export interface Database {
           device_type?: string | null;
           user_agent?: string | null;
           ip_hash?: string | null;
+          referrer?: string | null;
+          region?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
         };
         Update: never;
         Relationships: [

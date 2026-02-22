@@ -42,6 +42,10 @@ export interface ScanEventRow {
   device_type: string | null;
   user_agent: string | null;
   ip_hash: string | null;
+  referrer: string | null;
+  region: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 // Helper to convert database row to API response format
@@ -75,5 +79,9 @@ export function toScanEventResponse(row: ScanEventRow) {
     city: row.city,
     deviceType: row.device_type,
     userAgent: row.user_agent,
+    referrer: row.referrer,
+    region: row.region,
+    latitude: row.latitude,
+    longitude: row.longitude,
   };
 }

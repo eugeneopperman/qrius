@@ -137,15 +137,33 @@ async function logScanEvent(
     const clientIP = getClientIP(headers);
     const ipHash = await hashIP(clientIP);
 
+    // Extract referrer hostname for privacy (strip path/query)
+    const rawReferer = headers.get('referer');
+    let referrerHost: string | null = null;
+    if (rawReferer) {
+      try {
+        referrerHost = new URL(rawReferer).hostname;
+      } catch {
+        // Invalid URL — ignore
+      }
+    }
+
+    const lat = geo.latitude ? parseFloat(geo.latitude) : null;
+    const lng = geo.longitude ? parseFloat(geo.longitude) : null;
+
     await sql`
-      INSERT INTO scan_events (qr_code_id, country_code, city, device_type, user_agent, ip_hash)
+      INSERT INTO scan_events (qr_code_id, country_code, city, device_type, user_agent, ip_hash, referrer, region, latitude, longitude)
       VALUES (
         ${qrCodeId},
         ${geo.country || null},
         ${geo.city || null},
         ${deviceType},
         ${userAgent || null},
-        ${ipHash}
+        ${ipHash},
+        ${referrerHost},
+        ${geo.region || null},
+        ${Number.isFinite(lat) ? lat : null},
+        ${Number.isFinite(lng) ? lng : null}
       )
     `;
 

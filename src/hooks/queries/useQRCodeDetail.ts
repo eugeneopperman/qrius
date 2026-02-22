@@ -10,6 +10,13 @@ interface QRCodeDetail {
   scansThisMonth: number;
   topCountries: { countryCode: string; count: number }[];
   deviceBreakdown: { deviceType: string; count: number }[];
+  browserBreakdown: { browser: string; count: number }[];
+  osBreakdown: { os: string; count: number }[];
+  referrerBreakdown: { referrer: string; count: number }[];
+  scansByHour: { hour: number; count: number }[];
+  scansByDay: { date: string; count: number }[];
+  topRegions: { region: string; count: number }[];
+  topCountryForRegions: string | null;
 }
 
 interface APIDetailResponse {
@@ -34,6 +41,13 @@ interface APIDetailResponse {
   scansThisMonth: number;
   topCountries: { countryCode: string; count: number }[];
   deviceBreakdown: { deviceType: string; count: number }[];
+  browserBreakdown: { browser: string; count: number }[];
+  osBreakdown: { os: string; count: number }[];
+  referrerBreakdown: { referrer: string; count: number }[];
+  scansByHour: { hour: number; count: number }[];
+  scansByDay: { date: string; count: number }[];
+  topRegions: { region: string; count: number }[];
+  topCountryForRegions: string | null;
   recentScans: {
     id: string;
     qrCodeId: string;
@@ -42,6 +56,8 @@ interface APIDetailResponse {
     city: string | null;
     deviceType: string | null;
     userAgent: string | null;
+    referrer: string | null;
+    region: string | null;
   }[];
 }
 
@@ -90,6 +106,10 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     device_type: scan.deviceType,
     user_agent: scan.userAgent,
     ip_hash: null,
+    referrer: scan.referrer ?? null,
+    region: scan.region ?? null,
+    latitude: null,
+    longitude: null,
   }));
 
   return {
@@ -100,6 +120,13 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     scansThisMonth: data.scansThisMonth,
     topCountries: data.topCountries || [],
     deviceBreakdown: data.deviceBreakdown || [],
+    browserBreakdown: data.browserBreakdown || [],
+    osBreakdown: data.osBreakdown || [],
+    referrerBreakdown: data.referrerBreakdown || [],
+    scansByHour: data.scansByHour || [],
+    scansByDay: data.scansByDay || [],
+    topRegions: data.topRegions || [],
+    topCountryForRegions: data.topCountryForRegions ?? null,
   };
 }
 
