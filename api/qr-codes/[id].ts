@@ -115,111 +115,138 @@ async function handleGet(
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const sevenDaysAgoISO = sevenDaysAgo.toISOString();
 
-  const [
-    todayResult,
-    weekResult,
-    monthResult,
-    countriesResult,
-    devicesResult,
-    recentResult,
-    referrerResult,
-    hourlyResult,
-    dailyResult,
-    regionsResult,
-    userAgentResult,
-  ] = await Promise.all([
-    sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${todayStart.toISOString()}`,
-    sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${weekStart.toISOString()}`,
-    sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${monthStart.toISOString()}`,
-    sql`SELECT country_code, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND country_code IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY country_code ORDER BY count DESC LIMIT 10`,
-    sql`SELECT device_type, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND device_type IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY device_type ORDER BY count DESC`,
-    sql`SELECT * FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${historyCutoffISO} ORDER BY scanned_at DESC LIMIT 10`,
-    // Referrer breakdown — null = "Direct"
-    sql`SELECT referrer, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${historyCutoffISO} GROUP BY referrer ORDER BY count DESC LIMIT 11`,
-    // Hourly distribution (last 7 days)
-    sql`SELECT EXTRACT(HOUR FROM scanned_at) as hour, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${sevenDaysAgoISO} GROUP BY hour ORDER BY hour`,
-    // Daily scans (last 30 days)
-    sql`SELECT DATE(scanned_at) as day, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${thirtyDaysAgoISO} GROUP BY day ORDER BY day`,
-    // Regions for top country
-    sql`SELECT country_code, region, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND region IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY country_code, region ORDER BY count DESC LIMIT 20`,
-    // Raw user agents for JS-side parsing
-    sql`SELECT user_agent, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND user_agent IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY user_agent ORDER BY count DESC LIMIT 100`,
-  ]);
+  // Analytics queries — wrapped in try/catch so the detail page still loads
+  // even if analytics columns are missing or queries fail
+  let scansToday = 0;
+  let scansThisWeek = 0;
+  let scansThisMonth = 0;
+  let topCountries: { countryCode: string; count: number }[] = [];
+  let deviceBreakdown: { deviceType: string; count: number }[] = [];
+  let recentScans: ReturnType<typeof toScanEventResponse>[] = [];
+  let referrerBreakdown: { referrer: string; count: number }[] = [];
+  let scansByHour = Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 }));
+  let scansByDay: { date: string; count: number }[] = [];
+  let topCountryCode: string | null = null;
+  let topRegions: { region: string; count: number }[] = [];
+  let browserBreakdown: { browser: string; count: number }[] = [];
+  let osBreakdown: { os: string; count: number }[] = [];
 
-  const scansToday = parseInt(todayResult[0].count as string);
-  const scansThisWeek = parseInt(weekResult[0].count as string);
-  const scansThisMonth = parseInt(monthResult[0].count as string);
-
-  const topCountries = countriesResult.map((row) => ({
-    countryCode: row.country_code as string,
-    count: parseInt(row.count as string),
-  }));
-
-  const deviceBreakdown = devicesResult.map((row) => ({
-    deviceType: row.device_type as string,
-    count: parseInt(row.count as string),
-  }));
-
-  const recentScans = recentResult.map((row) => toScanEventResponse(row as ScanEventRow));
-
-  // Referrer breakdown — map null to "Direct"
-  const referrerBreakdown = referrerResult.map((row) => ({
-    referrer: (row.referrer as string | null) || 'Direct',
-    count: parseInt(row.count as string),
-  }));
-
-  // Hourly distribution — fill 24 hours with zeros
-  const hourlyMap = new Map<number, number>();
-  hourlyResult.forEach((row) => {
-    hourlyMap.set(parseInt(row.hour as string), parseInt(row.count as string));
-  });
-  const scansByHour = Array.from({ length: 24 }, (_, i) => ({
-    hour: i,
-    count: hourlyMap.get(i) || 0,
-  }));
-
-  // Daily distribution — fill 30 days with zeros
-  const dailyMap = new Map<string, number>();
-  dailyResult.forEach((row) => {
-    const dayStr = row.day instanceof Date
-      ? row.day.toISOString().slice(0, 10)
-      : String(row.day).slice(0, 10);
-    dailyMap.set(dayStr, parseInt(row.count as string));
-  });
-  const scansByDay: { date: string; count: number }[] = [];
+  // Fill default scansByDay (30 days of zeros)
   for (let i = 29; i >= 0; i--) {
     const d = new Date(todayStart);
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    scansByDay.push({ date: key, count: dailyMap.get(key) || 0 });
+    scansByDay.push({ date: d.toISOString().slice(0, 10), count: 0 });
   }
 
-  // Regions — extract top regions for #1 country
-  const topCountryCode = topCountries.length > 0 ? topCountries[0].countryCode : null;
-  const topRegions = regionsResult
-    .filter((row) => row.country_code === topCountryCode)
-    .map((row) => ({
-      region: row.region as string,
+  try {
+    const [
+      todayResult,
+      weekResult,
+      monthResult,
+      countriesResult,
+      devicesResult,
+      recentResult,
+      referrerResult,
+      hourlyResult,
+      dailyResult,
+      regionsResult,
+      userAgentResult,
+    ] = await Promise.all([
+      sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${todayStart.toISOString()}`,
+      sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${weekStart.toISOString()}`,
+      sql`SELECT COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${monthStart.toISOString()}`,
+      sql`SELECT country_code, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND country_code IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY country_code ORDER BY count DESC LIMIT 10`,
+      sql`SELECT device_type, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND device_type IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY device_type ORDER BY count DESC`,
+      sql`SELECT * FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${historyCutoffISO} ORDER BY scanned_at DESC LIMIT 10`,
+      // Referrer breakdown — null = "Direct"
+      sql`SELECT referrer, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${historyCutoffISO} GROUP BY referrer ORDER BY count DESC LIMIT 11`,
+      // Hourly distribution (last 7 days)
+      sql`SELECT EXTRACT(HOUR FROM scanned_at) as hour, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${sevenDaysAgoISO} GROUP BY hour ORDER BY hour`,
+      // Daily scans (last 30 days)
+      sql`SELECT DATE(scanned_at) as day, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND scanned_at >= ${thirtyDaysAgoISO} GROUP BY day ORDER BY day`,
+      // Regions for top country
+      sql`SELECT country_code, region, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND region IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY country_code, region ORDER BY count DESC LIMIT 20`,
+      // Raw user agents for JS-side parsing
+      sql`SELECT user_agent, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND user_agent IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY user_agent ORDER BY count DESC LIMIT 100`,
+    ]);
+
+    scansToday = parseInt(todayResult[0].count as string);
+    scansThisWeek = parseInt(weekResult[0].count as string);
+    scansThisMonth = parseInt(monthResult[0].count as string);
+
+    topCountries = countriesResult.map((row) => ({
+      countryCode: row.country_code as string,
       count: parseInt(row.count as string),
     }));
 
-  // Browser/OS breakdown from user agent strings
-  const browserMap = new Map<string, number>();
-  const osMap = new Map<string, number>();
-  userAgentResult.forEach((row) => {
-    const count = parseInt(row.count as string);
-    const parsed = parseUserAgent(row.user_agent as string);
-    browserMap.set(parsed.browser, (browserMap.get(parsed.browser) || 0) + count);
-    osMap.set(parsed.os, (osMap.get(parsed.os) || 0) + count);
-  });
+    deviceBreakdown = devicesResult.map((row) => ({
+      deviceType: row.device_type as string,
+      count: parseInt(row.count as string),
+    }));
 
-  const browserBreakdown = Array.from(browserMap.entries())
-    .map(([browser, count]) => ({ browser, count }))
-    .sort((a, b) => b.count - a.count);
+    recentScans = recentResult.map((row) => toScanEventResponse(row as ScanEventRow));
 
-  const osBreakdown = Array.from(osMap.entries())
-    .map(([os, count]) => ({ os, count }))
-    .sort((a, b) => b.count - a.count);
+    // Referrer breakdown — map null to "Direct"
+    referrerBreakdown = referrerResult.map((row) => ({
+      referrer: (row.referrer as string | null) || 'Direct',
+      count: parseInt(row.count as string),
+    }));
+
+    // Hourly distribution — fill 24 hours with zeros
+    const hourlyMap = new Map<number, number>();
+    hourlyResult.forEach((row) => {
+      hourlyMap.set(parseInt(row.hour as string), parseInt(row.count as string));
+    });
+    scansByHour = Array.from({ length: 24 }, (_, i) => ({
+      hour: i,
+      count: hourlyMap.get(i) || 0,
+    }));
+
+    // Daily distribution — fill 30 days with zeros
+    const dailyMap = new Map<string, number>();
+    dailyResult.forEach((row) => {
+      const dayStr = row.day instanceof Date
+        ? row.day.toISOString().slice(0, 10)
+        : String(row.day).slice(0, 10);
+      dailyMap.set(dayStr, parseInt(row.count as string));
+    });
+    scansByDay = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(todayStart);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      scansByDay.push({ date: key, count: dailyMap.get(key) || 0 });
+    }
+
+    // Regions — extract top regions for #1 country
+    topCountryCode = topCountries.length > 0 ? topCountries[0].countryCode : null;
+    topRegions = regionsResult
+      .filter((row) => row.country_code === topCountryCode)
+      .map((row) => ({
+        region: row.region as string,
+        count: parseInt(row.count as string),
+      }));
+
+    // Browser/OS breakdown from user agent strings
+    const browserMap = new Map<string, number>();
+    const osMap = new Map<string, number>();
+    userAgentResult.forEach((row) => {
+      const count = parseInt(row.count as string);
+      const parsed = parseUserAgent(row.user_agent as string);
+      browserMap.set(parsed.browser, (browserMap.get(parsed.browser) || 0) + count);
+      osMap.set(parsed.os, (osMap.get(parsed.os) || 0) + count);
+    });
+
+    browserBreakdown = Array.from(browserMap.entries())
+      .map(([browser, count]) => ({ browser, count }))
+      .sort((a, b) => b.count - a.count);
+
+    osBreakdown = Array.from(osMap.entries())
+      .map(([os, count]) => ({ os, count }))
+      .sort((a, b) => b.count - a.count);
+  } catch (error) {
+    logger.qrCodes.error('Analytics queries failed — returning empty analytics', { id, error: String(error) });
+  }
 
   return res.status(200).json({
     ...baseResponse,

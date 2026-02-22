@@ -256,27 +256,29 @@ export async function checkPlanLimit(
     }
 
     case 'api_requests': {
-      // Check today's API usage
-      const today = new Date().toISOString().split('T')[0];
-      const { data: usage } = await getSupabaseAdmin()
-        .from('usage_records')
-        .select('api_requests')
-        .eq('organization_id', organizationId)
-        .eq('month', today.slice(0, 7) + '-01')
-        .single();
-      current = usage?.api_requests || 0;
+      // usage_records lives in Neon, not Supabase — query Neon directly
+      if (sql) {
+        const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+        const usageResult = await sql`
+          SELECT api_requests FROM usage_records
+          WHERE organization_id = ${organizationId} AND month = ${currentMonth}
+        `;
+        current = usageResult.length > 0 ? (parseInt(usageResult[0].api_requests as string) || 0) : 0;
+      }
       limit = limits.api_requests_per_day;
       break;
     }
 
     case 'scans': {
-      const { data: monthUsage } = await getSupabaseAdmin()
-        .from('usage_records')
-        .select('scans_count')
-        .eq('organization_id', organizationId)
-        .eq('month', new Date().toISOString().slice(0, 7) + '-01')
-        .single();
-      current = monthUsage?.scans_count || 0;
+      // usage_records lives in Neon, not Supabase — query Neon directly
+      if (sql) {
+        const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+        const usageResult = await sql`
+          SELECT scans_count FROM usage_records
+          WHERE organization_id = ${organizationId} AND month = ${currentMonth}
+        `;
+        current = usageResult.length > 0 ? (parseInt(usageResult[0].scans_count as string) || 0) : 0;
+      }
       limit = limits.scans_per_month;
       break;
     }

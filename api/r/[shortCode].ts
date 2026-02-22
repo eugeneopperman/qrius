@@ -27,7 +27,10 @@ interface CachedRedirect {
   organizationId: string | null;
 }
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(
+  req: Request,
+  context: { waitUntil: (p: Promise<unknown>) => void }
+): Promise<Response> {
   const start = Date.now();
   const url = new URL(req.url);
   const pathParts = url.pathname.split('/');
@@ -108,10 +111,11 @@ export default async function handler(req: Request): Promise<Response> {
       return new Response('Invalid redirect URL', { status: 400 });
     }
 
-    // Log scan asynchronously (fire-and-forget)
-    logScanEvent(sql, req, redirectData.qrCodeId, redirectData.organizationId).catch((error) => {
+    // Log scan asynchronously — waitUntil keeps the worker alive until the DB write completes
+    const scanPromise = logScanEvent(sql, req, redirectData.qrCodeId, redirectData.organizationId).catch((error) => {
       logger.redirect.error('Scan event logging failed', { shortCode, error: String(error) });
     });
+    context.waitUntil(scanPromise);
 
     logger.redirect.info('Redirect', { shortCode, cacheHit, ms: Date.now() - start });
 
