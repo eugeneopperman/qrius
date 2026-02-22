@@ -264,11 +264,12 @@ export async function checkPlanLimit(
       break;
 
     case 'team_members':
-      usagePromise = getSupabaseAdmin()
-        .from('organization_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId)
-        .then(({ count }) => count || 0);
+      usagePromise = Promise.resolve(
+        getSupabaseAdmin()
+          .from('organization_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', organizationId)
+      ).then(({ count }) => count || 0);
       break;
   }
 
