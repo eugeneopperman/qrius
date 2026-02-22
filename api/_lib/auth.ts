@@ -2,6 +2,7 @@
 import type { VercelRequest } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { logger } from './logger.js';
+import { sql } from './db.js';
 
 // Supabase admin client (uses service role key)
 // Guard: createClient throws if key is empty string — defer to null when unconfigured
@@ -243,11 +244,13 @@ export async function checkPlanLimit(
 
   switch (limitType) {
     case 'qr_codes': {
-      const { count: qrCount } = await getSupabaseAdmin()
-        .from('qr_codes')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', organizationId);
-      current = qrCount || 0;
+      // QR codes live in Neon, not Supabase — query Neon directly
+      if (sql) {
+        const countResult = await sql`
+          SELECT COUNT(*) as count FROM qr_codes WHERE organization_id = ${organizationId}
+        `;
+        current = parseInt(countResult[0].count as string) || 0;
+      }
       limit = limits.qr_codes_limit;
       break;
     }
