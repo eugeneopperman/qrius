@@ -167,6 +167,12 @@ async function logScanEvent(
       )
     `;
 
+    // Explicitly increment total_scans (trigger may not exist in Neon)
+    await sql`
+      UPDATE qr_codes SET total_scans = total_scans + 1, updated_at = NOW()
+      WHERE id = ${qrCodeId}
+    `;
+
     // Increment scan count in usage_records for billing tracking
     if (organizationId) {
       const currentMonth = new Date().toISOString().slice(0, 7) + '-01';

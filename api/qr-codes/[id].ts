@@ -74,15 +74,20 @@ async function handleGet(
   const baseResponse = toQRCodeResponse(qrCode, baseUrl);
 
   // Look up scan_history_days from plan limits (default 30 for free)
+  // organizations + plan_limits live in Supabase, not Neon — query may fail
   let scanHistoryDays = 30;
   if (qrCode.organization_id) {
-    const planResult = await sql`
-      SELECT pl.scan_history_days FROM organizations o
-      JOIN plan_limits pl ON pl.plan = o.plan
-      WHERE o.id = ${qrCode.organization_id}
-    `;
-    if (planResult.length > 0) {
-      scanHistoryDays = planResult[0].scan_history_days as number;
+    try {
+      const planResult = await sql`
+        SELECT pl.scan_history_days FROM organizations o
+        JOIN plan_limits pl ON pl.plan = o.plan
+        WHERE o.id = ${qrCode.organization_id}
+      `;
+      if (planResult.length > 0) {
+        scanHistoryDays = planResult[0].scan_history_days as number;
+      }
+    } catch {
+      // Tables may not exist in Neon — use default 30 days
     }
   }
 
