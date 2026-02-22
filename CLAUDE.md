@@ -190,6 +190,7 @@ Copy `.env.example` to `.env.local` and configure:
 - **Zustand** over Redux/Jotai — already established in codebase, simple API with persist middleware
 - **Dual database** — Supabase for auth/users, Neon for QR tracking (both Postgres, could consolidate later)
 - **Upstash Redis** — caching redirect lookups with 24-hour TTL
+- **`@vercel/functions`** — `waitUntil()` for background work in Edge/Node functions (scan logging)
 
 ## File Naming Conventions
 
@@ -254,3 +255,4 @@ Copy `.env.example` to `.env.local` and configure:
 ## Known Issues
 - Mobile testing requires network access (use `npm run dev -- --host 0.0.0.0`)
 - Stripe integration requires configuration (works without for dev)
+- Neon migrations must be applied manually via Neon SQL Editor (see `api/migrations/`)
