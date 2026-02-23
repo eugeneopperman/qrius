@@ -21,6 +21,7 @@ export interface Database {
           id: string;
           email: string;
           name: string | null;
+          display_name: string | null;
           avatar_url: string | null;
           plan: Plan;
           stripe_customer_id: string | null;
@@ -32,6 +33,7 @@ export interface Database {
           id: string;
           email: string;
           name?: string | null;
+          display_name?: string | null;
           avatar_url?: string | null;
           plan?: Plan;
           stripe_customer_id?: string | null;
@@ -43,6 +45,7 @@ export interface Database {
           id?: string;
           email?: string;
           name?: string | null;
+          display_name?: string | null;
           avatar_url?: string | null;
           plan?: Plan;
           stripe_customer_id?: string | null;

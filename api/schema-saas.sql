@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255),
+    display_name VARCHAR(100),
     avatar_url TEXT,
     plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'pro', 'business')),
     stripe_customer_id VARCHAR(255),

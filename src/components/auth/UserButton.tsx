@@ -65,7 +65,7 @@ export function UserButton({ onSettingsClick }: UserButtonProps) {
 
   if (!user) return null;
 
-  const displayName = profile?.name || user.email?.split('@')[0] || 'User';
+  const displayName = profile?.display_name || profile?.name || user.email?.split('@')[0] || 'User';
   const avatarUrl = profile?.avatar_url;
   const initials = displayName
     .split(' ')

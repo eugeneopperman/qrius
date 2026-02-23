@@ -12,6 +12,7 @@ const AVATAR_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/we
 
 export function ProfileSettingsContent() {
   const { user, profile, updateProfile } = useAuthStore(useShallow((s) => ({ user: s.user, profile: s.profile, updateProfile: s.updateProfile })));
+  const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [name, setName] = useState(profile?.name || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -98,7 +99,7 @@ export function ProfileSettingsContent() {
     e.preventDefault();
     setIsSaving(true);
 
-    const { error } = await updateProfile({ name });
+    const { error } = await updateProfile({ display_name: displayName || null, name });
     setIsSaving(false);
 
     if (error) {
@@ -199,6 +200,16 @@ export function ProfileSettingsContent() {
           </h2>
 
           <div className="space-y-4">
+            <Input
+              label="Display Name"
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="e.g. Johnny"
+              hint="Shown in the header and to teammates"
+              maxLength={100}
+            />
+
             <Input
               label="Full name"
               type="text"
