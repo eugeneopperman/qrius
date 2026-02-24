@@ -56,6 +56,7 @@ function mapAPIToQRCode(api: APIQRCode): QRCode {
     description: api.description,
     tags: api.tags || [],
     metadata: (api.metadata || {}) as QRCode['metadata'],
+    tracking_url: api.tracking_url,
     created_at: api.created_at,
     updated_at: api.updated_at,
   };

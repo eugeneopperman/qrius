@@ -25,9 +25,10 @@ export interface QRPreviewHandle {
 interface QRPreviewProps {
   hideActions?: boolean;
   displaySize?: number;
+  overrideData?: string;
 }
 
-export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActions, displaySize }, ref) => {
+export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActions, displaySize, overrideData }, ref) => {
   const frameContainerRef = useRef<HTMLDivElement>(null);
   const [showFormatMenu, setShowFormatMenu] = useState(false);
   const { getQRValue, styleOptions, activeType, getCurrentData,
@@ -57,7 +58,7 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
     }
   })();
 
-  const displayValue = hasContent ? qrValue : QR_CONFIG.GHOST_DATA;
+  const displayValue = hasContent ? (overrideData || qrValue) : QR_CONFIG.GHOST_DATA;
 
   // Calculate zoom factor for displaySize — zoom scales both visual AND layout
   const zoomFactor = displaySize ? displaySize / QR_CONFIG.SIZE : undefined;

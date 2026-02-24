@@ -221,8 +221,9 @@ export default function QRCodeDetailPage() {
     );
   }
 
-  const trackingUrl = `${window.location.origin}/r/${qrCode.short_code}`;
+  const trackingUrl = qrCode.tracking_url || `${window.location.origin}/r/${qrCode.short_code}`;
   const isUrlType = qrCode.qr_type === 'url' || !qrCode.qr_type;
+  const qrData = isUrlType ? trackingUrl : qrCode.destination_url;
   const savedStyle = extractStyleOptions(qrCode.metadata);
 
   return (
@@ -303,7 +304,7 @@ export default function QRCodeDetailPage() {
           <div className="lg:col-span-1">
             <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 ${!qrCode.is_active ? 'opacity-60' : ''}`}>
               <div className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
-                <QRMiniPreview ref={qrPreviewRef} data={qrCode.destination_url} size={240} styleOptions={savedStyle} />
+                <QRMiniPreview ref={qrPreviewRef} data={qrData} size={240} styleOptions={savedStyle} />
               </div>
 
               <div className="space-y-3">

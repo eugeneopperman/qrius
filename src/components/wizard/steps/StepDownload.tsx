@@ -17,6 +17,7 @@ export function StepDownload() {
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [savedQRCodeId, setSavedQRCodeId] = useState<string | null>(null);
+  const [trackingUrl, setTrackingUrl] = useState<string | null>(null);
   const [saveAttempted, setSaveAttempted] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -104,6 +105,9 @@ export function StepDownload() {
 
       const data = await response.json();
       setSavedQRCodeId(data.id);
+      if (data.tracking_url) {
+        setTrackingUrl(data.tracking_url);
+      }
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast.success('QR code saved to your dashboard');
@@ -134,6 +138,7 @@ export function StepDownload() {
 
   const handleCreateAnother = () => {
     setSavedQRCodeId(null);
+    setTrackingUrl(null);
     setSaveAttempted(false);
     reset();
   };
@@ -158,7 +163,10 @@ export function StepDownload() {
       {/* Large QR Preview */}
       <div className="card mb-6 p-8">
         <div className="max-w-[300px] mx-auto">
-          <QRPreview ref={qrPreviewRef} />
+          <QRPreview
+            ref={qrPreviewRef}
+            overrideData={activeType === 'url' && trackingUrl ? trackingUrl : undefined}
+          />
         </div>
       </div>
 
@@ -196,6 +204,7 @@ export function StepDownload() {
           size="lg"
           className="flex-1 py-4 text-lg bg-orange-500 hover:bg-orange-600"
           onClick={handleQuickDownload}
+          disabled={isSaving}
         >
           {downloadSuccess ? (
             <>
@@ -215,6 +224,7 @@ export function StepDownload() {
           size="lg"
           className="py-4"
           onClick={handleShowFormatPicker}
+          disabled={isSaving}
         >
           <Settings2 className="w-5 h-5" />
           More Formats

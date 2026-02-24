@@ -93,6 +93,7 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     description: data.description,
     tags: data.tags || [],
     metadata: (data.metadata || {}) as QRCode['metadata'],
+    tracking_url: data.tracking_url,
     created_at: data.created_at,
     updated_at: data.updated_at,
   };

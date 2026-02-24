@@ -45,6 +45,8 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
   });
 
   const isDynamic = !!qrCode.short_code;
+  const isUrlType = qrCode.qr_type === 'url' || !qrCode.qr_type;
+  const qrData = isUrlType && qrCode.tracking_url ? qrCode.tracking_url : qrCode.destination_url;
   const savedStyle = extractStyleOptions(qrCode.metadata);
 
   return (
@@ -53,7 +55,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
       <Link to="/qr-codes/$id" params={{ id: qrCode.id }} className="block">
         <div className="aspect-square p-6 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
           <div className="w-full h-full max-w-[200px] max-h-[200px] bg-white rounded-lg flex items-center justify-center overflow-hidden">
-            <QRMiniPreview data={qrCode.destination_url} size={180} styleOptions={savedStyle} />
+            <QRMiniPreview data={qrData} size={180} styleOptions={savedStyle} />
           </div>
         </div>
       </Link>

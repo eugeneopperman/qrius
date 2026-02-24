@@ -321,6 +321,7 @@ export interface Database {
           description: string | null;
           tags: string[];
           metadata: Json;
+          tracking_url?: string;
           created_at: string;
           updated_at: string;
         };
