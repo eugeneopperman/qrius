@@ -17,11 +17,18 @@ function getSystemTheme(): 'light' | 'dark' {
   return 'light';
 }
 
+const THEME_COLORS = { light: '#f7e4d5', dark: '#141413' } as const;
+
 function applyTheme(resolved: 'light' | 'dark') {
   if (resolved === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
+  }
+  // Update Safari/PWA chrome color
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    meta.setAttribute('content', THEME_COLORS[resolved]);
   }
 }
 
