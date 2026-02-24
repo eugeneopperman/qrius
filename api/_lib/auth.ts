@@ -25,7 +25,7 @@ export interface AuthenticatedUser {
   role?: string;
 }
 
-function getSupabaseAdmin() {
+export function getSupabaseAdmin() {
   if (!supabaseAdmin) {
     throw new Error('Supabase admin client not configured — set SUPABASE_SERVICE_ROLE_KEY env var');
   }

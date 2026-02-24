@@ -11,6 +11,7 @@ import {
   getUserOrganization,
   checkPlanLimit,
   getOrgCustomDomain,
+  getSupabaseAdmin,
   UnauthorizedError,
   ForbiddenError,
 } from '../_lib/auth.js';
@@ -274,111 +275,109 @@ async function handleList(
   const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
   const offset = parseInt(req.query.offset as string) || 0;
 
-  // Filter by organization or user if authenticated
-  let result;
-  let countResult;
+  // Resolve the effective orgId first (sequential — needed for all subsequent queries)
+  let effectiveOrgId: string | null = null;
+  let isPersonalOnly = false;
 
   if (authContext?.organizationId) {
-    // API key auth - filter by organization
-    result = await sql`
-      SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at
-      FROM qr_codes
-      WHERE organization_id = ${authContext.organizationId}
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `;
-    countResult = await sql`
-      SELECT COUNT(*) as count
-      FROM qr_codes
-      WHERE organization_id = ${authContext.organizationId}
-    `;
+    effectiveOrgId = authContext.organizationId;
   } else if (authContext?.userId) {
-    // JWT auth - get user's organization
     try {
       const orgMembership = await getUserOrganization(authContext.userId);
-      result = await sql`
-        SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at
-        FROM qr_codes
-        WHERE organization_id = ${orgMembership.organizationId}
-        ORDER BY created_at DESC
-        LIMIT ${limit}
-        OFFSET ${offset}
-      `;
-      countResult = await sql`
-        SELECT COUNT(*) as count
-        FROM qr_codes
-        WHERE organization_id = ${orgMembership.organizationId}
-      `;
+      effectiveOrgId = orgMembership.organizationId;
     } catch {
-      // User has no organization - return only their personal QR codes
-      result = await sql`
-        SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at
-        FROM qr_codes
-        WHERE user_id = ${authContext.userId} AND organization_id IS NULL
-        ORDER BY created_at DESC
-        LIMIT ${limit}
-        OFFSET ${offset}
-      `;
-      countResult = await sql`
-        SELECT COUNT(*) as count
-        FROM qr_codes
-        WHERE user_id = ${authContext.userId} AND organization_id IS NULL
-      `;
+      isPersonalOnly = true;
     }
+  }
+
+  // Build query conditions based on auth context
+  const selectCols = 'id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at';
+
+  // Parallelize: list + count + customDomain + monthlyScans + teamMembers
+  const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+
+  let listPromise: Promise<QRCodeRow[]>;
+  let countPromise: Promise<number>;
+
+  if (effectiveOrgId) {
+    listPromise = sql`
+      SELECT ${sql.unsafe(selectCols)}
+      FROM qr_codes
+      WHERE organization_id = ${effectiveOrgId}
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+      OFFSET ${offset}
+    ` as Promise<QRCodeRow[]>;
+    countPromise = sql`
+      SELECT COUNT(*) as count FROM qr_codes WHERE organization_id = ${effectiveOrgId}
+    `.then(r => parseInt(r[0].count as string) || 0);
+  } else if (isPersonalOnly && authContext?.userId) {
+    listPromise = sql`
+      SELECT ${sql.unsafe(selectCols)}
+      FROM qr_codes
+      WHERE user_id = ${authContext.userId} AND organization_id IS NULL
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+      OFFSET ${offset}
+    ` as Promise<QRCodeRow[]>;
+    countPromise = sql`
+      SELECT COUNT(*) as count FROM qr_codes WHERE user_id = ${authContext.userId} AND organization_id IS NULL
+    `.then(r => parseInt(r[0].count as string) || 0);
   } else {
-    // Unauthenticated - return all public QR codes (backward compatibility)
-    // In production, you may want to require authentication here
-    result = await sql`
-      SELECT id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at
+    listPromise = sql`
+      SELECT ${sql.unsafe(selectCols)}
       FROM qr_codes
       WHERE organization_id IS NULL AND user_id IS NULL
       ORDER BY created_at DESC
       LIMIT ${limit}
       OFFSET ${offset}
-    `;
-    countResult = await sql`
-      SELECT COUNT(*) as count
-      FROM qr_codes
-      WHERE organization_id IS NULL AND user_id IS NULL
-    `;
+    ` as Promise<QRCodeRow[]>;
+    countPromise = sql`
+      SELECT COUNT(*) as count FROM qr_codes WHERE organization_id IS NULL AND user_id IS NULL
+    `.then(r => parseInt(r[0].count as string) || 0);
   }
 
-  // Look up custom domain for the org (one lookup for the whole list)
-  const listOrgId = authContext?.organizationId || null;
-  let customDomain: string | null = null;
-  if (listOrgId) {
-    customDomain = await getOrgCustomDomain(listOrgId);
-  } else if (authContext?.userId) {
-    // Try to get org from the first QR code in the result
-    const firstOrgId = result.length > 0 ? (result[0] as QRCodeRow).organization_id : null;
+  // Custom domain lookup (Supabase)
+  const domainPromise: Promise<string | null> = effectiveOrgId
+    ? getOrgCustomDomain(effectiveOrgId)
+    : Promise.resolve(null);
+
+  // Monthly scans from usage_records (Neon)
+  const scansPromise: Promise<number> = effectiveOrgId
+    ? sql`SELECT scans_count FROM usage_records WHERE organization_id = ${effectiveOrgId} AND month = ${currentMonth}`
+        .then(r => r.length > 0 ? (parseInt(r[0].scans_count as string) || 0) : 0)
+        .catch(() => 0)
+    : Promise.resolve(0);
+
+  // Team member count (Supabase) — included so frontend doesn't need a separate call
+  const teamPromise: Promise<number> = effectiveOrgId
+    ? getSupabaseAdmin()
+        .from('organization_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', effectiveOrgId)
+        .then(({ count }) => count || 1)
+        .catch(() => 1)
+    : Promise.resolve(1);
+
+  // Fire all 5 queries in parallel
+  const [result, total, customDomain, monthlyScans, teamMembers] = await Promise.all([
+    listPromise,
+    countPromise,
+    domainPromise,
+    scansPromise,
+    teamPromise,
+  ]);
+
+  // If no org from auth context, try to get custom domain from first result's org
+  let resolvedDomain = customDomain;
+  if (!resolvedDomain && !effectiveOrgId && authContext?.userId && result.length > 0) {
+    const firstOrgId = (result[0] as QRCodeRow).organization_id;
     if (firstOrgId) {
-      customDomain = await getOrgCustomDomain(firstOrgId);
+      resolvedDomain = await getOrgCustomDomain(firstOrgId);
     }
   }
 
-  const qrCodes = result.map((row) => toQRCodeResponse(row as QRCodeRow, baseUrl, customDomain));
-  const total = parseInt(countResult[0].count as string);
-
-  // Fetch monthly scan count from usage_records if we have an organization
-  let monthlyScans = 0;
-  const orgId = authContext?.organizationId || (authContext?.userId ? null : null);
-  // Derive orgId from the first QR code if available, or from auth context
-  const effectiveOrgId = orgId || (result.length > 0 ? (result[0] as QRCodeRow).organization_id : null);
-  if (effectiveOrgId && sql) {
-    try {
-      const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
-      const usageResult = await sql`
-        SELECT scans_count FROM usage_records
-        WHERE organization_id = ${effectiveOrgId} AND month = ${currentMonth}
-      `;
-      if (usageResult.length > 0) {
-        monthlyScans = parseInt(usageResult[0].scans_count as string) || 0;
-      }
-    } catch {
-      // Non-critical — stats just show 0
-    }
-  }
+  const qrCodes = result.map((row) => toQRCodeResponse(row as QRCodeRow, baseUrl, resolvedDomain));
 
   return res.status(200).json({
     qrCodes,
@@ -390,6 +389,7 @@ async function handleList(
     },
     stats: {
       monthlyScans,
+      teamMembers,
     },
   });
 }

@@ -37,6 +37,7 @@ interface APIResponse {
   };
   stats: {
     monthlyScans: number;
+    teamMembers: number;
   };
 }
 
@@ -62,10 +63,10 @@ function mapAPIToQRCode(api: APIQRCode): QRCode {
   };
 }
 
-async function fetchQRCodes(limit?: number): Promise<{ qrCodes: QRCode[]; totalCount: number; monthlyScans: number }> {
+async function fetchQRCodes(limit?: number): Promise<{ qrCodes: QRCode[]; totalCount: number; monthlyScans: number; teamMembers: number }> {
   const session = await getSession();
   if (!session?.access_token) {
-    return { qrCodes: [], totalCount: 0, monthlyScans: 0 };
+    return { qrCodes: [], totalCount: 0, monthlyScans: 0, teamMembers: 1 };
   }
 
   const params = new URLSearchParams();
@@ -87,6 +88,7 @@ async function fetchQRCodes(limit?: number): Promise<{ qrCodes: QRCode[]; totalC
     qrCodes: data.qrCodes.map(mapAPIToQRCode),
     totalCount: data.pagination.total,
     monthlyScans: data.stats.monthlyScans,
+    teamMembers: data.stats.teamMembers ?? 1,
   };
 }
 
@@ -105,6 +107,7 @@ export function useOrganizationQRCodes({ limit }: UseOrganizationQRCodesOptions 
   const qrCodes = data?.qrCodes ?? [];
   const totalCount = data?.totalCount ?? 0;
   const monthlyScans = data?.monthlyScans ?? 0;
+  const teamMembers = data?.teamMembers ?? 1;
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -154,6 +157,7 @@ export function useOrganizationQRCodes({ limit }: UseOrganizationQRCodesOptions 
     qrCodes,
     totalCount,
     monthlyScans,
+    teamMembers,
     isLoading,
     deleteQRCode,
     refetch: () => queryClient.invalidateQueries({ queryKey }),

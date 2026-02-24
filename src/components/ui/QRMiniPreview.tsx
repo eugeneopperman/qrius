@@ -1,4 +1,4 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { cn } from '@/utils/cn';
 import {
@@ -54,6 +54,9 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
         }
       },
     }));
+
+    // Memoize styleOptions by value to avoid re-renders when parent passes new object references
+    const styleKey = useMemo(() => JSON.stringify(styleOptions), [styleOptions]);
 
     useEffect(() => {
       const container = containerRef.current;
@@ -125,18 +128,23 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
         config.image = s.logoUrl;
       }
 
+      // Reuse existing instance (update) instead of destroy/recreate
       if (!qrRef.current) {
         qrRef.current = new QRCodeStyling(config as ConstructorParameters<typeof QRCodeStyling>[0]);
         qrRef.current.append(container);
       } else {
         qrRef.current.update(config as Parameters<QRCodeStyling['update']>[0]);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data, size, styleKey]);
 
+    // Separate unmount-only cleanup
+    useEffect(() => {
       return () => {
-        clearChildren(container);
+        if (containerRef.current) clearChildren(containerRef.current);
         qrRef.current = null;
       };
-    }, [data, size, styleOptions]);
+    }, []);
 
     if (!data) return null;
 

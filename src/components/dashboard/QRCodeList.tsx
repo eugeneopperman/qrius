@@ -12,7 +12,6 @@ import {
   SortAsc,
   SortDesc,
   QrCode,
-  Loader2,
 } from 'lucide-react';
 import type { QRCode } from '@/types/database';
 
@@ -73,8 +72,14 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="card-no-blur rounded-2xl p-4 animate-pulse">
+            <div className="aspect-square bg-black/5 dark:bg-white/5 rounded-xl mb-3" />
+            <div className="h-4 bg-black/5 dark:bg-white/5 rounded w-3/4 mb-2" />
+            <div className="h-3 bg-black/5 dark:bg-white/5 rounded w-1/2" />
+          </div>
+        ))}
       </div>
     );
   }
