@@ -35,7 +35,7 @@ export const WizardPreview = forwardRef<QRPreviewHandle, WizardPreviewProps>(
     if (compact) {
       return (
         <div className={className}>
-          <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+          <div className="flex flex-col items-center gap-2 rounded-2xl glass p-4">
             <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Live Preview</p>
             <QRPreview ref={ref} hideActions displaySize={160} />
           </div>
@@ -47,7 +47,7 @@ export const WizardPreview = forwardRef<QRPreviewHandle, WizardPreviewProps>(
       <div className={className}>
         <div className="lg:sticky lg:top-8 space-y-6">
           {/* QR Preview */}
-          <div className="card">
+          <div className="card animate-gentle-float">
             <QRPreview ref={ref} hideActions displaySize={220} />
             <p className="text-center text-xs font-medium text-gray-400 dark:text-gray-500 mt-3">
               {typeLabels[activeType] || 'QR Code'}

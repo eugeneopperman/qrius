@@ -21,7 +21,7 @@ function UsageBar({ label, used, limit }: { label: string; used: number; limit: 
   const isCritical = !isUnlimited && percentage >= 95;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
+    <div className="glass rounded-2xl p-4">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
         <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -29,7 +29,7 @@ function UsageBar({ label, used, limit }: { label: string; used: number; limit: 
         </span>
       </div>
       {!isUnlimited && (
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+        <div className="w-full bg-black/5 dark:bg-white/5 rounded-full h-2">
           <div
             className={`h-2 rounded-full transition-all ${
               isCritical

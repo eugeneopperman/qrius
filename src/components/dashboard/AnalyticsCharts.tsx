@@ -67,7 +67,7 @@ function HorizontalBar({
       <span className="text-sm text-gray-700 dark:text-gray-300 w-32 truncate flex-shrink-0">
         {label}
       </span>
-      <div className="flex-1 h-6 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+      <div className="flex-1 h-6 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
         <div
           className="h-full bg-orange-500 rounded-full transition-all duration-500"
           style={{ width: `${Math.max(pct, 1)}%` }}
@@ -94,7 +94,7 @@ function StatCard({
   value: number | string;
 }) {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4">
+    <div className="glass rounded-2xl p-4">
       <Icon className="w-5 h-5 text-orange-500 mb-2" />
       <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
       <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
@@ -119,7 +119,7 @@ export function AnalyticsCharts({
 }: AnalyticsChartsProps) {
   if (totalScans === 0) {
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-8 text-center">
+      <div className="glass rounded-2xl p-8 text-center">
         <BarChart2 className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
           No scan data yet
@@ -141,9 +141,9 @@ export function AnalyticsCharts({
   const regionTotal = topRegions.reduce((s, r) => s + r.count, 0);
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+    <div className="glass rounded-2xl">
       <TabGroup>
-        <div className="px-6 pt-4 border-b border-gray-100 dark:border-gray-800">
+        <div className="px-6 pt-4 border-b border-white/10 dark:border-white/5">
           <TabList>
             <Tab icon={BarChart2}>Overview</Tab>
             <Tab icon={Globe}>Geography</Tab>
@@ -178,7 +178,7 @@ export function AnalyticsCharts({
                         className="flex-1 group relative"
                         title={`${formatDayLabel(day.date)}: ${day.count} scans`}
                       >
-                        <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-t h-32 flex items-end">
+                        <div className="w-full bg-black/5 dark:bg-white/5 rounded-t h-32 flex items-end">
                           <div
                             className="w-full bg-orange-500 rounded-t transition-all duration-300 hover:bg-orange-400"
                             style={{ height: `${Math.max(heightPct, day.count > 0 ? 4 : 0)}%` }}
@@ -209,7 +209,7 @@ export function AnalyticsCharts({
                         className="flex-1 group relative"
                         title={`${formatHour(h.hour)}: ${h.count} scans`}
                       >
-                        <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-t h-20 flex items-end">
+                        <div className="w-full bg-black/5 dark:bg-white/5 rounded-t h-20 flex items-end">
                           <div
                             className="w-full bg-orange-400 rounded-t transition-all duration-300 hover:bg-orange-300"
                             style={{ height: `${Math.max(heightPct, h.count > 0 ? 5 : 0)}%` }}

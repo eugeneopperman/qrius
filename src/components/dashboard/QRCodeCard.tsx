@@ -50,10 +50,10 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
   const savedStyle = extractStyleOptions(qrCode.metadata);
 
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden card-interactive ${!qrCode.is_active ? 'opacity-60' : ''}`}>
+    <div className={`card-no-blur rounded-2xl overflow-hidden card-interactive ${!qrCode.is_active ? 'opacity-60' : ''}`}>
       {/* QR Preview */}
       <Link to="/qr-codes/$id" params={{ id: qrCode.id }} className="block">
-        <div className="aspect-square p-6 bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+        <div className="aspect-square p-6 bg-black/5 dark:bg-white/5 flex items-center justify-center">
           <div className="w-full h-full max-w-[200px] max-h-[200px] bg-white rounded-lg flex items-center justify-center overflow-hidden">
             <QRMiniPreview data={qrData} size={180} styleOptions={savedStyle} />
           </div>
@@ -85,7 +85,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
             trigger={({ toggle }) => (
               <button
                 onClick={toggle}
-                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5"
                 aria-label="QR code actions"
               >
                 <MoreVertical className="w-5 h-5 text-gray-400" />
@@ -98,7 +98,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                   to="/qr-codes/$id"
                   params={{ id: qrCode.id }}
                   onClick={close}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <BarChart2 className="w-4 h-4" />
                   View Analytics
@@ -107,19 +107,19 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                   href={qrCode.destination_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open URL
                 </a>
                 <button
                   onClick={() => handleCopyUrl(close)}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <Copy className="w-4 h-4" />
                   Copy Tracking URL
                 </button>
-                <hr className="my-1 border-gray-200 dark:border-gray-700" />
+                <hr className="my-1 border-white/10 dark:border-white/5" />
                 <button
                   onClick={() => handleDelete(close)}
                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -137,11 +137,11 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
           <div className="flex items-center gap-2">
             <span className="text-gray-500 dark:text-gray-400">{formattedDate}</span>
             {isDynamic ? (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-500/12 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400">
                 Dynamic
               </span>
             ) : (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-black/5 dark:bg-white/5 text-gray-500 dark:text-gray-400">
                 Static
               </span>
             )}

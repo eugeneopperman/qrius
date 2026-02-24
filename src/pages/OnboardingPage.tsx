@@ -80,9 +80,9 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
+    <div className="min-h-screen bg-transparent flex flex-col">
       {/* Progress bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-800 z-50">
+      <div className="fixed top-0 left-0 right-0 h-1 bg-black/10 dark:bg-white/10 z-50">
         <div
           className="h-full bg-gradient-to-r from-orange-500 to-pink-500 transition-all duration-500"
           style={{ width: `${progress}%` }}
@@ -145,7 +145,7 @@ export default function OnboardingPage() {
                     ? 'bg-orange-500'
                     : s < step
                     ? 'bg-orange-300'
-                    : 'bg-gray-300 dark:bg-gray-700'
+                    : 'bg-black/10 dark:bg-white/10'
                 }`}
               />
             ))}

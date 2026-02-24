@@ -79,7 +79,7 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-black/30 backdrop-blur-md"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -87,16 +87,16 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
       {/* Modal */}
       <div
         ref={dialogRef}
-        className="relative w-full max-w-2xl max-h-[80vh] bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xl overflow-hidden mx-4"
+        className="relative w-full max-w-2xl max-h-[80vh] glass-heavy rounded-2xl shadow-2xl overflow-hidden mx-4"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 dark:border-white/5">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
             <h2 id="history-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-white">
               QR Code History
             </h2>
-            <span className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">
+            <span className="px-2 py-0.5 text-xs bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-400 rounded-full">
               {entries.length} / 20
             </span>
           </div>

@@ -209,7 +209,7 @@ export function BillingSettingsContent() {
       </div>
 
       {/* Current subscription */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 mb-8">
+      <div className="glass rounded-2xl p-6 mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -272,12 +272,12 @@ export function BillingSettingsContent() {
           return (
             <div
               key={plan.id}
-              className={`relative bg-white dark:bg-gray-900 rounded-2xl border-2 shadow-sm p-6 ${
+              className={`relative glass rounded-2xl border-2 p-6 ${
                 plan.popular
                   ? 'border-orange-500'
                   : isCurrent
                   ? 'border-green-500'
-                  : 'border-gray-100 dark:border-gray-800'
+                  : 'border-white/10 dark:border-white/5'
               }`}
             >
               {plan.popular && (
@@ -341,7 +341,7 @@ export function BillingSettingsContent() {
       </div>
 
       {/* FAQ */}
-      <div className="mt-12 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+      <div className="mt-12 glass rounded-2xl p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Frequently Asked Questions
         </h2>

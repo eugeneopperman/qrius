@@ -32,7 +32,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsPro
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/30 backdrop-blur-md"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -40,10 +40,10 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsPro
       {/* Modal */}
       <div
         ref={dialogRef}
-        className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+        className="relative glass-heavy rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-white/10 dark:border-white/5">
           <div className="flex items-center gap-2">
             <Keyboard className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
             <h2 id="keyboard-shortcuts-title" className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -53,7 +53,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsPro
           <button
             ref={closeButtonRef}
             onClick={onClose}
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             aria-label="Close keyboard shortcuts"
           >
             <X className="w-5 h-5 text-gray-500" aria-hidden="true" />
@@ -73,7 +73,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsPro
               <div className="flex items-center gap-1">
                 {shortcut.keys.map((key, keyIndex) => (
                   <span key={keyIndex}>
-                    <kbd className="px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-600">
+                    <kbd className="px-2 py-1 text-xs font-mono bg-black/5 dark:bg-white/5 text-gray-700 dark:text-gray-300 rounded border border-white/20 dark:border-white/10">
                       {key === 'Ctrl' ? modKey : key}
                     </kbd>
                     {keyIndex < shortcut.keys.length - 1 && (
@@ -87,9 +87,9 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsPro
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <div className="p-4 border-t border-white/10 dark:border-white/5 bg-black/5 dark:bg-white/5">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            Press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-gray-200 dark:bg-gray-700 rounded">?</kbd> anytime to show this dialog
+            Press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-black/5 dark:bg-white/5 rounded">?</kbd> anytime to show this dialog
           </p>
         </div>
       </div>

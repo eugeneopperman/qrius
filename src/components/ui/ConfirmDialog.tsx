@@ -57,7 +57,7 @@ export function ConfirmDialog({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-black/30 backdrop-blur-md"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -65,12 +65,12 @@ export function ConfirmDialog({
       {/* Dialog */}
       <div
         ref={dialogRef}
-        className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-2xl mx-4 overflow-hidden"
+        className="relative w-full max-w-md glass-heavy rounded-2xl shadow-2xl mx-4 overflow-hidden"
       >
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" />

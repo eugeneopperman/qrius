@@ -100,7 +100,7 @@ export default function InviteAcceptPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
@@ -108,7 +108,7 @@ export default function InviteAcceptPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-transparent p-4">
         <div className="max-w-md w-full text-center">
           <div className="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-6">
             <X className="w-8 h-8 text-red-500" />
@@ -128,15 +128,15 @@ export default function InviteAcceptPage() {
   if (!invitation) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Logo size="md" className="mx-auto mb-4" />
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-8">
+        <div className="glass rounded-2xl p-8">
           <div className="text-center mb-6">
-            <div className="mx-auto w-14 h-14 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4">
+            <div className="mx-auto w-14 h-14 rounded-full bg-orange-500/10 flex items-center justify-center mb-4">
               <Users className="w-7 h-7 text-orange-600 dark:text-orange-400" />
             </div>
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
@@ -147,7 +147,7 @@ export default function InviteAcceptPage() {
             </p>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6 space-y-2">
+          <div className="bg-black/5 dark:bg-white/5 rounded-xl p-4 mb-6 space-y-2">
             <div>
               <span className="text-sm text-gray-500 dark:text-gray-400">Organization</span>
               <p className="font-medium text-gray-900 dark:text-white">

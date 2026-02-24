@@ -102,7 +102,7 @@ export function TemplateWizardModal() {
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/30 backdrop-blur-md"
         onClick={closeWizard}
         aria-hidden="true"
       />
@@ -112,12 +112,12 @@ export function TemplateWizardModal() {
         ref={dialogRef}
         className={cn(
           'relative w-full max-w-4xl max-h-[90vh] flex flex-col',
-          'bg-white dark:bg-gray-900 rounded-2xl shadow-2xl',
+          'glass-heavy rounded-2xl shadow-2xl',
           'overflow-hidden'
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 dark:border-white/5">
           <div>
             <h2
               id="template-wizard-title"
@@ -131,7 +131,7 @@ export function TemplateWizardModal() {
           </div>
           <button
             onClick={closeWizard}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             aria-label="Close wizard"
           >
             <X className="w-5 h-5" />
@@ -139,7 +139,7 @@ export function TemplateWizardModal() {
         </div>
 
         {/* Progress */}
-        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+        <div className="px-6 py-4 border-b border-white/10 dark:border-white/5 bg-black/5 dark:bg-white/5">
           <TemplateWizardProgress
             currentStep={currentStep}
             onStepClick={goToStep}
@@ -180,14 +180,14 @@ export function TemplateWizardModal() {
             </div>
 
             {/* Preview Sidebar */}
-            <div className="lg:w-72 p-6 bg-gray-50 dark:bg-gray-800/50 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-800 flex items-center justify-center">
+            <div className="lg:w-72 p-6 bg-black/5 dark:bg-white/5 border-t lg:border-t-0 lg:border-l border-white/10 dark:border-white/5 flex items-center justify-center">
               <TemplateWizardPreview style={draftStyle} />
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-white/10 dark:border-white/5 bg-black/5 dark:bg-white/5">
           <Button
             variant="ghost"
             onClick={prevStep}

@@ -45,7 +45,7 @@ export function WizardContainer({ onPreviewRef }: WizardContainerProps) {
   return (
     <div className="w-full">
       {/* Progress indicator */}
-      <div className="relative mb-6 py-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl">
+      <div className="relative mb-6 py-3 glass rounded-2xl">
         <WizardProgress />
       </div>
 

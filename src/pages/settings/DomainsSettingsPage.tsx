@@ -152,7 +152,7 @@ export function DomainsSettingsContent() {
       ) : domain ? (
         /* Domain configured — show status */
         <div className="space-y-6">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+          <div className="glass rounded-2xl p-6">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-1">
@@ -184,7 +184,7 @@ export function DomainsSettingsContent() {
                   Add the following CNAME record to your DNS provider:
                 </p>
 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 font-mono text-sm">
+                <div className="bg-black/5 dark:bg-white/5 rounded-lg p-4 font-mono text-sm">
                   <div className="flex items-center justify-between gap-4">
                     <div className="min-w-0">
                       <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">CNAME Record</div>
@@ -254,7 +254,7 @@ export function DomainsSettingsContent() {
         /* No domain configured — show two options side by side */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Card A: App Subdomain (any plan) */}
-          <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 flex flex-col ${!SUBDOMAIN_BASE_DOMAIN ? 'opacity-75' : ''}`}>
+          <div className={`glass rounded-2xl p-6 flex flex-col ${!SUBDOMAIN_BASE_DOMAIN ? 'opacity-75' : ''}`}>
             <div className="flex items-center gap-2 mb-1">
               <Zap className="w-5 h-5 text-orange-500" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -282,7 +282,7 @@ export function DomainsSettingsContent() {
                       if (e.key === 'Enter') handleAddSubdomain();
                     }}
                   />
-                  <div className="flex items-center px-3 h-10 bg-gray-100 dark:bg-gray-800 border border-l-0 border-gray-200 dark:border-gray-700 rounded-r-lg text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                  <div className="flex items-center px-3 h-10 bg-black/5 dark:bg-white/5 border border-l-0 border-white/20 dark:border-white/10 rounded-r-lg text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                     .{SUBDOMAIN_BASE_DOMAIN}
                   </div>
                 </div>
@@ -301,7 +301,7 @@ export function DomainsSettingsContent() {
               </div>
             ) : (
               <div className="mt-auto">
-                <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-black/5 dark:bg-white/5 text-gray-500 dark:text-gray-400">
                   Coming Soon
                 </span>
               </div>
@@ -309,7 +309,7 @@ export function DomainsSettingsContent() {
           </div>
 
           {/* Card B: Custom Domain (Business only) */}
-          <div className={`bg-white dark:bg-gray-900 rounded-2xl border shadow-sm p-6 flex flex-col ${canUseWhiteLabel ? 'border-gray-100 dark:border-gray-800' : 'border-gray-100 dark:border-gray-800 opacity-75'}`}>
+          <div className={`glass rounded-2xl p-6 flex flex-col ${!canUseWhiteLabel ? 'opacity-75' : ''}`}>
             <div className="flex items-center gap-2 mb-1">
               <Globe className="w-5 h-5 text-blue-500" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -321,13 +321,13 @@ export function DomainsSettingsContent() {
                 Business
               </span>
             ) : (
-              <span className="inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 mb-3">
+              <span className="inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-500/12 dark:bg-orange-400/10 text-orange-700 dark:text-orange-400 mb-3">
                 <Lock className="w-3 h-3" />
                 Business plan
               </span>
             )}
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-1">
-              Use your own domain (e.g., <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">track.acme.com</code>). Requires DNS setup.
+              Use your own domain (e.g., <code className="bg-black/5 dark:bg-white/5 px-1 py-0.5 rounded text-xs">track.acme.com</code>). Requires DNS setup.
             </p>
 
             <div className="space-y-3">

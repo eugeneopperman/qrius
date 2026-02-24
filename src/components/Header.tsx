@@ -34,7 +34,7 @@ function OverflowMenuItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${className ?? ''}`}
+      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${className ?? ''}`}
     >
       <Icon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
       <span className="flex-1 text-left">{label}</span>
@@ -88,7 +88,7 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
+              className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-black/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
               aria-label="Toggle theme"
             >
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -100,7 +100,7 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
               trigger={({ toggle }) => (
                 <button
                   onClick={toggle}
-                  className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
+                  className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-black/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
                   aria-label="More options"
                 >
                   <MoreVertical className="w-5 h-5" />

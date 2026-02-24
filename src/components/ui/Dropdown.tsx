@@ -47,7 +47,7 @@ export function Dropdown({ trigger, children, align = 'left', className }: Dropd
         <div
           role="menu"
           className={cn(
-            'absolute top-full mt-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50',
+            'absolute top-full mt-1 glass-heavy rounded-xl shadow-lg overflow-hidden z-50',
             align === 'right' ? 'right-0' : 'left-0'
           )}
         >

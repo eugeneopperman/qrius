@@ -71,8 +71,8 @@ export function StepType() {
                 'hover:shadow-lg hover:-translate-y-0.5',
                 'active:scale-[0.98]',
                 isSelected
-                  ? 'bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-500 shadow-md'
-                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600'
+                  ? 'glass border-2 border-orange-500/70 shadow-md'
+                  : 'glass hover:border-orange-300/50 dark:hover:border-orange-600/50'
               )}
             >
               {/* Icon */}
@@ -81,7 +81,7 @@ export function StepType() {
                   'p-4 rounded-2xl transition-colors duration-200',
                   isSelected
                     ? 'bg-orange-500 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 group-hover:text-orange-600 dark:group-hover:text-orange-400'
+                    : 'bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 group-hover:bg-orange-500/10 group-hover:text-orange-600 dark:group-hover:text-orange-400'
                 )}
               >
                 <Icon className="w-6 h-6" />

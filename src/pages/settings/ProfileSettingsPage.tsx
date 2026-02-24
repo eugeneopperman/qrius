@@ -120,7 +120,7 @@ export function ProfileSettingsContent() {
     <div className="max-w-2xl">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Avatar section */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+        <div className="glass rounded-2xl p-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Profile Picture
           </h2>
@@ -139,13 +139,13 @@ export function ProfileSettingsContent() {
                   className="w-20 h-20 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-full bg-orange-500/12 dark:bg-orange-400/10 flex items-center justify-center">
                   <span className="text-2xl font-medium text-orange-600 dark:text-orange-400">
                     {initials}
                   </span>
                 </div>
               )}
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+              <div className="absolute inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
                 {isUploadingAvatar ? (
                   <Loader2 className="w-5 h-5 text-white animate-spin" />
                 ) : (
@@ -194,7 +194,7 @@ export function ProfileSettingsContent() {
         </div>
 
         {/* Personal information */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+        <div className="glass rounded-2xl p-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Personal Information
           </h2>
@@ -223,7 +223,7 @@ export function ProfileSettingsContent() {
               type="email"
               value={user?.email || ''}
               disabled
-              className="bg-gray-50 dark:bg-gray-800"
+              className="bg-black/5 dark:bg-white/5"
               hint="Email cannot be changed"
             />
           </div>

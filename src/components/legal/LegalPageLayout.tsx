@@ -13,9 +13,9 @@ export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayou
   const { theme, toggleTheme } = useThemeStore();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <header className="glass-medium" style={{ borderRadius: 0 }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
@@ -35,7 +35,7 @@ export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayou
 
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? (
@@ -49,8 +49,8 @@ export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayou
 
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <article className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-8 sm:p-12">
-          <header className="mb-8 pb-8 border-b border-gray-200 dark:border-gray-800">
+        <article className="glass rounded-2xl p-8 sm:p-12">
+          <header className="mb-8 pb-8 border-b border-white/10 dark:border-white/5">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
               {title}
             </h1>
@@ -65,7 +65,7 @@ export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayou
         </article>
       </main>
 
-      <PublicFooter className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900" />
+      <PublicFooter className="glass-medium mt-16" />
     </div>
   );
 }

@@ -62,8 +62,8 @@ export function ApiKeysSettingsContent() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h1>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+        <div className="glass rounded-2xl p-8 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-black/5 dark:bg-white/5 rounded-full flex items-center justify-center">
             <Key className="w-8 h-8 text-gray-400" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -143,7 +143,7 @@ export function ApiKeysSettingsContent() {
       )}
 
       {/* API keys list */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div className="glass rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
@@ -165,9 +165,9 @@ export function ApiKeysSettingsContent() {
             )}
           </div>
         ) : (
-          <div className="divide-y divide-gray-200 dark:divide-gray-800">
+          <div className="divide-y divide-white/10 dark:divide-white/5">
             {apiKeys.map((key) => (
-              <div key={key.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <div key={key.id} className="p-4 hover:bg-black/5 dark:hover:bg-white/5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">{key.name}</p>
@@ -205,7 +205,7 @@ export function ApiKeysSettingsContent() {
       </div>
 
       {/* API documentation link */}
-      <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+      <div className="mt-8 glass rounded-2xl p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
           API Documentation
         </h2>
@@ -253,11 +253,11 @@ function CreateKeyModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-md" onClick={onClose} />
+      <div className="relative glass-heavy rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+          className="absolute top-4 right-4 p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg"
         >
           <X className="w-5 h-5 text-gray-400" />
         </button>

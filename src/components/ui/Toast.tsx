@@ -11,10 +11,10 @@ const icons: Record<ToastVariant, React.ReactNode> = {
 };
 
 const variants: Record<ToastVariant, string> = {
-  success: 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
-  error: 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
-  info: 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
-  warning: 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
+  success: 'glass-medium border-green-200/50 dark:border-green-500/20 text-green-800 dark:text-green-200',
+  error: 'glass-medium border-red-200/50 dark:border-red-500/20 text-red-800 dark:text-red-200',
+  info: 'glass-medium border-blue-200/50 dark:border-blue-500/20 text-blue-800 dark:text-blue-200',
+  warning: 'glass-medium border-yellow-200/50 dark:border-yellow-500/20 text-yellow-800 dark:text-yellow-200',
 };
 
 const iconColors: Record<ToastVariant, string> = {

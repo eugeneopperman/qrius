@@ -56,7 +56,7 @@ export function AuthModal({ isOpen, onClose, defaultView = 'signin' }: AuthModal
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/30 backdrop-blur-md"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -67,13 +67,13 @@ export function AuthModal({ isOpen, onClose, defaultView = 'signin' }: AuthModal
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        className="relative z-10 w-full max-w-md mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative z-10 w-full max-w-md mx-4 glass-heavy rounded-2xl shadow-2xl overflow-hidden"
       >
         {/* Close button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
           aria-label="Close"
         >
           <X className="w-5 h-5" />

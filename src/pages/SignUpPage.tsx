@@ -58,7 +58,7 @@ export default function SignUpPage() {
 
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? (

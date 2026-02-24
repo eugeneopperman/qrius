@@ -69,7 +69,7 @@ export function TeamSettingsContent() {
       )}
 
       {/* Members list */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div className="glass rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
@@ -91,11 +91,11 @@ export function TeamSettingsContent() {
             )}
           </div>
         ) : (
-          <div className="divide-y divide-gray-200 dark:divide-gray-800">
+          <div className="divide-y divide-white/10 dark:divide-white/5">
             {members.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                className="flex items-center justify-between p-4 hover:bg-black/5 dark:hover:bg-white/5"
               >
                 <div className="flex items-center gap-3">
                   {member.user.avatar_url ? (
@@ -105,7 +105,7 @@ export function TeamSettingsContent() {
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-orange-500/12 dark:bg-orange-400/10 flex items-center justify-center">
                       <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
                         {(member.user.name || member.user.email || 'U')
                           .split(' ')
@@ -137,7 +137,7 @@ export function TeamSettingsContent() {
                   </span>
 
                   {canManageTeam && member.role !== 'owner' && member.user_id !== user?.id && (
-                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                    <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg">
                       <MoreVertical className="w-4 h-4 text-gray-400" />
                     </button>
                   )}
@@ -149,7 +149,7 @@ export function TeamSettingsContent() {
       </div>
 
       {/* Role descriptions */}
-      <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+      <div className="mt-8 glass rounded-2xl p-6">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           Role Permissions
         </h2>
@@ -230,11 +230,11 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-md" onClick={onClose} />
+      <div className="relative glass-heavy rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+          className="absolute top-4 right-4 p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg"
         >
           <X className="w-5 h-5 text-gray-400" />
         </button>
@@ -268,7 +268,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as OrgRole)}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-white/70 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
               <option value="admin">Admin</option>
               <option value="editor">Editor</option>

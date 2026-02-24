@@ -254,7 +254,7 @@ export default function QRCodeDetailPage() {
             )}
 
             {/* Dynamic badge */}
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-500/12 dark:bg-orange-400/10 text-orange-700 dark:text-orange-400">
               Dynamic
             </span>
 
@@ -302,8 +302,8 @@ export default function QRCodeDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* QR Code preview */}
           <div className="lg:col-span-1">
-            <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 ${!qrCode.is_active ? 'opacity-60' : ''}`}>
-              <div className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
+            <div className={`glass rounded-2xl p-6 ${!qrCode.is_active ? 'opacity-60' : ''}`}>
+              <div className="aspect-square bg-black/5 dark:bg-white/5 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
                 <QRMiniPreview ref={qrPreviewRef} data={qrData} size={240} styleOptions={savedStyle} />
               </div>
 
@@ -330,7 +330,7 @@ export default function QRCodeDetailPage() {
           {/* Details and stats */}
           <div className="lg:col-span-2 space-y-6">
             {/* QR Code details */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+            <div className="glass rounded-2xl p-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Details
               </h2>
@@ -390,7 +390,7 @@ export default function QRCodeDetailPage() {
                       )}
                       <button
                         onClick={startEditUrl}
-                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
+                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
                         title="Edit destination"
                       >
                         <Pencil className="w-4 h-4" />
@@ -449,7 +449,7 @@ export default function QRCodeDetailPage() {
             />
 
             {/* Recent scans */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+            <div className="glass rounded-2xl p-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Recent Scans
               </h2>
@@ -463,10 +463,10 @@ export default function QRCodeDetailPage() {
                   {recentScans.map((scan) => (
                     <div
                       key={scan.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-black/5 dark:bg-white/5 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
                           {scan.device_type === 'mobile' ? (
                             <Smartphone className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                           ) : (

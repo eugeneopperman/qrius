@@ -8,9 +8,9 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon }: StatCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 card-hover">
+    <div className="glass rounded-2xl p-6 card-hover">
       <div className="flex items-center justify-between">
-        <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+        <div className="p-2 bg-orange-500/10 rounded-lg">
           {icon}
         </div>
       </div>

@@ -30,7 +30,7 @@ export function WizardProgress() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200',
                   'focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2',
-                  isAccessible && !isCurrent && 'hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer',
+                  isAccessible && !isCurrent && 'hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer',
                   !isAccessible && 'cursor-not-allowed opacity-50'
                 )}
               >
@@ -42,7 +42,7 @@ export function WizardProgress() {
                       ? 'bg-green-500 text-white'
                       : isCurrent
                       ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                      : 'bg-black/10 dark:bg-white/10 text-gray-500 dark:text-gray-400'
                   )}
                 >
                   {isCompleted && !isCurrent ? (
@@ -74,7 +74,7 @@ export function WizardProgress() {
                     'w-12 h-0.5 transition-colors duration-300',
                     isCompleted
                       ? 'bg-green-500'
-                      : 'bg-gray-200 dark:bg-gray-700'
+                      : 'bg-black/10 dark:bg-white/10'
                   )}
                 />
               )}
@@ -92,7 +92,7 @@ export function WizardProgress() {
           {steps.find(s => s.step === currentStep)?.label}
         </span>
         {/* Progress bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700">
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/10 dark:bg-white/10">
           <div
             className="h-full bg-orange-500 transition-all duration-300"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}

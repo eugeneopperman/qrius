@@ -6,7 +6,7 @@ interface PublicFooterProps {
   className?: string;
 }
 
-export function PublicFooter({ className = 'glass-header mt-16' }: PublicFooterProps) {
+export function PublicFooter({ className = 'glass-medium mt-16' }: PublicFooterProps) {
   const openShortcuts = useUIStore((s) => s.openShortcuts);
 
   return (
@@ -44,7 +44,7 @@ export function PublicFooter({ className = 'glass-header mt-16' }: PublicFooterP
           >
             <Keyboard className="w-4 h-4" />
             <span className="hidden sm:inline">Shortcuts</span>
-            <kbd className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded-lg font-medium">?</kbd>
+            <kbd className="px-2 py-1 text-xs bg-black/5 dark:bg-white/5 rounded-lg font-medium">?</kbd>
           </button>
         </div>
       </div>

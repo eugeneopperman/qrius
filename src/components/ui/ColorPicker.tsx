@@ -101,7 +101,7 @@ export function ColorPicker({ label, value, onChange, presets = defaultPresets }
       )}
       <div className="relative">
         <div
-          className="flex items-center gap-2 p-2 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-white dark:bg-gray-800"
+          className="flex items-center gap-2 p-2 border border-white/20 dark:border-white/10 rounded-lg cursor-pointer bg-white/70 dark:bg-white/5"
           onClick={() => setIsOpen(!isOpen)}
         >
           <div
@@ -127,7 +127,7 @@ export function ColorPicker({ label, value, onChange, presets = defaultPresets }
 
         {isOpen && (
           <div
-            className="absolute z-50 mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 w-full"
+            className="absolute z-50 mt-2 p-3 glass-heavy rounded-xl shadow-lg w-full"
             role="listbox"
             aria-label="Color presets"
           >
