@@ -1,7 +1,6 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
-import { useThemeStore } from '@/stores/themeStore';
 import { UserButton } from '../auth/UserButton';
 import {
   QrCode,
@@ -11,8 +10,6 @@ import {
   Clock,
   ScanLine,
   Palette,
-  Sun,
-  Moon,
   Menu,
   X,
   Building2,
@@ -40,7 +37,6 @@ const navigation = [
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { theme, toggleTheme } = useThemeStore();
   const { currentOrganization, organizations, setCurrentOrganization } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, organizations: s.organizations, setCurrentOrganization: s.setCurrentOrganization })));
 
   return (
@@ -162,42 +158,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Button>
             </Link>
           </div>
+
+          {/* User avatar */}
+          <div className="px-3 pb-4">
+            <UserButton />
+          </div>
         </div>
       </aside>
 
       {/* Main content */}
       <div className="lg:pl-64">
-        {/* Top header */}
-        <header className="sticky top-0 z-30 h-16 bg-transparent">
-          <div className="flex items-center justify-between h-full px-4 lg:px-6">
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
-            >
-              <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-            </button>
-
-            <div className="flex-1" />
-
-            {/* Right side actions */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? (
-                  <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                ) : (
-                  <Moon className="w-5 h-5 text-gray-600" />
-                )}
-              </button>
-
-              <UserButton />
-            </div>
-          </div>
-        </header>
+        {/* Mobile menu button */}
+        <div className="lg:hidden sticky top-0 z-30 p-3">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+          >
+            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </button>
+        </div>
 
         {/* Page content */}
         <main className="p-4 lg:p-6">

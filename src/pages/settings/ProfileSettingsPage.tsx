@@ -3,15 +3,17 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
+import { useThemeStore } from '@/stores/themeStore';
 import { toast } from '@/stores/toastStore';
 import { supabase } from '@/lib/supabase';
-import { Camera, Loader2, Trash2 } from 'lucide-react';
+import { Camera, Loader2, Trash2, Sun, Moon } from 'lucide-react';
 
 const AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const AVATAR_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 export function ProfileSettingsContent() {
   const { user, profile, updateProfile } = useAuthStore(useShallow((s) => ({ user: s.user, profile: s.profile, updateProfile: s.updateProfile })));
+  const { theme, toggleTheme } = useThemeStore();
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [name, setName] = useState(profile?.name || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -243,6 +245,38 @@ export function ProfileSettingsContent() {
           </Button>
         </div>
       </form>
+
+      {/* Appearance */}
+      <div className="mt-6 glass rounded-2xl p-6">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          Appearance
+        </h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">Theme</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Switch between light and dark mode
+            </p>
+          </div>
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Moon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Dark</span>
+              </>
+            ) : (
+              <>
+                <Sun className="w-4 h-4 text-gray-600" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Light</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
 
       {/* Danger zone */}
       <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900 shadow-sm p-6">
