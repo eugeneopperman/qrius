@@ -211,6 +211,25 @@ export async function requireRole(
 }
 
 /**
+ * Get verified custom domain for an organization
+ */
+export async function getOrgCustomDomain(organizationId: string): Promise<string | null> {
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from('custom_domains')
+      .select('domain')
+      .eq('organization_id', organizationId)
+      .eq('status', 'verified')
+      .single();
+
+    if (error || !data) return null;
+    return data.domain;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Check organization plan limits
  */
 export async function checkPlanLimit(

@@ -53,6 +53,35 @@ export default async function handler(req: Request): Promise<Response> {
   const kv = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
 
   try {
+    // Custom domain validation — zero cost for default domains
+    const host = url.hostname;
+    const defaultHosts = new Set(
+      [
+        process.env.SHORT_URL_DOMAIN,
+        (() => {
+          try { return new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://localhost').hostname; }
+          catch { return null; }
+        })(),
+      ].filter(Boolean) as string[]
+    );
+
+    const isCustomDomain = !defaultHosts.has(host) && !host.endsWith('.vercel.app');
+
+    if (isCustomDomain && kv) {
+      try {
+        const domainMapping = await kv.get<{ organizationId: string }>(`domain:${host}`);
+        if (!domainMapping) {
+          logger.redirect.warn('Unknown custom domain', { host, shortCode });
+          return new Response('Domain not configured', { status: 404 });
+        }
+        // Domain is valid — proceed with normal redirect flow
+        // (short codes are globally unique, so no need to scope query by org)
+      } catch (error) {
+        logger.kv.warn('Domain mapping lookup error', { host, error: String(error) });
+        // Allow the request to proceed — don't block on cache errors
+      }
+    }
+
     let redirectData: CachedRedirect | null = null;
     let cacheHit = false;
 

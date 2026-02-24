@@ -5,7 +5,7 @@ import { sql, toQRCodeResponse, toScanEventResponse, type QRCodeRow, type ScanEv
 import { setCorsHeaders } from '../_lib/cors.js';
 import { isValidHttpUrl, isValidUUID, validateOptionalString } from '../_lib/validate.js';
 import { invalidateCachedRedirect } from '../_lib/kv.js';
-import { requireAuth, getUserOrganization, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
+import { requireAuth, getUserOrganization, getOrgCustomDomain, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { logger } from '../_lib/logger.js';
 import { parseUserAgent } from '../_lib/userAgentParser.js';
 
@@ -26,7 +26,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid QR code ID' });
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`;
+  const shortDomain = process.env.SHORT_URL_DOMAIN;
+  const baseUrl = shortDomain ? `https://${shortDomain}` : (process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`);
 
   try {
     if (req.method === 'GET') {
@@ -71,7 +72,8 @@ async function handleGet(
   }
 
   const qrCode = qrResult[0] as QRCodeRow;
-  const baseResponse = toQRCodeResponse(qrCode, baseUrl);
+  const customDomain = qrCode.organization_id ? await getOrgCustomDomain(qrCode.organization_id) : null;
+  const baseResponse = toQRCodeResponse(qrCode, baseUrl, customDomain);
 
   // Look up scan_history_days from plan limits (default 30 for free)
   // organizations + plan_limits live in Supabase, not Neon — query may fail
@@ -377,7 +379,8 @@ async function handlePatch(
   }
 
   const updated = result[0] as unknown as QRCodeRow;
-  return res.status(200).json(toQRCodeResponse(updated, baseUrl));
+  const patchCustomDomain = updated.organization_id ? await getOrgCustomDomain(updated.organization_id) : null;
+  return res.status(200).json(toQRCodeResponse(updated, baseUrl, patchCustomDomain));
 }
 
 async function handleDelete(

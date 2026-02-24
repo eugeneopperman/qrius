@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
 
-type GatedFeature = 'svg_download' | 'pdf_download' | 'unlimited_templates';
+type GatedFeature = 'svg_download' | 'pdf_download' | 'unlimited_templates' | 'white_label';
 
 export function usePlanGate() {
   const { user, currentOrganization } = useAuthStore(
@@ -27,6 +27,8 @@ export function usePlanGate() {
         return isPro || isBusiness;
       case 'unlimited_templates':
         return isPro || isBusiness;
+      case 'white_label':
+        return isBusiness;
       default:
         return true;
     }

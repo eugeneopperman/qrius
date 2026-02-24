@@ -49,11 +49,12 @@ export interface ScanEventRow {
 }
 
 // Helper to convert database row to API response format
-export function toQRCodeResponse(row: QRCodeRow, baseUrl: string) {
+export function toQRCodeResponse(row: QRCodeRow, baseUrl: string, customDomain?: string | null) {
+  const trackingBase = customDomain ? `https://${customDomain}` : baseUrl;
   return {
     id: row.id,
     short_code: row.short_code,
-    tracking_url: `${baseUrl}/r/${row.short_code}`,
+    tracking_url: `${trackingBase}/r/${row.short_code}`,
     destination_url: row.destination_url,
     qr_type: row.qr_type,
     original_data: row.original_data,

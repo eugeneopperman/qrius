@@ -410,6 +410,48 @@ export interface Database {
           },
         ];
       };
+      custom_domains: {
+        Row: {
+          id: string;
+          organization_id: string;
+          domain: string;
+          status: 'pending' | 'verifying' | 'verified' | 'failed';
+          cname_target: string;
+          verified_at: string | null;
+          last_check_at: string | null;
+          last_check_error: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          domain: string;
+          status?: 'pending' | 'verifying' | 'verified' | 'failed';
+          cname_target: string;
+          verified_at?: string | null;
+          last_check_at?: string | null;
+          last_check_error?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          status?: 'pending' | 'verifying' | 'verified' | 'failed';
+          verified_at?: string | null;
+          last_check_at?: string | null;
+          last_check_error?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'custom_domains_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: true;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       plan_limits: {
         Row: {
           plan: Plan;
@@ -458,6 +500,7 @@ export type UsageRecord = Database['public']['Tables']['usage_records']['Row'];
 export type QRCode = Database['public']['Tables']['qr_codes']['Row'];
 export type ScanEvent = Database['public']['Tables']['scan_events']['Row'];
 export type PlanLimits = Database['public']['Tables']['plan_limits']['Row'];
+export type CustomDomain = Database['public']['Tables']['custom_domains']['Row'];
 
 // Extended types with relations
 export interface OrganizationWithMembers extends Organization {

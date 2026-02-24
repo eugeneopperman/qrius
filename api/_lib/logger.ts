@@ -95,6 +95,7 @@ export const logger = {
   redirect: createLogger('redirect'),
   kv: createLogger('kv'),
   notifications: createLogger('notifications'),
+  domains: createLogger('domains'),
 };
 
 export default logger;

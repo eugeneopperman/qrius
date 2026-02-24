@@ -69,3 +69,51 @@ export async function invalidateCachedRedirect(shortCode: string): Promise<void>
     logger.kv.warn('KV del error', { shortCode, error: String(error) });
   }
 }
+
+// Domain mapping cache (custom domain → organization)
+const DOMAIN_PREFIX = 'domain:';
+const DOMAIN_CACHE_TTL = 60 * 60 * 24 * 7; // 7 days in seconds
+
+export interface CachedDomainMapping {
+  organizationId: string;
+}
+
+/**
+ * Get cached domain→org mapping
+ */
+export async function getCachedDomainMapping(domain: string): Promise<CachedDomainMapping | null> {
+  if (!kv) return null;
+
+  try {
+    return await kv.get<CachedDomainMapping>(`${DOMAIN_PREFIX}${domain}`);
+  } catch (error) {
+    logger.kv.warn('Domain mapping get error', { domain, error: String(error) });
+    return null;
+  }
+}
+
+/**
+ * Set cached domain→org mapping
+ */
+export async function setCachedDomainMapping(domain: string, data: CachedDomainMapping): Promise<void> {
+  if (!kv) return;
+
+  try {
+    await kv.set(`${DOMAIN_PREFIX}${domain}`, data, { ex: DOMAIN_CACHE_TTL });
+  } catch (error) {
+    logger.kv.warn('Domain mapping set error', { domain, error: String(error) });
+  }
+}
+
+/**
+ * Invalidate cached domain→org mapping
+ */
+export async function invalidateCachedDomainMapping(domain: string): Promise<void> {
+  if (!kv) return;
+
+  try {
+    await kv.del(`${DOMAIN_PREFIX}${domain}`);
+  } catch (error) {
+    logger.kv.warn('Domain mapping del error', { domain, error: String(error) });
+  }
+}

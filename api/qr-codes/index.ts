@@ -10,6 +10,7 @@ import {
   authenticate,
   getUserOrganization,
   checkPlanLimit,
+  getOrgCustomDomain,
   UnauthorizedError,
   ForbiddenError,
 } from '../_lib/auth.js';
@@ -39,7 +40,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Database not configured' });
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`;
+  const shortDomain = process.env.SHORT_URL_DOMAIN;
+  const baseUrl = shortDomain ? `https://${shortDomain}` : (process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`);
 
   try {
     // Authenticate request (optional for backward compatibility)
@@ -255,7 +257,10 @@ async function handleCreate(
     organizationId,
   });
 
-  return res.status(201).json(toQRCodeResponse(row, baseUrl));
+  // Look up custom domain for the org
+  const customDomain = organizationId ? await getOrgCustomDomain(organizationId) : null;
+
+  return res.status(201).json(toQRCodeResponse(row, baseUrl, customDomain));
 }
 
 async function handleList(
@@ -339,7 +344,20 @@ async function handleList(
     `;
   }
 
-  const qrCodes = result.map((row) => toQRCodeResponse(row as QRCodeRow, baseUrl));
+  // Look up custom domain for the org (one lookup for the whole list)
+  const listOrgId = authContext?.organizationId || null;
+  let customDomain: string | null = null;
+  if (listOrgId) {
+    customDomain = await getOrgCustomDomain(listOrgId);
+  } else if (authContext?.userId) {
+    // Try to get org from the first QR code in the result
+    const firstOrgId = result.length > 0 ? (result[0] as QRCodeRow).organization_id : null;
+    if (firstOrgId) {
+      customDomain = await getOrgCustomDomain(firstOrgId);
+    }
+  }
+
+  const qrCodes = result.map((row) => toQRCodeResponse(row as QRCodeRow, baseUrl, customDomain));
   const total = parseInt(countResult[0].count as string);
 
   // Fetch monthly scan count from usage_records if we have an organization

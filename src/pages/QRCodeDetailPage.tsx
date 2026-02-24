@@ -61,7 +61,7 @@ export default function QRCodeDetailPage() {
 
   const handleCopyUrl = async () => {
     if (!qrCode) return;
-    const trackingUrl = `${window.location.origin}/r/${qrCode.short_code}`;
+    const trackingUrl = qrCode.tracking_url || `${window.location.origin}/r/${qrCode.short_code}`;
     try {
       await navigator.clipboard.writeText(trackingUrl);
       toast.success('Tracking URL copied to clipboard');

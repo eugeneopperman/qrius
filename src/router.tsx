@@ -353,6 +353,14 @@ const apiKeysSettingsRedirect = createRoute({
   },
 });
 
+const domainsSettingsRedirect = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settings/domains',
+  beforeLoad: () => {
+    throw redirect({ to: '/settings', search: { tab: 'domains' } });
+  },
+});
+
 // Create route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -377,6 +385,7 @@ const routeTree = rootRoute.addChildren([
   teamSettingsRedirect,
   billingSettingsRedirect,
   apiKeysSettingsRedirect,
+  domainsSettingsRedirect,
 ]);
 
 // Create router

@@ -67,6 +67,40 @@ export function validatePositiveInt(
 /**
  * Validate a string array with max items and max item length.
  */
+/**
+ * Check that a string is a valid domain name.
+ * Lowercase hostname, at least one dot, no protocol, not IP, not reserved.
+ */
+const DOMAIN_REGEX = /^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/;
+const IP_REGEX = /^\d{1,3}(\.\d{1,3}){3}$/;
+const RESERVED_DOMAINS = ['localhost', 'example.com', 'example.org', 'example.net'];
+
+export function isValidDomain(domain: string): boolean {
+  if (!domain || typeof domain !== 'string') return false;
+
+  const normalized = domain.toLowerCase().trim();
+
+  // Max 253 chars per DNS spec
+  if (normalized.length === 0 || normalized.length > 253) return false;
+
+  // Must not contain protocol
+  if (normalized.includes('://') || normalized.includes('/')) return false;
+
+  // Must not be an IP address
+  if (IP_REGEX.test(normalized)) return false;
+
+  // Must match valid hostname pattern (at least one dot)
+  if (!DOMAIN_REGEX.test(normalized)) return false;
+
+  // Must not be a reserved domain
+  if (RESERVED_DOMAINS.includes(normalized)) return false;
+
+  // Must not be a *.vercel.app domain
+  if (normalized.endsWith('.vercel.app')) return false;
+
+  return true;
+}
+
 export function validateStringArray(
   value: unknown,
   maxItems: number,

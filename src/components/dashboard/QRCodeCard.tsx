@@ -21,7 +21,7 @@ interface QRCodeCardProps {
 
 export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeCardProps) {
   const handleCopyUrl = async (close: () => void) => {
-    const trackingUrl = `${window.location.origin}/r/${qrCode.short_code}`;
+    const trackingUrl = qrCode.tracking_url || `${window.location.origin}/r/${qrCode.short_code}`;
     try {
       await navigator.clipboard.writeText(trackingUrl);
       toast.success('URL copied to clipboard');

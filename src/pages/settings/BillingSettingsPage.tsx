@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { ComingSoonBadge } from '@/components/ui/ProBadge';
 
-const COMING_SOON_FEATURES = ['White-label branding', 'CSV analytics export', 'Advanced analytics'];
+const COMING_SOON_FEATURES = ['CSV analytics export', 'Advanced analytics'];
 
 // Stripe price IDs from environment variables
 const STRIPE_PRICES = {
