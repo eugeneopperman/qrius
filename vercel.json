@@ -4,6 +4,10 @@
     {
       "source": "/r/:shortCode",
       "destination": "/api/r/:shortCode"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }
