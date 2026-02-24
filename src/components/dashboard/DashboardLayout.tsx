@@ -1,6 +1,4 @@
 import { Link, useLocation } from '@tanstack/react-router';
-import { useAuthStore } from '@/stores/authStore';
-import { useShallow } from 'zustand/react/shallow';
 import { UserButton } from '../auth/UserButton';
 import {
   QrCode,
@@ -12,12 +10,9 @@ import {
   Palette,
   Menu,
   X,
-  Building2,
-  ChevronDown,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../ui/Button';
-import { Dropdown } from '../ui/Dropdown';
 import { Logo } from '../ui/Logo';
 
 interface DashboardLayoutProps {
@@ -37,7 +32,6 @@ const navigation = [
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { currentOrganization, organizations, setCurrentOrganization } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, organizations: s.organizations, setCurrentOrganization: s.setCurrentOrganization })));
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -69,81 +63,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
           </div>
 
-          {/* Organization Switcher */}
-          <div className="px-3 py-4 border-b border-black/[0.04] dark:border-white/[0.04]">
-            <Dropdown
-              trigger={({ toggle }) => (
-                <button
-                  onClick={toggle}
-                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-orange-500/12 dark:bg-orange-400/10 flex items-center justify-center">
-                    <Building2 className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {currentOrganization?.name || 'Select workspace'}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                      {currentOrganization?.plan || 'Free'} plan
-                    </p>
-                  </div>
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
-                </button>
-              )}
-              children={({ close }) => (
-                <>
-                  {organizations.map((membership) => (
-                    <button
-                      key={membership.organization.id}
-                      onClick={async () => {
-                        await setCurrentOrganization(membership.organization.id);
-                        close();
-                      }}
-                      className={`w-full flex items-center gap-3 p-3 text-left transition-colors ${
-                        currentOrganization?.id === membership.organization.id
-                          ? 'bg-orange-500/10 dark:bg-orange-400/10'
-                          : 'hover:bg-black/5 dark:hover:bg-white/5'
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center">
-                        <Building2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {membership.organization.name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                          {membership.role}
-                        </p>
-                      </div>
-                      {currentOrganization?.id === membership.organization.id && (
-                        <div className="w-2 h-2 rounded-full bg-orange-500" />
-                      )}
-                    </button>
-                  ))}
-                </>
-              )}
-            />
-          </div>
-
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            <p className="section-title px-3 mb-2">Main</p>
+          <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-colors ${
                     isActive
-                      ? 'bg-orange-500/10 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'bg-orange-500/10 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400 font-medium'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 font-normal'
                   }`}
                 >
-                  <item.icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
+                  <item.icon className="w-[18px] h-[18px]" />
+                  <span>{item.name}</span>
                 </Link>
               );
             })}

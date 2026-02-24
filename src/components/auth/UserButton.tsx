@@ -108,12 +108,12 @@ export function UserButton({ onSettingsClick }: UserButtonProps) {
           </div>
         )}
 
-        {/* Organization name (desktop only) */}
+        {/* User nickname */}
         <div className="hidden sm:flex items-center gap-1">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[120px] truncate">
-            {currentOrganization?.name || displayName}
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[140px] truncate">
+            {displayName}
           </span>
-          <ChevronDown className="w-4 h-4 text-gray-400" />
+          <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
         </div>
       </button>
 
