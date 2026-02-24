@@ -50,7 +50,7 @@ export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayou
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <article className="glass rounded-2xl p-8 sm:p-12">
-          <header className="mb-8 pb-8 border-b border-white/10 dark:border-white/5">
+          <header className="mb-8 pb-8 border-b border-divider">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
               {title}
             </h1>

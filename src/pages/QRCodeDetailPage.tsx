@@ -450,7 +450,7 @@ export default function QRCodeDetailPage() {
 
             {/* Recent scans */}
             <div className="glass rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h2 className="section-title mb-4">
                 Recent Scans
               </h2>
 

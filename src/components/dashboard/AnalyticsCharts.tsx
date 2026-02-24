@@ -143,7 +143,7 @@ export function AnalyticsCharts({
   return (
     <div className="glass rounded-2xl">
       <TabGroup>
-        <div className="px-6 pt-4 border-b border-white/10 dark:border-white/5">
+        <div className="px-6 pt-4 border-b border-divider">
           <TabList>
             <Tab icon={BarChart2}>Overview</Tab>
             <Tab icon={Globe}>Geography</Tab>

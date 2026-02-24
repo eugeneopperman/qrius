@@ -43,7 +43,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsPro
         className="relative glass-heavy rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10 dark:border-white/5">
+        <div className="flex items-center justify-between p-4 border-b border-divider">
           <div className="flex items-center gap-2">
             <Keyboard className="w-5 h-5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
             <h2 id="keyboard-shortcuts-title" className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -87,7 +87,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsPro
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/10 dark:border-white/5 bg-black/5 dark:bg-white/5">
+        <div className="p-4 border-t border-divider bg-black/5 dark:bg-white/5">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
             Press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-black/5 dark:bg-white/5 rounded">?</kbd> anytime to show this dialog
           </p>

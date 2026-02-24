@@ -119,7 +119,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                   <Copy className="w-4 h-4" />
                   Copy Tracking URL
                 </button>
-                <hr className="my-1 border-white/10 dark:border-white/5" />
+                <hr className="my-1 border-divider" />
                 <button
                   onClick={() => handleDelete(close)}
                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"

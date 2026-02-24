@@ -15,7 +15,7 @@ function StatCard({ title, value, icon }: StatCardProps) {
         </div>
       </div>
       <div className="mt-4">
-        <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+        <p className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{value}</p>
         <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
       </div>
     </div>

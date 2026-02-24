@@ -198,7 +198,7 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
 
       {/* List view */}
       {viewMode === 'list' && filteredQRCodes.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+        <div className="card-no-blur rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-800">

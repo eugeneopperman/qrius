@@ -165,7 +165,7 @@ export function ApiKeysSettingsContent() {
             )}
           </div>
         ) : (
-          <div className="divide-y divide-white/10 dark:divide-white/5">
+          <div className="divide-y divide-divider">
             {apiKeys.map((key) => (
               <div key={key.id} className="p-4 hover:bg-black/5 dark:hover:bg-white/5">
                 <div className="flex items-center justify-between">
@@ -206,7 +206,7 @@ export function ApiKeysSettingsContent() {
 
       {/* API documentation link */}
       <div className="mt-8 glass rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <h2 className="section-title mb-2">
           API Documentation
         </h2>
         <p className="text-gray-500 dark:text-gray-400 mb-4">

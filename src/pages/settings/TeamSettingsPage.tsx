@@ -91,7 +91,7 @@ export function TeamSettingsContent() {
             )}
           </div>
         ) : (
-          <div className="divide-y divide-white/10 dark:divide-white/5">
+          <div className="divide-y divide-divider">
             {members.map((member) => (
               <div
                 key={member.id}

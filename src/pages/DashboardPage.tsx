@@ -137,7 +137,7 @@ export default function DashboardPage() {
         {/* Recent QR codes */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 className="section-title">
               Recent QR Codes
             </h2>
             <Link

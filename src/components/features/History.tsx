@@ -90,7 +90,7 @@ export function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
         className="relative w-full max-w-2xl max-h-[80vh] glass-heavy rounded-2xl shadow-2xl overflow-hidden mx-4"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 dark:border-white/5">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-divider">
           <div className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-indigo-600" aria-hidden="true" />
             <h2 id="history-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-white">

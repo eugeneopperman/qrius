@@ -212,7 +212,7 @@ export function BillingSettingsContent() {
       <div className="glass rounded-2xl p-6 mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 className="section-title">
               Current Plan
             </h2>
             <p className="text-gray-500 dark:text-gray-400">
@@ -277,7 +277,7 @@ export function BillingSettingsContent() {
                   ? 'border-orange-500'
                   : isCurrent
                   ? 'border-green-500'
-                  : 'border-white/10 dark:border-white/5'
+                  : 'border-divider'
               }`}
             >
               {plan.popular && (
@@ -342,7 +342,7 @@ export function BillingSettingsContent() {
 
       {/* FAQ */}
       <div className="mt-12 glass rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <h2 className="section-title mb-4">
           Frequently Asked Questions
         </h2>
 

@@ -62,7 +62,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-white/10 dark:border-white/5">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-divider">
             <Link to="/dashboard">
               <Logo size="sm" />
             </Link>
@@ -75,7 +75,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Organization Switcher */}
-          <div className="px-3 py-4 border-b border-white/10 dark:border-white/5">
+          <div className="px-3 py-4 border-b border-divider">
             <Dropdown
               trigger={({ toggle }) => (
                 <button
@@ -154,7 +154,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </nav>
 
           {/* Create QR CTA */}
-          <div className="p-4 border-t border-white/10 dark:border-white/5">
+          <div className="p-4 border-t border-divider">
             <Link to="/create">
               <Button className="w-full">
                 <Plus className="w-4 h-4" />
@@ -200,7 +200,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="p-6 lg:p-8">{children}</main>
+        <main className="p-4 lg:p-6">
+          <div className="glass-panel rounded-3xl p-6 lg:p-8 min-h-[calc(100vh-5rem)]">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

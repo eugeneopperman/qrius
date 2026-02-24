@@ -117,7 +117,7 @@ export function TemplateWizardModal() {
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 dark:border-white/5">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-divider">
           <div>
             <h2
               id="template-wizard-title"
@@ -139,7 +139,7 @@ export function TemplateWizardModal() {
         </div>
 
         {/* Progress */}
-        <div className="px-6 py-4 border-b border-white/10 dark:border-white/5 bg-black/5 dark:bg-white/5">
+        <div className="px-6 py-4 border-b border-divider bg-black/5 dark:bg-white/5">
           <TemplateWizardProgress
             currentStep={currentStep}
             onStepClick={goToStep}
@@ -180,14 +180,14 @@ export function TemplateWizardModal() {
             </div>
 
             {/* Preview Sidebar */}
-            <div className="lg:w-72 p-6 bg-black/5 dark:bg-white/5 border-t lg:border-t-0 lg:border-l border-white/10 dark:border-white/5 flex items-center justify-center">
+            <div className="lg:w-72 p-6 bg-black/5 dark:bg-white/5 border-t lg:border-t-0 lg:border-l border-divider flex items-center justify-center">
               <TemplateWizardPreview style={draftStyle} />
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-white/10 dark:border-white/5 bg-black/5 dark:bg-white/5">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-divider bg-black/5 dark:bg-white/5">
           <Button
             variant="ghost"
             onClick={prevStep}
