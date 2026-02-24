@@ -81,25 +81,26 @@ export function useCustomDomain() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  const invalidateDomainAndQRCodes = () => {
+    queryClient.invalidateQueries({ queryKey });
+    // Tracking URLs change when domain changes — refetch QR codes
+    queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
+    queryClient.invalidateQueries({ queryKey: ['qr-code-detail'] });
+  };
+
   const addMutation = useMutation({
     mutationFn: addCustomDomain,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
+    onSuccess: invalidateDomainAndQRCodes,
   });
 
   const verifyMutation = useMutation({
     mutationFn: verifyCustomDomain,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
+    onSuccess: invalidateDomainAndQRCodes,
   });
 
   const removeMutation = useMutation({
     mutationFn: removeCustomDomain,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
+    onSuccess: invalidateDomainAndQRCodes,
   });
 
   return {
