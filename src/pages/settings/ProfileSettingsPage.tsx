@@ -279,7 +279,7 @@ export function ProfileSettingsContent() {
       </div>
 
       {/* Danger zone */}
-      <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900 shadow-sm p-6">
+      <div className="mt-8 glass rounded-2xl border-red-200/50 dark:border-red-900/30 p-6">
         <h2 className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">
           Danger Zone
         </h2>
