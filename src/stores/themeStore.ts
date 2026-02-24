@@ -25,11 +25,10 @@ function applyTheme(resolved: 'light' | 'dark') {
   } else {
     document.documentElement.classList.remove('dark');
   }
-  // Update Safari/PWA chrome color
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) {
+  // Update Safari/PWA chrome color (both media-query variants)
+  document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
     meta.setAttribute('content', THEME_COLORS[resolved]);
-  }
+  });
 }
 
 function resolveTheme(theme: Theme): 'light' | 'dark' {
