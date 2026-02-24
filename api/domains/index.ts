@@ -98,16 +98,13 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
       return res.status(400).json({ error: 'Invalid subdomain. Use 3-63 lowercase letters, numbers, or hyphens.' });
     }
 
-    // Derive app host from NEXT_PUBLIC_APP_URL or request host
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-    let appHost: string;
-    try {
-      appHost = appUrl ? new URL(appUrl).hostname : (req.headers.host || 'localhost');
-    } catch {
-      appHost = req.headers.host || 'localhost';
+    // Requires SUBDOMAIN_BASE_DOMAIN env var (a real domain with wildcard DNS → Vercel)
+    const baseDomain = process.env.SUBDOMAIN_BASE_DOMAIN;
+    if (!baseDomain) {
+      return res.status(503).json({ error: 'App subdomains are not yet available. A custom base domain is being configured.' });
     }
 
-    normalizedDomain = `${label.toLowerCase().trim()}.${appHost}`;
+    normalizedDomain = `${label.toLowerCase().trim()}.${baseDomain}`;
   } else {
     // Custom domain flow — plan-gated to Business
     if (!body.domain || !isValidDomain(body.domain)) {
@@ -167,13 +164,12 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
     return res.status(409).json({ error: 'This domain is already in use by another organization' });
   }
 
-  // Add domain to Vercel project (custom domains only — app subdomains
-  // are routed automatically by Vercel for *.vercel.app)
+  // Add domain to Vercel project
   const vercelToken = process.env.VERCEL_API_TOKEN;
   const vercelProjectId = process.env.VERCEL_PROJECT_ID;
   let cnameTarget = domainType === 'subdomain' ? 'n/a' : 'cname.vercel-dns.com';
 
-  if (domainType === 'custom' && vercelToken && vercelProjectId) {
+  if (vercelToken && vercelProjectId) {
     try {
       const vercelRes = await fetch(
         `https://api.vercel.com/v10/projects/${vercelProjectId}/domains`,
@@ -199,18 +195,21 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
         return res.status(502).json({ error: 'Failed to add domain to hosting provider' });
       }
 
-      if (vercelData.cnames && vercelData.cnames.length > 0) {
-        cnameTarget = vercelData.cnames[0];
-      } else if (vercelData.apexName) {
-        cnameTarget = 'cname.vercel-dns.com';
+      // Extract CNAME target (only relevant for custom domains)
+      if (domainType === 'custom') {
+        if (vercelData.cnames && vercelData.cnames.length > 0) {
+          cnameTarget = vercelData.cnames[0];
+        } else if (vercelData.apexName) {
+          cnameTarget = 'cname.vercel-dns.com';
+        }
       }
 
-      logger.domains.info('Domain added to Vercel', { domain: normalizedDomain, cnameTarget });
+      logger.domains.info('Domain added to Vercel', { domain: normalizedDomain, type: domainType, cnameTarget });
     } catch (error) {
       logger.domains.error('Vercel API call failed', { domain: normalizedDomain, error: String(error) });
       return res.status(502).json({ error: 'Failed to communicate with hosting provider' });
     }
-  } else if (domainType === 'custom') {
+  } else {
     logger.domains.warn('Vercel API not configured — skipping domain registration', { domain: normalizedDomain });
   }
 

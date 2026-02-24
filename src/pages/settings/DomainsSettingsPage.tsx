@@ -19,10 +19,13 @@ import {
   Lock,
 } from 'lucide-react';
 
-const APP_HOST = 'design-sandbox-theta.vercel.app';
+// Will be set to a real domain once configured (e.g., qrius.app)
+// Until then, subdomain creation is disabled and the API returns 503
+const SUBDOMAIN_BASE_DOMAIN: string | null = null;
 
 function isAppSubdomain(domainStr: string): boolean {
-  return domainStr.endsWith(`.${APP_HOST}`);
+  if (!SUBDOMAIN_BASE_DOMAIN) return false;
+  return domainStr.endsWith(`.${SUBDOMAIN_BASE_DOMAIN}`);
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -251,7 +254,7 @@ export function DomainsSettingsContent() {
         /* No domain configured — show two options side by side */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Card A: App Subdomain (any plan) */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 flex flex-col">
+          <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6 flex flex-col ${!SUBDOMAIN_BASE_DOMAIN ? 'opacity-75' : ''}`}>
             <div className="flex items-center gap-2 mb-1">
               <Zap className="w-5 h-5 text-orange-500" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -262,37 +265,47 @@ export function DomainsSettingsContent() {
               All plans
             </span>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-1">
-              Get a branded subdomain instantly. No DNS setup needed.
+              {SUBDOMAIN_BASE_DOMAIN
+                ? 'Get a branded subdomain instantly. No DNS setup needed.'
+                : 'App subdomains are coming soon. Get a branded URL like my-brand.qrius.app with no DNS setup.'}
             </p>
 
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Input
-                  value={subdomainLabel}
-                  onChange={(e) => setSubdomainLabel(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                  placeholder="my-brand"
-                  className="rounded-r-none flex-1"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleAddSubdomain();
-                  }}
-                />
-                <div className="flex items-center px-3 h-10 bg-gray-100 dark:bg-gray-800 border border-l-0 border-gray-200 dark:border-gray-700 rounded-r-lg text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                  .{APP_HOST}
+            {SUBDOMAIN_BASE_DOMAIN ? (
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <Input
+                    value={subdomainLabel}
+                    onChange={(e) => setSubdomainLabel(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    placeholder="my-brand"
+                    className="rounded-r-none flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddSubdomain();
+                    }}
+                  />
+                  <div className="flex items-center px-3 h-10 bg-gray-100 dark:bg-gray-800 border border-l-0 border-gray-200 dark:border-gray-700 rounded-r-lg text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    .{SUBDOMAIN_BASE_DOMAIN}
+                  </div>
                 </div>
+                <Button
+                  onClick={handleAddSubdomain}
+                  disabled={isAdding || !subdomainLabel.trim() || subdomainLabel.trim().length < 3}
+                  className="w-full"
+                >
+                  {isAdding ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Zap className="w-4 h-4" />
+                  )}
+                  {isAdding ? 'Creating...' : 'Create Subdomain'}
+                </Button>
               </div>
-              <Button
-                onClick={handleAddSubdomain}
-                disabled={isAdding || !subdomainLabel.trim() || subdomainLabel.trim().length < 3}
-                className="w-full"
-              >
-                {isAdding ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Zap className="w-4 h-4" />
-                )}
-                {isAdding ? 'Creating...' : 'Create Subdomain'}
-              </Button>
-            </div>
+            ) : (
+              <div className="mt-auto">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                  Coming Soon
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Card B: Custom Domain (Business only) */}
