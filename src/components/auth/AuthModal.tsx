@@ -67,7 +67,7 @@ export function AuthModal({ isOpen, onClose, defaultView = 'signin' }: AuthModal
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
-        className="relative z-10 w-full max-w-md mx-4 glass-heavy rounded-2xl shadow-2xl overflow-hidden"
+        className="relative z-10 w-full max-w-md mx-4 max-h-[90vh] glass-heavy rounded-2xl shadow-2xl overflow-y-auto"
       >
         {/* Close button */}
         <button
