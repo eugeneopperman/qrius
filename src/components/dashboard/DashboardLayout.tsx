@@ -55,14 +55,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 glass-medium transform transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 lg:bg-transparent bg-[var(--color-bg)]/95 lg:backdrop-blur-0 backdrop-blur-sm transform transition-transform lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        style={{ borderRadius: 0, borderRight: 'none' }}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-divider">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-black/[0.04] dark:border-white/[0.04]">
             <Link to="/dashboard">
               <Logo size="sm" />
             </Link>
@@ -75,7 +74,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Organization Switcher */}
-          <div className="px-3 py-4 border-b border-divider">
+          <div className="px-3 py-4 border-b border-black/[0.04] dark:border-white/[0.04]">
             <Dropdown
               trigger={({ toggle }) => (
                 <button
@@ -134,6 +133,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            <p className="section-title px-3 mb-2">Main</p>
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -154,7 +154,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </nav>
 
           {/* Create QR CTA */}
-          <div className="p-4 border-t border-divider">
+          <div className="p-4 border-t border-black/[0.04] dark:border-white/[0.04]">
             <Link to="/create">
               <Button className="w-full">
                 <Plus className="w-4 h-4" />
@@ -168,7 +168,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top header */}
-        <header className="sticky top-0 z-30 h-16 glass-medium" style={{ borderRadius: 0, borderLeft: 'none', borderRight: 'none', borderTop: 'none' }}>
+        <header className="sticky top-0 z-30 h-16 bg-transparent">
           <div className="flex items-center justify-between h-full px-4 lg:px-6">
             {/* Mobile menu button */}
             <button
