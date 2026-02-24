@@ -101,6 +101,22 @@ export function isValidDomain(domain: string): boolean {
   return true;
 }
 
+/**
+ * Check that a string is a valid subdomain label for app subdomains.
+ * Lowercase alphanumeric + hyphens only, 3-63 chars, no leading/trailing hyphens.
+ */
+const SUBDOMAIN_LABEL_REGEX = /^[a-z0-9]([a-z0-9-]{1,61}[a-z0-9])?$/;
+const RESERVED_SUBDOMAINS = ['www', 'api', 'app', 'admin', 'mail', 'ftp', 'smtp', 'pop', 'imap', 'ns1', 'ns2'];
+
+export function isValidSubdomainLabel(label: string): boolean {
+  if (!label || typeof label !== 'string') return false;
+  const normalized = label.toLowerCase().trim();
+  if (normalized.length < 3 || normalized.length > 63) return false;
+  if (!SUBDOMAIN_LABEL_REGEX.test(normalized)) return false;
+  if (RESERVED_SUBDOMAINS.includes(normalized)) return false;
+  return true;
+}
+
 export function validateStringArray(
   value: unknown,
   maxItems: number,

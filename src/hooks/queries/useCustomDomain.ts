@@ -32,12 +32,16 @@ async function fetchCustomDomain(): Promise<DomainResponse> {
   return res.json();
 }
 
-async function addCustomDomain(domain: string): Promise<AddDomainResponse> {
+type AddDomainParams =
+  | { type: 'subdomain'; subdomain: string }
+  | { type: 'custom'; domain: string };
+
+async function addCustomDomain(params: AddDomainParams): Promise<AddDomainResponse> {
   const headers = await getAuthHeaders();
   const res = await fetch('/api/domains', {
     method: 'POST',
     headers,
-    body: JSON.stringify({ domain }),
+    body: JSON.stringify(params),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to add domain');

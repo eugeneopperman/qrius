@@ -18,6 +18,79 @@ function isValidDomain(domain: string): boolean {
   return true;
 }
 
+// Mirror subdomain label validation logic for testing
+const SUBDOMAIN_LABEL_REGEX = /^[a-z0-9]([a-z0-9-]{1,61}[a-z0-9])?$/;
+const RESERVED_SUBDOMAINS = ['www', 'api', 'app', 'admin', 'mail', 'ftp', 'smtp', 'pop', 'imap', 'ns1', 'ns2'];
+
+function isValidSubdomainLabel(label: string): boolean {
+  if (!label || typeof label !== 'string') return false;
+  const normalized = label.toLowerCase().trim();
+  if (normalized.length < 3 || normalized.length > 63) return false;
+  if (!SUBDOMAIN_LABEL_REGEX.test(normalized)) return false;
+  if (RESERVED_SUBDOMAINS.includes(normalized)) return false;
+  return true;
+}
+
+describe('isValidSubdomainLabel', () => {
+  it('accepts valid subdomain labels', () => {
+    expect(isValidSubdomainLabel('eugene')).toBe(true);
+    expect(isValidSubdomainLabel('my-brand')).toBe(true);
+    expect(isValidSubdomainLabel('acme123')).toBe(true);
+    expect(isValidSubdomainLabel('abc')).toBe(true); // minimum 3 chars
+    expect(isValidSubdomainLabel('a'.repeat(63))).toBe(true); // max 63 chars
+  });
+
+  it('rejects empty/invalid input', () => {
+    expect(isValidSubdomainLabel('')).toBe(false);
+    expect(isValidSubdomainLabel('  ')).toBe(false);
+    // @ts-expect-error testing invalid input
+    expect(isValidSubdomainLabel(null)).toBe(false);
+    // @ts-expect-error testing invalid input
+    expect(isValidSubdomainLabel(undefined)).toBe(false);
+  });
+
+  it('rejects labels shorter than 3 chars', () => {
+    expect(isValidSubdomainLabel('ab')).toBe(false);
+    expect(isValidSubdomainLabel('a')).toBe(false);
+  });
+
+  it('rejects labels longer than 63 chars', () => {
+    expect(isValidSubdomainLabel('a'.repeat(64))).toBe(false);
+  });
+
+  it('rejects labels with leading or trailing hyphens', () => {
+    expect(isValidSubdomainLabel('-abc')).toBe(false);
+    expect(isValidSubdomainLabel('abc-')).toBe(false);
+    expect(isValidSubdomainLabel('-abc-')).toBe(false);
+  });
+
+  it('rejects labels with invalid characters', () => {
+    expect(isValidSubdomainLabel('my_brand')).toBe(false);
+    expect(isValidSubdomainLabel('my.brand')).toBe(false);
+    expect(isValidSubdomainLabel('my brand')).toBe(false);
+    expect(isValidSubdomainLabel('my@brand')).toBe(false);
+    expect(isValidSubdomainLabel('MY-BRAND')).toBe(true); // normalized to lowercase
+  });
+
+  it('rejects reserved subdomain labels', () => {
+    expect(isValidSubdomainLabel('www')).toBe(false);
+    expect(isValidSubdomainLabel('api')).toBe(false);
+    expect(isValidSubdomainLabel('app')).toBe(false);
+    expect(isValidSubdomainLabel('admin')).toBe(false);
+    expect(isValidSubdomainLabel('mail')).toBe(false);
+    expect(isValidSubdomainLabel('ftp')).toBe(false);
+    expect(isValidSubdomainLabel('smtp')).toBe(false);
+    expect(isValidSubdomainLabel('ns1')).toBe(false);
+    expect(isValidSubdomainLabel('ns2')).toBe(false);
+  });
+
+  it('accepts non-reserved words that look similar', () => {
+    expect(isValidSubdomainLabel('myapi')).toBe(true);
+    expect(isValidSubdomainLabel('admin2')).toBe(true);
+    expect(isValidSubdomainLabel('webapp')).toBe(true);
+  });
+});
+
 describe('isValidDomain', () => {
   it('accepts valid domains', () => {
     expect(isValidDomain('track.acme.com')).toBe(true);

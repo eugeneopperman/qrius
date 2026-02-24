@@ -12,8 +12,8 @@ import {
   ForbiddenError,
 } from '../_lib/auth.js';
 import { logger } from '../_lib/logger.js';
-import { isValidDomain } from '../_lib/validate.js';
-import { invalidateCachedDomainMapping } from '../_lib/kv.js';
+import { isValidDomain, isValidSubdomainLabel } from '../_lib/validate.js';
+import { invalidateCachedDomainMapping, setCachedDomainMapping } from '../_lib/kv.js';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -86,40 +86,63 @@ async function handleGet(res: VercelResponse, organizationId: string) {
 }
 
 async function handlePost(req: VercelRequest, res: VercelResponse, organizationId: string) {
-  const { domain } = req.body as { domain?: string };
+  const body = req.body as { type?: 'subdomain' | 'custom'; subdomain?: string; domain?: string };
+  const domainType = body.type || 'custom';
 
-  if (!domain || !isValidDomain(domain)) {
-    return res.status(400).json({ error: 'Invalid domain. Must be a valid hostname (e.g., track.acme.com)' });
-  }
+  let normalizedDomain: string;
 
-  const normalizedDomain = domain.toLowerCase().trim();
+  if (domainType === 'subdomain') {
+    // App subdomain flow — no plan gate
+    const label = body.subdomain;
+    if (!label || !isValidSubdomainLabel(label)) {
+      return res.status(400).json({ error: 'Invalid subdomain. Use 3-63 lowercase letters, numbers, or hyphens.' });
+    }
 
-  // Plan gate: check white_label is enabled for this org's plan
-  const { data: org, error: orgError } = await getSupabaseAdmin()
-    .from('organizations')
-    .select('plan')
-    .eq('id', organizationId)
-    .single();
+    // Derive app host from NEXT_PUBLIC_APP_URL or request host
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    let appHost: string;
+    try {
+      appHost = appUrl ? new URL(appUrl).hostname : (req.headers.host || 'localhost');
+    } catch {
+      appHost = req.headers.host || 'localhost';
+    }
 
-  if (orgError || !org) {
-    return res.status(500).json({ error: 'Organization not found' });
-  }
+    normalizedDomain = `${label.toLowerCase().trim()}.${appHost}`;
+  } else {
+    // Custom domain flow — plan-gated to Business
+    if (!body.domain || !isValidDomain(body.domain)) {
+      return res.status(400).json({ error: 'Invalid domain. Must be a valid hostname (e.g., track.acme.com)' });
+    }
 
-  const { data: planLimits, error: planError } = await getSupabaseAdmin()
-    .from('plan_limits')
-    .select('white_label')
-    .eq('plan', org.plan)
-    .single();
+    normalizedDomain = body.domain.toLowerCase().trim();
 
-  if (planError || !planLimits) {
-    return res.status(500).json({ error: 'Plan limits not found' });
-  }
+    // Plan gate: check white_label is enabled for this org's plan
+    const { data: org, error: orgError } = await getSupabaseAdmin()
+      .from('organizations')
+      .select('plan')
+      .eq('id', organizationId)
+      .single();
 
-  if (!planLimits.white_label) {
-    return res.status(403).json({
-      error: 'Custom domains require a Business plan',
-      requiredPlan: 'business',
-    });
+    if (orgError || !org) {
+      return res.status(500).json({ error: 'Organization not found' });
+    }
+
+    const { data: planLimits, error: planError } = await getSupabaseAdmin()
+      .from('plan_limits')
+      .select('white_label')
+      .eq('plan', org.plan)
+      .single();
+
+    if (planError || !planLimits) {
+      return res.status(500).json({ error: 'Plan limits not found' });
+    }
+
+    if (!planLimits.white_label) {
+      return res.status(403).json({
+        error: 'Custom domains require a Business plan',
+        requiredPlan: 'business',
+      });
+    }
   }
 
   // Check if org already has a domain
@@ -147,7 +170,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
   // Add domain to Vercel project
   const vercelToken = process.env.VERCEL_API_TOKEN;
   const vercelProjectId = process.env.VERCEL_PROJECT_ID;
-  let cnameTarget = 'cname.vercel-dns.com'; // default fallback
+  let cnameTarget = domainType === 'subdomain' ? 'n/a' : 'cname.vercel-dns.com';
 
   if (vercelToken && vercelProjectId) {
     try {
@@ -168,7 +191,6 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
       if (!vercelRes.ok) {
         logger.domains.error('Vercel domain add failed', { domain: normalizedDomain, status: vercelRes.status, body: vercelData });
 
-        // Handle specific Vercel errors
         if (vercelData.error?.code === 'domain_already_in_use') {
           return res.status(409).json({ error: 'This domain is already configured on another Vercel project' });
         }
@@ -176,14 +198,16 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
         return res.status(502).json({ error: 'Failed to add domain to hosting provider' });
       }
 
-      // Extract CNAME target from Vercel response
-      if (vercelData.cnames && vercelData.cnames.length > 0) {
-        cnameTarget = vercelData.cnames[0];
-      } else if (vercelData.apexName) {
-        cnameTarget = 'cname.vercel-dns.com';
+      // Extract CNAME target from Vercel response (only relevant for custom domains)
+      if (domainType === 'custom') {
+        if (vercelData.cnames && vercelData.cnames.length > 0) {
+          cnameTarget = vercelData.cnames[0];
+        } else if (vercelData.apexName) {
+          cnameTarget = 'cname.vercel-dns.com';
+        }
       }
 
-      logger.domains.info('Domain added to Vercel', { domain: normalizedDomain, cnameTarget });
+      logger.domains.info('Domain added to Vercel', { domain: normalizedDomain, type: domainType, cnameTarget });
     } catch (error) {
       logger.domains.error('Vercel API call failed', { domain: normalizedDomain, error: String(error) });
       return res.status(502).json({ error: 'Failed to communicate with hosting provider' });
@@ -192,6 +216,9 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
     logger.domains.warn('Vercel API not configured — skipping domain registration', { domain: normalizedDomain });
   }
 
+  // Subdomains are auto-verified; custom domains start as pending
+  const isSubdomain = domainType === 'subdomain';
+
   // Insert into custom_domains
   const { data: inserted, error: insertError } = await getSupabaseAdmin()
     .from('custom_domains')
@@ -199,7 +226,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
       organization_id: organizationId,
       domain: normalizedDomain,
       cname_target: cnameTarget,
-      status: 'pending',
+      status: isSubdomain ? 'verified' : 'pending',
+      ...(isSubdomain ? { verified_at: new Date().toISOString() } : {}),
     })
     .select()
     .single();
@@ -209,11 +237,20 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
     return res.status(500).json({ error: 'Failed to save domain configuration' });
   }
 
+  // Populate Redis cache immediately for subdomains
+  if (isSubdomain) {
+    setCachedDomainMapping(normalizedDomain, { organizationId }).catch(() => {});
+  }
+
+  if (isSubdomain) {
+    return res.status(201).json({ domain: inserted });
+  }
+
   return res.status(201).json({
     domain: inserted,
     instructions: {
       type: 'CNAME',
-      host: normalizedDomain.split('.')[0], // subdomain part
+      host: normalizedDomain.split('.')[0],
       value: cnameTarget,
       fullRecord: `${normalizedDomain} CNAME ${cnameTarget}`,
     },
