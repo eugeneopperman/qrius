@@ -167,12 +167,13 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
     return res.status(409).json({ error: 'This domain is already in use by another organization' });
   }
 
-  // Add domain to Vercel project
+  // Add domain to Vercel project (custom domains only — app subdomains
+  // are routed automatically by Vercel for *.vercel.app)
   const vercelToken = process.env.VERCEL_API_TOKEN;
   const vercelProjectId = process.env.VERCEL_PROJECT_ID;
   let cnameTarget = domainType === 'subdomain' ? 'n/a' : 'cname.vercel-dns.com';
 
-  if (vercelToken && vercelProjectId) {
+  if (domainType === 'custom' && vercelToken && vercelProjectId) {
     try {
       const vercelRes = await fetch(
         `https://api.vercel.com/v10/projects/${vercelProjectId}/domains`,
@@ -198,21 +199,18 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
         return res.status(502).json({ error: 'Failed to add domain to hosting provider' });
       }
 
-      // Extract CNAME target from Vercel response (only relevant for custom domains)
-      if (domainType === 'custom') {
-        if (vercelData.cnames && vercelData.cnames.length > 0) {
-          cnameTarget = vercelData.cnames[0];
-        } else if (vercelData.apexName) {
-          cnameTarget = 'cname.vercel-dns.com';
-        }
+      if (vercelData.cnames && vercelData.cnames.length > 0) {
+        cnameTarget = vercelData.cnames[0];
+      } else if (vercelData.apexName) {
+        cnameTarget = 'cname.vercel-dns.com';
       }
 
-      logger.domains.info('Domain added to Vercel', { domain: normalizedDomain, type: domainType, cnameTarget });
+      logger.domains.info('Domain added to Vercel', { domain: normalizedDomain, cnameTarget });
     } catch (error) {
       logger.domains.error('Vercel API call failed', { domain: normalizedDomain, error: String(error) });
       return res.status(502).json({ error: 'Failed to communicate with hosting provider' });
     }
-  } else {
+  } else if (domainType === 'custom') {
     logger.domains.warn('Vercel API not configured — skipping domain registration', { domain: normalizedDomain });
   }
 
