@@ -115,9 +115,9 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
         imageOptions: {
           crossOrigin: 'anonymous',
           margin: s?.logoMargin ?? 5,
-          imageSize: s?.logoSize ? s.logoSize / 100 : 0.4,
+          imageSize: s?.logoSize || 0.3,
         },
-        qrOptions: { errorCorrectionLevel: s?.errorCorrectionLevel || 'M' },
+        qrOptions: { errorCorrectionLevel: s?.errorCorrectionLevel || 'H' },
       };
 
       // Logo
