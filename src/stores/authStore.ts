@@ -415,21 +415,25 @@ export const useAuthStore = create<AuthState>()(
           const organizations = data as (OrganizationMember & { organization: Organization })[];
           set({ organizations });
 
-          // Set current organization if not set (avoid extra query by fetching limits here)
+          // Set or refresh current organization (always update to pick up plan changes)
           const { currentOrganization } = get();
-          if (!currentOrganization && organizations.length > 0) {
-            const defaultOrg = organizations[0];
+          if (organizations.length > 0) {
+            // If we already have a current org, find the fresh version; otherwise default to first
+            const match = currentOrganization
+              ? organizations.find((m) => m.organization.id === currentOrganization.id)
+              : null;
+            const activeOrg = match || organizations[0];
 
-            // Fetch plan limits for the default organization
+            // Fetch plan limits for the active organization
             const { data: limits } = await supabase
               .from('plan_limits')
               .select('*')
-              .eq('plan', defaultOrg.organization.plan)
+              .eq('plan', activeOrg.organization.plan)
               .single();
 
             set({
-              currentOrganization: defaultOrg.organization,
-              currentRole: defaultOrg.role,
+              currentOrganization: activeOrg.organization,
+              currentRole: activeOrg.role,
               planLimits: limits || DEFAULT_FREE_PLAN_LIMITS,
             });
           }
