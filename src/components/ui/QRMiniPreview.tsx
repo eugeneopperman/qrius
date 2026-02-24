@@ -1,7 +1,11 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import QRCodeStyling from 'qr-code-styling';
 import { cn } from '@/utils/cn';
-import { getDotTypeForPattern } from '@/utils/qrRoundness';
+import {
+  getDotTypeForPattern,
+  getCornerSquareTypeForRoundness,
+  getCornerDotTypeForRoundness,
+} from '@/utils/qrRoundness';
 import { convertGradientToQRFormat } from '@/utils/gradientUtils';
 import type { GradientOptions, QRPattern, DotType, CornerSquareType, CornerDotType, LogoShape } from '@/types';
 
@@ -64,6 +68,14 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
         dotType = getDotTypeForPattern(s.qrPattern, s.qrRoundness);
       }
 
+      // Derive corner types from roundness (matching useQRCodeInstance logic)
+      const effectiveCornerSquareType = s?.qrRoundness !== undefined
+        ? getCornerSquareTypeForRoundness(s.qrRoundness)
+        : (s?.cornersSquareType || 'extra-rounded');
+      const effectiveCornerDotType = s?.qrRoundness !== undefined
+        ? getCornerDotTypeForRoundness(s.qrRoundness)
+        : (s?.cornersDotType || undefined);
+
       // Dots options (with optional gradient)
       const dotsOptions: Record<string, unknown> = { type: dotType };
       if (s?.useGradient && s?.gradient) {
@@ -74,7 +86,7 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
 
       // Corner options
       const cornersSquareOptions: Record<string, unknown> = {
-        type: s?.cornersSquareType || 'extra-rounded',
+        type: effectiveCornerSquareType,
       };
       if (s?.useGradient && s?.gradient) {
         cornersSquareOptions.gradient = convertGradientToQRFormat(s.gradient);
@@ -83,7 +95,7 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
       }
 
       const cornersDotOptions: Record<string, unknown> = {
-        type: s?.cornersDotType || undefined,
+        type: effectiveCornerDotType,
       };
       if (s?.useGradient && s?.gradient) {
         cornersDotOptions.gradient = convertGradientToQRFormat(s.gradient);
@@ -92,6 +104,7 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
       }
 
       const config: Record<string, unknown> = {
+        type: 'canvas',
         width: size,
         height: size,
         data,
