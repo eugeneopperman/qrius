@@ -95,7 +95,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* User avatar */}
           <div className="px-3 pb-4">
-            <UserButton />
+            <UserButton dropUp />
           </div>
         </div>
       </aside>

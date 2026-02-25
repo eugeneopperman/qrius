@@ -15,9 +15,11 @@ import {
 
 interface UserButtonProps {
   onSettingsClick?: () => void;
+  /** Position the dropdown above and to the right (for sidebar bottom placement) */
+  dropUp?: boolean;
 }
 
-export function UserButton({ onSettingsClick }: UserButtonProps) {
+export function UserButton({ onSettingsClick, dropUp }: UserButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -119,7 +121,9 @@ export function UserButton({ onSettingsClick }: UserButtonProps) {
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50">
+        <div className={`absolute w-72 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50 ${
+          dropUp ? 'bottom-full left-0 mb-2' : 'right-0 mt-2'
+        }`}>
           {/* User info */}
           <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3">
