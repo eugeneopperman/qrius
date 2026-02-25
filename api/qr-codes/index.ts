@@ -98,7 +98,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
     logger.qrCodes.error('API error', { error: errorMessage, stack: errorStack });
-    return res.status(500).json({ error: 'Internal server error', detail: errorMessage });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }
 
@@ -362,18 +362,17 @@ async function handleList(
   const whereClause = filterConditions.join(' AND ');
   const orderClause = `ORDER BY ${sortField} ${sortOrder}`;
 
-  // Use raw SQL for dynamic queries
-  const rawSql = sql as unknown as (query: string, params: unknown[]) => Promise<Record<string, unknown>[]>;
+  // Use sql.query() for dynamic queries with parameterized placeholders
 
   // Parallelize: list + count + status counts + customDomain + monthlyScans + teamMembers
   const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
 
-  const listPromise = rawSql(
+  const listPromise = sql.query(
     `SELECT ${selectCols} FROM qr_codes WHERE ${whereClause} ${orderClause} LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
     [...params, limit, offset]
   ) as unknown as Promise<QRCodeRow[]>;
 
-  const countPromise = rawSql(
+  const countPromise = sql.query(
     `SELECT COUNT(*) as count FROM qr_codes WHERE ${whereClause}`,
     params
   ).then(r => parseInt(r[0].count as string) || 0);
@@ -396,7 +395,7 @@ async function handleList(
     ownerCondition = 'organization_id IS NULL AND user_id IS NULL';
   }
 
-  const countsPromise = rawSql(
+  const countsPromise = sql.query(
     `SELECT
       COUNT(*) as total,
       COUNT(*) FILTER (WHERE is_active = true) as active,
@@ -535,8 +534,7 @@ async function handleBulk(
   }
   setClauses.push('updated_at = NOW()');
 
-  const rawSql = sql as unknown as (query: string, params: unknown[]) => Promise<Record<string, unknown>[]>;
-  const result = await rawSql(
+  const result = await sql.query(
     `UPDATE qr_codes SET ${setClauses.join(', ')} WHERE organization_id = $1 AND id = ANY($2) RETURNING id`,
     params
   );
