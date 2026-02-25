@@ -50,8 +50,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (error instanceof ForbiddenError) {
       return res.status(403).json({ error: error.message });
     }
-    logger.qrCodes.error('API error', { error: String(error) });
-    return res.status(500).json({ error: 'Internal server error' });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.qrCodes.error('API error', { error: errorMessage });
+    return res.status(500).json({ error: 'Internal server error', detail: errorMessage });
   }
 }
 
