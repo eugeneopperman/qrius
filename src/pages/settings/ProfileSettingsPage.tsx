@@ -1,4 +1,5 @@
 import { useRef, useState, useMemo } from 'react';
+import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuthStore } from '@/stores/authStore';
@@ -7,20 +8,394 @@ import { useThemeStore } from '@/stores/themeStore';
 import type { ThemeMode, ResolvedTheme, AutoSchedule } from '@/stores/themeStore';
 import { toast } from '@/stores/toastStore';
 import { supabase } from '@/lib/supabase';
-import { Camera, Loader2, Trash2, Sun, CloudSun, Moon, Clock, Save } from 'lucide-react';
+import {
+  Camera, Loader2, Trash2, Sun, CloudSun, Moon, Clock, Save,
+  Shield, Lock, Eye, EyeOff, ArrowRight, Building2, Globe,
+} from 'lucide-react';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useOrganizationQRCodes } from '@/hooks/useOrganizationQRCodes';
+import { useUsageStats } from '@/hooks/queries/useUsageStats';
 import { cn } from '@/utils/cn';
+import type { Plan, OrgRole } from '@/types/database';
+
+// ============================================================================
+// Constants
+// ============================================================================
 
 const AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const AVATAR_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
+const PLAN_BADGE: Record<Plan, { label: string; className: string }> = {
+  free: { label: 'Free', className: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  pro: { label: 'Pro', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  business: { label: 'Business', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+};
+
+const ROLE_COLORS: Record<OrgRole, string> = {
+  owner: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  admin: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  editor: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  viewer: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+};
+
+function relativeTime(iso: string | null | undefined): string {
+  if (!iso) return 'Unknown';
+  const date = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 30) return `${diffDays} days ago`;
+  if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return `${months} month${months > 1 ? 's' : ''} ago`;
+  }
+  const years = Math.floor(diffDays / 365);
+  return `${years} year${years > 1 ? 's' : ''} ago`;
+}
+
+const COUNTRY_LIST = [
+  'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Argentina', 'Armenia',
+  'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados',
+  'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina',
+  'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia',
+  'Cameroon', 'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile',
+  'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica', 'Croatia', 'Cuba', 'Cyprus',
+  'Czech Republic', 'Denmark', 'Djibouti', 'Dominican Republic', 'Ecuador', 'Egypt',
+  'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia',
+  'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana',
+  'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guyana', 'Haiti', 'Honduras', 'Hungary',
+  'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy',
+  'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kuwait', 'Kyrgyzstan', 'Laos',
+  'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania',
+  'Luxembourg', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta',
+  'Mauritania', 'Mauritius', 'Mexico', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro',
+  'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nepal', 'Netherlands', 'New Zealand',
+  'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman',
+  'Pakistan', 'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines',
+  'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saudi Arabia', 'Senegal',
+  'Serbia', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Somalia', 'South Africa',
+  'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden',
+  'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo',
+  'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Uganda', 'Ukraine',
+  'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan',
+  'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe',
+];
+
+// ============================================================================
+// Sub-components
+// ============================================================================
+
+function CompactUsageBar({ label, used, limit }: { label: string; used: number; limit: number }) {
+  const isUnlimited = limit === -1;
+  const pct = isUnlimited ? 0 : limit === 0 ? 0 : Math.min((used / limit) * 100, 100);
+  const isWarning = !isUnlimited && pct >= 80;
+  const isCritical = !isUnlimited && pct >= 95;
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-gray-600 dark:text-gray-400">{label}</span>
+        <span className="font-medium text-gray-900 dark:text-white">
+          {used.toLocaleString()} / {isUnlimited ? 'Unlimited' : limit.toLocaleString()}
+        </span>
+      </div>
+      <div className="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+        <div
+          className={cn(
+            'h-full rounded-full transition-all duration-300',
+            isCritical ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-orange-500'
+          )}
+          style={{ width: isUnlimited ? '0%' : `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function AccountOverviewCard({
+  memberSince,
+  plan,
+  role,
+  workspaceName,
+  usageStats,
+  planLimits,
+  teamMembers,
+}: {
+  memberSince: string | null | undefined;
+  plan: Plan;
+  role: OrgRole | null;
+  workspaceName: string | undefined;
+  usageStats: { scansUsed: number; scansLimit: number; qrCodesUsed: number; qrCodesLimit: number } | undefined;
+  planLimits: { team_members: number } | null;
+  teamMembers: number;
+}) {
+  const badge = PLAN_BADGE[plan] || PLAN_BADGE.free;
+  const roleBadge = role ? ROLE_COLORS[role] : ROLE_COLORS.viewer;
+
+  return (
+    <div className="glass rounded-2xl p-6">
+      <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+        Account Overview
+      </h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Left: Account info */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-500 dark:text-gray-400 w-24">Member since</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              {memberSince ? new Date(memberSince).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Unknown'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-500 dark:text-gray-400 w-24">Plan</span>
+            <span className={cn('px-2 py-0.5 rounded-full text-xs font-semibold', badge.className)}>
+              {badge.label}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-500 dark:text-gray-400 w-24">Role</span>
+            <span className={cn('px-2 py-0.5 rounded-full text-xs font-semibold capitalize', roleBadge)}>
+              {role || 'viewer'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-500 dark:text-gray-400 w-24">Workspace</span>
+            <span className="font-medium text-gray-900 dark:text-white flex items-center gap-1">
+              <Building2 className="w-3.5 h-3.5 text-gray-400" />
+              {workspaceName || 'Personal'}
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Usage bars */}
+        <div className="space-y-3">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Usage This Month
+          </p>
+          {usageStats ? (
+            <>
+              <CompactUsageBar label="Dynamic QR Codes" used={usageStats.qrCodesUsed} limit={usageStats.qrCodesLimit} />
+              <CompactUsageBar label="Monthly Scans" used={usageStats.scansUsed} limit={usageStats.scansLimit} />
+              <CompactUsageBar label="Team Members" used={teamMembers} limit={planLimits?.team_members ?? 1} />
+            </>
+          ) : (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-1">
+                  <div className="h-3 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                  <div className="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick links */}
+      <div className="flex items-center gap-4 mt-5 pt-4 border-t border-black/[0.04] dark:border-white/[0.04]">
+        {plan === 'free' && (
+          <Link
+            to="/settings"
+            search={{ tab: 'billing' }}
+            className="text-sm text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1"
+          >
+            Upgrade plan <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        )}
+        <Link
+          to="/settings"
+          search={{ tab: 'team' }}
+          className="text-sm text-gray-600 dark:text-gray-400 hover:underline flex items-center gap-1"
+        >
+          Manage team <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function SecurityCard({
+  provider,
+  lastSignIn,
+  updatePassword,
+}: {
+  provider: string | undefined;
+  lastSignIn: string | null | undefined;
+  updatePassword: (pw: string) => Promise<{ error: Error | null }>;
+}) {
+  const isEmailAuth = !provider || provider === 'email';
+  const providerLabel = provider === 'google' ? 'Google' : provider === 'github' ? 'GitHub' : 'Email & Password';
+
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const passwordValid = newPassword.length >= 8;
+  const passwordsMatch = newPassword === confirmPassword;
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordValid || !passwordsMatch) return;
+
+    setIsChangingPassword(true);
+    const { error } = await updatePassword(newPassword);
+    setIsChangingPassword(false);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Password updated successfully');
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowChangePassword(false);
+    }
+  };
+
+  return (
+    <div className="glass rounded-2xl p-6">
+      <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <Shield className="w-5 h-5 text-gray-500" />
+        Security
+      </h2>
+
+      <div className="space-y-4">
+        {/* Login method */}
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-500 dark:text-gray-400">Login method</span>
+          <span className="font-medium text-gray-900 dark:text-white flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-gray-400" />
+            {providerLabel}
+          </span>
+        </div>
+
+        {/* Last sign-in */}
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-500 dark:text-gray-400">Last sign-in</span>
+          <span className="font-medium text-gray-900 dark:text-white">
+            {relativeTime(lastSignIn)}
+          </span>
+        </div>
+
+        {/* Change password */}
+        {isEmailAuth ? (
+          <div className="pt-2 border-t border-black/[0.04] dark:border-white/[0.04]">
+            {!showChangePassword ? (
+              <button
+                type="button"
+                onClick={() => setShowChangePassword(true)}
+                className="text-sm text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1"
+              >
+                Change password <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <form onSubmit={handlePasswordChange} className="space-y-3 animate-fade-in">
+                <div className="relative">
+                  <Input
+                    label="New password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Minimum 8 characters"
+                    minLength={8}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <Input
+                  label="Confirm password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter new password"
+                  error={confirmPassword && !passwordsMatch ? 'Passwords do not match' : undefined}
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={!passwordValid || !passwordsMatch || isChangingPassword}
+                  >
+                    {isChangingPassword ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      'Update password'
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setShowChangePassword(false);
+                      setNewPassword('');
+                      setConfirmPassword('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-gray-400 dark:text-gray-500 pt-2 border-t border-black/[0.04] dark:border-white/[0.04]">
+            Password changes are managed by your {providerLabel} account.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
 export function ProfileSettingsContent() {
-  const { user, profile, updateProfile } = useAuthStore(useShallow((s) => ({ user: s.user, profile: s.profile, updateProfile: s.updateProfile })));
+  const {
+    user, profile, updateProfile, updatePassword,
+    currentOrganization, currentRole, planLimits,
+  } = useAuthStore(useShallow((s) => ({
+    user: s.user,
+    profile: s.profile,
+    updateProfile: s.updateProfile,
+    updatePassword: s.updatePassword,
+    currentOrganization: s.currentOrganization,
+    currentRole: s.currentRole,
+    planLimits: s.planLimits,
+  })));
+
   const { theme, resolvedTheme, autoSchedule, setTheme, setAutoSchedule } = useThemeStore();
   const autosaveEnabled = useSettingsStore((s) => s.autosaveEnabled);
   const setAutosaveEnabled = useSettingsStore((s) => s.setAutosaveEnabled);
+
+  // Usage data
+  const { totalCount, monthlyScans, teamMembers } = useOrganizationQRCodes({ limit: 1 });
+  const { data: usageStats } = useUsageStats({ totalQRCodes: totalCount, monthlyScans });
+
+  // Profile form state
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [name, setName] = useState(profile?.name || '');
+  const [phone, setPhone] = useState(profile?.phone || '');
+  const [company, setCompany] = useState(profile?.company || '');
+  const [street, setStreet] = useState(profile?.street || '');
+  const [city, setCity] = useState(profile?.city || '');
+  const [zip, setZip] = useState(profile?.zip || '');
+  const [country, setCountry] = useState(profile?.country || '');
+  const [website, setWebsite] = useState(profile?.website || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,7 +431,6 @@ export function ProfileSettingsContent() {
         .from('avatars')
         .getPublicUrl(filePath);
 
-      // Append cache-buster so the browser fetches the new image
       const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
       const { error: profileError } = await updateProfile({ avatar_url: avatarUrl });
 
@@ -69,7 +443,6 @@ export function ProfileSettingsContent() {
       toast.error('Failed to upload avatar');
     } finally {
       setIsUploadingAvatar(false);
-      // Reset file input so the same file can be re-selected
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -79,7 +452,6 @@ export function ProfileSettingsContent() {
 
     setIsUploadingAvatar(true);
     try {
-      // List and remove all files in the user's avatar folder
       const { data: files } = await supabase.storage
         .from('avatars')
         .list(user.id);
@@ -106,7 +478,17 @@ export function ProfileSettingsContent() {
     e.preventDefault();
     setIsSaving(true);
 
-    const { error } = await updateProfile({ display_name: displayName || null, name });
+    const { error } = await updateProfile({
+      display_name: displayName || null,
+      name,
+      phone: phone || null,
+      company: company || null,
+      street: street || null,
+      city: city || null,
+      zip: zip || null,
+      country: country || null,
+      website: website || null,
+    });
     setIsSaving(false);
 
     if (error) {
@@ -123,10 +505,24 @@ export function ProfileSettingsContent() {
     .toUpperCase()
     .slice(0, 2);
 
+  const plan = planLimits?.plan || profile?.plan || 'free';
+  const provider = user?.app_metadata?.provider as string | undefined;
+
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl space-y-6">
+      {/* 1. Account Overview */}
+      <AccountOverviewCard
+        memberSince={profile?.created_at}
+        plan={plan}
+        role={currentRole}
+        workspaceName={currentOrganization?.name}
+        usageStats={usageStats}
+        planLimits={planLimits}
+        teamMembers={teamMembers}
+      />
+
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Avatar section */}
+        {/* 2. Profile Picture */}
         <div className="glass rounded-2xl p-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Profile Picture
@@ -200,7 +596,7 @@ export function ProfileSettingsContent() {
           </div>
         </div>
 
-        {/* Personal information */}
+        {/* 3. Personal Information (expanded) */}
         <div className="glass rounded-2xl p-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Personal Information
@@ -233,6 +629,96 @@ export function ProfileSettingsContent() {
               className="bg-black/5 dark:bg-white/5"
               hint="Email cannot be changed"
             />
+
+            {/* Divider */}
+            <div className="border-t border-black/[0.04] dark:border-white/[0.04] pt-4 mt-4">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                Contact & Business
+              </p>
+            </div>
+
+            <Input
+              label="Phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 (555) 000-0000"
+              maxLength={30}
+            />
+
+            <Input
+              label="Company"
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              placeholder="Acme Inc."
+              maxLength={200}
+            />
+
+            <div className="flex items-center gap-1.5">
+              <Globe className="w-4 h-4 text-gray-400 mt-5" />
+              <div className="flex-1">
+                <Input
+                  label="Website"
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="https://example.com"
+                  maxLength={500}
+                />
+              </div>
+            </div>
+
+            {/* Address sub-section */}
+            <div className="border-t border-black/[0.04] dark:border-white/[0.04] pt-4 mt-4">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                Address
+              </p>
+            </div>
+
+            <Input
+              label="Street"
+              type="text"
+              value={street}
+              onChange={(e) => setStreet(e.target.value)}
+              placeholder="123 Main St"
+              maxLength={200}
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="City"
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="San Francisco"
+                maxLength={100}
+              />
+              <Input
+                label="ZIP / Postal code"
+                type="text"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                placeholder="94107"
+                maxLength={20}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Country
+              </label>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="input text-sm py-2.5"
+              >
+                <option value="">Select a country</option>
+                {COUNTRY_LIST.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -251,8 +737,15 @@ export function ProfileSettingsContent() {
         </div>
       </form>
 
-      {/* Appearance */}
-      <div className="mt-6 glass rounded-2xl p-6">
+      {/* 4. Security */}
+      <SecurityCard
+        provider={provider}
+        lastSignIn={user?.last_sign_in_at}
+        updatePassword={updatePassword}
+      />
+
+      {/* 5. Appearance */}
+      <div className="glass rounded-2xl p-6">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           Appearance
         </h2>
@@ -268,8 +761,8 @@ export function ProfileSettingsContent() {
         />
       </div>
 
-      {/* QR Code Autosave */}
-      <div className="mt-6 glass rounded-2xl p-6">
+      {/* 6. QR Code Autosave */}
+      <div className="glass rounded-2xl p-6">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
           <Save className="w-5 h-5 inline-block mr-2 -mt-0.5" />
           QR Code Autosave
@@ -300,8 +793,8 @@ export function ProfileSettingsContent() {
         </div>
       </div>
 
-      {/* Danger zone */}
-      <div className="mt-8 glass rounded-2xl border-red-200/50 dark:border-red-900/30 p-6">
+      {/* 7. Danger zone */}
+      <div className="glass rounded-2xl border-red-200/50 dark:border-red-900/30 p-6">
         <h2 className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">
           Danger Zone
         </h2>
@@ -313,7 +806,9 @@ export function ProfileSettingsContent() {
   );
 }
 
-// ---- Theme Selector Component ----
+// ============================================================================
+// Theme Selector Component
+// ============================================================================
 
 const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: typeof Sun; swatch: string; desc: string }[] = [
   { mode: 'warm', label: 'Warm', icon: Sun, swatch: '#f9f6f1', desc: 'Warm beige tones' },
@@ -478,7 +973,6 @@ function HourSelect({ label, color, value, onChange }: { label: string; color: s
 
 function TimelineBar({ schedule }: { schedule: AutoSchedule }) {
   const { morningWarm, dayCool, eveningWarm, nightDark } = schedule;
-  // Build 4 segments as percentages of 24 hours
   const segments = [
     { start: 0, end: morningWarm, color: 'bg-indigo-900', label: 'Dark' },
     { start: morningWarm, end: dayCool, color: 'bg-amber-400', label: 'Warm' },
