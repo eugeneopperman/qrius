@@ -57,7 +57,7 @@ export function ApiKeysSettingsContent() {
 
   if (!hasApiAccess) {
     return (
-      <div className="max-w-2xl">
+      <div className="max-w-4xl">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h1>
         </div>

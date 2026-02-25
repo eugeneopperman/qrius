@@ -15,7 +15,7 @@ export function SystemSettingsContent() {
   const setAutosaveEnabled = useSettingsStore((s) => s.setAutosaveEnabled);
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       {/* Appearance */}
       <div className="glass rounded-2xl p-6">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">

@@ -502,7 +502,7 @@ export function ProfileSettingsContent() {
   const provider = user?.app_metadata?.provider as string | undefined;
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       {/* 1. Account Overview */}
       <AccountOverviewCard
         memberSince={profile?.created_at}

@@ -137,7 +137,7 @@ export function DomainsSettingsContent() {
   const isDomainAppSubdomain = domain ? isAppSubdomain(domain.domain) : false;
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Branded Domain</h1>
         <p className="text-gray-500 dark:text-gray-400">
