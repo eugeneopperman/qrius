@@ -2,10 +2,10 @@ import { Link, useSearch, useNavigate } from '@tanstack/react-router';
 import { SignUpForm } from '@/components/auth/SignUpForm';
 import { Logo } from '@/components/ui/Logo';
 import { useThemeStore } from '@/stores/themeStore';
-import { Moon, Sun, Check } from 'lucide-react';
+import { Moon, Sun, CloudSun, Check } from 'lucide-react';
 
 export default function SignUpPage() {
-  const { theme, toggleTheme } = useThemeStore();
+  const { resolvedTheme, cycleTheme } = useThemeStore();
   const search = useSearch({ from: '/signup' }) as { redirect?: string };
   const navigate = useNavigate();
 
@@ -57,14 +57,16 @@ export default function SignUpPage() {
           </Link>
 
           <button
-            onClick={toggleTheme}
+            onClick={cycleTheme}
             className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            aria-label="Toggle theme"
+            aria-label="Cycle theme"
           >
-            {theme === 'dark' ? (
+            {resolvedTheme === 'dark' ? (
               <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            ) : resolvedTheme === 'cool' ? (
+              <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             ) : (
-              <Moon className="w-5 h-5 text-gray-600" />
+              <CloudSun className="w-5 h-5 text-gray-600" />
             )}
           </button>
         </header>

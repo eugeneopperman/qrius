@@ -4,7 +4,7 @@
  */
 
 /** App version — bump by 0.01 with each release */
-export const APP_VERSION = '0.38';
+export const APP_VERSION = '0.39';
 
 // ============================================================================
 // QR Code Configuration
@@ -247,7 +247,7 @@ export const SHORTCUTS = [
   { keys: ['Ctrl', 'S'], description: 'Download QR code (PNG)' },
   { keys: ['Ctrl', 'Shift', 'S'], description: 'Download with format picker' },
   { keys: ['Ctrl', 'C'], description: 'Copy QR code to clipboard' },
-  { keys: ['Ctrl', 'D'], description: 'Toggle dark mode' },
+  { keys: ['Ctrl', 'D'], description: 'Cycle theme' },
   { keys: ['Ctrl', 'R'], description: 'Open QR code reader' },
   { keys: ['Ctrl', 'T'], description: 'Open templates' },
   { keys: ['?'], description: 'Show keyboard shortcuts' },

@@ -14,7 +14,7 @@ import type { QRPreviewHandle } from '@/components/QRPreview';
 
 export default function HomePage() {
   const qrPreviewRef = useRef<QRPreviewHandle | null>(null);
-  const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const cycleTheme = useThemeStore((state) => state.cycleTheme);
   const { openWizard } = useTemplateStore();
   const user = useAuthStore((s) => s.user);
   const { openShortcuts, openSettings } = useUIStore();
@@ -41,14 +41,14 @@ export default function HomePage() {
     onDownload: handleDownload,
     onDownloadWithPicker: handleDownloadWithPicker,
     onCopy: handleCopy,
-    onToggleDarkMode: toggleTheme,
+    onCycleTheme: cycleTheme,
     onShowHelp: openShortcuts,
     onOpenTemplates: handleOpenTemplates,
   }), [
     handleDownload,
     handleDownloadWithPicker,
     handleCopy,
-    toggleTheme,
+    cycleTheme,
     openShortcuts,
     handleOpenTemplates,
   ]);

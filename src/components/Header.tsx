@@ -1,4 +1,4 @@
-import { Sun, Moon, Palette, LogIn, MoreVertical, Settings, Keyboard } from 'lucide-react';
+import { Sun, CloudSun, Moon, Palette, LogIn, MoreVertical, Settings, Keyboard } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useTemplateStore } from '@/stores/templateStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -50,8 +50,8 @@ function OverflowMenuItem({
 }
 
 export function Header({ onSettingsClick, onShortcutsClick }: HeaderProps) {
-  const { resolvedTheme, toggleTheme } = useThemeStore();
-  const isDark = resolvedTheme === 'dark';
+  const { resolvedTheme, cycleTheme } = useThemeStore();
+  const ThemeIcon = resolvedTheme === 'dark' ? Sun : resolvedTheme === 'cool' ? Moon : CloudSun;
   const templateCount = useTemplateStore((state) => state.templates.length);
   const openWizard = useTemplateStore((state) => state.openWizard);
   const user = useAuthStore((s) => s.user);
@@ -82,13 +82,13 @@ export function Header({ onSettingsClick, onShortcutsClick }: HeaderProps) {
                 )}
               </button>
 
-              {/* Theme toggle */}
+              {/* Theme cycle */}
               <button
-                onClick={toggleTheme}
+                onClick={cycleTheme}
                 className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-black/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
-                aria-label="Toggle theme"
+                aria-label="Cycle theme"
               >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                <ThemeIcon className="w-5 h-5" />
               </button>
 
               {/* Overflow menu */}

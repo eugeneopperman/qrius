@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { QrCode, Moon, Sun, ArrowLeft } from 'lucide-react';
+import { QrCode, Moon, Sun, CloudSun, ArrowLeft } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 import { PublicFooter } from '../layout/PublicFooter';
 
@@ -10,7 +10,7 @@ interface LegalPageLayoutProps {
 }
 
 export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayoutProps) {
-  const { theme, toggleTheme } = useThemeStore();
+  const { resolvedTheme, cycleTheme } = useThemeStore();
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -34,14 +34,16 @@ export function LegalPageLayout({ title, lastUpdated, children }: LegalPageLayou
           </div>
 
           <button
-            onClick={toggleTheme}
+            onClick={cycleTheme}
             className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            aria-label="Toggle theme"
+            aria-label="Cycle theme"
           >
-            {theme === 'dark' ? (
+            {resolvedTheme === 'dark' ? (
               <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            ) : resolvedTheme === 'cool' ? (
+              <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             ) : (
-              <Moon className="w-5 h-5 text-gray-600" />
+              <CloudSun className="w-5 h-5 text-gray-600" />
             )}
           </button>
         </div>

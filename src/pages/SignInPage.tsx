@@ -4,13 +4,13 @@ import { SignInForm } from '@/components/auth/SignInForm';
 import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
 import { Logo } from '@/components/ui/Logo';
 import { useThemeStore } from '@/stores/themeStore';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, CloudSun } from 'lucide-react';
 
 type View = 'signin' | 'forgot-password';
 
 export default function SignInPage() {
   const [view, setView] = useState<View>('signin');
-  const { theme, toggleTheme } = useThemeStore();
+  const { resolvedTheme, cycleTheme } = useThemeStore();
   const search = useSearch({ from: '/signin' }) as { redirect?: string };
   const navigate = useNavigate();
 
@@ -25,14 +25,16 @@ export default function SignInPage() {
           </Link>
 
           <button
-            onClick={toggleTheme}
+            onClick={cycleTheme}
             className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            aria-label="Toggle theme"
+            aria-label="Cycle theme"
           >
-            {theme === 'dark' ? (
+            {resolvedTheme === 'dark' ? (
               <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            ) : resolvedTheme === 'cool' ? (
+              <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             ) : (
-              <Moon className="w-5 h-5 text-gray-600" />
+              <CloudSun className="w-5 h-5 text-gray-600" />
             )}
           </button>
         </header>

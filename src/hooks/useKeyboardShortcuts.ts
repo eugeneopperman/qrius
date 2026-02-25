@@ -7,7 +7,7 @@ interface KeyboardCallbacks {
   onDownload?: () => void;
   onDownloadWithPicker?: () => void;
   onCopy?: () => void;
-  onToggleDarkMode?: () => void;
+  onCycleTheme?: () => void;
   onShowHelp?: () => void;
   onOpenReader?: () => void;
   onOpenTemplates?: () => void;
@@ -81,10 +81,10 @@ export function useKeyboardShortcuts(callbacks: KeyboardCallbacks) {
         return;
       }
 
-      // Ctrl/Cmd + D - Toggle dark mode
+      // Ctrl/Cmd + D - Cycle theme
       if (cmdOrCtrl && e.key.toLowerCase() === 'd') {
         e.preventDefault();
-        callbacksRef.current.onToggleDarkMode?.();
+        callbacksRef.current.onCycleTheme?.();
         return;
       }
 
