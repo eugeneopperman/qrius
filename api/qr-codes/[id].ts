@@ -307,6 +307,9 @@ async function handlePatch(
     name?: string;
     is_active?: boolean;
     folder_id?: string | null;
+    qr_type?: string;
+    original_data?: unknown;
+    style_options?: Record<string, unknown>;
   };
 
   // Validate fields
@@ -341,6 +344,31 @@ async function handlePatch(
     }
   }
 
+  if (body.qr_type !== undefined) {
+    const validTypes = ['url', 'text', 'email', 'phone', 'sms', 'wifi', 'vcard', 'event', 'location'];
+    if (typeof body.qr_type !== 'string' || !validTypes.includes(body.qr_type)) {
+      return res.status(400).json({ error: 'Invalid qr_type' });
+    }
+  }
+
+  if (body.style_options !== undefined) {
+    if (typeof body.style_options !== 'object' || body.style_options === null || Array.isArray(body.style_options)) {
+      return res.status(400).json({ error: 'style_options must be an object' });
+    }
+    if (JSON.stringify(body.style_options).length > 4096) {
+      return res.status(400).json({ error: 'style_options must be 4KB or less' });
+    }
+  }
+
+  // When qr_type is provided, use it for URL validation logic instead of existing record's type
+  if (body.destination_url !== undefined && body.qr_type !== undefined) {
+    const effectiveType = body.qr_type;
+    // Re-check: if the new type is 'url', destination_url must be a valid HTTP URL
+    if (effectiveType === 'url' && !isValidHttpUrl(body.destination_url)) {
+      return res.status(400).json({ error: 'destination_url must be a valid http or https URL' });
+    }
+  }
+
   // Build update
   const updates: string[] = [];
   const values: unknown[] = [];
@@ -360,6 +388,18 @@ async function handlePatch(
   if (body.folder_id !== undefined) {
     updates.push('folder_id');
     values.push(body.folder_id);
+  }
+  if (body.qr_type !== undefined) {
+    updates.push('qr_type');
+    values.push(body.qr_type);
+  }
+  if (body.original_data !== undefined) {
+    updates.push('original_data');
+    values.push(JSON.stringify(body.original_data));
+  }
+  if (body.style_options !== undefined) {
+    updates.push('metadata');
+    values.push(JSON.stringify({ style_options: body.style_options }));
   }
 
   if (updates.length === 0) {

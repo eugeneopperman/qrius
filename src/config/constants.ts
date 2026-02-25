@@ -4,7 +4,7 @@
  */
 
 /** App version — bump by 0.01 with each release */
-export const APP_VERSION = '0.36';
+export const APP_VERSION = '0.37';
 
 // ============================================================================
 // QR Code Configuration
@@ -225,6 +225,17 @@ export const VALIDATION = {
     LONGITUDE_MIN: -180,
     LONGITUDE_MAX: 180,
   },
+} as const;
+
+// ============================================================================
+// Autosave Configuration
+// ============================================================================
+
+export const AUTOSAVE = {
+  /** Interval between autosave attempts (ms) — 2 minutes */
+  INTERVAL_MS: 2 * 60 * 1000,
+  /** Minimum wizard step before autosave activates */
+  MIN_STEP: 2,
 } as const;
 
 // ============================================================================

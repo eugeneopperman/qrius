@@ -31,6 +31,10 @@ interface SettingsStore {
   trackingSettings: TrackingSettings;
   setTrackingEnabled: (enabled: boolean) => void;
   setTrackingApiBaseUrl: (url: string) => void;
+
+  // QR Code Autosave
+  autosaveEnabled: boolean;
+  setAutosaveEnabled: (enabled: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -98,6 +102,13 @@ export const useSettingsStore = create<SettingsStore>()(
         set((state) => ({
           trackingSettings: { ...state.trackingSettings, apiBaseUrl: url },
         }));
+      },
+
+      // QR Code Autosave
+      autosaveEnabled: true,
+
+      setAutosaveEnabled: (enabled) => {
+        set({ autosaveEnabled: enabled });
       },
     }),
     {

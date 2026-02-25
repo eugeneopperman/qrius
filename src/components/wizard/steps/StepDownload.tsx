@@ -9,16 +9,17 @@ import { toast } from '@/stores/toastStore';
 import { getSession } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Download, Copy, RotateCcw, Check, Settings2, Loader2, ExternalLink } from 'lucide-react';
+import type { AutosaveState } from '@/hooks/useAutosave';
 
-export function StepDownload() {
+interface StepDownloadProps {
+  autosave?: AutosaveState;
+}
+
+export function StepDownload({ autosave }: StepDownloadProps) {
   const { prevStep, reset } = useWizardStore();
   const qrPreviewRef = useRef<QRPreviewHandle>(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [savedQRCodeId, setSavedQRCodeId] = useState<string | null>(null);
-  const [trackingUrl, setTrackingUrl] = useState<string | null>(null);
-  const [saveAttempted, setSaveAttempted] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -27,13 +28,30 @@ export function StepDownload() {
   const getCurrentData = useQRStore((s) => s.getCurrentData);
   const getQRValue = useQRStore((s) => s.getQRValue);
 
-  // Auto-save to DB for authenticated users when reaching this step
+  // --- Fallback local save state (when autosave prop is not provided) ---
+  const [localIsSaving, setLocalIsSaving] = useState(false);
+  const [localSavedQRCodeId, setLocalSavedQRCodeId] = useState<string | null>(null);
+  const [localTrackingUrl, setLocalTrackingUrl] = useState<string | null>(null);
+  const [localSaveAttempted, setLocalSaveAttempted] = useState(false);
+
+  // Resolve which save state to use
+  const isSaving = autosave ? autosave.isSaving : localIsSaving;
+  const savedQRCodeId = autosave ? autosave.savedQRCodeId : localSavedQRCodeId;
+  const trackingUrl = autosave ? autosave.trackingUrl : localTrackingUrl;
+
+  // Auto-save on mount: either via autosave hook or local fallback
   useEffect(() => {
-    if (!user || saveAttempted) return;
-    setSaveAttempted(true);
-    saveToDatabase();
+    if (autosave) {
+      // Use autosave's saveNow to ensure final state is persisted
+      autosave.saveNow();
+    } else {
+      // Fallback: local save logic
+      if (!user || localSaveAttempted) return;
+      setLocalSaveAttempted(true);
+      saveToDatabaseLocal();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, saveAttempted]);
+  }, []);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -44,10 +62,10 @@ export function StepDownload() {
     };
   }, []);
 
-  async function saveToDatabase() {
+  async function saveToDatabaseLocal() {
     if (!user) return;
 
-    setIsSaving(true);
+    setLocalIsSaving(true);
     try {
       const session = await getSession();
       if (!session?.access_token) return;
@@ -56,11 +74,9 @@ export function StepDownload() {
       const currentData = getCurrentData();
       const { campaignName, styleOptions } = useQRStore.getState();
 
-      // Determine name: use campaignName if provided, otherwise auto-generate
       const name = campaignName.trim()
         || (activeType === 'url' ? (currentData.data as { url?: string }).url?.slice(0, 100) : `${activeType.toUpperCase()} QR Code`);
 
-      // Serialize rendering-relevant style options (exclude frame/transient fields)
       const style_options: Record<string, unknown> = {
         dotsColor: styleOptions.dotsColor,
         backgroundColor: styleOptions.backgroundColor,
@@ -95,7 +111,6 @@ export function StepDownload() {
 
       if (!response.ok) {
         const data = await response.json();
-        // Don't show error for plan limit exceeded — user can still use static QR
         if (response.status === 403) {
           toast.info('QR code limit reached. Download still works as a static QR code.');
           return;
@@ -104,18 +119,17 @@ export function StepDownload() {
       }
 
       const data = await response.json();
-      setSavedQRCodeId(data.id);
+      setLocalSavedQRCodeId(data.id);
       if (data.tracking_url) {
-        setTrackingUrl(data.tracking_url);
+        setLocalTrackingUrl(data.tracking_url);
       }
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast.success('QR code saved to your dashboard');
     } catch (error) {
-      // Non-blocking: QR still works client-side
       if (import.meta.env.DEV) console.error('Failed to save QR to DB:', error);
     } finally {
-      setIsSaving(false);
+      setLocalIsSaving(false);
     }
   }
 
@@ -137,9 +151,13 @@ export function StepDownload() {
   };
 
   const handleCreateAnother = () => {
-    setSavedQRCodeId(null);
-    setTrackingUrl(null);
-    setSaveAttempted(false);
+    if (autosave) {
+      autosave.reset();
+    } else {
+      setLocalSavedQRCodeId(null);
+      setLocalTrackingUrl(null);
+      setLocalSaveAttempted(false);
+    }
     reset();
   };
 

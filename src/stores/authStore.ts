@@ -84,7 +84,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, connectionError: null });
 
-          // Check if Supabase is reachable
+          // Check connection + get session in one call (avoids redundant getSession)
           const connectionCheck = await checkSupabaseConnection();
           if (!connectionCheck.ok) {
             if (import.meta.env.DEV) console.warn('Supabase connection issue:', connectionCheck.message);
@@ -92,13 +92,8 @@ export const useAuthStore = create<AuthState>()(
             return;
           }
 
-          // Get current session
-          const { data: { session }, error } = await supabase.auth.getSession();
-
-          if (error) {
-            set({ isLoading: false, isInitialized: true });
-            return;
-          }
+          // Re-use the session from the connection check
+          const session = connectionCheck.session ?? null;
 
           if (session) {
             set({ session, user: session.user });
@@ -142,15 +137,22 @@ export const useAuthStore = create<AuthState>()(
       signIn: async (email, password) => {
         try {
           set({ isLoading: true });
-          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
           if (error) {
             set({ isLoading: false });
             return { error: new Error(error.message) };
           }
 
+          // Set user immediately so navigation guards pass without waiting for onAuthStateChange
+          if (data.session) {
+            set({ session: data.session, user: data.session.user, isLoading: false });
+            return { error: null };
+          }
+
+          // No session returned — likely email not confirmed
           set({ isLoading: false });
-          return { error: null };
+          return { error: new Error('Please check your email to confirm your account before signing in.') };
         } catch (error) {
           set({ isLoading: false });
           if (error instanceof TypeError) {

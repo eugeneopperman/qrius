@@ -28,18 +28,19 @@ export const supabase = createClient<Database>(
 );
 
 // Check if Supabase is reachable (detects paused projects, network issues)
-export async function checkSupabaseConnection(): Promise<{ ok: boolean; message?: string }> {
+// Returns the session so callers can avoid a redundant getSession() call
+export async function checkSupabaseConnection(): Promise<{ ok: boolean; message?: string; session?: import('@supabase/supabase-js').Session | null }> {
   if (isSupabaseMissing) {
     return { ok: false, message: 'Supabase configuration missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.' };
   }
 
   try {
     // A lightweight auth call that exercises the REST endpoint
-    const { error } = await supabase.auth.getSession();
+    const { data, error } = await supabase.auth.getSession();
     if (error) {
       return { ok: false, message: `Supabase responded with an error: ${error.message}` };
     }
-    return { ok: true };
+    return { ok: true, session: data.session };
   } catch (err) {
     if (err instanceof TypeError) {
       return {

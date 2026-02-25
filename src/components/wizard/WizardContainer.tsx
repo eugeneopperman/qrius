@@ -8,6 +8,7 @@ import { StepCustomize } from './steps/StepCustomize';
 import { StepDownload } from './steps/StepDownload';
 import type { QRPreviewHandle } from '../QRPreview';
 import { cn } from '@/utils/cn';
+import { useAutosave } from '@/hooks/useAutosave';
 
 interface WizardContainerProps {
   onPreviewRef?: (ref: React.RefObject<QRPreviewHandle | null>) => void;
@@ -16,6 +17,7 @@ interface WizardContainerProps {
 export function WizardContainer({ onPreviewRef }: WizardContainerProps) {
   const { currentStep } = useWizardStore();
   const previewRef = useRef<QRPreviewHandle>(null);
+  const autosave = useAutosave();
 
   // Pass the preview ref up for keyboard shortcuts
   useEffect(() => {
@@ -33,7 +35,7 @@ export function WizardContainer({ onPreviewRef }: WizardContainerProps) {
       case 3:
         return <StepCustomize />;
       case 4:
-        return <StepDownload />;
+        return <StepDownload autosave={autosave} />;
       default:
         return <StepType />;
     }
@@ -46,7 +48,7 @@ export function WizardContainer({ onPreviewRef }: WizardContainerProps) {
     <div className="w-full">
       {/* Progress indicator */}
       <div className="relative mb-6 py-3 glass rounded-2xl">
-        <WizardProgress />
+        <WizardProgress lastSavedAt={autosave.lastSavedAt} isSaving={autosave.isSaving} />
       </div>
 
       {/* Step content with optional side preview */}

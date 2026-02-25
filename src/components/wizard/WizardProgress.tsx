@@ -1,4 +1,5 @@
-import { Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, Loader2, CloudUpload } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useWizardStore, type WizardStep } from '@/stores/wizardStore';
 
@@ -9,8 +10,55 @@ const steps: { step: WizardStep; label: string }[] = [
   { step: 4, label: 'Download' },
 ];
 
-export function WizardProgress() {
+function getRelativeTime(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 10) return 'Saved just now';
+  if (seconds < 60) return `Saved ${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `Saved ${minutes}m ago`;
+  return `Saved ${Math.floor(minutes / 60)}h ago`;
+}
+
+interface WizardProgressProps {
+  lastSavedAt?: Date | null;
+  isSaving?: boolean;
+}
+
+function SaveIndicator({ lastSavedAt, isSaving }: { lastSavedAt: Date | null; isSaving: boolean }) {
+  const [, setTick] = useState(0);
+
+  // Tick every 30s to update relative time
+  useEffect(() => {
+    if (!lastSavedAt) return;
+    const id = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(id);
+  }, [lastSavedAt]);
+
+  if (isSaving) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+        <Loader2 className="w-3 h-3 animate-spin" />
+        Saving...
+      </span>
+    );
+  }
+
+  if (lastSavedAt) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+        <CloudUpload className="w-3 h-3" />
+        {getRelativeTime(lastSavedAt)}
+      </span>
+    );
+  }
+
+  return null;
+}
+
+export function WizardProgress({ lastSavedAt, isSaving }: WizardProgressProps) {
   const { currentStep, completedSteps, goToStep, isStepAccessible } = useWizardStore();
+
+  const showSaveIndicator = isSaving || lastSavedAt;
 
   return (
     <div className="w-full">
@@ -81,16 +129,33 @@ export function WizardProgress() {
             </div>
           );
         })}
+
+        {/* Desktop save indicator — after step buttons */}
+        {showSaveIndicator && (
+          <div className="ml-4">
+            <SaveIndicator lastSavedAt={lastSavedAt ?? null} isSaving={isSaving ?? false} />
+          </div>
+        )}
       </div>
 
       {/* Mobile: Compact indicator */}
-      <div className="sm:hidden flex items-center justify-between px-4">
-        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-          Step {currentStep} of {steps.length}
-        </span>
-        <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">
-          {steps.find(s => s.step === currentStep)?.label}
-        </span>
+      <div className="sm:hidden flex flex-col px-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            Step {currentStep} of {steps.length}
+          </span>
+          <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">
+            {steps.find(s => s.step === currentStep)?.label}
+          </span>
+        </div>
+
+        {/* Mobile save indicator — below step label row */}
+        {showSaveIndicator && (
+          <div className="mt-1 flex justify-end">
+            <SaveIndicator lastSavedAt={lastSavedAt ?? null} isSaving={isSaving ?? false} />
+          </div>
+        )}
+
         {/* Progress bar */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/10 dark:bg-white/10">
           <div

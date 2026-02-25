@@ -6,7 +6,9 @@ import { useShallow } from 'zustand/react/shallow';
 import { useThemeStore } from '@/stores/themeStore';
 import { toast } from '@/stores/toastStore';
 import { supabase } from '@/lib/supabase';
-import { Camera, Loader2, Trash2, Sun, Moon } from 'lucide-react';
+import { Camera, Loader2, Trash2, Sun, Moon, Save } from 'lucide-react';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { cn } from '@/utils/cn';
 
 const AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const AVATAR_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -14,6 +16,8 @@ const AVATAR_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/we
 export function ProfileSettingsContent() {
   const { user, profile, updateProfile } = useAuthStore(useShallow((s) => ({ user: s.user, profile: s.profile, updateProfile: s.updateProfile })));
   const { theme, toggleTheme } = useThemeStore();
+  const autosaveEnabled = useSettingsStore((s) => s.autosaveEnabled);
+  const setAutosaveEnabled = useSettingsStore((s) => s.setAutosaveEnabled);
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [name, setName] = useState(profile?.name || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -274,6 +278,38 @@ export function ProfileSettingsContent() {
                 <span className="text-sm text-gray-700 dark:text-gray-300">Light</span>
               </>
             )}
+          </button>
+        </div>
+      </div>
+
+      {/* QR Code Autosave */}
+      <div className="mt-6 glass rounded-2xl p-6">
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+          <Save className="w-5 h-5 inline-block mr-2 -mt-0.5" />
+          QR Code Autosave
+        </h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">Auto-save drafts</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Automatically save your QR code every 2 minutes while creating
+            </p>
+          </div>
+          <button
+            role="switch"
+            aria-checked={autosaveEnabled}
+            onClick={() => setAutosaveEnabled(!autosaveEnabled)}
+            className={cn(
+              'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2',
+              autosaveEnabled ? 'bg-orange-500' : 'bg-gray-200 dark:bg-gray-700'
+            )}
+          >
+            <span
+              className={cn(
+                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out',
+                autosaveEnabled ? 'translate-x-5' : 'translate-x-0'
+              )}
+            />
           </button>
         </div>
       </div>

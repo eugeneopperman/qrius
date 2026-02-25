@@ -3,12 +3,11 @@ import { useHistoryStore } from '@/stores/historyStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { useTemplateStore } from '@/stores/templateStore';
 import { useAuthStore } from '@/stores/authStore';
-import { useShallow } from 'zustand/react/shallow';
 import { Dropdown } from './ui/Dropdown';
 import { Logo } from './ui/Logo';
 import { UserButton } from './auth/UserButton';
 import { AuthModal } from './auth/AuthModal';
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 
 interface HeaderProps {
   onHistoryClick?: () => void;
@@ -58,93 +57,93 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
   const historyCount = useHistoryStore((state) => state.entries.length);
   const templateCount = useTemplateStore((state) => state.templates.length);
   const openWizard = useTemplateStore((state) => state.openWizard);
-  const { user, isInitialized } = useAuthStore(useShallow((s) => ({ user: s.user, isInitialized: s.isInitialized })));
+  const user = useAuthStore((s) => s.user);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
-    <header className="glass-header sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* LEFT: Logo + brand name */}
-          <Logo size="md" />
+    <Fragment>
+      <header className="glass-header sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* LEFT: Logo + brand name */}
+            <Logo size="md" />
 
-          {/* RIGHT: Templates (desktop), Theme toggle, Overflow menu, Auth */}
-          <div className="flex items-center gap-1">
-            {/* Templates button — desktop only */}
-            <button
-              onClick={() => openWizard()}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-full transition-colors"
-              aria-label="Templates"
-            >
-              <Palette className="w-3.5 h-3.5" />
-              Templates
-              {templateCount > 0 && (
-                <span className="ml-0.5 px-1.5 py-0.5 text-[10px] bg-indigo-600 dark:bg-indigo-500 text-white rounded-full">
-                  {templateCount}
-                </span>
-              )}
-            </button>
+            {/* RIGHT: Templates (desktop), Theme toggle, Overflow menu, Auth */}
+            <div className="flex items-center gap-1">
+              {/* Templates button — desktop only */}
+              <button
+                onClick={() => openWizard()}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-full transition-colors"
+                aria-label="Templates"
+              >
+                <Palette className="w-3.5 h-3.5" />
+                Templates
+                {templateCount > 0 && (
+                  <span className="ml-0.5 px-1.5 py-0.5 text-[10px] bg-indigo-600 dark:bg-indigo-500 text-white rounded-full">
+                    {templateCount}
+                  </span>
+                )}
+              </button>
 
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-black/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-black/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
 
-            {/* Overflow menu */}
-            <Dropdown
-              align="right"
-              trigger={({ toggle }) => (
-                <button
-                  onClick={toggle}
-                  className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-black/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
-                  aria-label="More options"
-                >
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-              )}
-            >
-              {({ close }) => (
-                <div className="w-56 py-1 max-h-[calc(100vh-5rem)] overflow-y-auto">
-                  {/* Templates — mobile only */}
-                  <div className="sm:hidden">
+              {/* Overflow menu */}
+              <Dropdown
+                align="right"
+                trigger={({ toggle }) => (
+                  <button
+                    onClick={toggle}
+                    className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-black/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5 transition-colors"
+                    aria-label="More options"
+                  >
+                    <MoreVertical className="w-5 h-5" />
+                  </button>
+                )}
+              >
+                {({ close }) => (
+                  <div className="w-56 py-1 max-h-[calc(100vh-5rem)] overflow-y-auto">
+                    {/* Templates — mobile only */}
+                    <div className="sm:hidden">
+                      <OverflowMenuItem
+                        icon={Palette}
+                        label="Templates"
+                        badge={templateCount}
+                        onClick={() => { close(); openWizard(); }}
+                      />
+                    </div>
+
                     <OverflowMenuItem
-                      icon={Palette}
-                      label="Templates"
-                      badge={templateCount}
-                      onClick={() => { close(); openWizard(); }}
+                      icon={Clock}
+                      label="History"
+                      badge={historyCount}
+                      onClick={() => { close(); onHistoryClick?.(); }}
+                    />
+
+                    <OverflowMenuItem
+                      icon={Settings}
+                      label="Settings"
+                      onClick={() => { close(); onSettingsClick?.(); }}
+                    />
+
+                    <OverflowMenuItem
+                      icon={Keyboard}
+                      label="Shortcuts"
+                      kbd="?"
+                      onClick={() => { close(); onShortcutsClick?.(); }}
                     />
                   </div>
+                )}
+              </Dropdown>
 
-                  <OverflowMenuItem
-                    icon={Clock}
-                    label="History"
-                    badge={historyCount}
-                    onClick={() => { close(); onHistoryClick?.(); }}
-                  />
-
-                  <OverflowMenuItem
-                    icon={Settings}
-                    label="Settings"
-                    onClick={() => { close(); onSettingsClick?.(); }}
-                  />
-
-                  <OverflowMenuItem
-                    icon={Keyboard}
-                    label="Shortcuts"
-                    kbd="?"
-                    onClick={() => { close(); onShortcutsClick?.(); }}
-                  />
-                </div>
-              )}
-            </Dropdown>
-
-            {/* Auth section */}
-            {isInitialized && (
-              user ? (
+              {/* Auth section — show sign-in button immediately, don't wait for init */}
+              {user ? (
                 <UserButton onSettingsClick={onSettingsClick} />
               ) : (
                 <button
@@ -154,14 +153,14 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
                   <LogIn className="w-4 h-4" />
                   <span className="hidden sm:inline">Sign In</span>
                 </button>
-              )
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Auth Modal */}
+      {/* Auth Modal — rendered outside header to avoid backdrop-filter containing block */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
-    </header>
+    </Fragment>
   );
 }
