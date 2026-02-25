@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@/components/ui/Tabs';
-import { User, Users, CreditCard, Key, Globe, Loader2 } from 'lucide-react';
+import { User, Users, CreditCard, Key, Globe, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 
 // Lazy load settings content components
@@ -11,6 +11,7 @@ const TeamSettingsContent = lazy(() => import('./settings/TeamSettingsPage').the
 const BillingSettingsContent = lazy(() => import('./settings/BillingSettingsPage').then(m => ({ default: m.BillingSettingsContent })));
 const ApiKeysSettingsContent = lazy(() => import('./settings/ApiKeysSettingsPage').then(m => ({ default: m.ApiKeysSettingsContent })));
 const DomainsSettingsContent = lazy(() => import('./settings/DomainsSettingsPage').then(m => ({ default: m.DomainsSettingsContent })));
+const SystemSettingsContent = lazy(() => import('./settings/SystemSettingsPage').then(m => ({ default: m.SystemSettingsContent })));
 
 function SettingsLoading() {
   return (
@@ -20,7 +21,7 @@ function SettingsLoading() {
   );
 }
 
-const TAB_KEYS = ['profile', 'team', 'billing', 'api-keys', 'domains'] as const;
+const TAB_KEYS = ['profile', 'team', 'billing', 'api-keys', 'domains', 'system'] as const;
 type SettingsTab = (typeof TAB_KEYS)[number];
 
 function getTabIndex(tab: string | undefined): number {
@@ -58,6 +59,7 @@ export default function SettingsPage() {
             <Tab icon={CreditCard}>Billing</Tab>
             <Tab icon={Key}>API Keys</Tab>
             <Tab icon={Globe}>Domains</Tab>
+            <Tab icon={SlidersHorizontal}>System</Tab>
           </TabList>
 
           <TabPanels>
@@ -84,6 +86,11 @@ export default function SettingsPage() {
             <TabPanel>
               <Suspense fallback={<SettingsLoading />}>
                 <DomainsSettingsContent />
+              </Suspense>
+            </TabPanel>
+            <TabPanel>
+              <Suspense fallback={<SettingsLoading />}>
+                <SystemSettingsContent />
               </Suspense>
             </TabPanel>
           </TabPanels>
