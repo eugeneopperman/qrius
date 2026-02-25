@@ -7,6 +7,7 @@ import { getSession } from '@/lib/supabase';
 import { toast } from '@/stores/toastStore';
 import {
   Check,
+  ChevronDown,
   CreditCard,
   ExternalLink,
   Loader2,
@@ -340,43 +341,15 @@ export function BillingSettingsContent() {
         })}
       </div>
 
-      {/* FAQ */}
+      {/* FAQ Accordion */}
       <div className="mt-12 glass rounded-2xl p-6">
         <h2 className="section-title mb-4">
           Frequently Asked Questions
         </h2>
-
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-medium text-gray-900 dark:text-white">
-              Can I change plans anytime?
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Yes, you can upgrade or downgrade your plan at any time. Changes take effect
-              immediately, and we'll prorate any payments.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-medium text-gray-900 dark:text-white">
-              What happens if I exceed my limits?
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              We'll notify you when you're approaching your limits. If you exceed them, your QR
-              codes will continue to work, but you won't be able to create new ones until you
-              upgrade.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-medium text-gray-900 dark:text-white">
-              Do you offer refunds?
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Yes, we offer a 14-day money-back guarantee. If you're not satisfied, contact
-              support for a full refund.
-            </p>
-          </div>
+        <div className="divide-y divide-gray-200/60 dark:divide-gray-700/60">
+          {FAQ_ITEMS.map((item) => (
+            <AccordionItem key={item.q} question={item.q} answer={item.a} />
+          ))}
         </div>
       </div>
 
@@ -389,6 +362,52 @@ export function BillingSettingsContent() {
         >
           support@qrius.app
         </a>
+      </div>
+    </div>
+  );
+}
+
+const FAQ_ITEMS = [
+  {
+    q: 'Can I change plans anytime?',
+    a: "Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any payments.",
+  },
+  {
+    q: 'What happens if I exceed my limits?',
+    a: "We'll notify you when you're approaching your limits. If you exceed them, your QR codes will continue to work, but you won't be able to create new ones until you upgrade.",
+  },
+  {
+    q: 'Do you offer refunds?',
+    a: "Yes, we offer a 14-day money-back guarantee. If you're not satisfied, contact support for a full refund.",
+  },
+];
+
+function AccordionItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between gap-4 py-4 text-left group"
+        aria-expanded={open}
+      >
+        <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+          {question}
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      <div
+        className={`grid transition-all duration-200 ease-in-out ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className="overflow-hidden">
+          <p className="pb-4 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            {answer}
+          </p>
+        </div>
       </div>
     </div>
   );
