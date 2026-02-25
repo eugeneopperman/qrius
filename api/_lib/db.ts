@@ -25,7 +25,7 @@ export interface QRCodeRow {
   total_scans: number;
   user_id: string | null;
   organization_id: string | null;
-  folder_id: string | null;
+  folder_id?: string | null;
   name: string | null;
   description: string | null;
   tags: string[];
@@ -63,7 +63,7 @@ export function toQRCodeResponse(row: QRCodeRow, baseUrl: string, customDomain?:
     total_scans: row.total_scans,
     user_id: row.user_id,
     organization_id: row.organization_id,
-    folder_id: row.folder_id,
+    folder_id: row.folder_id ?? null,
     name: row.name,
     description: row.description,
     tags: row.tags || [],

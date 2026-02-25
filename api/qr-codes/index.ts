@@ -312,7 +312,7 @@ async function handleList(
   }
 
   // Build dynamic WHERE clauses
-  const selectCols = 'id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, folder_id, created_at, updated_at';
+  const selectCols = 'id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at';
 
   // Build base ownership condition
   let ownershipCondition: string;
