@@ -52,8 +52,8 @@ export default function QRCodeDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Deactivation state
-  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
+  // Pause state
+  const [showPauseConfirm, setShowPauseConfirm] = useState(false);
   const [isTogglingActive, setIsTogglingActive] = useState(false);
 
   const qrCode = data?.qrCode ?? null;
@@ -180,12 +180,12 @@ export default function QRCodeDetailPage() {
 
       queryClient.invalidateQueries({ queryKey: ['qr-code-detail', qrCode.id] });
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
-      toast.success(newState ? 'QR code activated' : 'QR code deactivated');
+      toast.success(newState ? 'QR code activated' : 'QR code paused');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to update');
     } finally {
       setIsTogglingActive(false);
-      setShowDeactivateConfirm(false);
+      setShowPauseConfirm(false);
     }
   }, [qrCode, queryClient]);
 
@@ -264,7 +264,7 @@ export default function QRCodeDetailPage() {
               size="sm"
               onClick={() => {
                 if (qrCode.is_active) {
-                  setShowDeactivateConfirm(true);
+                  setShowPauseConfirm(true);
                 } else {
                   handleToggleActive();
                 }
@@ -276,7 +276,7 @@ export default function QRCodeDetailPage() {
               ) : qrCode.is_active ? (
                 <>
                   <PowerOff className="w-4 h-4" />
-                  Deactivate
+                  Pause
                 </>
               ) : (
                 <>
@@ -518,14 +518,14 @@ export default function QRCodeDetailPage() {
         variant="danger"
       />
 
-      {/* Deactivate confirmation */}
+      {/* Pause confirmation */}
       <ConfirmDialog
-        isOpen={showDeactivateConfirm}
-        onClose={() => setShowDeactivateConfirm(false)}
+        isOpen={showPauseConfirm}
+        onClose={() => setShowPauseConfirm(false)}
         onConfirm={handleToggleActive}
-        title="Deactivate QR Code"
-        message="Deactivated QR codes will show an error page when scanned. You can reactivate it at any time."
-        confirmLabel={isTogglingActive ? 'Deactivating...' : 'Deactivate'}
+        title="Pause QR Code"
+        message="Paused QR codes will show an error page when scanned. You can resume it at any time."
+        confirmLabel={isTogglingActive ? 'Pausing...' : 'Pause'}
         cancelLabel="Cancel"
         variant="danger"
       />
