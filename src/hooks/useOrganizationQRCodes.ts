@@ -4,8 +4,13 @@ import { toast } from '@/stores/toastStore';
 import { useAuthStore } from '@/stores/authStore';
 import type { QRCode } from '@/types/database';
 
-interface UseOrganizationQRCodesOptions {
+export interface UseOrganizationQRCodesOptions {
   limit?: number;
+  status?: 'all' | 'active' | 'paused';
+  folderId?: string | null;
+  search?: string;
+  sort?: 'created_at' | 'total_scans' | 'name';
+  order?: 'asc' | 'desc';
 }
 
 interface APIQRCode {
@@ -19,12 +24,19 @@ interface APIQRCode {
   total_scans: number;
   user_id: string | null;
   organization_id: string | null;
+  folder_id: string | null;
   name: string | null;
   description: string | null;
   tags: string[];
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+}
+
+interface StatusCounts {
+  all: number;
+  active: number;
+  paused: number;
 }
 
 interface APIResponse {
@@ -35,6 +47,7 @@ interface APIResponse {
     offset: number;
     hasMore: boolean;
   };
+  counts?: StatusCounts;
   stats: {
     monthlyScans: number;
     teamMembers: number;
@@ -53,6 +66,7 @@ function mapAPIToQRCode(api: APIQRCode): QRCode {
     total_scans: api.total_scans,
     user_id: api.user_id,
     organization_id: api.organization_id,
+    folder_id: api.folder_id,
     name: api.name,
     description: api.description,
     tags: api.tags || [],
@@ -63,14 +77,27 @@ function mapAPIToQRCode(api: APIQRCode): QRCode {
   };
 }
 
-async function fetchQRCodes(limit?: number): Promise<{ qrCodes: QRCode[]; totalCount: number; monthlyScans: number; teamMembers: number }> {
+async function fetchQRCodes(options: UseOrganizationQRCodesOptions = {}): Promise<{
+  qrCodes: QRCode[];
+  totalCount: number;
+  counts: StatusCounts;
+  monthlyScans: number;
+  teamMembers: number;
+}> {
   const session = await getSession();
   if (!session?.access_token) {
-    return { qrCodes: [], totalCount: 0, monthlyScans: 0, teamMembers: 1 };
+    return { qrCodes: [], totalCount: 0, counts: { all: 0, active: 0, paused: 0 }, monthlyScans: 0, teamMembers: 1 };
   }
 
   const params = new URLSearchParams();
-  if (limit) params.set('limit', String(limit));
+  if (options.limit) params.set('limit', String(options.limit));
+  if (options.status && options.status !== 'all') params.set('status', options.status);
+  if (options.folderId !== undefined) {
+    params.set('folder_id', options.folderId === null ? 'none' : options.folderId);
+  }
+  if (options.search) params.set('search', options.search);
+  if (options.sort) params.set('sort', options.sort);
+  if (options.order) params.set('order', options.order);
 
   const response = await fetch(`/api/qr-codes?${params.toString()}`, {
     headers: {
@@ -87,35 +114,66 @@ async function fetchQRCodes(limit?: number): Promise<{ qrCodes: QRCode[]; totalC
   return {
     qrCodes: data.qrCodes.map(mapAPIToQRCode),
     totalCount: data.pagination.total,
+    counts: data.counts || { all: data.pagination.total, active: 0, paused: 0 },
     monthlyScans: data.stats.monthlyScans,
     teamMembers: data.stats.teamMembers ?? 1,
   };
 }
 
-export function useOrganizationQRCodes({ limit }: UseOrganizationQRCodesOptions = {}) {
+export function useOrganizationQRCodes(options: UseOrganizationQRCodesOptions = {}) {
+  const { limit, status, folderId, search, sort, order } = options;
   const currentOrganization = useAuthStore((s) => s.currentOrganization);
   const queryClient = useQueryClient();
 
-  const queryKey = ['qr-codes', currentOrganization?.id, limit] as const;
+  const queryKey = ['qr-codes', currentOrganization?.id, { limit, status, folderId, search, sort, order }] as const;
 
   const { data, isLoading } = useQuery({
     queryKey,
-    queryFn: () => fetchQRCodes(limit),
+    queryFn: () => fetchQRCodes(options),
     enabled: !!currentOrganization,
   });
 
   const qrCodes = data?.qrCodes ?? [];
   const totalCount = data?.totalCount ?? 0;
+  const counts = data?.counts ?? { all: 0, active: 0, paused: 0 };
   const monthlyScans = data?.monthlyScans ?? 0;
   const teamMembers = data?.teamMembers ?? 1;
 
+  const patchMutation = useMutation({
+    mutationFn: async (params: { id: string; destination_url?: string; name?: string; is_active?: boolean; folder_id?: string | null }) => {
+      const session = await getSession();
+      if (!session?.access_token) throw new Error('Not authenticated');
+
+      const { id, ...body } = params;
+      const response = await fetch(`/api/qr-codes/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const responseData = await response.json();
+        throw new Error(responseData.error || 'Failed to update');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
+      queryClient.invalidateQueries({ queryKey: ['qr-code-folders'] });
+    },
+    onError: () => {
+      toast.error('Failed to update QR code. Please try again.');
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Use API endpoint for deletion (handles cache cleanup, scan events, etc.)
       const session = await getSession();
-      if (!session?.access_token) {
-        throw new Error('Not authenticated');
-      }
+      if (!session?.access_token) throw new Error('Not authenticated');
 
       const response = await fetch(`/api/qr-codes/${id}`, {
         method: 'DELETE',
@@ -132,12 +190,11 @@ export function useOrganizationQRCodes({ limit }: UseOrganizationQRCodesOptions 
       return id;
     },
     onSuccess: (deletedId) => {
-      // Optimistically remove from cache
       queryClient.setQueryData(queryKey, (old: typeof data) =>
         old ? { ...old, qrCodes: old.qrCodes.filter((qr) => qr.id !== deletedId), totalCount: old.totalCount - 1 } : old
       );
-      // Also invalidate any other qr-codes queries (different limits)
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
+      queryClient.invalidateQueries({ queryKey: ['qr-code-folders'] });
     },
     onError: () => {
       toast.error('Failed to delete QR code. Please try again.');
@@ -153,13 +210,24 @@ export function useOrganizationQRCodes({ limit }: UseOrganizationQRCodesOptions 
     }
   };
 
+  const patchQRCode = async (params: { id: string; destination_url?: string; name?: string; is_active?: boolean; folder_id?: string | null }): Promise<boolean> => {
+    try {
+      await patchMutation.mutateAsync(params);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return {
     qrCodes,
     totalCount,
+    counts,
     monthlyScans,
     teamMembers,
     isLoading,
+    patchQRCode,
     deleteQRCode,
-    refetch: () => queryClient.invalidateQueries({ queryKey }),
+    refetch: () => queryClient.invalidateQueries({ queryKey: ['qr-codes'] }),
   };
 }

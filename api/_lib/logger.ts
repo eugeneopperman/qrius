@@ -96,6 +96,7 @@ export const logger = {
   kv: createLogger('kv'),
   notifications: createLogger('notifications'),
   domains: createLogger('domains'),
+  folders: createLogger('folders'),
 };
 
 export default logger;

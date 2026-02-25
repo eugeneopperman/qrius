@@ -89,6 +89,7 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     total_scans: data.total_scans,
     user_id: data.user_id,
     organization_id: data.organization_id,
+    folder_id: (data as unknown as Record<string, unknown>).folder_id as string | null ?? null,
     name: data.name,
     description: data.description,
     tags: data.tags || [],

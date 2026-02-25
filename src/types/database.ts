@@ -306,6 +306,38 @@ export interface Database {
           },
         ];
       };
+      qr_code_folders: {
+        Row: {
+          id: string;
+          organization_id: string;
+          name: string;
+          color: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          name: string;
+          color?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          color?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'qr_code_folders_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       qr_codes: {
         Row: {
           id: string;
@@ -317,6 +349,7 @@ export interface Database {
           total_scans: number;
           user_id: string | null;
           organization_id: string | null;
+          folder_id: string | null;
           name: string | null;
           description: string | null;
           tags: string[];
@@ -335,6 +368,7 @@ export interface Database {
           total_scans?: number;
           user_id?: string | null;
           organization_id?: string | null;
+          folder_id?: string | null;
           name?: string | null;
           description?: string | null;
           tags?: string[];
@@ -347,6 +381,7 @@ export interface Database {
           qr_type?: string;
           original_data?: Json | null;
           is_active?: boolean;
+          folder_id?: string | null;
           name?: string | null;
           description?: string | null;
           tags?: string[];
@@ -497,6 +532,7 @@ export type OrganizationInvitation = Database['public']['Tables']['organization_
 export type ApiKey = Database['public']['Tables']['api_keys']['Row'];
 export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 export type UsageRecord = Database['public']['Tables']['usage_records']['Row'];
+export type QRCodeFolder = Database['public']['Tables']['qr_code_folders']['Row'];
 export type QRCode = Database['public']['Tables']['qr_codes']['Row'];
 export type ScanEvent = Database['public']['Tables']['scan_events']['Row'];
 export type PlanLimits = Database['public']['Tables']['plan_limits']['Row'];

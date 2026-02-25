@@ -306,6 +306,7 @@ async function handlePatch(
     destination_url?: string;
     name?: string;
     is_active?: boolean;
+    folder_id?: string | null;
   };
 
   // Validate fields
@@ -334,6 +335,12 @@ async function handlePatch(
     return res.status(400).json({ error: 'is_active must be a boolean' });
   }
 
+  if (body.folder_id !== undefined && body.folder_id !== null) {
+    if (typeof body.folder_id !== 'string' || !isValidUUID(body.folder_id)) {
+      return res.status(400).json({ error: 'folder_id must be a valid UUID or null' });
+    }
+  }
+
   // Build update
   const updates: string[] = [];
   const values: unknown[] = [];
@@ -349,6 +356,10 @@ async function handlePatch(
   if (body.is_active !== undefined) {
     updates.push('is_active');
     values.push(body.is_active);
+  }
+  if (body.folder_id !== undefined) {
+    updates.push('folder_id');
+    values.push(body.folder_id);
   }
 
   if (updates.length === 0) {

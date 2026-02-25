@@ -275,6 +275,21 @@ async function handleList(
   const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
   const offset = parseInt(req.query.offset as string) || 0;
 
+  // Filter parameters
+  const statusFilter = (req.query.status as string) || 'all';
+  const folderIdFilter = req.query.folder_id as string | undefined;
+  const searchFilter = req.query.search as string | undefined;
+  const sortField = (req.query.sort as string) || 'created_at';
+  const sortOrder = (req.query.order as string) === 'asc' ? 'ASC' : 'DESC';
+
+  // Validate filter params
+  if (!['all', 'active', 'paused'].includes(statusFilter)) {
+    return res.status(400).json({ error: 'status must be all, active, or paused' });
+  }
+  if (!['created_at', 'total_scans', 'name'].includes(sortField)) {
+    return res.status(400).json({ error: 'sort must be created_at, total_scans, or name' });
+  }
+
   // Resolve the effective orgId first (sequential — needed for all subsequent queries)
   let effectiveOrgId: string | null = null;
   let isPersonalOnly = false;
@@ -290,52 +305,101 @@ async function handleList(
     }
   }
 
-  // Build query conditions based on auth context
-  const selectCols = 'id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at';
+  // Build dynamic WHERE clauses
+  const selectCols = 'id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, folder_id, created_at, updated_at';
 
-  // Parallelize: list + count + customDomain + monthlyScans + teamMembers
-  const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
-
-  let listPromise: Promise<QRCodeRow[]>;
-  let countPromise: Promise<number>;
+  // Build base ownership condition
+  let ownershipCondition: string;
+  const params: unknown[] = [];
+  let paramIdx = 1;
 
   if (effectiveOrgId) {
-    listPromise = sql`
-      SELECT ${sql.unsafe(selectCols)}
-      FROM qr_codes
-      WHERE organization_id = ${effectiveOrgId}
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    ` as Promise<QRCodeRow[]>;
-    countPromise = sql`
-      SELECT COUNT(*) as count FROM qr_codes WHERE organization_id = ${effectiveOrgId}
-    `.then(r => parseInt(r[0].count as string) || 0);
+    ownershipCondition = `organization_id = $${paramIdx}`;
+    params.push(effectiveOrgId);
+    paramIdx++;
   } else if (isPersonalOnly && authContext?.userId) {
-    listPromise = sql`
-      SELECT ${sql.unsafe(selectCols)}
-      FROM qr_codes
-      WHERE user_id = ${authContext.userId} AND organization_id IS NULL
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    ` as Promise<QRCodeRow[]>;
-    countPromise = sql`
-      SELECT COUNT(*) as count FROM qr_codes WHERE user_id = ${authContext.userId} AND organization_id IS NULL
-    `.then(r => parseInt(r[0].count as string) || 0);
+    ownershipCondition = `user_id = $${paramIdx} AND organization_id IS NULL`;
+    params.push(authContext.userId);
+    paramIdx++;
   } else {
-    listPromise = sql`
-      SELECT ${sql.unsafe(selectCols)}
-      FROM qr_codes
-      WHERE organization_id IS NULL AND user_id IS NULL
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    ` as Promise<QRCodeRow[]>;
-    countPromise = sql`
-      SELECT COUNT(*) as count FROM qr_codes WHERE organization_id IS NULL AND user_id IS NULL
-    `.then(r => parseInt(r[0].count as string) || 0);
+    ownershipCondition = 'organization_id IS NULL AND user_id IS NULL';
   }
+
+  // Add filter conditions
+  const filterConditions: string[] = [ownershipCondition];
+
+  if (statusFilter === 'active') {
+    filterConditions.push('is_active = true');
+  } else if (statusFilter === 'paused') {
+    filterConditions.push('is_active = false');
+  }
+
+  if (folderIdFilter !== undefined) {
+    if (folderIdFilter === 'none') {
+      filterConditions.push('folder_id IS NULL');
+    } else if (folderIdFilter) {
+      filterConditions.push(`folder_id = $${paramIdx}`);
+      params.push(folderIdFilter);
+      paramIdx++;
+    }
+  }
+
+  if (searchFilter && searchFilter.trim().length > 0) {
+    const searchTerm = `%${searchFilter.trim().slice(0, 200)}%`;
+    filterConditions.push(`(name ILIKE $${paramIdx} OR destination_url ILIKE $${paramIdx})`);
+    params.push(searchTerm);
+    paramIdx++;
+  }
+
+  const whereClause = filterConditions.join(' AND ');
+  const orderClause = `ORDER BY ${sortField} ${sortOrder}`;
+
+  // Use raw SQL for dynamic queries
+  const rawSql = sql as unknown as (query: string, params: unknown[]) => Promise<Record<string, unknown>[]>;
+
+  // Parallelize: list + count + status counts + customDomain + monthlyScans + teamMembers
+  const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
+
+  const listPromise = rawSql(
+    `SELECT ${selectCols} FROM qr_codes WHERE ${whereClause} ${orderClause} LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
+    [...params, limit, offset]
+  ) as Promise<QRCodeRow[]>;
+
+  const countPromise = rawSql(
+    `SELECT COUNT(*) as count FROM qr_codes WHERE ${whereClause}`,
+    params
+  ).then(r => parseInt(r[0].count as string) || 0);
+
+  // Status counts — always based on ownership condition only (not other filters)
+  // Build ownership-only params
+  const ownerParams: unknown[] = [];
+  let ownerParamIdx = 1;
+  let ownerCondition: string;
+
+  if (effectiveOrgId) {
+    ownerCondition = `organization_id = $${ownerParamIdx}`;
+    ownerParams.push(effectiveOrgId);
+    ownerParamIdx++;
+  } else if (isPersonalOnly && authContext?.userId) {
+    ownerCondition = `user_id = $${ownerParamIdx} AND organization_id IS NULL`;
+    ownerParams.push(authContext.userId);
+    ownerParamIdx++;
+  } else {
+    ownerCondition = 'organization_id IS NULL AND user_id IS NULL';
+  }
+
+  const countsPromise = rawSql(
+    `SELECT
+      COUNT(*) as total,
+      COUNT(*) FILTER (WHERE is_active = true) as active,
+      COUNT(*) FILTER (WHERE is_active = false) as paused
+    FROM qr_codes WHERE ${ownerCondition}`,
+    ownerParams
+  ).then(r => ({
+    all: parseInt(r[0].total as string) || 0,
+    active: parseInt(r[0].active as string) || 0,
+    paused: parseInt(r[0].paused as string) || 0,
+  }));
 
   // Custom domain lookup (Supabase)
   const domainPromise: Promise<string | null> = effectiveOrgId
@@ -359,10 +423,11 @@ async function handleList(
         .catch(() => 1)
     : Promise.resolve(1);
 
-  // Fire all 5 queries in parallel
-  const [result, total, customDomain, monthlyScans, teamMembers] = await Promise.all([
+  // Fire all 6 queries in parallel
+  const [result, total, counts, customDomain, monthlyScans, teamMembers] = await Promise.all([
     listPromise,
     countPromise,
+    countsPromise,
     domainPromise,
     scansPromise,
     teamPromise,
@@ -387,6 +452,7 @@ async function handleList(
       offset,
       hasMore: offset + limit < total,
     },
+    counts,
     stats: {
       monthlyScans,
       teamMembers,
