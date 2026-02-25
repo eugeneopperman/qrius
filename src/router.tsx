@@ -6,7 +6,7 @@ import { isSupabaseMissing } from '@/lib/supabase';
 import { APP_VERSION } from '@/config/constants';
 import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { KeyboardShortcutsModal } from '@/components/features/KeyboardShortcuts';
-import { HistoryModal } from '@/components/features/History';
+
 import { TemplateWizardModal } from '@/components/templates';
 import { SettingsModal } from '@/components/settings';
 import { ToastContainer } from '@/components/ui/Toast';
@@ -76,7 +76,7 @@ const QRCodesPage = lazy(() => import('@/pages/QRCodesPage'));
 const QRCodeDetailPage = lazy(() => import('@/pages/QRCodeDetailPage'));
 const CreateQRPage = lazy(() => import('@/pages/CreateQRPage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
-const HistoryPage = lazy(() => import('@/pages/HistoryPage'));
+
 const OnboardingPage = lazy(() => import('@/pages/OnboardingPage'));
 const ReaderPage = lazy(() => import('@/pages/ReaderPage'));
 const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
@@ -97,7 +97,7 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {
-  const { isShortcutsOpen, closeShortcuts, isHistoryOpen, closeHistory, isSettingsOpen, closeSettings } = useUIStore();
+  const { isShortcutsOpen, closeShortcuts, isSettingsOpen, closeSettings } = useUIStore();
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
@@ -115,7 +115,6 @@ function RootLayout() {
 
       {/* Global modals */}
       <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={closeShortcuts} />
-      <HistoryModal isOpen={isHistoryOpen} onClose={closeHistory} />
       <TemplateWizardModal />
       <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
       <ToastContainer />
@@ -279,13 +278,6 @@ const createQRRoute = createRoute({
   errorComponent: ErrorPage,
 });
 
-const historyRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/history',
-  beforeLoad: requireAuth,
-  component: HistoryPage,
-  errorComponent: ErrorPage,
-});
 
 const templatesRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -376,7 +368,6 @@ const routeTree = rootRoute.addChildren([
   qrCodesRoute,
   qrCodeDetailRoute,
   createQRRoute,
-  historyRoute,
   templatesRoute,
   onboardingRoute,
   readerRoute,

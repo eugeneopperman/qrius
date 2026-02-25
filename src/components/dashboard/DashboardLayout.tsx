@@ -5,7 +5,7 @@ import {
   LayoutDashboard,
   Plus,
   Settings,
-  Clock,
+
   ScanLine,
   Palette,
   Menu,
@@ -23,7 +23,6 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'QR Codes', href: '/qr-codes', icon: QrCode },
   { name: 'Create', href: '/create', icon: Plus },
-  { name: 'History', href: '/history', icon: Clock },
   { name: 'Templates', href: '/templates', icon: Palette },
   { name: 'Reader', href: '/reader', icon: ScanLine },
   { name: 'Settings', href: '/settings', icon: Settings },

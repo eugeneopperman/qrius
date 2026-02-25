@@ -249,7 +249,6 @@ export const SHORTCUTS = [
   { keys: ['Ctrl', 'C'], description: 'Copy QR code to clipboard' },
   { keys: ['Ctrl', 'D'], description: 'Toggle dark mode' },
   { keys: ['Ctrl', 'R'], description: 'Open QR code reader' },
-  { keys: ['Ctrl', 'H'], description: 'Open history' },
   { keys: ['Ctrl', 'T'], description: 'Open templates' },
   { keys: ['?'], description: 'Show keyboard shortcuts' },
 ] as const;

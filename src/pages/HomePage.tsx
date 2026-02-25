@@ -17,7 +17,7 @@ export default function HomePage() {
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { openWizard } = useTemplateStore();
   const user = useAuthStore((s) => s.user);
-  const { openShortcuts, openHistory, openSettings } = useUIStore();
+  const { openShortcuts, openSettings } = useUIStore();
 
   // Memoized callbacks for keyboard shortcuts to prevent unnecessary re-renders
   const handleDownload = useCallback(() => {
@@ -43,7 +43,6 @@ export default function HomePage() {
     onCopy: handleCopy,
     onToggleDarkMode: toggleTheme,
     onShowHelp: openShortcuts,
-    onOpenHistory: openHistory,
     onOpenTemplates: handleOpenTemplates,
   }), [
     handleDownload,
@@ -51,7 +50,6 @@ export default function HomePage() {
     handleCopy,
     toggleTheme,
     openShortcuts,
-    openHistory,
     handleOpenTemplates,
   ]);
 
@@ -65,7 +63,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen transition-colors">
       <Header
-        onHistoryClick={openHistory}
         onSettingsClick={openSettings}
         onShortcutsClick={openShortcuts}
       />

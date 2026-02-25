@@ -1,5 +1,4 @@
-import { Sun, Moon, Palette, LogIn, MoreVertical, Clock, Settings, Keyboard } from 'lucide-react';
-import { useHistoryStore } from '@/stores/historyStore';
+import { Sun, Moon, Palette, LogIn, MoreVertical, Settings, Keyboard } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useTemplateStore } from '@/stores/templateStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -10,7 +9,6 @@ import { AuthModal } from './auth/AuthModal';
 import { useState, Fragment } from 'react';
 
 interface HeaderProps {
-  onHistoryClick?: () => void;
   onSettingsClick?: () => void;
   onShortcutsClick?: () => void;
 }
@@ -23,7 +21,7 @@ function OverflowMenuItem({
   onClick,
   className,
 }: {
-  icon: typeof Clock;
+  icon: typeof Settings;
   label: string;
   badge?: number;
   kbd?: string;
@@ -51,10 +49,9 @@ function OverflowMenuItem({
   );
 }
 
-export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: HeaderProps) {
+export function Header({ onSettingsClick, onShortcutsClick }: HeaderProps) {
   const { resolvedTheme, toggleTheme } = useThemeStore();
   const isDark = resolvedTheme === 'dark';
-  const historyCount = useHistoryStore((state) => state.entries.length);
   const templateCount = useTemplateStore((state) => state.templates.length);
   const openWizard = useTemplateStore((state) => state.openWizard);
   const user = useAuthStore((s) => s.user);
@@ -118,13 +115,6 @@ export function Header({ onHistoryClick, onSettingsClick, onShortcutsClick }: He
                         onClick={() => { close(); openWizard(); }}
                       />
                     </div>
-
-                    <OverflowMenuItem
-                      icon={Clock}
-                      label="History"
-                      badge={historyCount}
-                      onClick={() => { close(); onHistoryClick?.(); }}
-                    />
 
                     <OverflowMenuItem
                       icon={Settings}

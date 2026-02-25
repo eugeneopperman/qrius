@@ -10,7 +10,6 @@ interface KeyboardCallbacks {
   onToggleDarkMode?: () => void;
   onShowHelp?: () => void;
   onOpenReader?: () => void;
-  onOpenHistory?: () => void;
   onOpenTemplates?: () => void;
 }
 
@@ -100,13 +99,6 @@ export function useKeyboardShortcuts(callbacks: KeyboardCallbacks) {
       if (cmdOrCtrl && e.key.toLowerCase() === 'r') {
         e.preventDefault();
         callbacksRef.current.onOpenReader?.();
-        return;
-      }
-
-      // Ctrl/Cmd + H - Open History
-      if (cmdOrCtrl && e.key.toLowerCase() === 'h') {
-        e.preventDefault();
-        callbacksRef.current.onOpenHistory?.();
         return;
       }
 

@@ -1,7 +1,6 @@
 import { useRef, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { useQRStore } from '@/stores/qrStore';
 import { useShallow } from 'zustand/react/shallow';
-import { useHistoryStore } from '@/stores/historyStore';
 import { Download, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '@/utils/cn';
@@ -31,15 +30,13 @@ interface QRPreviewProps {
 export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActions, displaySize, overrideData }, ref) => {
   const frameContainerRef = useRef<HTMLDivElement>(null);
   const [showFormatMenu, setShowFormatMenu] = useState(false);
-  const { getQRValue, styleOptions, activeType, getCurrentData,
+  const { getQRValue, styleOptions, activeType,
     urlData, textData, emailData, phoneData, smsData, wifiData, vcardData, eventData, locationData,
   } = useQRStore(useShallow((s) => ({
-    getQRValue: s.getQRValue, styleOptions: s.styleOptions, activeType: s.activeType, getCurrentData: s.getCurrentData,
+    getQRValue: s.getQRValue, styleOptions: s.styleOptions, activeType: s.activeType,
     urlData: s.urlData, textData: s.textData, emailData: s.emailData, phoneData: s.phoneData,
     smsData: s.smsData, wifiData: s.wifiData, vcardData: s.vcardData, eventData: s.eventData, locationData: s.locationData,
   })));
-  const { addEntry, updateThumbnail } = useHistoryStore();
-
   const qrValue = getQRValue();
 
   // Check raw store data — getQRValue() returns fallback placeholders so it's always non-empty
@@ -82,49 +79,6 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
     qrPattern: styleOptions.qrPattern,
   });
 
-  // Save to history with thumbnail
-  const saveToHistory = useCallback(async () => {
-    const currentData = getCurrentData();
-
-    // Extract tracking info if this is a URL type with tracking enabled
-    let trackingId: string | undefined;
-    let trackingShortCode: string | undefined;
-    if (currentData.type === 'url' && currentData.data.trackingEnabled && currentData.data.trackingId) {
-      trackingId = currentData.data.trackingId;
-      trackingShortCode = currentData.data.trackingShortCode;
-    }
-
-    // Add entry first (without thumbnail for speed)
-    addEntry({
-      type: activeType,
-      data: currentData,
-      styleOptions: { ...styleOptions },
-      qrValue,
-      trackingId,
-      trackingShortCode,
-    });
-
-    // Generate thumbnail asynchronously
-    if (qrCodeRef.current) {
-      try {
-        const rawData = await qrCodeRef.current.getRawData('png');
-        if (rawData && rawData instanceof Blob) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64 = reader.result as string;
-            const entries = useHistoryStore.getState().entries;
-            if (entries.length > 0) {
-              updateThumbnail(entries[0].id, base64);
-            }
-          };
-          reader.readAsDataURL(rawData);
-        }
-      } catch {
-        // Thumbnail generation is non-critical; history entry saved regardless
-      }
-    }
-  }, [activeType, getCurrentData, styleOptions, qrValue, addEntry, updateThumbnail, qrCodeRef]);
-
   const frameStyle = styleOptions.frameStyle || 'none';
   const hasFrame = frameStyle !== 'none';
 
@@ -137,7 +91,6 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
     styleOptions,
     processedLogoUrl,
     hasFrame,
-    onSuccess: saveToHistory,
   });
 
   // Wrap handlers to close menu after action
