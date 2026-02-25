@@ -76,7 +76,7 @@ export function useQRCodeFolders() {
       if (!session?.access_token) throw new Error('Not authenticated');
 
       const { id, ...body } = params;
-      const response = await fetch(`/api/folders/${id}`, {
+      const response = await fetch(`/api/folders?id=${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ export function useQRCodeFolders() {
       const session = await getSession();
       if (!session?.access_token) throw new Error('Not authenticated');
 
-      const response = await fetch(`/api/folders/${id}`, {
+      const response = await fetch(`/api/folders?id=${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       });

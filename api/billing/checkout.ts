@@ -1,4 +1,5 @@
 // POST /api/billing/checkout - Create Stripe checkout session
+// POST /api/billing/checkout?action=portal - Create Stripe customer portal session
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
@@ -42,6 +43,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Only owners and admins can manage billing
     await requireRole(user.id, organizationId, ['owner', 'admin']);
+
+    // Route portal requests
+    if (req.query.action === 'portal') {
+      return await handlePortal(req, res, user, organizationId);
+    }
 
     const body = req.body as CheckoutRequest;
 
@@ -136,4 +142,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     logger.billing.error('Checkout error', { error: String(error) });
     return res.status(500).json({ error: 'Failed to create checkout session' });
   }
+}
+
+async function handlePortal(
+  req: VercelRequest,
+  res: VercelResponse,
+  _user: { id: string; email: string },
+  organizationId: string
+) {
+  const body = req.body as { returnUrl?: string };
+
+  // Validate returnUrl if provided
+  if (body.returnUrl && !isValidHttpUrl(body.returnUrl)) {
+    return res.status(400).json({ error: 'returnUrl must be a valid http or https URL' });
+  }
+
+  // Get organization's Stripe customer ID
+  const { data: org, error: orgError } = await supabaseAdmin
+    .from('organizations')
+    .select('stripe_customer_id')
+    .eq('id', organizationId)
+    .single();
+
+  if (orgError || !org || !org.stripe_customer_id) {
+    return res.status(400).json({ error: 'No billing account found' });
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`;
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: org.stripe_customer_id,
+    return_url: body.returnUrl || `${baseUrl}/settings/billing`,
+  });
+
+  return res.status(200).json({ url: session.url });
 }

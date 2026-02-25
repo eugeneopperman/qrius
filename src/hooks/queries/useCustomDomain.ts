@@ -50,7 +50,7 @@ async function addCustomDomain(params: AddDomainParams): Promise<AddDomainRespon
 
 async function verifyCustomDomain(): Promise<{ domain: CustomDomain }> {
   const headers = await getAuthHeaders();
-  const res = await fetch('/api/domains/verify', {
+  const res = await fetch('/api/domains?action=verify', {
     method: 'POST',
     headers,
   });

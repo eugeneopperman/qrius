@@ -172,7 +172,7 @@ export function BillingSettingsContent() {
         return;
       }
 
-      const response = await fetch('/api/billing/portal', {
+      const response = await fetch('/api/billing/checkout?action=portal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 // POST /api/qr-codes - Create a new trackable QR code
 // GET /api/qr-codes - List all QR codes
+// PATCH /api/qr-codes?action=bulk - Bulk update QR codes
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, toQRCodeResponse, type QRCodeRow } from '../_lib/db.js';
@@ -8,6 +9,7 @@ import { setCachedRedirect } from '../_lib/kv.js';
 import { logger } from '../_lib/logger.js';
 import {
   authenticate,
+  requireAuth,
   getUserOrganization,
   checkPlanLimit,
   getOrgCustomDomain,
@@ -17,7 +19,7 @@ import {
 } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { checkRateLimit, setRateLimitHeaders } from '../_lib/rateLimit.js';
-import { isValidHttpUrl, validateOptionalString, validateStringArray } from '../_lib/validate.js';
+import { isValidHttpUrl, isValidUUID, validateOptionalString, validateStringArray } from '../_lib/validate.js';
 
 interface CreateQRCodeRequest {
   destination_url: string;
@@ -79,6 +81,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'GET') {
       return await handleList(req, res, baseUrl, authContext);
+    }
+
+    if (req.method === 'PATCH' && req.query.action === 'bulk') {
+      return await handleBulk(req, res, authContext);
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
@@ -363,7 +369,7 @@ async function handleList(
   const listPromise = rawSql(
     `SELECT ${selectCols} FROM qr_codes WHERE ${whereClause} ${orderClause} LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
     [...params, limit, offset]
-  ) as Promise<QRCodeRow[]>;
+  ) as unknown as Promise<QRCodeRow[]>;
 
   const countPromise = rawSql(
     `SELECT COUNT(*) as count FROM qr_codes WHERE ${whereClause}`,
@@ -415,12 +421,13 @@ async function handleList(
 
   // Team member count (Supabase) — included so frontend doesn't need a separate call
   const teamPromise: Promise<number> = effectiveOrgId
-    ? getSupabaseAdmin()
-        .from('organization_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', effectiveOrgId)
-        .then(({ count }) => count || 1)
-        .catch(() => 1)
+    ? Promise.resolve(
+        getSupabaseAdmin()
+          .from('organization_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', effectiveOrgId)
+      ).then(({ count }) => count || 1)
+       .catch(() => 1)
     : Promise.resolve(1);
 
   // Fire all 6 queries in parallel
@@ -458,4 +465,85 @@ async function handleList(
       teamMembers,
     },
   });
+}
+
+async function handleBulk(
+  req: VercelRequest,
+  res: VercelResponse,
+  authContext: { userId?: string; organizationId?: string; apiKeyId?: string } | null
+) {
+  if (!sql) return res.status(500).json({ error: 'Database not configured' });
+
+  // Bulk requires auth
+  if (!authContext?.userId) {
+    const user = await requireAuth(req);
+    authContext = { userId: user.id };
+  }
+
+  const { organizationId } = await getUserOrganization(authContext.userId!);
+
+  const body = req.body as {
+    ids?: string[];
+    folder_id?: string | null;
+    is_active?: boolean;
+  };
+
+  // Validate ids
+  if (!Array.isArray(body.ids) || body.ids.length === 0) {
+    return res.status(400).json({ error: 'ids must be a non-empty array' });
+  }
+  if (body.ids.length > 100) {
+    return res.status(400).json({ error: 'Maximum 100 IDs per bulk operation' });
+  }
+  for (const id of body.ids) {
+    if (typeof id !== 'string' || !isValidUUID(id)) {
+      return res.status(400).json({ error: `Invalid ID: ${id}` });
+    }
+  }
+
+  // Validate fields
+  if (body.folder_id === undefined && body.is_active === undefined) {
+    return res.status(400).json({ error: 'Provide at least one of: folder_id, is_active' });
+  }
+
+  if (body.folder_id !== undefined && body.folder_id !== null) {
+    if (typeof body.folder_id !== 'string' || !isValidUUID(body.folder_id)) {
+      return res.status(400).json({ error: 'folder_id must be a valid UUID or null' });
+    }
+  }
+
+  if (body.is_active !== undefined && typeof body.is_active !== 'boolean') {
+    return res.status(400).json({ error: 'is_active must be a boolean' });
+  }
+
+  // Build dynamic SET clause
+  const setClauses: string[] = [];
+  const params: unknown[] = [organizationId, body.ids];
+  let paramIdx = 3;
+
+  if (body.folder_id !== undefined) {
+    setClauses.push(`folder_id = $${paramIdx}`);
+    params.push(body.folder_id);
+    paramIdx++;
+  }
+  if (body.is_active !== undefined) {
+    setClauses.push(`is_active = $${paramIdx}`);
+    params.push(body.is_active);
+    paramIdx++;
+  }
+  setClauses.push('updated_at = NOW()');
+
+  const rawSql = sql as unknown as (query: string, params: unknown[]) => Promise<Record<string, unknown>[]>;
+  const result = await rawSql(
+    `UPDATE qr_codes SET ${setClauses.join(', ')} WHERE organization_id = $1 AND id = ANY($2) RETURNING id`,
+    params
+  );
+
+  logger.qrCodes.info('Bulk update', {
+    orgId: organizationId,
+    count: result.length,
+    fields: Object.keys(body).filter(k => k !== 'ids'),
+  });
+
+  return res.status(200).json({ updated: result.length });
 }
