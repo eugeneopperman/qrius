@@ -314,17 +314,18 @@ CREATE POLICY plan_limits_select ON plan_limits
     FOR SELECT USING (true);
 
 -- Users: can read own profile, admins can read all
+-- Note: (select auth.uid()) wrapping evaluates once per query (InitPlan) instead of per row
 DROP POLICY IF EXISTS users_select_own ON users;
 CREATE POLICY users_select_own ON users
-    FOR SELECT USING (auth.uid() = id);
+    FOR SELECT USING (id = (select auth.uid()));
 
 DROP POLICY IF EXISTS users_insert_own ON users;
 CREATE POLICY users_insert_own ON users
-    FOR INSERT WITH CHECK (auth.uid() = id);
+    FOR INSERT WITH CHECK (id = (select auth.uid()));
 
 DROP POLICY IF EXISTS users_update_own ON users;
 CREATE POLICY users_update_own ON users
-    FOR UPDATE USING (auth.uid() = id);
+    FOR UPDATE USING (id = (select auth.uid()));
 
 -- Organizations: members can read their orgs
 DROP POLICY IF EXISTS organizations_select ON organizations;
@@ -333,14 +334,14 @@ CREATE POLICY organizations_select ON organizations
         EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = organizations.id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
         )
     );
 
 DROP POLICY IF EXISTS organizations_insert ON organizations;
 CREATE POLICY organizations_insert ON organizations
     FOR INSERT WITH CHECK (
-        auth.uid() IS NOT NULL
+        (select auth.uid()) IS NOT NULL
         AND plan = 'free'
     );
 
@@ -350,7 +351,7 @@ CREATE POLICY organizations_update ON organizations
         EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = organizations.id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
             AND role IN ('owner', 'admin')
         )
     );
@@ -362,7 +363,7 @@ CREATE POLICY org_members_select ON organization_members
         EXISTS (
             SELECT 1 FROM organization_members om
             WHERE om.organization_id = organization_members.organization_id
-            AND om.user_id = auth.uid()
+            AND om.user_id = (select auth.uid())
         )
     );
 
@@ -370,11 +371,11 @@ DROP POLICY IF EXISTS org_members_insert ON organization_members;
 CREATE POLICY org_members_insert ON organization_members
     FOR INSERT WITH CHECK (
         -- Allow self-provisioning (user adding themselves)
-        user_id = auth.uid()
+        user_id = (select auth.uid())
         OR EXISTS (
             SELECT 1 FROM organization_members om
             WHERE om.organization_id = organization_members.organization_id
-            AND om.user_id = auth.uid()
+            AND om.user_id = (select auth.uid())
             AND om.role IN ('owner', 'admin')
         )
     );
@@ -383,22 +384,22 @@ CREATE POLICY org_members_insert ON organization_members
 DROP POLICY IF EXISTS qr_codes_select ON qr_codes;
 CREATE POLICY qr_codes_select ON qr_codes
     FOR SELECT USING (
-        user_id = auth.uid()
+        user_id = (select auth.uid())
         OR EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = qr_codes.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
         )
     );
 
 DROP POLICY IF EXISTS qr_codes_insert ON qr_codes;
 CREATE POLICY qr_codes_insert ON qr_codes
     FOR INSERT WITH CHECK (
-        user_id = auth.uid()
+        user_id = (select auth.uid())
         OR EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = qr_codes.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
             AND role IN ('owner', 'admin', 'editor')
         )
     );
@@ -406,11 +407,11 @@ CREATE POLICY qr_codes_insert ON qr_codes
 DROP POLICY IF EXISTS qr_codes_update ON qr_codes;
 CREATE POLICY qr_codes_update ON qr_codes
     FOR UPDATE USING (
-        user_id = auth.uid()
+        user_id = (select auth.uid())
         OR EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = qr_codes.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
             AND role IN ('owner', 'admin', 'editor')
         )
     );
@@ -418,11 +419,11 @@ CREATE POLICY qr_codes_update ON qr_codes
 DROP POLICY IF EXISTS qr_codes_delete ON qr_codes;
 CREATE POLICY qr_codes_delete ON qr_codes
     FOR DELETE USING (
-        user_id = auth.uid()
+        user_id = (select auth.uid())
         OR EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = qr_codes.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
             AND role IN ('owner', 'admin')
         )
     );
@@ -435,11 +436,11 @@ CREATE POLICY scan_events_select ON scan_events
             SELECT 1 FROM qr_codes qr
             WHERE qr.id = scan_events.qr_code_id
             AND (
-                qr.user_id = auth.uid()
+                qr.user_id = (select auth.uid())
                 OR EXISTS (
                     SELECT 1 FROM organization_members
                     WHERE organization_id = qr.organization_id
-                    AND user_id = auth.uid()
+                    AND user_id = (select auth.uid())
                 )
             )
         )
@@ -452,7 +453,7 @@ CREATE POLICY api_keys_select ON api_keys
         EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = api_keys.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
             AND role IN ('owner', 'admin')
         )
     );
@@ -463,7 +464,7 @@ CREATE POLICY api_keys_insert ON api_keys
         EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = api_keys.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
             AND role IN ('owner', 'admin')
         )
     );
@@ -474,7 +475,7 @@ CREATE POLICY api_keys_delete ON api_keys
         EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = api_keys.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
             AND role IN ('owner', 'admin')
         )
     );
@@ -486,7 +487,7 @@ CREATE POLICY subscriptions_select ON subscriptions
         EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = subscriptions.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
         )
     );
 
@@ -497,7 +498,7 @@ CREATE POLICY usage_records_select ON usage_records
         EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = usage_records.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
         )
     );
 
@@ -505,11 +506,11 @@ CREATE POLICY usage_records_select ON usage_records
 DROP POLICY IF EXISTS invitations_select ON organization_invitations;
 CREATE POLICY invitations_select ON organization_invitations
     FOR SELECT USING (
-        email = (SELECT email FROM users WHERE id = auth.uid())
+        email = (SELECT email FROM public.users WHERE id = (select auth.uid()))
         OR EXISTS (
             SELECT 1 FROM organization_members
             WHERE organization_id = organization_invitations.organization_id
-            AND user_id = auth.uid()
+            AND user_id = (select auth.uid())
             AND role IN ('owner', 'admin')
         )
     );

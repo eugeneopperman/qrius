@@ -26,12 +26,14 @@ CREATE INDEX IF NOT EXISTS idx_custom_domains_status ON custom_domains(status);
 -- RLS policies
 ALTER TABLE custom_domains ENABLE ROW LEVEL SECURITY;
 
+-- Note: service_role bypasses RLS entirely, so no separate service_role policy needed.
+-- All auth.uid() wrapped in (select auth.uid()) for InitPlan optimization.
 DROP POLICY IF EXISTS "custom_domains_select_members" ON custom_domains;
 CREATE POLICY "custom_domains_select_members" ON custom_domains
     FOR SELECT USING (
         organization_id IN (
-            SELECT organization_id FROM organization_members
-            WHERE user_id = auth.uid()
+            SELECT organization_id FROM public.organization_members
+            WHERE user_id = (select auth.uid())
         )
     );
 
@@ -39,8 +41,8 @@ DROP POLICY IF EXISTS "custom_domains_insert_admin" ON custom_domains;
 CREATE POLICY "custom_domains_insert_admin" ON custom_domains
     FOR INSERT WITH CHECK (
         organization_id IN (
-            SELECT organization_id FROM organization_members
-            WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
+            SELECT organization_id FROM public.organization_members
+            WHERE user_id = (select auth.uid()) AND role IN ('owner', 'admin')
         )
     );
 
@@ -48,8 +50,8 @@ DROP POLICY IF EXISTS "custom_domains_update_admin" ON custom_domains;
 CREATE POLICY "custom_domains_update_admin" ON custom_domains
     FOR UPDATE USING (
         organization_id IN (
-            SELECT organization_id FROM organization_members
-            WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
+            SELECT organization_id FROM public.organization_members
+            WHERE user_id = (select auth.uid()) AND role IN ('owner', 'admin')
         )
     );
 
@@ -57,12 +59,10 @@ DROP POLICY IF EXISTS "custom_domains_delete_admin" ON custom_domains;
 CREATE POLICY "custom_domains_delete_admin" ON custom_domains
     FOR DELETE USING (
         organization_id IN (
-            SELECT organization_id FROM organization_members
-            WHERE user_id = auth.uid() AND role IN ('owner', 'admin')
+            SELECT organization_id FROM public.organization_members
+            WHERE user_id = (select auth.uid()) AND role IN ('owner', 'admin')
         )
     );
 
--- Allow service role full access (for API routes)
+-- Remove the redundant service_role policy — service_role bypasses RLS automatically
 DROP POLICY IF EXISTS "custom_domains_service_role" ON custom_domains;
-CREATE POLICY "custom_domains_service_role" ON custom_domains
-    FOR ALL USING (auth.role() = 'service_role');
