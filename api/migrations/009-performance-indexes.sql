@@ -6,9 +6,7 @@
 CREATE INDEX IF NOT EXISTS idx_qr_codes_org_active
   ON qr_codes(organization_id, is_active);
 
--- Composite index for QR codes filtered by org + folder
-CREATE INDEX IF NOT EXISTS idx_qr_codes_org_folder
-  ON qr_codes(organization_id, folder_id);
+-- NOTE: idx_qr_codes_org_folder skipped — folder_id only exists in Neon, not Supabase
 
 -- Composite index for subscription lookups by org + status
 CREATE INDEX IF NOT EXISTS idx_subscriptions_org_status
