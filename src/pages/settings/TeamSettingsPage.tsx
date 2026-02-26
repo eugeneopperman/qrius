@@ -43,7 +43,7 @@ export function TeamSettingsContent() {
     <div className="max-w-4xl">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team</h1>
             <p className="text-gray-500 dark:text-gray-400">
@@ -137,7 +137,7 @@ export function TeamSettingsContent() {
                   </span>
 
                   {canManageTeam && member.role !== 'owner' && member.user_id !== user?.id && (
-                    <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg">
+                    <button className="btn-icon">
                       <MoreVertical className="w-4 h-4 text-gray-400" />
                     </button>
                   )}

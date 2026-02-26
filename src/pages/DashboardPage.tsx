@@ -142,7 +142,7 @@ export default function DashboardPage() {
             </h2>
             <Link
               to="/qr-codes"
-              className="text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 flex items-center gap-1"
+              className="text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 flex items-center gap-1 py-2"
             >
               View all
               <ArrowRight className="w-4 h-4" />

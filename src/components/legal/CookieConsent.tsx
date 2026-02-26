@@ -126,7 +126,7 @@ export function CookieConsent() {
                 </div>
 
                 {/* Analytics cookies */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between min-h-[44px]">
                   <div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
                       Analytics Cookies
@@ -137,7 +137,7 @@ export function CookieConsent() {
                   </div>
                   <button
                     onClick={() => setAnalyticsEnabled(!analyticsEnabled)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
                       analyticsEnabled
                         ? 'bg-orange-500'
                         : 'bg-gray-300 dark:bg-gray-700'

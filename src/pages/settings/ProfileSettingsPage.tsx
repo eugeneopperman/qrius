@@ -285,7 +285,7 @@ function SecurityCard({
               <button
                 type="button"
                 onClick={() => setShowChangePassword(true)}
-                className="text-sm text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1"
+                className="text-sm text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 py-2"
               >
                 Change password <ArrowRight className="w-3.5 h-3.5" />
               </button>
@@ -678,7 +678,7 @@ export function ProfileSettingsContent() {
               maxLength={200}
             />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
                 label="City"
                 type="text"
@@ -717,7 +717,7 @@ export function ProfileSettingsContent() {
 
         {/* Save button */}
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSaving}>
+          <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
             {isSaving ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />

@@ -82,9 +82,10 @@ export function QRCodeFilterBar({
       : selectedFolder?.name || 'Folder';
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      {/* Status tabs */}
-      <div className="flex items-center gap-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.03] p-1">
+    <div className="space-y-3 lg:space-y-0 lg:flex lg:flex-wrap lg:items-center lg:gap-3">
+      {/* Row 1: Status tabs + folder dropdown */}
+      <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.03] p-1 flex-shrink-0">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.key}
@@ -174,9 +175,12 @@ export function QRCodeFilterBar({
           </div>
         )}
       </Dropdown>
+      </div>
 
+      {/* Row 2: Search + sort + create */}
+      <div className="flex items-center gap-3">
       {/* Search */}
-      <div className="flex-1 min-w-[180px] max-w-xs">
+      <div className="flex-1 min-w-0">
         <Input
           placeholder="Search QR codes..."
           value={localSearch}
@@ -229,12 +233,13 @@ export function QRCodeFilterBar({
       </Dropdown>
 
       {/* Create button */}
-      <Link to="/create">
+      <Link to="/create" className="flex-shrink-0">
         <Button variant="primary" size="sm">
-          <Plus className="w-4 h-4 mr-1.5" />
-          Create QR Code
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline ml-1.5">Create QR Code</span>
         </Button>
       </Link>
+      </div>
     </div>
   );
 }

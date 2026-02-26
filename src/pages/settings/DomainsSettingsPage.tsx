@@ -194,7 +194,7 @@ export function DomainsSettingsContent() {
                     </div>
                     <button
                       onClick={() => handleCopyCname(`${domain.domain} CNAME ${domain.cname_target}`)}
-                      className="flex-shrink-0 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      className="flex-shrink-0 btn-icon text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                       title="Copy CNAME record"
                     >
                       <Copy className="w-4 h-4" />

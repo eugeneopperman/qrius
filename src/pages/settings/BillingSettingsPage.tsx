@@ -211,7 +211,7 @@ export function BillingSettingsContent() {
 
       {/* Current subscription */}
       <div className="glass rounded-2xl p-6 mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="section-title">
               Current Plan
@@ -244,7 +244,7 @@ export function BillingSettingsContent() {
           role="switch"
           aria-checked={isAnnual}
           onClick={() => setIsAnnual(!isAnnual)}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
             isAnnual ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'
           }`}
         >

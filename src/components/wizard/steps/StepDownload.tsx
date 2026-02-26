@@ -179,7 +179,7 @@ export function StepDownload({ autosave }: StepDownloadProps) {
       </div>
 
       {/* Large QR Preview */}
-      <div className="card mb-6 p-8">
+      <div className="card mb-6 p-4 sm:p-8">
         <div className="max-w-[300px] mx-auto">
           <QRPreview
             ref={qrPreviewRef}

@@ -99,7 +99,7 @@ export default function OnboardingPage() {
         </div>
         <button
           onClick={handleSkip}
-          className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 py-2 px-3"
         >
           Skip
         </button>

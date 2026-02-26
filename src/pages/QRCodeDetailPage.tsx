@@ -239,7 +239,7 @@ export default function QRCodeDetailPage() {
             Back to QR Codes
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Active/Inactive badge */}
             {qrCode.is_active ? (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
@@ -390,7 +390,7 @@ export default function QRCodeDetailPage() {
                       )}
                       <button
                         onClick={startEditUrl}
-                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
+                        className="btn-icon text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
                         title="Edit destination"
                       >
                         <Pencil className="w-4 h-4" />
@@ -403,12 +403,12 @@ export default function QRCodeDetailPage() {
                   <label className="text-sm text-gray-500 dark:text-gray-400">
                     Tracking URL
                   </label>
-                  <p className="font-medium text-gray-900 dark:text-white font-mono text-sm">
+                  <p className="font-medium text-gray-900 dark:text-white font-mono text-sm break-all">
                     {trackingUrl}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                   <div>
                     <label className="text-sm text-gray-500 dark:text-gray-400">Type</label>
                     <p className="font-medium text-gray-900 dark:text-white capitalize">

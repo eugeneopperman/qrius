@@ -56,7 +56,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+              className="lg:hidden btn-icon"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -70,7 +70,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center gap-3.5 px-3 py-2 rounded-lg text-[15px] transition-colors ${
+                  className={`flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-[15px] transition-colors ${
                     isActive
                       ? 'bg-orange-500/10 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400 font-medium'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 font-normal'
@@ -103,18 +103,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Mobile menu button */}
-        <div className="lg:hidden sticky top-0 z-30 p-3">
+        <div className="lg:hidden sticky top-0 z-30 p-3 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+            className="btn-icon"
           >
             <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
+          <Link to="/dashboard"><Logo size="sm" /></Link>
         </div>
 
         {/* Page content */}
         <main className="p-4 lg:p-6">
-          <div className="glass-panel rounded-3xl p-6 lg:p-8 min-h-[calc(100vh-5rem)]">
+          <div className="glass-panel rounded-3xl p-3 sm:p-6 lg:p-8 min-h-[calc(100vh-5rem)]">
             {children}
           </div>
         </main>

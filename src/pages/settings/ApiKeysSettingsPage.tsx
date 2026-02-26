@@ -85,7 +85,7 @@ export function ApiKeysSettingsContent() {
     <div className="max-w-4xl">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys</h1>
             <p className="text-gray-500 dark:text-gray-400">
@@ -168,10 +168,10 @@ export function ApiKeysSettingsContent() {
           <div className="divide-y divide-divider">
             {apiKeys.map((key) => (
               <div key={key.id} className="p-4 hover:bg-black/5 dark:hover:bg-white/5">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="min-w-0">
                     <p className="font-medium text-gray-900 dark:text-white">{key.name}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-mono truncate">
                       {key.key_prefix}...
                     </p>
                   </div>

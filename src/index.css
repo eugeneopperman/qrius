@@ -302,9 +302,16 @@
 
   /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 font-medium transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 min-h-[2.75rem];
     @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Icon-only button — 44px tap target */
+  .btn-icon {
+    @apply inline-flex items-center justify-center rounded-lg transition-colors min-h-[2.75rem] min-w-[2.75rem];
+    @apply hover:bg-black/5 dark:hover:bg-white/5;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400;
   }
 
   .btn-primary {
@@ -354,13 +361,20 @@
 
   /* Input Fields */
   .input {
-    @apply w-full rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200;
+    @apply w-full rounded-2xl px-4 py-3 font-medium transition-all duration-200;
     @apply placeholder:text-gray-400 dark:placeholder:text-gray-500;
     @apply focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400;
+    font-size: 1rem; /* 16px prevents iOS auto-zoom on focus */
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  @media (min-width: 640px) {
+    .input {
+      font-size: 0.875rem; /* 14px on desktop */
+    }
   }
 
   .dark .input {
@@ -378,7 +392,8 @@
 
   /* Card Component — now uses glass light tier */
   .card {
-    @apply rounded-3xl p-6 transition-all duration-200;
+    @apply rounded-3xl transition-all duration-200;
+    padding: 1rem;
     background: var(--glass-bg);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
     backdrop-filter: blur(12px) saturate(180%);
@@ -403,6 +418,12 @@
     box-shadow:
       var(--glass-shadow-inset),
       0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  @media (min-width: 640px) {
+    .card {
+      padding: 1.5rem;
+    }
   }
 
   /* Section Title — wide-tracked uppercase label */

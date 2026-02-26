@@ -179,7 +179,7 @@ export const QRCodeRow = memo(function QRCodeRow({
       <div className="flex items-center gap-1 flex-shrink-0">
         <button
           onClick={handleDownload}
-          className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors"
+          className="btn-icon text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           title="Download"
         >
           <Download className="w-4 h-4" />
@@ -190,7 +190,7 @@ export const QRCodeRow = memo(function QRCodeRow({
           trigger={({ toggle }) => (
             <button
               onClick={toggle}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors"
+              className="btn-icon text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               title="More actions"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -201,14 +201,14 @@ export const QRCodeRow = memo(function QRCodeRow({
             <div className="min-w-[180px] py-1">
               <button
                 onClick={() => { onEditUrl(qr); close(); }}
-                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
+                className="w-full px-3 py-2.5 min-h-[44px] text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 Edit URL
               </button>
               <button
                 onClick={() => { onToggleActive(qr); close(); }}
-                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
+                className="w-full px-3 py-2.5 min-h-[44px] text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
               >
                 {qr.is_active ? (
                   <><Pause className="w-3.5 h-3.5" /> Pause</>
@@ -223,7 +223,7 @@ export const QRCodeRow = memo(function QRCodeRow({
                 trigger={({ toggle: toggleSub }) => (
                   <button
                     onClick={toggleSub}
-                    className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
+                    className="w-full px-3 py-2.5 min-h-[44px] text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
                   >
                     <FolderInput className="w-3.5 h-3.5" />
                     Move to Folder
@@ -234,7 +234,7 @@ export const QRCodeRow = memo(function QRCodeRow({
                   <div className="min-w-[160px] py-1">
                     <button
                       onClick={() => { onMoveToFolder(qr, null); closeSub(); close(); }}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
+                      className="w-full px-3 py-2.5 min-h-[44px] text-left text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
                     >
                       None (Unfiled)
                     </button>
@@ -242,7 +242,7 @@ export const QRCodeRow = memo(function QRCodeRow({
                       <button
                         key={f.id}
                         onClick={() => { onMoveToFolder(qr, f.id); closeSub(); close(); }}
-                        className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
+                        className="w-full px-3 py-2.5 min-h-[44px] text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
                       >
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: f.color }} />
                         {f.name}
@@ -258,14 +258,14 @@ export const QRCodeRow = memo(function QRCodeRow({
                 to="/qr-codes/$id"
                 params={{ id: qr.id }}
                 onClick={() => close()}
-                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
+                className="w-full px-3 py-2.5 min-h-[44px] text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
               >
                 <BarChart3 className="w-3.5 h-3.5" />
                 View Analytics
               </Link>
               <button
                 onClick={() => { handleCopyLink(); close(); }}
-                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
+                className="w-full px-3 py-2.5 min-h-[44px] text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-gray-700 dark:text-gray-300"
               >
                 <Copy className="w-3.5 h-3.5" />
                 Copy Tracking URL
@@ -275,7 +275,7 @@ export const QRCodeRow = memo(function QRCodeRow({
 
               <button
                 onClick={() => { onDelete(qr); close(); }}
-                className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-red-600 dark:text-red-400"
+                className="w-full px-3 py-2.5 min-h-[44px] text-left text-sm flex items-center gap-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors text-red-600 dark:text-red-400"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Delete

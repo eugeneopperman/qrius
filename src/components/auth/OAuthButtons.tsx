@@ -48,7 +48,7 @@ export function OAuthButtons({ onOAuthSignIn, disabled }: OAuthButtonsProps) {
           <div className="w-full border-t border-gray-200 dark:border-gray-700" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white dark:bg-gray-900 text-gray-500">
+          <span className="px-2 bg-[var(--color-bg)] text-gray-500">
             Or continue with
           </span>
         </div>

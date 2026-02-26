@@ -64,7 +64,7 @@ function HorizontalBar({
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-700 dark:text-gray-300 w-32 truncate flex-shrink-0">
+      <span className="text-sm text-gray-700 dark:text-gray-300 w-20 sm:w-32 truncate flex-shrink-0">
         {label}
       </span>
       <div className="flex-1 h-6 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">

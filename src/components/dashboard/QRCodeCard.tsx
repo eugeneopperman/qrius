@@ -85,7 +85,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
             trigger={({ toggle }) => (
               <button
                 onClick={toggle}
-                className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5"
+                className="btn-icon"
                 aria-label="QR code actions"
               >
                 <MoreVertical className="w-5 h-5 text-gray-400" />
@@ -98,7 +98,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                   to="/qr-codes/$id"
                   params={{ id: qrCode.id }}
                   onClick={close}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
+                  className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <BarChart2 className="w-4 h-4" />
                   View Analytics
@@ -107,14 +107,14 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                   href={qrCode.destination_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
+                  className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open URL
                 </a>
                 <button
                   onClick={() => handleCopyUrl(close)}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
+                  className="w-full flex items-center gap-2 px-4 py-2.5 min-h-[44px] text-sm text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <Copy className="w-4 h-4" />
                   Copy Tracking URL
@@ -122,7 +122,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
                 <hr className="my-1 border-divider" />
                 <button
                   onClick={() => handleDelete(close)}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="w-full flex items-center gap-2 px-4 py-2.5 min-h-[44px] text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete

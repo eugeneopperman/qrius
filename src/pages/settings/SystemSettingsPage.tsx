@@ -39,7 +39,7 @@ export function SystemSettingsContent() {
           <Save className="w-5 h-5 inline-block mr-2 -mt-0.5" />
           QR Code Autosave
         </h2>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between min-h-[44px]">
           <div>
             <p className="text-sm font-medium text-gray-900 dark:text-white">Auto-save drafts</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -51,7 +51,7 @@ export function SystemSettingsContent() {
             aria-checked={autosaveEnabled}
             onClick={() => setAutosaveEnabled(!autosaveEnabled)}
             className={cn(
-              'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2',
+              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2',
               autosaveEnabled ? 'bg-orange-500' : 'bg-gray-200 dark:bg-gray-700'
             )}
           >

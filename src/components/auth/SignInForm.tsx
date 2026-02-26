@@ -92,7 +92,7 @@ export function SignInForm({ onForgotPassword, onSignUp, redirectTo }: SignInFor
           <button
             type="button"
             onClick={onForgotPassword}
-            className="text-sm text-orange-600 hover:text-orange-500 dark:text-orange-400"
+            className="text-sm text-orange-600 hover:text-orange-500 dark:text-orange-400 py-2"
           >
             Forgot password?
           </button>
@@ -123,7 +123,7 @@ export function SignInForm({ onForgotPassword, onSignUp, redirectTo }: SignInFor
         <button
           type="button"
           onClick={onSignUp}
-          className="font-medium text-orange-600 hover:text-orange-500 dark:text-orange-400"
+          className="font-medium text-orange-600 hover:text-orange-500 dark:text-orange-400 py-1"
         >
           Sign up
         </button>

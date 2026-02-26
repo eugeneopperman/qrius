@@ -53,6 +53,25 @@ export function TabList({ children, className }: TabListProps) {
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
+  const [showLeftFade, setShowLeftFade] = useState(false);
+  const [showRightFade, setShowRightFade] = useState(false);
+
+  // Check overflow and update fade hints
+  const updateFades = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    setShowLeftFade(container.scrollLeft > 4);
+    setShowRightFade(container.scrollLeft + container.clientWidth < container.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    updateFades();
+    const container = containerRef.current;
+    if (!container) return;
+    const ro = new ResizeObserver(updateFades);
+    ro.observe(container);
+    return () => ro.disconnect();
+  }, [updateFades]);
 
   // Update indicator position
   useEffect(() => {
@@ -122,9 +141,24 @@ export function TabList({ children, className }: TabListProps) {
 
   return (
     <div className="relative">
+      {/* Left fade hint */}
+      <div
+        className={cn(
+          'absolute left-0 top-0 bottom-0 w-6 z-10 pointer-events-none bg-gradient-to-r from-[var(--color-bg)] to-transparent transition-opacity duration-200',
+          showLeftFade ? 'opacity-100' : 'opacity-0'
+        )}
+      />
+      {/* Right fade hint */}
+      <div
+        className={cn(
+          'absolute right-0 top-0 bottom-0 w-6 z-10 pointer-events-none bg-gradient-to-l from-[var(--color-bg)] to-transparent transition-opacity duration-200',
+          showRightFade ? 'opacity-100' : 'opacity-0'
+        )}
+      />
       <div
         ref={containerRef}
         role="tablist"
+        onScroll={updateFades}
         className={cn(
           'flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth pb-0.5',
           className
