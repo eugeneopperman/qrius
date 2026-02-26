@@ -233,7 +233,7 @@ export default function QRCodeDetailPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <Link
             to="/qr-codes"
-            className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 min-h-[2.75rem] py-2"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to QR Codes

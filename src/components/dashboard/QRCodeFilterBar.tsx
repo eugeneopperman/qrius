@@ -85,13 +85,12 @@ export function QRCodeFilterBar({
     <div className="space-y-3 lg:space-y-0 lg:flex lg:flex-wrap lg:items-center lg:gap-3">
       {/* Row 1: Status tabs + folder dropdown */}
       <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide">
-      <div className="flex items-center gap-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.03] p-1 flex-shrink-0">
+      <div className="segmented-control">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onStatusChange(tab.key)}
             className={cn(
-              'px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
               status === tab.key
                 ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -111,7 +110,7 @@ export function QRCodeFilterBar({
         trigger={({ toggle }) => (
           <button
             onClick={toggle}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+            className="filter-trigger"
           >
             {selectedFolder && (
               <span
@@ -195,10 +194,10 @@ export function QRCodeFilterBar({
         trigger={({ toggle }) => (
           <button
             onClick={toggle}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+            className="filter-trigger"
           >
             <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
-            <span className="text-gray-700 dark:text-gray-300">
+            <span className="hidden sm:inline text-gray-700 dark:text-gray-300">
               {SORT_OPTIONS.find((o) => o.key === sort)?.label}
             </span>
           </button>

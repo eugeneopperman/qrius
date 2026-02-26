@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { QRCodeCard } from './QRCodeCard';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { cn } from '@/utils/cn';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
   Search,
@@ -125,30 +126,32 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
           </div>
 
           {/* View mode toggle */}
-          <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" role="group" aria-label="View mode">
+          <div className="segmented-control" role="group" aria-label="View mode">
             <button
               onClick={() => setViewMode('grid')}
               aria-label="Grid view"
               aria-pressed={viewMode === 'grid'}
-              className={`p-2 ${
+              className={cn(
+                '!px-2',
                 viewMode === 'grid'
-                  ? 'bg-gray-100 dark:bg-gray-800'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
+                  ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              )}
             >
-              <Grid3X3 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <Grid3X3 className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
               aria-label="List view"
               aria-pressed={viewMode === 'list'}
-              className={`p-2 ${
+              className={cn(
+                '!px-2',
                 viewMode === 'list'
-                  ? 'bg-gray-100 dark:bg-gray-800'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
+                  ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              )}
             >
-              <List className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+              <List className="w-4 h-4" />
             </button>
           </div>
 
