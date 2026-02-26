@@ -667,6 +667,104 @@
 }
 
 /* ============================================
+   ICON HOVER MICRO-ANIMATIONS
+   ============================================ */
+
+/* --- Sidebar icons --- */
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+@keyframes iconScanTilt {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-8deg); }
+  70% { transform: rotate(4deg); }
+}
+@keyframes iconRotateQuarter {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes iconBrushTilt {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(3deg); }
+}
+@keyframes iconScanPulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@keyframes iconGearTurn {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(60deg); }
+}
+
+/* --- QR type card icons --- */
+@keyframes iconLinkWiggle {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-1.5px) rotate(-3deg); }
+  75% { transform: translateX(1.5px) rotate(3deg); }
+}
+@keyframes iconTypeShift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@keyframes iconMailOpen {
+  0%, 100% { transform: perspective(200px) rotateX(0deg) scale(1); }
+  50% { transform: perspective(200px) rotateX(-15deg) scale(1.04); }
+}
+@keyframes iconRing {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(10deg); }
+  30% { transform: rotate(-8deg); }
+  45% { transform: rotate(6deg); }
+  60% { transform: rotate(-4deg); }
+  80% { transform: rotate(2deg); }
+}
+@keyframes iconMessageBounce {
+  0% { transform: translateY(3px) scale(0.97); }
+  60% { transform: translateY(-1px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes iconSignalPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.85; }
+}
+@keyframes iconNod {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(1px) rotate(3deg); }
+}
+@keyframes iconPageFlip {
+  0%, 100% { transform: perspective(200px) rotateY(0deg); }
+  50% { transform: perspective(200px) rotateY(-15deg); }
+}
+@keyframes iconPinDrop {
+  0% { transform: translateY(-4px); }
+  60% { transform: translateY(1px); }
+  80% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+
+/* Sidebar: trigger on .group:hover */
+.group:hover .icon-anim-pulse { animation: iconPulse 0.3s ease-in-out; }
+.group:hover .icon-anim-scan-tilt { animation: iconScanTilt 0.3s ease-in-out; }
+.group:hover .icon-anim-rotate-quarter { animation: iconRotateQuarter 0.4s ease-in-out; }
+.group:hover .icon-anim-brush-tilt { animation: iconBrushTilt 0.35s ease-in-out; }
+.group:hover .icon-anim-scan-pulse { animation: iconScanPulse 0.35s ease-in-out; }
+.group:hover .icon-anim-gear-turn { animation: iconGearTurn 0.4s ease-in-out; }
+
+/* QR type cards: trigger on .group:hover */
+.group:hover .icon-anim-link-wiggle { animation: iconLinkWiggle 0.3s ease-in-out; }
+.group:hover .icon-anim-type-shift { animation: iconTypeShift 0.3s ease-in-out; }
+.group:hover .icon-anim-mail-open { animation: iconMailOpen 0.3s ease-in-out; }
+.group:hover .icon-anim-ring { animation: iconRing 0.35s ease-in-out; }
+.group:hover .icon-anim-message-bounce { animation: iconMessageBounce 0.3s ease-out; }
+.group:hover .icon-anim-signal-pulse { animation: iconSignalPulse 0.35s ease-in-out; }
+.group:hover .icon-anim-nod { animation: iconNod 0.3s ease-in-out; }
+.group:hover .icon-anim-page-flip { animation: iconPageFlip 0.35s ease-in-out; }
+.group:hover .icon-anim-pin-drop { animation: iconPinDrop 0.35s ease-out; }
+
+/* ============================================
    BROWSER FALLBACK & ACCESSIBILITY
    ============================================ */
 
@@ -695,6 +793,23 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-glass-reveal,
   .animate-gentle-float {
+    animation: none;
+  }
+  .group:hover .icon-anim-pulse,
+  .group:hover .icon-anim-scan-tilt,
+  .group:hover .icon-anim-rotate-quarter,
+  .group:hover .icon-anim-brush-tilt,
+  .group:hover .icon-anim-scan-pulse,
+  .group:hover .icon-anim-gear-turn,
+  .group:hover .icon-anim-link-wiggle,
+  .group:hover .icon-anim-type-shift,
+  .group:hover .icon-anim-mail-open,
+  .group:hover .icon-anim-ring,
+  .group:hover .icon-anim-message-bounce,
+  .group:hover .icon-anim-signal-pulse,
+  .group:hover .icon-anim-nod,
+  .group:hover .icon-anim-page-flip,
+  .group:hover .icon-anim-pin-drop {
     animation: none;
   }
 }

@@ -20,12 +20,12 @@ interface DashboardLayoutProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'QR Codes', href: '/qr-codes', icon: QrCode },
-  { name: 'Create', href: '/create', icon: Plus },
-  { name: 'Templates', href: '/templates', icon: Palette },
-  { name: 'Reader', href: '/reader', icon: ScanLine },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, animClass: 'icon-anim-pulse' },
+  { name: 'QR Codes', href: '/qr-codes', icon: QrCode, animClass: 'icon-anim-scan-tilt' },
+  { name: 'Create', href: '/create', icon: Plus, animClass: 'icon-anim-rotate-quarter' },
+  { name: 'Templates', href: '/templates', icon: Palette, animClass: 'icon-anim-brush-tilt' },
+  { name: 'Reader', href: '/reader', icon: ScanLine, animClass: 'icon-anim-scan-pulse' },
+  { name: 'Settings', href: '/settings', icon: Settings, animClass: 'icon-anim-gear-turn' },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -70,13 +70,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-[15px] transition-colors ${
+                  className={`group flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-[15px] transition-colors ${
                     isActive
                       ? 'bg-orange-500/10 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400 font-medium'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 font-normal'
                   }`}
                 >
-                  <item.icon className="w-[18px] h-[18px]" />
+                  <item.icon className={`w-[18px] h-[18px] ${item.animClass}`} />
                   <span>{item.name}</span>
                 </Link>
               );

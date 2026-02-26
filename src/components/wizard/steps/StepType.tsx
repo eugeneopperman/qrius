@@ -21,18 +21,19 @@ interface TypeOption {
   icon: React.ElementType;
   description: string;
   example: string;
+  animClass: string;
 }
 
 const typeOptions: TypeOption[] = [
-  { id: 'url', label: 'URL', icon: Link, description: 'Website link', example: 'https://example.com' },
-  { id: 'text', label: 'Text', icon: Type, description: 'Plain text message', example: 'Hello world!' },
-  { id: 'email', label: 'Email', icon: Mail, description: 'Email address', example: 'hello@example.com' },
-  { id: 'phone', label: 'Phone', icon: Phone, description: 'Phone number', example: '+1 234 567 8900' },
-  { id: 'sms', label: 'SMS', icon: MessageSquare, description: 'Text message', example: 'Send a message' },
-  { id: 'wifi', label: 'WiFi', icon: Wifi, description: 'Network credentials', example: 'Join network' },
-  { id: 'vcard', label: 'vCard', icon: User, description: 'Contact card', example: 'Save contact' },
-  { id: 'event', label: 'Event', icon: Calendar, description: 'Calendar event', example: 'Add to calendar' },
-  { id: 'location', label: 'Location', icon: MapPin, description: 'Map coordinates', example: 'Open in maps' },
+  { id: 'url', label: 'URL', icon: Link, description: 'Website link', example: 'https://example.com', animClass: 'icon-anim-link-wiggle' },
+  { id: 'text', label: 'Text', icon: Type, description: 'Plain text message', example: 'Hello world!', animClass: 'icon-anim-type-shift' },
+  { id: 'email', label: 'Email', icon: Mail, description: 'Email address', example: 'hello@example.com', animClass: 'icon-anim-mail-open' },
+  { id: 'phone', label: 'Phone', icon: Phone, description: 'Phone number', example: '+1 234 567 8900', animClass: 'icon-anim-ring' },
+  { id: 'sms', label: 'SMS', icon: MessageSquare, description: 'Text message', example: 'Send a message', animClass: 'icon-anim-message-bounce' },
+  { id: 'wifi', label: 'WiFi', icon: Wifi, description: 'Network credentials', example: 'Join network', animClass: 'icon-anim-signal-pulse' },
+  { id: 'vcard', label: 'vCard', icon: User, description: 'Contact card', example: 'Save contact', animClass: 'icon-anim-nod' },
+  { id: 'event', label: 'Event', icon: Calendar, description: 'Calendar event', example: 'Add to calendar', animClass: 'icon-anim-page-flip' },
+  { id: 'location', label: 'Location', icon: MapPin, description: 'Map coordinates', example: 'Open in maps', animClass: 'icon-anim-pin-drop' },
 ];
 
 export function StepType() {
@@ -84,7 +85,7 @@ export function StepType() {
                     : 'bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 group-hover:bg-orange-500/10 group-hover:text-orange-600 dark:group-hover:text-orange-400'
                 )}
               >
-                <Icon className="w-6 h-6" />
+                <Icon className={cn('w-6 h-6', option.animClass)} />
               </div>
 
               {/* Label */}
