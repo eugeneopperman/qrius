@@ -34,11 +34,11 @@ CREATE INDEX IF NOT EXISTS idx_scan_events_scanned_at ON scan_events(scanned_at)
 -- Auto-increment scan count trigger
 CREATE OR REPLACE FUNCTION update_scan_count() RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE qr_codes SET total_scans = total_scans + 1, updated_at = NOW()
+    UPDATE public.qr_codes SET total_scans = total_scans + 1, updated_at = NOW()
     WHERE id = NEW.qr_code_id;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = '';
 
 -- Drop existing trigger if it exists, then create
 DROP TRIGGER IF EXISTS trigger_scan_count ON scan_events;

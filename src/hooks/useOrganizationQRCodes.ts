@@ -127,7 +127,7 @@ export function useOrganizationQRCodes(options: UseOrganizationQRCodesOptions = 
 
   const queryKey = ['qr-codes', currentOrganization?.id, { limit, status, folderId, search, sort, order }] as const;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey,
     queryFn: () => fetchQRCodes(options),
     enabled: !!currentOrganization,
@@ -226,6 +226,7 @@ export function useOrganizationQRCodes(options: UseOrganizationQRCodesOptions = 
     monthlyScans,
     teamMembers,
     isLoading,
+    error,
     patchQRCode,
     deleteQRCode,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['qr-codes'] }),

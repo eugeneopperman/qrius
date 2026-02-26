@@ -6,9 +6,15 @@ import { getSupabaseAdmin } from '../_lib/auth.js';
 import { notifyPaymentFailed } from '../_lib/notifications.js';
 import { logger } from '../_lib/logger.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16',
-});
+let _stripe: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
+    _stripe = new Stripe(key, { apiVersion: '2023-10-16' });
+  }
+  return _stripe;
+}
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
@@ -48,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const rawBody = await getRawBody(req);
-    event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
+    event = getStripe().webhooks.constructEvent(rawBody, sig, endpointSecret);
   } catch (err) {
     logger.webhooks.error('Webhook signature verification failed', { error: String(err) });
     return res.status(400).json({ error: 'Webhook signature verification failed' });
@@ -99,7 +105,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const subscriptionId = session.subscription as string;
   if (!subscriptionId) return;
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
   const priceId = subscription.items.data[0]?.price.id;
   const plan = priceToPlan[priceId] || 'free';
 

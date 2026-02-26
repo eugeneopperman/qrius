@@ -4,10 +4,10 @@ import type { VercelResponse } from '@vercel/node';
 /**
  * Allowed origins for CORS.
  * In production, restrict to the app's domain.
- * Falls back to '*' only when NEXT_PUBLIC_APP_URL is not set (local dev).
+ * Falls back to '*' only when APP_URL is not set (local dev).
  */
 function getAllowedOrigin(requestOrigin?: string): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const appUrl = process.env.APP_URL;
 
   if (!appUrl) {
     // Development fallback
@@ -33,7 +33,7 @@ function getAllowedOrigin(requestOrigin?: string): string {
 
 /**
  * Set CORS headers on the response.
- * Uses NEXT_PUBLIC_APP_URL in production, '*' in development.
+ * Uses APP_URL in production, '*' in development.
  */
 export function setCorsHeaders(
   res: VercelResponse,

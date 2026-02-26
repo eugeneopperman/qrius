@@ -185,6 +185,17 @@ ON CONFLICT (plan) DO UPDATE SET
 -- HELPER FUNCTIONS
 -- ============================================
 
+-- Function to get all org IDs for a user (used by RLS policies)
+CREATE OR REPLACE FUNCTION get_user_org_ids(p_user_id UUID)
+RETURNS SETOF UUID AS $$
+BEGIN
+    RETURN QUERY
+    SELECT organization_id
+    FROM public.organization_members
+    WHERE user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
+
 -- Function to get user's current organization
 CREATE OR REPLACE FUNCTION get_user_organization(p_user_id UUID)
 RETURNS UUID AS $$
@@ -192,26 +203,26 @@ DECLARE
     org_id UUID;
 BEGIN
     SELECT organization_id INTO org_id
-    FROM organization_members
+    FROM public.organization_members
     WHERE user_id = p_user_id
     ORDER BY joined_at ASC
     LIMIT 1;
     RETURN org_id;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- Function to check if user has permission in org
 CREATE OR REPLACE FUNCTION user_has_permission(p_user_id UUID, p_org_id UUID, p_required_roles TEXT[])
 RETURNS BOOLEAN AS $$
 BEGIN
     RETURN EXISTS (
-        SELECT 1 FROM organization_members
+        SELECT 1 FROM public.organization_members
         WHERE user_id = p_user_id
         AND organization_id = p_org_id
         AND role = ANY(p_required_roles)
     );
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- Function to get org plan limits
 CREATE OR REPLACE FUNCTION get_org_limits(p_org_id UUID)
@@ -230,11 +241,11 @@ BEGIN
         pl.scan_history_days,
         pl.team_members,
         pl.api_requests_per_day
-    FROM organizations o
-    JOIN plan_limits pl ON pl.plan = o.plan
+    FROM public.organizations o
+    JOIN public.plan_limits pl ON pl.plan = o.plan
     WHERE o.id = p_org_id;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- Function to check if org can create more QR codes
 CREATE OR REPLACE FUNCTION can_create_qr_code(p_org_id UUID)
@@ -243,15 +254,15 @@ DECLARE
     current_count INTEGER;
     limit_count INTEGER;
 BEGIN
-    SELECT COUNT(*) INTO current_count FROM qr_codes WHERE organization_id = p_org_id;
+    SELECT COUNT(*) INTO current_count FROM public.qr_codes WHERE organization_id = p_org_id;
     SELECT pl.qr_codes_limit INTO limit_count
-    FROM organizations o
-    JOIN plan_limits pl ON pl.plan = o.plan
+    FROM public.organizations o
+    JOIN public.plan_limits pl ON pl.plan = o.plan
     WHERE o.id = p_org_id;
 
     RETURN limit_count = -1 OR current_count < limit_count;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- ============================================
 -- AUTO-UPDATE TIMESTAMPS TRIGGER
@@ -262,7 +273,7 @@ BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = '';
 
 -- Apply to tables with updated_at
 DROP TRIGGER IF EXISTS trigger_users_updated_at ON users;
@@ -295,6 +306,12 @@ ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE usage_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE qr_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scan_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE plan_limits ENABLE ROW LEVEL SECURITY;
+
+-- plan_limits: read-only reference data for all authenticated users
+DROP POLICY IF EXISTS plan_limits_select ON plan_limits;
+CREATE POLICY plan_limits_select ON plan_limits
+    FOR SELECT USING (true);
 
 -- Users: can read own profile, admins can read all
 DROP POLICY IF EXISTS users_select_own ON users;
@@ -322,7 +339,10 @@ CREATE POLICY organizations_select ON organizations
 
 DROP POLICY IF EXISTS organizations_insert ON organizations;
 CREATE POLICY organizations_insert ON organizations
-    FOR INSERT WITH CHECK (true);
+    FOR INSERT WITH CHECK (
+        auth.uid() IS NOT NULL
+        AND plan = 'free'
+    );
 
 DROP POLICY IF EXISTS organizations_update ON organizations;
 CREATE POLICY organizations_update ON organizations
@@ -519,13 +539,14 @@ BEGIN
         NEW.raw_user_meta_data->>'avatar_url'
     );
 
-    -- Create personal organization
+    -- Create personal organization (plan must be 'free' per RLS policy)
     new_org_id := gen_random_uuid();
-    INSERT INTO public.organizations (id, name, slug)
+    INSERT INTO public.organizations (id, name, slug, plan)
     VALUES (
         new_org_id,
         user_name || '''s Workspace',
-        'personal-' || substring(NEW.id::text, 1, 8)
+        'personal-' || substring(NEW.id::text, 1, 8),
+        'free'
     );
 
     -- Add user as owner of their personal org
@@ -534,7 +555,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- Trigger for new user signup
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;

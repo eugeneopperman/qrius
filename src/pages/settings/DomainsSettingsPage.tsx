@@ -5,6 +5,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { usePlanGate } from '@/hooks/usePlanGate';
 import { useCustomDomain } from '@/hooks/queries/useCustomDomain';
 import { toast } from '@/stores/toastStore';
+import { QueryError } from '@/components/ui/QueryError';
 import {
   Globe,
   Loader2,
@@ -66,6 +67,7 @@ export function DomainsSettingsContent() {
   const {
     domain,
     isLoading,
+    error: domainError,
     addDomain,
     isAdding,
     verifyDomain,
@@ -145,7 +147,9 @@ export function DomainsSettingsContent() {
         </p>
       </div>
 
-      {isLoading ? (
+      {domainError ? (
+        <QueryError message="Failed to load domain settings." />
+      ) : isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
         </div>
@@ -195,6 +199,7 @@ export function DomainsSettingsContent() {
                     <button
                       onClick={() => handleCopyCname(`${domain.domain} CNAME ${domain.cname_target}`)}
                       className="flex-shrink-0 btn-icon text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      aria-label="Copy CNAME record"
                       title="Copy CNAME record"
                     >
                       <Copy className="w-4 h-4" />

@@ -153,7 +153,7 @@ async function requireAuth() {
   try {
     await waitForAuthInit();
   } catch (error) {
-    console.error('Auth initialization failed:', error);
+    if (import.meta.env.DEV) console.error('Auth initialization failed:', error);
     throw redirect({ to: '/signin', search: { redirect: window.location.pathname } });
   }
 
@@ -168,7 +168,7 @@ async function requireGuest() {
   try {
     await waitForAuthInit();
   } catch (error) {
-    console.error('Auth initialization failed:', error);
+    if (import.meta.env.DEV) console.error('Auth initialization failed:', error);
     // Allow access to auth pages if initialization times out
     return;
   }

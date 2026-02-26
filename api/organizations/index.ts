@@ -2,6 +2,7 @@
 // POST /api/organizations - Create new organization
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import crypto from 'node:crypto';
 import { requireAuth, getSupabaseAdmin, UnauthorizedError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { logger } from '../_lib/logger.js';
@@ -91,7 +92,7 @@ async function handleCreate(req: VercelRequest, res: VercelResponse, userId: str
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-  const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`;
+  const slug = `${baseSlug}-${crypto.randomBytes(4).toString('hex')}`;
 
   // Create organization
   const { data: org, error: orgError } = await getSupabaseAdmin()

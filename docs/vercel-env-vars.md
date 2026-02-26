@@ -25,9 +25,9 @@ Quick reference for setting up environment variables in Vercel for production de
 
 | Variable | Environment | Description |
 |----------|-------------|-------------|
-| `NEXT_PUBLIC_APP_URL` | Production | `https://your-domain.com` |
-| `NEXT_PUBLIC_APP_URL` | Preview | `https://your-project-preview.vercel.app` |
-| `NEXT_PUBLIC_APP_URL` | Development | `http://localhost:5173` |
+| `APP_URL` | Production | `https://your-domain.com` |
+| `APP_URL` | Preview | `https://your-project-preview.vercel.app` |
+| `APP_URL` | Development | `http://localhost:5173` |
 
 ## Payment Variables (Stripe)
 
@@ -114,7 +114,7 @@ VITE_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 
 # Required - App
-NEXT_PUBLIC_APP_URL=
+APP_URL=
 
 # Stripe (use pk_test/sk_test for non-production)
 VITE_STRIPE_PUBLISHABLE_KEY=

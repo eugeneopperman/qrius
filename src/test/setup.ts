@@ -27,6 +27,9 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Mock Element.scrollBy (not available in jsdom)
+Element.prototype.scrollBy = vi.fn();
+
 // Mock ResizeObserver
 class ResizeObserverMock {
   observe = vi.fn();

@@ -1,4 +1,4 @@
-export { QRActions, type QRActionsHandle } from './QRActions';
+export { QRActions } from './QRActions';
 export { EmptyState } from './EmptyState';
 export {
   TopLabel,

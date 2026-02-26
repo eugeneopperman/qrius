@@ -6,6 +6,7 @@ import { setCorsHeaders } from '../../_lib/cors.js';
 import { isValidUUID } from '../../_lib/validate.js';
 import { logger } from '../../_lib/logger.js';
 import crypto from 'crypto';
+import { checkRateLimit } from '../../_lib/rateLimit.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,6 +29,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const user = await requireAuth(req);
+
+    // Rate limit: 10 invites per day per user
+    const rateLimit = await checkRateLimit(`invite:${user.id}`, 10);
+    if (!rateLimit.allowed) {
+      return res.status(429).json({ error: 'Too many invitations. Please try again later.' });
+    }
+
     const organizationId = req.query.id as string;
 
     if (!organizationId || !isValidUUID(organizationId)) {
@@ -72,25 +80,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'role must be one of: admin, editor, viewer' });
     }
 
-    // Check if user is already a member
-    const { data: existingMember } = await getSupabaseAdmin()
-      .from('organization_members')
-      .select('id')
-      .eq('organization_id', organizationId)
-      .eq('user_id', (
-        await getSupabaseAdmin()
-          .from('users')
-          .select('id')
-          .eq('email', body.email)
-          .single()
-      ).data?.id)
-      .single();
-
-    if (existingMember) {
-      return res.status(400).json({ error: 'User is already a member' });
-    }
-
-    // Check if there's already a pending invitation
+    // Check if there's already a pending invitation or existing membership
+    // Uses a single invitation check — avoids querying users table (email enumeration)
+    // If the invited user is already a member, the acceptance flow handles the duplicate gracefully
     const { data: existingInvite } = await getSupabaseAdmin()
       .from('organization_invitations')
       .select('id')
@@ -131,9 +123,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // TODO: Send invitation email
     // For now, return the invite link
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const baseUrl = process.env.APP_URL;
     if (!baseUrl) {
-      logger.organizations.error('NEXT_PUBLIC_APP_URL not configured - cannot generate invite link');
+      logger.organizations.error('APP_URL not configured - cannot generate invite link');
       return res.status(500).json({ error: 'Server configuration error' });
     }
     const inviteLink = `${baseUrl}/invite/accept?token=${token}`;

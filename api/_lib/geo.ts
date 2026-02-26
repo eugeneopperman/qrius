@@ -48,7 +48,11 @@ export function getDeviceType(userAgent: string | null): string {
 export async function hashIP(ip: string | null): Promise<string | null> {
   if (!ip) return null;
 
-  const salt = process.env.IP_SALT || 'default-salt';
+  const salt = process.env.IP_SALT;
+  if (!salt) {
+    // Without a real salt, IP hashing is meaningless — return null to skip storage
+    return null;
+  }
   const data = new TextEncoder().encode(`${salt}:${ip}`);
 
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);

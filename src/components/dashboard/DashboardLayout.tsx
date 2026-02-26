@@ -57,6 +57,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden btn-icon"
+              aria-label="Close sidebar"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>

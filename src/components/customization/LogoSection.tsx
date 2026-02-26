@@ -137,6 +137,7 @@ export const LogoSection = memo(function LogoSection() {
             <img
               src={styleOptions.logoUrl}
               alt="Logo preview"
+              loading="lazy"
               className={cn(
                 "w-20 h-20 object-cover border border-gray-200 dark:border-gray-700 bg-white",
                 styleOptions.logoShape === 'circle' ? "rounded-full" :

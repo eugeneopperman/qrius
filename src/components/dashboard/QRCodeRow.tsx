@@ -13,9 +13,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { QRMiniPreview, type QRMiniPreviewHandle } from '@/components/ui/QRMiniPreview';
-import type { QRStyleOptionsForPreview } from '@/components/ui/QRMiniPreview';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { toast } from '@/stores/toastStore';
+import { extractStyleOptions } from '@/utils/extractStyleOptions';
 import type { QRCode } from '@/types/database';
 import type { QRCodeFolder } from '@/hooks/queries/useQRCodeFolders';
 
@@ -39,13 +39,6 @@ const TYPE_COLORS: Record<string, string> = {
   location: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
   text: 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-300',
 };
-
-function extractStyleOptions(metadata: unknown): QRStyleOptionsForPreview | undefined {
-  if (!metadata || typeof metadata !== 'object') return undefined;
-  const meta = metadata as Record<string, unknown>;
-  if (!meta.style_options || typeof meta.style_options !== 'object') return undefined;
-  return meta.style_options as QRStyleOptionsForPreview;
-}
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -180,6 +173,7 @@ export const QRCodeRow = memo(function QRCodeRow({
         <button
           onClick={handleDownload}
           className="btn-icon text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          aria-label="Download"
           title="Download"
         >
           <Download className="w-4 h-4" />
@@ -191,6 +185,7 @@ export const QRCodeRow = memo(function QRCodeRow({
             <button
               onClick={toggle}
               className="btn-icon text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              aria-label="More actions"
               title="More actions"
             >
               <MoreHorizontal className="w-4 h-4" />

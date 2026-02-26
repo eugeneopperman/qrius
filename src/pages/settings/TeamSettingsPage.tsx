@@ -7,6 +7,7 @@ import { toast } from '@/stores/toastStore';
 import { UsageLimitWarning } from '@/components/dashboard/UpgradePrompt';
 import { useTeamMembers, useInviteMember } from '@/hooks/queries/useTeamMembers';
 import type { OrgRole } from '@/types/database';
+import { QueryError } from '@/components/ui/QueryError';
 import {
   Loader2,
   UserPlus,
@@ -32,7 +33,7 @@ const roleColors: Record<OrgRole, string> = {
 
 export function TeamSettingsContent() {
   const { currentOrganization, currentRole, user, planLimits } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, currentRole: s.currentRole, user: s.user, planLimits: s.planLimits })));
-  const { data: members = [], isLoading } = useTeamMembers();
+  const { data: members = [], isLoading, error, refetch } = useTeamMembers();
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   const canManageTeam = currentRole === 'owner' || currentRole === 'admin';
@@ -70,7 +71,9 @@ export function TeamSettingsContent() {
 
       {/* Members list */}
       <div className="glass rounded-2xl overflow-hidden">
-        {isLoading ? (
+        {error ? (
+          <QueryError message="Failed to load team members." retry={() => refetch()} />
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
           </div>
@@ -137,7 +140,7 @@ export function TeamSettingsContent() {
                   </span>
 
                   {canManageTeam && member.role !== 'owner' && member.user_id !== user?.id && (
-                    <button className="btn-icon">
+                    <button className="btn-icon" aria-label="Team member options">
                       <MoreVertical className="w-4 h-4 text-gray-400" />
                     </button>
                   )}

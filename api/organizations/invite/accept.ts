@@ -104,31 +104,13 @@ async function handleAcceptInvite(req: VercelRequest, res: VercelResponse) {
   }
 
   // Check if user's email matches the invitation
-  if (invitation.email !== user.email) {
+  if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
     return res.status(403).json({
       error: 'This invitation was sent to a different email address',
     });
   }
 
-  // Check if user is already a member
-  const { data: existingMember } = await getSupabaseAdmin()
-    .from('organization_members')
-    .select('id')
-    .eq('organization_id', invitation.organization_id)
-    .eq('user_id', user.id)
-    .single();
-
-  if (existingMember) {
-    // Already a member — mark invitation as accepted and return success
-    await getSupabaseAdmin()
-      .from('organization_invitations')
-      .update({ accepted_at: new Date().toISOString() })
-      .eq('id', invitation.id);
-
-    return res.status(200).json({ message: 'Already a member of this organization' });
-  }
-
-  // Create membership
+  // Insert membership directly — catch unique constraint violation (TOCTOU-safe)
   const { error: memberError } = await getSupabaseAdmin()
     .from('organization_members')
     .insert({
@@ -140,6 +122,16 @@ async function handleAcceptInvite(req: VercelRequest, res: VercelResponse) {
     });
 
   if (memberError) {
+    // 23505 = unique_violation — user is already a member (race condition or re-accept)
+    if (memberError.code === '23505') {
+      await getSupabaseAdmin()
+        .from('organization_invitations')
+        .update({ accepted_at: new Date().toISOString() })
+        .eq('id', invitation.id);
+
+      return res.status(200).json({ message: 'Already a member of this organization' });
+    }
+
     logger.organizations.error('Failed to create membership', {
       error: memberError.message,
       userId: user.id,

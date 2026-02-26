@@ -8,7 +8,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 /** True when Supabase env vars are missing (placeholder client in use) */
 export const isSupabaseMissing = !supabaseUrl || !supabaseAnonKey;
 
-if (isSupabaseMissing) {
+if (isSupabaseMissing && import.meta.env.DEV) {
   console.warn(
     'Supabase configuration missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.'
   );
@@ -56,7 +56,7 @@ export async function checkSupabaseConnection(): Promise<{ ok: boolean; message?
 export async function getSession() {
   const { data: { session }, error } = await supabase.auth.getSession();
   if (error) {
-    console.error('Error getting session:', error);
+    if (import.meta.env.DEV) console.error('Error getting session:', error);
     return null;
   }
   return session;

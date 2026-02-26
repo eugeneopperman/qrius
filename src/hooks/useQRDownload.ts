@@ -73,7 +73,7 @@ export function useQRDownload({
       }
     } catch (error) {
       // html2canvas can't handle Tailwind v4 oklch() colors — fall through
-      console.warn('html2canvas frame capture failed:', error);
+      if (import.meta.env.DEV) console.warn('html2canvas frame capture failed:', error);
       return null;
     }
   }, [frameContainerRef]);
@@ -157,7 +157,7 @@ export function useQRDownload({
         }
         onSuccess?.();
       } catch (error) {
-        console.error('Download failed:', error);
+        if (import.meta.env.DEV) console.error('Download failed:', error);
         const detail = error instanceof Error ? error.message : String(error);
         toast.error(`Failed to download QR code: ${detail}`);
       } finally {
@@ -212,7 +212,7 @@ export function useQRDownload({
       }
       onSuccess?.();
     } catch (error) {
-      console.error('PDF download failed:', error);
+      if (import.meta.env.DEV) console.error('PDF download failed:', error);
       const detail = error instanceof Error ? error.message : String(error);
       toast.error(`Failed to generate PDF: ${detail}`);
     } finally {

@@ -8,15 +8,9 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { toast } from '@/stores/toastStore';
 import { useQRCodeDetail } from '@/hooks/queries/useQRCodeDetail';
 import { QRMiniPreview } from '@/components/ui/QRMiniPreview';
-import type { QRMiniPreviewHandle, QRStyleOptionsForPreview } from '@/components/ui/QRMiniPreview';
-import type { Json } from '@/types/database';
-
-function extractStyleOptions(metadata: Json | undefined): QRStyleOptionsForPreview | undefined {
-  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return undefined;
-  const m = metadata as Record<string, unknown>;
-  if (!m.style_options || typeof m.style_options !== 'object' || Array.isArray(m.style_options)) return undefined;
-  return m.style_options as QRStyleOptionsForPreview;
-}
+import type { QRMiniPreviewHandle } from '@/components/ui/QRMiniPreview';
+import { extractStyleOptions } from '@/utils/extractStyleOptions';
+import { QueryError } from '@/components/ui/QueryError';
 import { getSession } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -38,7 +32,7 @@ import {
 
 export default function QRCodeDetailPage() {
   const { id } = useParams({ from: '/qr-codes/$id' });
-  const { data, isLoading } = useQRCodeDetail(id);
+  const { data, isLoading, error, refetch } = useQRCodeDetail(id);
   const qrPreviewRef = useRef<QRMiniPreviewHandle>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -192,9 +186,35 @@ export default function QRCodeDetailPage() {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <div className="space-y-6 animate-pulse">
+          <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1 glass rounded-2xl p-6">
+              <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg mb-6" />
+              <div className="space-y-3">
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+                <div className="h-10 bg-gray-100 dark:bg-gray-800 rounded-lg" />
+              </div>
+            </div>
+            <div className="lg:col-span-2 space-y-6">
+              <div className="glass rounded-2xl p-6 space-y-4">
+                <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-4 w-48 bg-gray-100 dark:bg-gray-800 rounded" />
+                <div className="h-4 w-64 bg-gray-100 dark:bg-gray-800 rounded" />
+                <div className="h-4 w-56 bg-gray-100 dark:bg-gray-800 rounded" />
+              </div>
+              <div className="glass rounded-2xl p-6 h-48" />
+            </div>
+          </div>
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <QueryError message="Failed to load QR code details." retry={() => refetch()} />
       </DashboardLayout>
     );
   }
@@ -391,6 +411,7 @@ export default function QRCodeDetailPage() {
                       <button
                         onClick={startEditUrl}
                         className="btn-icon text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
+                        aria-label="Edit destination"
                         title="Edit destination"
                       >
                         <Pencil className="w-4 h-4" />

@@ -60,7 +60,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.setState({ errorInfo });
 
     // Call the optional error callback
@@ -88,7 +88,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     window.location.reload();
   };
 
-  render(): ReactNode {
+  override render(): ReactNode {
     const { hasError, error } = this.state;
     const { children, fallback, minimal } = this.props;
 

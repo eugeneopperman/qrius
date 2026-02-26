@@ -19,7 +19,7 @@ import {
 } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { checkRateLimit, setRateLimitHeaders } from '../_lib/rateLimit.js';
-import { isValidHttpUrl, isValidUUID, validateOptionalString, validateStringArray } from '../_lib/validate.js';
+import { isValidHttpUrl, isValidUUID, validateOptionalString, validateStringArray, validateOriginalData } from '../_lib/validate.js';
 
 interface CreateQRCodeRequest {
   destination_url: string;
@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const shortDomain = process.env.SHORT_URL_DOMAIN;
-  const baseUrl = shortDomain ? `https://${shortDomain}` : (process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`);
+  const baseUrl = shortDomain ? `https://${shortDomain}` : (process.env.APP_URL || `https://${req.headers.host}`);
 
   try {
     // Authenticate request (optional for backward compatibility)
@@ -156,6 +156,14 @@ async function handleCreate(
     }
   }
 
+  // Validate original_data structure matches qr_type
+  if (body.original_data !== undefined) {
+    const dataError = validateOriginalData(body.qr_type || 'url', body.original_data);
+    if (dataError) {
+      return res.status(400).json({ error: dataError });
+    }
+  }
+
   // Get organization context
   let organizationId: string | null = null;
   let userId: string | null = null;
@@ -259,6 +267,8 @@ async function handleCreate(
     return res.status(500).json({ error: 'Failed to create QR code' });
   }
 
+  logger.qrCodes.info('QR code created', { id: row.id, orgId: organizationId, userId, shortCode, qrType: body.qr_type || 'url' });
+
   // Pre-populate cache for fast redirects (non-blocking — don't delay the response)
   void setCachedRedirect(shortCode, {
     destinationUrl: body.destination_url,
@@ -346,6 +356,21 @@ async function handleList(
     if (folderIdFilter === 'none') {
       filterConditions.push('folder_id IS NULL');
     } else if (folderIdFilter) {
+      if (!isValidUUID(folderIdFilter)) {
+        return res.status(400).json({ error: 'folder_id must be a valid UUID' });
+      }
+      // Validate folder belongs to the user's org before filtering
+      if (effectiveOrgId) {
+        const { data: folder } = await getSupabaseAdmin()
+          .from('qr_code_folders')
+          .select('id')
+          .eq('id', folderIdFilter)
+          .eq('organization_id', effectiveOrgId)
+          .single();
+        if (!folder) {
+          return res.status(400).json({ error: 'Folder not found' });
+        }
+      }
       filterConditions.push(`folder_id = $${paramIdx}`);
       params.push(folderIdFilter);
       paramIdx++;
@@ -539,11 +564,15 @@ async function handleBulk(
     params
   );
 
+  const updatedIds = new Set(result.map((r: Record<string, unknown>) => r.id as string));
+  const failed = body.ids!.filter(id => !updatedIds.has(id));
+
   logger.qrCodes.info('Bulk update', {
     orgId: organizationId,
     count: result.length,
+    failed: failed.length > 0 ? failed : undefined,
     fields: Object.keys(body).filter(k => k !== 'ids'),
   });
 
-  return res.status(200).json({ updated: result.length });
+  return res.status(200).json({ updated: result.length, failed });
 }

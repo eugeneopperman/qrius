@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const shortDomain = process.env.SHORT_URL_DOMAIN;
-  const baseUrl = shortDomain ? `https://${shortDomain}` : (process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`);
+  const baseUrl = shortDomain ? `https://${shortDomain}` : (process.env.APP_URL || `https://${req.headers.host}`);
 
   try {
     if (req.method === 'GET') {
@@ -173,18 +173,18 @@ async function handleGet(
       sql`SELECT user_agent, COUNT(*) as count FROM scan_events WHERE qr_code_id = ${id} AND user_agent IS NOT NULL AND scanned_at >= ${historyCutoffISO} GROUP BY user_agent ORDER BY count DESC LIMIT 100`,
     ]);
 
-    scansToday = parseInt(todayResult[0].count as string);
-    scansThisWeek = parseInt(weekResult[0].count as string);
-    scansThisMonth = parseInt(monthResult[0].count as string);
+    scansToday = parseInt(todayResult[0]?.count as string || '0') || 0;
+    scansThisWeek = parseInt(weekResult[0]?.count as string || '0') || 0;
+    scansThisMonth = parseInt(monthResult[0]?.count as string || '0') || 0;
 
     topCountries = countriesResult.map((row) => ({
       countryCode: row.country_code as string,
-      count: parseInt(row.count as string),
+      count: parseInt(row.count as string || '0') || 0,
     }));
 
     deviceBreakdown = devicesResult.map((row) => ({
       deviceType: row.device_type as string,
-      count: parseInt(row.count as string),
+      count: parseInt(row.count as string || '0') || 0,
     }));
 
     recentScans = recentResult.map((row) => toScanEventResponse(row as ScanEventRow));
@@ -192,13 +192,13 @@ async function handleGet(
     // Referrer breakdown — map null to "Direct"
     referrerBreakdown = referrerResult.map((row) => ({
       referrer: (row.referrer as string | null) || 'Direct',
-      count: parseInt(row.count as string),
+      count: parseInt(row.count as string || '0') || 0,
     }));
 
     // Hourly distribution — fill 24 hours with zeros
     const hourlyMap = new Map<number, number>();
     hourlyResult.forEach((row) => {
-      hourlyMap.set(parseInt(row.hour as string), parseInt(row.count as string));
+      hourlyMap.set(parseInt(row.hour as string || '0') || 0, parseInt(row.count as string || '0') || 0);
     });
     scansByHour = Array.from({ length: 24 }, (_, i) => ({
       hour: i,
@@ -211,7 +211,7 @@ async function handleGet(
       const dayStr = row.day instanceof Date
         ? row.day.toISOString().slice(0, 10)
         : String(row.day).slice(0, 10);
-      dailyMap.set(dayStr, parseInt(row.count as string));
+      dailyMap.set(dayStr, parseInt(row.count as string || '0') || 0);
     });
     scansByDay = [];
     for (let i = 29; i >= 0; i--) {
@@ -227,14 +227,14 @@ async function handleGet(
       .filter((row) => row.country_code === topCountryCode)
       .map((row) => ({
         region: row.region as string,
-        count: parseInt(row.count as string),
+        count: parseInt(row.count as string || '0') || 0,
       }));
 
     // Browser/OS breakdown from user agent strings
     const browserMap = new Map<string, number>();
     const osMap = new Map<string, number>();
     userAgentResult.forEach((row) => {
-      const count = parseInt(row.count as string);
+      const count = parseInt(row.count as string || '0') || 0;
       const parsed = parseUserAgent(row.user_agent as string);
       browserMap.set(parsed.browser, (browserMap.get(parsed.browser) || 0) + count);
       osMap.set(parsed.os, (osMap.get(parsed.os) || 0) + count);
@@ -297,9 +297,11 @@ async function handlePatch(
     try {
       await getUserOrganization(user.id, qrCode.organization_id);
     } catch {
+      logger.qrCodes.warn('Unauthorized PATCH attempt', { id, userId: user.id, orgId: qrCode.organization_id });
       return res.status(403).json({ error: 'Not authorized to modify this QR code' });
     }
   } else {
+    logger.qrCodes.warn('Unauthorized PATCH attempt', { id, userId: user.id });
     return res.status(403).json({ error: 'Not authorized to modify this QR code' });
   }
 
@@ -429,6 +431,9 @@ async function handlePatch(
   }
 
   const updated = result[0] as unknown as QRCodeRow;
+
+  logger.qrCodes.info('QR code updated', { id, userId: user.id, fields: updates });
+
   const patchCustomDomain = updated.organization_id ? await getOrgCustomDomain(updated.organization_id) : null;
   return res.status(200).json(toQRCodeResponse(updated, baseUrl, patchCustomDomain));
 }
@@ -460,9 +465,11 @@ async function handleDelete(
     try {
       await getUserOrganization(user.id, qrCode.organization_id);
     } catch {
+      logger.qrCodes.warn('Unauthorized DELETE attempt', { id, userId: user.id, orgId: qrCode.organization_id });
       return res.status(403).json({ error: 'Not authorized to delete this QR code' });
     }
   } else {
+    logger.qrCodes.warn('Unauthorized DELETE attempt', { id, userId: user.id });
     return res.status(403).json({ error: 'Not authorized to delete this QR code' });
   }
 
@@ -474,6 +481,8 @@ async function handleDelete(
 
   // Clean up Redis cache
   await invalidateCachedRedirect(qrCode.short_code);
+
+  logger.qrCodes.info('QR code deleted', { id, userId: user.id, shortCode: qrCode.short_code });
 
   return res.status(200).json({ success: true });
 }

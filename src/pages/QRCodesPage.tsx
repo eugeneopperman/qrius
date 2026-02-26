@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Link } from '@tanstack/react-router';
 import { QrCode, Plus } from 'lucide-react';
+import { QueryError } from '@/components/ui/QueryError';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { QRCodeFilterBar } from '@/components/dashboard/QRCodeFilterBar';
 import { QRCodeRow } from '@/components/dashboard/QRCodeRow';
@@ -27,8 +28,10 @@ export default function QRCodesPage() {
     qrCodes,
     counts,
     isLoading,
+    error: qrError,
     patchQRCode,
     deleteQRCode,
+    refetch,
   } = useOrganizationQRCodes({
     status,
     folderId: folderId === 'none' ? null : folderId,
@@ -114,7 +117,9 @@ export default function QRCodesPage() {
         />
 
         {/* QR Code rows */}
-        {isLoading ? (
+        {qrError ? (
+          <QueryError message="Failed to load QR codes." retry={refetch} />
+        ) : isLoading ? (
           <div className="card-no-blur rounded-2xl overflow-hidden">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-4 px-4 py-3 border-b border-black/[0.04] dark:border-white/[0.04] last:border-b-0">

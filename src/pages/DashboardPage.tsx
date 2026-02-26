@@ -8,6 +8,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Plus, ArrowRight } from 'lucide-react';
+import { QueryError } from '@/components/ui/QueryError';
 import { useState, useCallback } from 'react';
 import { useOrganizationQRCodes } from '@/hooks/useOrganizationQRCodes';
 import { useDashboardStats } from '@/hooks/queries/useDashboardStats';
@@ -48,7 +49,7 @@ function UsageBar({ label, used, limit }: { label: string; used: number; limit: 
 
 export default function DashboardPage() {
   const { currentOrganization, planLimits, profile } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, planLimits: s.planLimits, profile: s.profile })));
-  const { qrCodes, totalCount, monthlyScans, teamMembers, isLoading, deleteQRCode } = useOrganizationQRCodes({ limit: 10 });
+  const { qrCodes, totalCount, monthlyScans, teamMembers, isLoading, error: qrError, deleteQRCode, refetch } = useOrganizationQRCodes({ limit: 10 });
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string | null } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
@@ -148,7 +149,11 @@ export default function DashboardPage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <QRCodeList qrCodes={qrCodes} isLoading={isLoading} onDelete={handleDeleteClick} />
+          {qrError ? (
+            <QueryError message="Failed to load QR codes." retry={refetch} />
+          ) : (
+            <QRCodeList qrCodes={qrCodes} isLoading={isLoading} onDelete={handleDeleteClick} />
+          )}
         </div>
 
         {/* Delete confirmation dialog */}

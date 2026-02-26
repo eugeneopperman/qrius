@@ -117,6 +117,80 @@ export function isValidSubdomainLabel(label: string): boolean {
   return true;
 }
 
+/**
+ * Validate that original_data structure matches the QR type.
+ * Returns null if valid, or an error message string if invalid.
+ * Non-URL types should have a meaningful original_data object; URL type doesn't require it.
+ */
+export function validateOriginalData(
+  qrType: string,
+  originalData: unknown
+): string | null {
+  // original_data is optional — if not provided, skip validation
+  if (originalData === undefined || originalData === null) return null;
+
+  if (typeof originalData !== 'object' || Array.isArray(originalData)) {
+    return 'original_data must be an object';
+  }
+
+  const data = originalData as Record<string, unknown>;
+
+  switch (qrType) {
+    case 'url':
+      // URL type: original_data is optional, no strict schema
+      return null;
+
+    case 'email':
+      if (!data.email || typeof data.email !== 'string') {
+        return 'Email QR code requires original_data.email';
+      }
+      return null;
+
+    case 'phone':
+      if (!data.phone || typeof data.phone !== 'string') {
+        return 'Phone QR code requires original_data.phone';
+      }
+      return null;
+
+    case 'sms':
+      if (!data.phone || typeof data.phone !== 'string') {
+        return 'SMS QR code requires original_data.phone';
+      }
+      return null;
+
+    case 'wifi':
+      if (!data.ssid || typeof data.ssid !== 'string') {
+        return 'WiFi QR code requires original_data.ssid';
+      }
+      return null;
+
+    case 'vcard':
+      if (!data.firstName && !data.lastName && !data.name) {
+        return 'vCard QR code requires original_data.firstName, lastName, or name';
+      }
+      return null;
+
+    case 'event':
+      if (!data.title || typeof data.title !== 'string') {
+        return 'Event QR code requires original_data.title';
+      }
+      return null;
+
+    case 'location':
+      if (data.latitude === undefined || data.longitude === undefined) {
+        return 'Location QR code requires original_data.latitude and longitude';
+      }
+      return null;
+
+    case 'text':
+      // Text type: original_data is freeform
+      return null;
+
+    default:
+      return null;
+  }
+}
+
 export function validateStringArray(
   value: unknown,
   maxItems: number,

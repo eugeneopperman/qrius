@@ -118,6 +118,7 @@ npm run test:ui      # Vitest browser UI
 npm run e2e          # Run E2E tests (Playwright)
 npm run storybook    # Start Storybook component docs
 npm run lint         # Run ESLint
+npm run lint:fix     # Run ESLint with auto-fix
 npm run typecheck    # Run TypeScript type checking
 ```
 
@@ -166,6 +167,7 @@ Copy `.env.example` to `.env.local` and configure:
 - **Deploy**: `npx vercel --prod` (or git push triggers auto-deploy)
 - **Version**: Beta version badge shown bottom-right on all pages, tracked in `src/config/constants.ts` (`APP_VERSION`)
 - **Env vars**: Must be set in Vercel dashboard (Settings > Environment Variables) — `.env.local` is local only
+- **Security headers**: `vercel.json` sets X-Content-Type-Options, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy; immutable cache on `/assets/`
 
 ## Development Notes
 - **Import convention**: Use `@/` path alias for all imports from `src/` (e.g., `@/stores/authStore`). Single-level `../` is acceptable within the same directory group.
@@ -233,11 +235,11 @@ Copy `.env.example` to `.env.local` and configure:
 - CORS headers set on all API routes
 
 ## Testing
-- **Unit Tests**: 488 tests passing across 21 test files (Vitest)
+- **Unit Tests**: 619 tests passing across 28 test files (Vitest)
 - **E2E Tests**: 63 tests across 7 Playwright test files (app, navigation, 404, theme, keyboard, wizard, mobile)
 - **Unit command**: `npm run test:run` (single run) or `npm run test` (watch mode)
 - **E2E command**: `npm run e2e` (all browsers) or `npx playwright test --project=chromium` (fast)
-- **Unit coverage**: Utilities (cn, validators, scannability, gradients, qrRoundness), stores (auth, qr, template, theme, toast, wizard, history), UI components (Button, Input), hooks (useClickOutside, useDebounce, useFormField)
+- **Unit coverage**: Utilities (cn, validators, scannability, gradients, qrRoundness, extractStyleOptions), stores (auth, qr, template, theme, toast, wizard, settings, history), UI components (Button, Input, Tabs), dashboard components (AnalyticsCharts, QRCodeCard), wizard steps (StepContent, StepDownload), features (ScannabilityScore), hooks (useClickOutside, useDebounce, useFormField, useAutosave)
 - **E2E coverage**: Navigation, legal pages, auth pages, wizard flow (all 9 QR types), keyboard shortcuts, theme toggle persistence, 404 pages, mobile viewport
 
 ## Documentation & Filing

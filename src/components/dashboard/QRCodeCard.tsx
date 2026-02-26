@@ -5,14 +5,7 @@ import type { QRCode } from '@/types/database';
 import { toast } from '@/stores/toastStore';
 import { Dropdown } from '../ui/Dropdown';
 import { QRMiniPreview } from '../ui/QRMiniPreview';
-import type { QRStyleOptionsForPreview } from '../ui/QRMiniPreview';
-
-function extractStyleOptions(metadata: QRCode['metadata']): QRStyleOptionsForPreview | undefined {
-  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return undefined;
-  const m = metadata as Record<string, unknown>;
-  if (!m.style_options || typeof m.style_options !== 'object' || Array.isArray(m.style_options)) return undefined;
-  return m.style_options as QRStyleOptionsForPreview;
-}
+import { extractStyleOptions } from '@/utils/extractStyleOptions';
 
 interface QRCodeCardProps {
   qrCode: QRCode;

@@ -113,6 +113,7 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'qr-settings-storage',
+      version: 1,
     }
   )
 );

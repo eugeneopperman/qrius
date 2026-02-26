@@ -138,10 +138,11 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, size, styleKey]);
 
-    // Separate unmount-only cleanup
+    // Separate unmount-only cleanup — copy ref to avoid stale closure warning
     useEffect(() => {
+      const container = containerRef.current;
       return () => {
-        if (containerRef.current) clearChildren(containerRef.current);
+        if (container) clearChildren(container);
         qrRef.current = null;
       };
     }, []);

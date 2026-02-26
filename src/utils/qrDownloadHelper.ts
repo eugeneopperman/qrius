@@ -21,7 +21,7 @@ export async function rasterizeQRToBlob(
       return rawData;
     }
   } catch (e) {
-    console.warn('QR getRawData failed, trying fallback:', e);
+    if (import.meta.env.DEV) console.warn('QR getRawData failed, trying fallback:', e);
   }
 
   const instance = qrInstance as unknown as {

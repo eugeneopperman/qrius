@@ -22,7 +22,7 @@ export default function AuthCallbackPage() {
           // PKCE flow: exchange the auth code for a session
           const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
           if (exchangeError) {
-            console.error('Auth code exchange error:', exchangeError);
+            if (import.meta.env.DEV) console.error('Auth code exchange error:', exchangeError);
             setError(exchangeError.message);
             return;
           }
@@ -31,7 +31,7 @@ export default function AuthCallbackPage() {
           // Fallback for hash-based (implicit) flows
           const { data, error: sessionError } = await supabase.auth.getSession();
           if (sessionError) {
-            console.error('Auth callback error:', sessionError);
+            if (import.meta.env.DEV) console.error('Auth callback error:', sessionError);
             setError(sessionError.message);
             return;
           }
@@ -50,7 +50,7 @@ export default function AuthCallbackPage() {
           navigate({ to: '/signin' });
         }
       } catch (err) {
-        console.error('Auth callback error:', err);
+        if (import.meta.env.DEV) console.error('Auth callback error:', err);
         setError('An unexpected error occurred');
       }
     };

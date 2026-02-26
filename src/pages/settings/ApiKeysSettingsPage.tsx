@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from '@/stores/toastStore';
 import { useApiKeys, useCreateApiKey, useDeleteApiKey } from '@/hooks/queries/useApiKeys';
+import { QueryError } from '@/components/ui/QueryError';
 import {
   Loader2,
   Plus,
@@ -18,7 +19,7 @@ import {
 
 export function ApiKeysSettingsContent() {
   const { currentRole, planLimits } = useAuthStore(useShallow((s) => ({ currentRole: s.currentRole, planLimits: s.planLimits })));
-  const { data: apiKeys = [], isLoading } = useApiKeys();
+  const { data: apiKeys = [], isLoading, error, refetch } = useApiKeys();
   const createApiKey = useCreateApiKey();
   const deleteApiKey = useDeleteApiKey();
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -144,7 +145,9 @@ export function ApiKeysSettingsContent() {
 
       {/* API keys list */}
       <div className="glass rounded-2xl overflow-hidden">
-        {isLoading ? (
+        {error ? (
+          <QueryError message="Failed to load API keys." retry={() => refetch()} />
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
           </div>

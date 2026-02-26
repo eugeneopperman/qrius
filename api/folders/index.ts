@@ -16,6 +16,7 @@ import {
 } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { isValidUUID, validateString } from '../_lib/validate.js';
+import { checkRateLimit } from '../_lib/rateLimit.js';
 
 const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
 
@@ -111,6 +112,13 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
 
 async function handleCreate(req: VercelRequest, res: VercelResponse) {
   const user = await requireAuth(req);
+
+  // Rate limit: 20 folder creates per day per user
+  const rateLimit = await checkRateLimit(`folder:${user.id}`, 20);
+  if (!rateLimit.allowed) {
+    return res.status(429).json({ error: 'Too many folder operations. Please try again later.' });
+  }
+
   const { organizationId } = await getUserOrganization(user.id);
   await requireRole(user.id, organizationId, ['owner', 'admin', 'editor']);
 

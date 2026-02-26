@@ -8,9 +8,15 @@ import { setCorsHeaders } from '../_lib/cors.js';
 import { isValidHttpUrl } from '../_lib/validate.js';
 import { logger } from '../_lib/logger.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16',
-});
+let _stripe: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
+    _stripe = new Stripe(key, { apiVersion: '2023-10-16' });
+  }
+  return _stripe;
+}
 
 interface CheckoutRequest {
   priceId: string;
@@ -78,7 +84,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!customerId) {
       // Create new Stripe customer
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email: user.email,
         name: org.name,
         metadata: {
@@ -96,10 +102,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Determine base URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`;
+    const baseUrl = process.env.APP_URL || `https://${req.headers.host}`;
 
     // Create checkout session
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -162,9 +168,9 @@ async function handlePortal(
     return res.status(400).json({ error: 'No billing account found' });
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${req.headers.host}`;
+  const baseUrl = process.env.APP_URL || `https://${req.headers.host}`;
 
-  const session = await stripe.billingPortal.sessions.create({
+  const session = await getStripe().billingPortal.sessions.create({
     customer: org.stripe_customer_id,
     return_url: body.returnUrl || `${baseUrl}/settings/billing`,
   });

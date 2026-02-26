@@ -59,7 +59,7 @@ export default async function handler(req: Request): Promise<Response> {
       [
         process.env.SHORT_URL_DOMAIN,
         (() => {
-          try { return new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://localhost').hostname; }
+          try { return new URL(process.env.APP_URL || 'https://localhost').hostname; }
           catch { return null; }
         })(),
       ].filter(Boolean) as string[]
@@ -168,12 +168,13 @@ async function logScanEvent(
     const clientIP = getClientIP(headers);
     const ipHash = await hashIP(clientIP);
 
-    // Extract referrer hostname for privacy (strip path/query)
+    // Extract referrer hostname for privacy (strip path/query), cap at 255 chars
     const rawReferer = headers.get('referer');
     let referrerHost: string | null = null;
     if (rawReferer) {
       try {
-        referrerHost = new URL(rawReferer).hostname;
+        const hostname = new URL(rawReferer).hostname;
+        referrerHost = hostname.length > 255 ? hostname.slice(0, 255) : hostname;
       } catch {
         // Invalid URL — ignore
       }
