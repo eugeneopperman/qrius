@@ -45,7 +45,7 @@ export async function rasterizeQRToBlob(
       });
       if (blob) return blob;
     } catch (e) {
-      console.warn('QR canvas.toBlob failed, trying SVG fallback:', e);
+      if (import.meta.env.DEV) console.warn('QR canvas.toBlob failed, trying SVG fallback:', e);
     }
   }
 
