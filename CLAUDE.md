@@ -235,7 +235,7 @@ Copy `.env.example` to `.env.local` and configure:
 - CORS headers set on all API routes
 
 ## Testing
-- **Unit Tests**: 619 tests passing across 28 test files (Vitest)
+- **Unit Tests**: 1148 tests passing across 63 test files (Vitest)
 - **E2E Tests**: 63 tests across 7 Playwright test files (app, navigation, 404, theme, keyboard, wizard, mobile)
 - **Unit command**: `npm run test:run` (single run) or `npm run test` (watch mode)
 - **E2E command**: `npm run e2e` (all browsers) or `npx playwright test --project=chromium` (fast)

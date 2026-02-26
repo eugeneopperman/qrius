@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npx tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
@@ -20,7 +20,7 @@
     "e2e:report": "playwright show-report",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "npx tsc -b --noEmit",
     "generate-icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {

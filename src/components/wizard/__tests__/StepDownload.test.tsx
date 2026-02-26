@@ -150,6 +150,7 @@ describe('StepDownload', () => {
         isSaving: true,
         savedQRCodeId: null,
         trackingUrl: null,
+        lastSavedAt: null,
         saveNow: vi.fn(),
         reset: vi.fn(),
       };
@@ -170,6 +171,7 @@ describe('StepDownload', () => {
         isSaving: false,
         savedQRCodeId: null,
         trackingUrl: null,
+        lastSavedAt: null,
         saveNow: vi.fn(),
         reset: vi.fn(),
       };
@@ -182,6 +184,7 @@ describe('StepDownload', () => {
         isSaving: false,
         savedQRCodeId: null,
         trackingUrl: null,
+        lastSavedAt: null,
         saveNow: vi.fn(),
         reset: vi.fn(),
       };
