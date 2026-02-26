@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearch } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/authStore';
@@ -677,6 +677,7 @@ export function BillingSettingsContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
   const [showPlanPicker, setShowPlanPicker] = useState(false);
+  const planPickerRef = useRef<HTMLDivElement>(null);
 
   // Fetch subscription details for paid users
   const { subscription, isLoading: isSubLoading } = useSubscription(
@@ -686,6 +687,16 @@ export function BillingSettingsContent() {
   // Fetch usage data
   const { totalCount, monthlyScans, teamMembers } = useOrganizationQRCodes({ limit: 1 });
   const { data: usageStats } = useUsageStats({ totalQRCodes: totalCount, monthlyScans });
+
+  // Scroll plan picker into view when opened
+  useEffect(() => {
+    if (showPlanPicker) {
+      // Small delay to let the DOM render before scrolling
+      requestAnimationFrame(() => {
+        planPickerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }, [showPlanPicker]);
 
   // Handle success/cancel URL params from Stripe redirect
   const search = useSearch({ strict: false }) as { success?: string; canceled?: string };
@@ -825,15 +836,17 @@ export function BillingSettingsContent() {
       )}
 
       {/* Plan picker (collapsible) */}
-      <PlanPicker
-        isOpen={showPlanPicker}
-        onClose={() => setShowPlanPicker(false)}
-        currentPlan={currentPlan}
-        isAnnual={isAnnual}
-        onToggleAnnual={() => setIsAnnual(!isAnnual)}
-        onSelectPlan={handleUpgrade}
-        isLoading={isLoading}
-      />
+      <div ref={planPickerRef}>
+        <PlanPicker
+          isOpen={showPlanPicker}
+          onClose={() => setShowPlanPicker(false)}
+          currentPlan={currentPlan}
+          isAnnual={isAnnual}
+          onToggleAnnual={() => setIsAnnual(!isAnnual)}
+          onSelectPlan={handleUpgrade}
+          isLoading={isLoading}
+        />
+      </div>
 
       {/* FAQ */}
       <div className="glass rounded-2xl p-6">
