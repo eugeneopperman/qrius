@@ -303,7 +303,7 @@ function SubscriptionCard({
       <div className="flex items-center justify-between mb-4">
         <h2 className="section-title">Subscription</h2>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={onChangePlan}>
+          <Button variant="primary" size="sm" onClick={onChangePlan}>
             Change Plan
             <ChevronRight className="w-3.5 h-3.5" />
           </Button>
@@ -492,15 +492,11 @@ function PlanPicker({
   onSelectPlan: (planId: string) => void;
   isLoading: boolean;
 }) {
+  if (!isOpen) return null;
+
   return (
-    <div
-      className={cn(
-        'grid transition-all duration-300 ease-in-out',
-        isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-      )}
-    >
-      <div className="overflow-hidden">
-        <div className="glass rounded-2xl p-6">
+    <div className="animate-fade-in">
+      <div className="glass rounded-2xl p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="section-title">Choose a Plan</h2>
@@ -625,7 +621,6 @@ function PlanPicker({
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
