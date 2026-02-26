@@ -2,16 +2,10 @@
 // POST /api/api-keys - Create new API key
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuth, getUserOrganization, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
+import { requireAuth, getSupabaseAdmin, getUserOrganization, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { logger } from '../_lib/logger.js';
 import crypto from 'crypto';
-
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 interface CreateKeyRequest {
   name: string;
@@ -65,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleList(req: VercelRequest, res: VercelResponse, organizationId: string) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('api_keys')
     .select('id, name, key_prefix, scopes, rate_limit_per_day, last_used_at, expires_at, is_active, created_at')
     .eq('organization_id', organizationId)
@@ -133,7 +127,7 @@ async function handleCreate(
   }
 
   // Create API key record
-  const { data: apiKey, error } = await supabaseAdmin
+  const { data: apiKey, error } = await getSupabaseAdmin()
     .from('api_keys')
     .insert({
       organization_id: organizationId,

@@ -76,7 +76,7 @@ api/
 10. **Campaign Names**: Optional labels for QR codes, shown on dashboard instead of raw URLs
 11. **Styled Thumbnails**: Dashboard QR previews render with saved colors, gradients, logos, and dot patterns
 12. **Scan Analytics Dashboard**: 4-tab analytics (Overview with daily/hourly charts, Geography with country/region bars, Technology with browser/OS/device breakdown, Sources with referrer tracking) — pure CSS, no charting library
-13. **Testing**: Vitest unit tests (450 passing across 18 test files)
+13. **Testing**: Vitest unit tests (488 passing across 21 test files)
 11. **PWA**: Offline support, installable app
 12. **Keyboard Shortcuts**: Ctrl+S (download), Ctrl+C (copy), etc.
 
@@ -156,7 +156,6 @@ Copy `.env.example` to `.env.local` and configure:
 - `/settings/team` - Redirects to `/settings?tab=team`
 - `/settings/billing` - Redirects to `/settings?tab=billing`
 - `/settings/api-keys` - Redirects to `/settings?tab=api-keys`
-- `/history` - QR code history
 - `/reader` - QR code reader
 - `/onboarding` - Onboarding wizard
 
@@ -234,8 +233,8 @@ Copy `.env.example` to `.env.local` and configure:
 - CORS headers set on all API routes
 
 ## Testing
-- **Unit Tests**: 432 tests passing across 17 test files (Vitest)
-- **E2E Tests**: 62 tests across 7 Playwright test files (app, navigation, 404, theme, keyboard, wizard, mobile)
+- **Unit Tests**: 488 tests passing across 21 test files (Vitest)
+- **E2E Tests**: 63 tests across 7 Playwright test files (app, navigation, 404, theme, keyboard, wizard, mobile)
 - **Unit command**: `npm run test:run` (single run) or `npm run test` (watch mode)
 - **E2E command**: `npm run e2e` (all browsers) or `npx playwright test --project=chromium` (fast)
 - **Unit coverage**: Utilities (cn, validators, scannability, gradients, qrRoundness), stores (auth, qr, template, theme, toast, wizard, history), UI components (Button, Input), hooks (useClickOutside, useDebounce, useFormField)

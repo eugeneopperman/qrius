@@ -34,6 +34,7 @@ interface APIDetailResponse {
   description: string | null;
   tags: string[];
   metadata: Record<string, unknown>;
+  folder_id: string | null;
   created_at: string;
   updated_at: string;
   scansToday: number;
@@ -89,7 +90,7 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     total_scans: data.total_scans,
     user_id: data.user_id,
     organization_id: data.organization_id,
-    folder_id: (data as unknown as Record<string, unknown>).folder_id as string | null ?? null,
+    folder_id: data.folder_id ?? null,
     name: data.name,
     description: data.description,
     tags: data.tags || [],

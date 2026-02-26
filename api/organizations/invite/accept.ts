@@ -1,15 +1,9 @@
 // POST /api/organizations/invite/accept - Accept a team invitation
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuth, UnauthorizedError } from '../../_lib/auth.js';
+import { requireAuth, getSupabaseAdmin, UnauthorizedError } from '../../_lib/auth.js';
 import { setCorsHeaders } from '../../_lib/cors.js';
 import { logger } from '../../_lib/logger.js';
-
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   setCorsHeaders(res, 'GET, POST, OPTIONS', req.headers.origin);
@@ -46,7 +40,7 @@ async function handleGetInvite(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid invitation token' });
   }
 
-  const { data: invitation, error } = await supabaseAdmin
+  const { data: invitation, error } = await getSupabaseAdmin()
     .from('organization_invitations')
     .select(`
       id,
@@ -91,7 +85,7 @@ async function handleAcceptInvite(req: VercelRequest, res: VercelResponse) {
   }
 
   // Fetch invitation
-  const { data: invitation, error: inviteError } = await supabaseAdmin
+  const { data: invitation, error: inviteError } = await getSupabaseAdmin()
     .from('organization_invitations')
     .select('*')
     .eq('token', token)
@@ -117,7 +111,7 @@ async function handleAcceptInvite(req: VercelRequest, res: VercelResponse) {
   }
 
   // Check if user is already a member
-  const { data: existingMember } = await supabaseAdmin
+  const { data: existingMember } = await getSupabaseAdmin()
     .from('organization_members')
     .select('id')
     .eq('organization_id', invitation.organization_id)
@@ -126,7 +120,7 @@ async function handleAcceptInvite(req: VercelRequest, res: VercelResponse) {
 
   if (existingMember) {
     // Already a member — mark invitation as accepted and return success
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('organization_invitations')
       .update({ accepted_at: new Date().toISOString() })
       .eq('id', invitation.id);
@@ -135,7 +129,7 @@ async function handleAcceptInvite(req: VercelRequest, res: VercelResponse) {
   }
 
   // Create membership
-  const { error: memberError } = await supabaseAdmin
+  const { error: memberError } = await getSupabaseAdmin()
     .from('organization_members')
     .insert({
       organization_id: invitation.organization_id,
@@ -155,13 +149,13 @@ async function handleAcceptInvite(req: VercelRequest, res: VercelResponse) {
   }
 
   // Mark invitation as accepted
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from('organization_invitations')
     .update({ accepted_at: new Date().toISOString() })
     .eq('id', invitation.id);
 
   // Fetch organization details for response
-  const { data: org } = await supabaseAdmin
+  const { data: org } = await getSupabaseAdmin()
     .from('organizations')
     .select('id, name, slug')
     .eq('id', invitation.organization_id)

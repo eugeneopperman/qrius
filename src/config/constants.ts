@@ -4,7 +4,7 @@
  */
 
 /** App version — bump by 0.01 with each release */
-export const APP_VERSION = '0.46';
+export const APP_VERSION = '0.47';
 
 // ============================================================================
 // QR Code Configuration
@@ -195,6 +195,8 @@ export const TIMING = {
   COPY_SUCCESS_DURATION: 2000,
   /** Scroll threshold for sticky header (px) */
   SCROLL_THRESHOLD: 50,
+  /** Auth initialization timeout (ms) */
+  AUTH_TIMEOUT_MS: 10000,
 } as const;
 
 // ============================================================================

@@ -3,20 +3,14 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-import { requireAuth, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
+import { requireAuth, getSupabaseAdmin, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { isValidHttpUrl } from '../_lib/validate.js';
 import { logger } from '../_lib/logger.js';
-import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16',
 });
-
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 interface CheckoutRequest {
   priceId: string;
@@ -69,7 +63,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Get organization details
-    const { data: org, error: orgError } = await supabaseAdmin
+    const { data: org, error: orgError } = await getSupabaseAdmin()
       .from('organizations')
       .select('id, name, stripe_customer_id')
       .eq('id', organizationId)
@@ -95,7 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       customerId = customer.id;
 
       // Save customer ID to organization
-      await supabaseAdmin
+      await getSupabaseAdmin()
         .from('organizations')
         .update({ stripe_customer_id: customerId })
         .eq('id', organizationId);
@@ -158,7 +152,7 @@ async function handlePortal(
   }
 
   // Get organization's Stripe customer ID
-  const { data: org, error: orgError } = await supabaseAdmin
+  const { data: org, error: orgError } = await getSupabaseAdmin()
     .from('organizations')
     .select('stripe_customer_id')
     .eq('id', organizationId)

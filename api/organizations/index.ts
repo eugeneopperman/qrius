@@ -2,15 +2,9 @@
 // POST /api/organizations - Create new organization
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuth, UnauthorizedError } from '../_lib/auth.js';
+import { requireAuth, getSupabaseAdmin, UnauthorizedError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { logger } from '../_lib/logger.js';
-
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 interface CreateOrgRequest {
   name: string;
@@ -47,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 async function handleList(req: VercelRequest, res: VercelResponse, userId: string) {
   // Get all organizations the user is a member of
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('organization_members')
     .select(`
       role,
@@ -100,7 +94,7 @@ async function handleCreate(req: VercelRequest, res: VercelResponse, userId: str
   const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 8)}`;
 
   // Create organization
-  const { data: org, error: orgError } = await supabaseAdmin
+  const { data: org, error: orgError } = await getSupabaseAdmin()
     .from('organizations')
     .insert({
       name,
@@ -115,7 +109,7 @@ async function handleCreate(req: VercelRequest, res: VercelResponse, userId: str
   }
 
   // Add user as owner
-  const { error: memberError } = await supabaseAdmin.from('organization_members').insert({
+  const { error: memberError } = await getSupabaseAdmin().from('organization_members').insert({
     organization_id: org.id,
     user_id: userId,
     role: 'owner',
@@ -123,7 +117,7 @@ async function handleCreate(req: VercelRequest, res: VercelResponse, userId: str
 
   if (memberError) {
     // Rollback org creation
-    await supabaseAdmin.from('organizations').delete().eq('id', org.id);
+    await getSupabaseAdmin().from('organizations').delete().eq('id', org.id);
     logger.organizations.error('Error adding member', { error: memberError.message });
     return res.status(500).json({ error: 'Failed to create organization' });
   }

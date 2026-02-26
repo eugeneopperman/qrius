@@ -183,13 +183,14 @@ async function handlePost(req: VercelRequest, res: VercelResponse, organizationI
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ name: normalizedDomain }),
+          signal: AbortSignal.timeout(10000),
         }
       );
 
       const vercelData = await vercelRes.json();
 
       if (!vercelRes.ok) {
-        logger.domains.error('Vercel domain add failed', { domain: normalizedDomain, status: vercelRes.status, body: vercelData });
+        logger.domains.error('Vercel domain add failed', { domain: normalizedDomain, status: vercelRes.status, statusText: vercelRes.statusText });
 
         if (vercelData.error?.code === 'domain_already_in_use') {
           return res.status(409).json({ error: 'This domain is already configured on another Vercel project' });
@@ -282,6 +283,7 @@ async function handleDelete(res: VercelResponse, organizationId: string) {
           headers: {
             Authorization: `Bearer ${vercelToken}`,
           },
+          signal: AbortSignal.timeout(10000),
         }
       );
 
@@ -359,7 +361,7 @@ async function handleVerify(res: VercelResponse, organizationId: string) {
   // Check domain status with Vercel
   const vercelRes = await fetch(
     `https://api.vercel.com/v10/projects/${vercelProjectId}/domains/${domain.domain}`,
-    { headers: { Authorization: `Bearer ${vercelToken}` } }
+    { headers: { Authorization: `Bearer ${vercelToken}` }, signal: AbortSignal.timeout(10000) }
   );
 
   if (!vercelRes.ok) {

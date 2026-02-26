@@ -1,16 +1,10 @@
 // DELETE /api/api-keys/:id - Revoke API key
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuth, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
+import { requireAuth, getSupabaseAdmin, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { isValidUUID } from '../_lib/validate.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { logger } from '../_lib/logger.js';
-
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
@@ -37,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await requireRole(user.id, organizationId, ['owner', 'admin']);
 
     // Verify the key belongs to this organization
-    const { data: key, error: fetchError } = await supabaseAdmin
+    const { data: key, error: fetchError } = await getSupabaseAdmin()
       .from('api_keys')
       .select('id, organization_id')
       .eq('id', keyId)
@@ -52,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Delete the key
-    const { error: deleteError } = await supabaseAdmin
+    const { error: deleteError } = await getSupabaseAdmin()
       .from('api_keys')
       .delete()
       .eq('id', keyId);

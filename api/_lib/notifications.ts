@@ -1,11 +1,6 @@
 // Notification utilities for sending alerts to users
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from './auth.js';
 import { logger } from './logger.js';
-
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export interface PaymentFailureDetails {
   subscriptionId: string;
@@ -20,7 +15,7 @@ export interface PaymentFailureDetails {
  * Get organization admin emails for notifications
  */
 async function getOrgAdminEmails(organizationId: string): Promise<string[]> {
-  const { data: members, error } = await supabaseAdmin
+  const { data: members, error } = await getSupabaseAdmin()
     .from('organization_members')
     .select(`
       user_id,
@@ -52,7 +47,7 @@ export async function notifyPaymentFailed(
 ): Promise<void> {
   try {
     // Get organization details
-    const { data: org } = await supabaseAdmin
+    const { data: org } = await getSupabaseAdmin()
       .from('organizations')
       .select('name')
       .eq('id', organizationId)

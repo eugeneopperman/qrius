@@ -3,7 +3,7 @@ import { lazy, Suspense } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import { isSupabaseMissing } from '@/lib/supabase';
-import { APP_VERSION } from '@/config/constants';
+import { APP_VERSION, TIMING } from '@/config/constants';
 import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { KeyboardShortcutsModal } from '@/components/features/KeyboardShortcuts';
 
@@ -127,7 +127,7 @@ function RootLayout() {
 }
 
 // Auth check for protected routes
-const AUTH_TIMEOUT_MS = 10000; // 10 second timeout
+const AUTH_TIMEOUT_MS = TIMING.AUTH_TIMEOUT_MS;
 
 async function waitForAuthInit(): Promise<void> {
   const { isInitialized } = useAuthStore.getState();

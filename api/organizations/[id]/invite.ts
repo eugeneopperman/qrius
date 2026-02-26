@@ -1,19 +1,13 @@
 // POST /api/organizations/:id/invite - Invite member to organization
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
-import { requireAuth, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../../_lib/auth.js';
+import { requireAuth, getSupabaseAdmin, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../../_lib/auth.js';
 import { setCorsHeaders } from '../../_lib/cors.js';
 import { isValidUUID } from '../../_lib/validate.js';
 import { logger } from '../../_lib/logger.js';
 import crypto from 'crypto';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 interface InviteRequest {
   email: string;
@@ -46,7 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Check team member limit
     const { current, limit } = await checkPlanLimit(organizationId, 'team_members');
     // Also count pending invites toward the limit
-    const { count: pendingInvites } = await supabaseAdmin
+    const { count: pendingInvites } = await getSupabaseAdmin()
       .from('organization_invitations')
       .select('*', { count: 'exact', head: true })
       .eq('organization_id', organizationId)
@@ -79,12 +73,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Check if user is already a member
-    const { data: existingMember } = await supabaseAdmin
+    const { data: existingMember } = await getSupabaseAdmin()
       .from('organization_members')
       .select('id')
       .eq('organization_id', organizationId)
       .eq('user_id', (
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from('users')
           .select('id')
           .eq('email', body.email)
@@ -97,7 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Check if there's already a pending invitation
-    const { data: existingInvite } = await supabaseAdmin
+    const { data: existingInvite } = await getSupabaseAdmin()
       .from('organization_invitations')
       .select('id')
       .eq('organization_id', organizationId)
@@ -115,7 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
     // Create invitation
-    const { data: invitation, error } = await supabaseAdmin
+    const { data: invitation, error } = await getSupabaseAdmin()
       .from('organization_invitations')
       .insert({
         organization_id: organizationId,
@@ -132,6 +126,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       logger.organizations.error('Error creating invitation', { error: error.message });
       return res.status(500).json({ error: 'Failed to create invitation' });
     }
+
+    logger.organizations.info('Invitation sent', { orgId: organizationId, email: body.email, role: body.role });
 
     // TODO: Send invitation email
     // For now, return the invite link

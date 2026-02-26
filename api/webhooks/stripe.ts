@@ -2,7 +2,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '../_lib/auth.js';
 import { notifyPaymentFailed } from '../_lib/notifications.js';
 import { logger } from '../_lib/logger.js';
 
@@ -10,18 +10,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16',
 });
 
-const supabaseAdmin = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
-
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
-// Plan mapping from Stripe price IDs
+// Plan mapping from Stripe price IDs — filter out empty-string keys from unconfigured env vars
 const priceToPlan: Record<string, string> = {
   [process.env.STRIPE_PRICE_PRO || '']: 'pro',
   [process.env.STRIPE_PRICE_BUSINESS || '']: 'business',
 };
+delete priceToPlan[''];
 
 export const config = {
   api: {
@@ -40,6 +36,10 @@ async function getRawBody(req: VercelRequest): Promise<Buffer> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (!endpointSecret) {
+    return res.status(500).json({ error: 'Webhook not configured' });
   }
 
   const sig = req.headers['stripe-signature'] as string;
@@ -104,7 +104,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const plan = priceToPlan[priceId] || 'free';
 
   // Update organization with subscription info
-  const { error: orgUpdateError } = await supabaseAdmin
+  const { error: orgUpdateError } = await getSupabaseAdmin()
     .from('organizations')
     .update({
       plan,
@@ -117,7 +117,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Create or update subscription record
-  const { error: subUpsertError } = await supabaseAdmin.from('subscriptions').upsert({
+  const { error: subUpsertError } = await getSupabaseAdmin().from('subscriptions').upsert({
     organization_id: organizationId,
     stripe_subscription_id: subscriptionId,
     stripe_price_id: priceId,
@@ -139,7 +139,7 @@ async function updateSubscription(orgId: string, subscription: Stripe.Subscripti
   const plan = priceToPlan[priceId] || 'free';
 
   // Update organization plan
-  const { error: orgUpdateError } = await supabaseAdmin
+  const { error: orgUpdateError } = await getSupabaseAdmin()
     .from('organizations')
     .update({
       plan,
@@ -152,7 +152,7 @@ async function updateSubscription(orgId: string, subscription: Stripe.Subscripti
   }
 
   // Upsert subscription record
-  const { error: subUpsertError } = await supabaseAdmin.from('subscriptions').upsert({
+  const { error: subUpsertError } = await getSupabaseAdmin().from('subscriptions').upsert({
     organization_id: orgId,
     stripe_subscription_id: subscription.id,
     stripe_price_id: priceId,
@@ -172,7 +172,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   if (!organizationId) {
     // Try to find by customer ID
-    const { data: org } = await supabaseAdmin
+    const { data: org } = await getSupabaseAdmin()
       .from('organizations')
       .select('id')
       .eq('stripe_customer_id', subscription.customer as string)
@@ -192,7 +192,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   // Find organization by subscription ID
-  const { data: sub } = await supabaseAdmin
+  const { data: sub } = await getSupabaseAdmin()
     .from('subscriptions')
     .select('organization_id')
     .eq('stripe_subscription_id', subscription.id)
@@ -204,7 +204,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   // Downgrade to free plan
-  const { error: orgUpdateError } = await supabaseAdmin
+  const { error: orgUpdateError } = await getSupabaseAdmin()
     .from('organizations')
     .update({
       plan: 'free',
@@ -217,7 +217,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   // Update subscription status
-  const { error: subUpdateError } = await supabaseAdmin
+  const { error: subUpdateError } = await getSupabaseAdmin()
     .from('subscriptions')
     .update({ status: 'canceled' })
     .eq('stripe_subscription_id', subscription.id);
@@ -234,7 +234,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!subscriptionId) return;
 
   // Update subscription status to active
-  const { error: subUpdateError } = await supabaseAdmin
+  const { error: subUpdateError } = await getSupabaseAdmin()
     .from('subscriptions')
     .update({ status: 'active' })
     .eq('stripe_subscription_id', subscriptionId);
@@ -251,7 +251,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   if (!subscriptionId) return;
 
   // Update subscription status to past_due
-  const { error: subUpdateError } = await supabaseAdmin
+  const { error: subUpdateError } = await getSupabaseAdmin()
     .from('subscriptions')
     .update({ status: 'past_due' })
     .eq('stripe_subscription_id', subscriptionId);
@@ -263,7 +263,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   logger.webhooks.warn('Payment failed', { subscriptionId });
 
   // Find organization and send notification
-  const { data: sub } = await supabaseAdmin
+  const { data: sub } = await getSupabaseAdmin()
     .from('subscriptions')
     .select('organization_id')
     .eq('stripe_subscription_id', subscriptionId)

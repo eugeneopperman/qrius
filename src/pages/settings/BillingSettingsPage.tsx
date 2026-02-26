@@ -159,15 +159,12 @@ interface SubscriptionRow {
 
 function useSubscription(organizationId: string | undefined) {
   const [subscription, setSubscription] = useState<SubscriptionRow | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!!organizationId);
 
   useEffect(() => {
-    if (!organizationId) {
-      setIsLoading(false);
-      return;
-    }
+    if (!organizationId) return;
 
-    setIsLoading(true);
+    let cancelled = false;
     supabase
       .from('subscriptions')
       .select('*')
@@ -175,9 +172,13 @@ function useSubscription(organizationId: string | undefined) {
       .order('created_at', { ascending: false })
       .limit(1)
       .then(({ data }) => {
-        setSubscription(data?.[0] ?? null);
-        setIsLoading(false);
+        if (!cancelled) {
+          setSubscription(data?.[0] ?? null);
+          setIsLoading(false);
+        }
       });
+
+    return () => { cancelled = true; };
   }, [organizationId]);
 
   return { subscription, isLoading };
@@ -271,6 +272,15 @@ function UsageBars({
   );
 }
 
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between py-2.5">
+      <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
+      <span className="text-sm font-medium text-gray-900 dark:text-white">{children}</span>
+    </div>
+  );
+}
+
 function SubscriptionCard({
   subscription,
   plan,
@@ -290,13 +300,6 @@ function SubscriptionCard({
   const cycle = getBillingCycle(subscription?.stripe_price_id ?? null);
   const status = subscription?.status ?? 'active';
   const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.active;
-
-  const DetailRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="flex items-center justify-between py-2.5">
-      <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-      <span className="text-sm font-medium text-gray-900 dark:text-white">{children}</span>
-    </div>
-  );
 
   return (
     <div className="glass rounded-2xl p-6">
@@ -642,18 +645,13 @@ function AccordionItem({ question, answer }: { question: string; answer: string 
           className={cn('w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200', open && 'rotate-180')}
         />
       </button>
-      <div
-        className={cn(
-          'grid transition-all duration-200 ease-in-out',
-          open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-        )}
-      >
-        <div className="overflow-hidden">
+      {open && (
+        <div className="animate-fade-in">
           <p className="pb-4 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
             {answer}
           </p>
         </div>
-      </div>
+      )}
     </div>
   );
 }
