@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useRef, useEffect, useCallback, useLayoutEffect, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/utils/cn';
 
@@ -9,53 +9,58 @@ interface DropdownProps {
   className?: string;
 }
 
+interface MenuPosition {
+  top: number;
+  left: number;
+  ready: boolean;
+}
+
 export function Dropdown({ trigger, children, align = 'left', className }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const [position, setPosition] = useState<MenuPosition>({ top: 0, left: 0, ready: false });
 
   const close = useCallback(() => setIsOpen(false), []);
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  // Calculate position when opening
+  // Reset position when closing so next open gets a fresh calculation
   useEffect(() => {
-    if (!isOpen || !containerRef.current) return;
+    if (!isOpen) {
+      setPosition({ top: 0, left: 0, ready: false });
+    }
+  }, [isOpen]);
 
-    const trigger = containerRef.current;
-    const rect = trigger.getBoundingClientRect();
+  // Calculate position synchronously after DOM update, before paint
+  useLayoutEffect(() => {
+    if (!isOpen || !containerRef.current || !menuRef.current) return;
 
-    // Calculate initial position (below trigger)
-    let top = rect.bottom + 4;
-    let left = align === 'right' ? rect.right : rect.left;
+    const triggerRect = containerRef.current.getBoundingClientRect();
+    const menuRect = menuRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const pad = 8;
 
-    // Defer flip check to after menu renders and we know its size
-    setPosition({ top, left });
+    // Vertical: prefer below, flip above if it would overflow
+    let top = triggerRect.bottom + 4;
+    if (top + menuRect.height > vh - pad) {
+      const above = triggerRect.top - menuRect.height - 4;
+      top = above >= pad ? above : pad;
+    }
 
-    // After paint, check if menu overflows and flip if needed
-    requestAnimationFrame(() => {
-      if (!menuRef.current) return;
-      const menuRect = menuRef.current.getBoundingClientRect();
-
-      // Flip upward if menu overflows viewport bottom
-      if (menuRect.bottom > window.innerHeight - 8) {
-        top = rect.top - menuRect.height - 4;
-        if (top < 8) top = 8; // don't go above viewport either
+    // Horizontal: anchor to trigger edge, then clamp to viewport
+    let left: number;
+    if (align === 'right') {
+      left = triggerRect.right - menuRect.width;
+      if (left < pad) left = pad;
+    } else {
+      left = triggerRect.left;
+      if (left + menuRect.width > vw - pad) {
+        left = vw - menuRect.width - pad;
       }
+    }
 
-      // Prevent horizontal overflow
-      if (align === 'right') {
-        if (left - menuRect.width < 8) {
-          left = menuRect.width + 8;
-        }
-      } else {
-        if (left + menuRect.width > window.innerWidth - 8) {
-          left = window.innerWidth - menuRect.width - 8;
-        }
-      }
-
-      setPosition({ top, left });
-    });
+    setPosition({ top, left, ready: true });
   }, [isOpen, align]);
 
   useEffect(() => {
@@ -95,7 +100,7 @@ export function Dropdown({ trigger, children, align = 'left', className }: Dropd
       <div aria-haspopup="true" aria-expanded={isOpen}>
         {trigger({ isOpen, toggle })}
       </div>
-      {isOpen && position && createPortal(
+      {isOpen && createPortal(
         <div
           ref={menuRef}
           role="menu"
@@ -104,8 +109,10 @@ export function Dropdown({ trigger, children, align = 'left', className }: Dropd
           )}
           style={{
             top: position.top,
-            left: align === 'right' ? undefined : position.left,
-            right: align === 'right' ? window.innerWidth - position.left : undefined,
+            left: position.left,
+            // Render invisibly on first pass so useLayoutEffect can measure;
+            // show once position is calculated
+            visibility: position.ready ? 'visible' : 'hidden',
           }}
         >
           {children({ close })}
