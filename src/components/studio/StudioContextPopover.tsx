@@ -175,7 +175,6 @@ const PopoverContent = memo(function PopoverContent({ popover }: { popover: Popo
           <ColorPicker
             value={colorValue}
             onChange={handleColorChange}
-            size="sm"
           />
         </div>
       )}
