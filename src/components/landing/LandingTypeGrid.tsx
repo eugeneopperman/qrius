@@ -1,20 +1,12 @@
 import { cn } from '@/utils/cn';
-import { useQRStore } from '@/stores/qrStore';
-import { useShallow } from 'zustand/react/shallow';
-import { useWizardStore } from '@/stores/wizardStore';
 import { typeOptions } from '@/data/qrTypeOptions';
 import type { QRCodeType } from '@/types';
 
-export function StepType() {
-  const { activeType, setActiveType } = useQRStore(useShallow((s) => ({ activeType: s.activeType, setActiveType: s.setActiveType })));
-  const { nextStep } = useWizardStore();
+interface LandingTypeGridProps {
+  onSelect: (typeId: QRCodeType) => void;
+}
 
-  const handleSelect = (typeId: QRCodeType) => {
-    setActiveType(typeId);
-    // Auto-advance to next step
-    nextStep();
-  };
-
+export function LandingTypeGrid({ onSelect }: LandingTypeGridProps) {
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="text-center mb-8">
@@ -22,51 +14,37 @@ export function StepType() {
           What would you like to create?
         </h1>
         <p className="text-gray-500 dark:text-gray-400">
-          Choose the type of QR code you want to generate
+          Choose a QR code type to get started — free, fast, and trackable
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {typeOptions.map((option) => {
           const Icon = option.icon;
-          const isSelected = activeType === option.id;
 
           return (
             <button
               key={option.id}
-              onClick={() => handleSelect(option.id)}
+              onClick={() => onSelect(option.id)}
               className={cn(
                 'group relative flex flex-col items-center gap-3 p-6 rounded-2xl text-center transition-all duration-200',
                 'focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2',
                 'hover:shadow-lg hover:-translate-y-0.5',
                 'active:scale-[0.98]',
-                isSelected
-                  ? 'glass border-2 border-orange-500/70 shadow-md'
-                  : 'glass hover:border-orange-300/50 dark:hover:border-orange-600/50'
+                'glass hover:border-orange-300/50 dark:hover:border-orange-600/50'
               )}
             >
-              {/* Icon */}
               <div
                 className={cn(
                   'p-4 rounded-2xl transition-colors duration-200',
-                  isSelected
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 group-hover:bg-orange-500/10 group-hover:text-orange-600 dark:group-hover:text-orange-400'
+                  'bg-black/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 group-hover:bg-orange-500/10 group-hover:text-orange-600 dark:group-hover:text-orange-400'
                 )}
               >
                 <Icon className={cn('w-6 h-6', option.animClass)} />
               </div>
 
-              {/* Label */}
               <div>
-                <h3
-                  className={cn(
-                    'font-semibold text-lg transition-colors',
-                    isSelected
-                      ? 'text-orange-700 dark:text-orange-400'
-                      : 'text-gray-900 dark:text-white'
-                  )}
-                >
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white transition-colors">
                   {option.label}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -74,15 +52,9 @@ export function StepType() {
                 </p>
               </div>
 
-              {/* Example hint */}
               <span className="text-xs text-gray-400 dark:text-gray-500">
                 {option.example}
               </span>
-
-              {/* Selected indicator */}
-              {isSelected && (
-                <div className="absolute top-3 right-3 w-3 h-3 bg-orange-500 rounded-full animate-scale-in" />
-              )}
             </button>
           );
         })}

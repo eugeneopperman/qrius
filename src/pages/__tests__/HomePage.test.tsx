@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@/test/test-utils';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@/test/test-utils';
 import HomePage from '../HomePage';
 
 // Mock TanStack Router
+const mockNavigate = vi.fn();
 vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => vi.fn(),
+  useNavigate: () => mockNavigate,
   useSearch: () => ({}),
   Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
 }));
@@ -14,44 +15,55 @@ vi.mock('@/components/Header', () => ({
   Header: () => <div data-testid="header" />,
 }));
 
-vi.mock('@/components/wizard', () => ({
-  WizardContainer: () => <div data-testid="wizard-container" />,
+vi.mock('@/components/landing/LandingTypeGrid', () => ({
+  LandingTypeGrid: ({ onSelect }: { onSelect: (id: string) => void }) => (
+    <div data-testid="landing-type-grid">
+      <button data-testid="type-url" onClick={() => onSelect('url')}>URL</button>
+    </div>
+  ),
+}));
+
+vi.mock('@/components/auth/AuthModal', () => ({
+  AuthModal: ({ isOpen, onClose, onAuthSuccess }: any) =>
+    isOpen ? (
+      <div data-testid="auth-modal">
+        <button data-testid="close-modal" onClick={onClose}>Close</button>
+        <button data-testid="auth-success" onClick={onAuthSuccess}>Sign In Success</button>
+      </div>
+    ) : null,
 }));
 
 vi.mock('@/components/layout/PublicFooter', () => ({
   PublicFooter: () => <div data-testid="public-footer" />,
 }));
 
-vi.mock('@/components/ErrorBoundary', () => ({
-  ErrorBoundary: ({ children }: any) => <div data-testid="error-boundary">{children}</div>,
-}));
-
 // Mock stores
-const mockUser = vi.fn<() => any>(() => null);
-
-vi.mock('@/stores/authStore', () => ({
-  useAuthStore: (selector: any) => selector({ user: mockUser() }),
-}));
-
-vi.mock('@/stores/themeStore', () => ({
-  useThemeStore: (selector: any) => selector({ cycleTheme: vi.fn() }),
-}));
-
-vi.mock('@/stores/templateStore', () => ({
-  useTemplateStore: () => ({ openWizard: vi.fn() }),
-}));
-
 vi.mock('@/stores/uiStore', () => ({
   useUIStore: () => ({ openShortcuts: vi.fn(), openSettings: vi.fn() }),
 }));
 
-vi.mock('@/hooks/useKeyboardShortcuts', () => ({
-  useKeyboardShortcuts: vi.fn(),
+const mockSetActiveType = vi.fn();
+const mockMarkCompleted = vi.fn();
+const mockGoToStep = vi.fn();
+
+vi.mock('@/stores/qrStore', () => ({
+  useQRStore: Object.assign(
+    (selector: any) => selector({ setActiveType: mockSetActiveType }),
+    { getState: () => ({ setActiveType: mockSetActiveType }) }
+  ),
+}));
+
+vi.mock('@/stores/wizardStore', () => ({
+  useWizardStore: Object.assign(
+    (selector: any) => selector({ markCompleted: mockMarkCompleted, goToStep: mockGoToStep }),
+    { getState: () => ({ markCompleted: mockMarkCompleted, goToStep: mockGoToStep }) }
+  ),
 }));
 
 describe('HomePage', () => {
   beforeEach(() => {
-    mockUser.mockReturnValue(null);
+    vi.clearAllMocks();
+    sessionStorage.clear();
   });
 
   it('renders the header', () => {
@@ -59,9 +71,9 @@ describe('HomePage', () => {
     expect(screen.getByTestId('header')).toBeInTheDocument();
   });
 
-  it('renders the wizard container', () => {
+  it('renders the landing type grid', () => {
     render(<HomePage />);
-    expect(screen.getByTestId('wizard-container')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-type-grid')).toBeInTheDocument();
   });
 
   it('renders the public footer', () => {
@@ -69,27 +81,57 @@ describe('HomePage', () => {
     expect(screen.getByTestId('public-footer')).toBeInTheDocument();
   });
 
-  it('shows CTA banner when user is not authenticated', () => {
-    render(<HomePage />);
-    expect(screen.getByText(/track your qr code scans/i)).toBeInTheDocument();
-    expect(screen.getByText(/get started free/i)).toBeInTheDocument();
-  });
-
-  it('CTA banner links to /signup', () => {
-    render(<HomePage />);
-    const signupLink = screen.getByText(/get started free/i).closest('a');
-    expect(signupLink).toHaveAttribute('href', '/signup');
-  });
-
-  it('hides CTA banner when user is authenticated', () => {
-    mockUser.mockReturnValue({ id: 'user-1', email: 'test@example.com' });
-    render(<HomePage />);
-    expect(screen.queryByText(/track your qr code scans/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/get started free/i)).not.toBeInTheDocument();
-  });
-
   it('renders the main content area', () => {
     render(<HomePage />);
     expect(screen.getByRole('main')).toBeInTheDocument();
+  });
+
+  it('does not show auth modal initially', () => {
+    render(<HomePage />);
+    expect(screen.queryByTestId('auth-modal')).not.toBeInTheDocument();
+  });
+
+  it('opens auth modal when a type card is clicked', () => {
+    render(<HomePage />);
+    fireEvent.click(screen.getByTestId('type-url'));
+    expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
+  });
+
+  it('stores pending type in sessionStorage on type select', () => {
+    render(<HomePage />);
+    fireEvent.click(screen.getByTestId('type-url'));
+    expect(sessionStorage.getItem('pendingQRType')).toBe('url');
+  });
+
+  it('closes auth modal when close button is clicked', () => {
+    render(<HomePage />);
+    fireEvent.click(screen.getByTestId('type-url'));
+    expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('close-modal'));
+    expect(screen.queryByTestId('auth-modal')).not.toBeInTheDocument();
+  });
+
+  it('navigates to /create on auth success', () => {
+    render(<HomePage />);
+    fireEvent.click(screen.getByTestId('type-url'));
+    fireEvent.click(screen.getByTestId('auth-success'));
+    expect(mockNavigate).toHaveBeenCalledWith({ to: '/create' });
+  });
+
+  it('sets active type and wizard step on auth success', () => {
+    render(<HomePage />);
+    fireEvent.click(screen.getByTestId('type-url'));
+    fireEvent.click(screen.getByTestId('auth-success'));
+    expect(mockSetActiveType).toHaveBeenCalledWith('url');
+    expect(mockMarkCompleted).toHaveBeenCalledWith(1);
+    expect(mockGoToStep).toHaveBeenCalledWith(2);
+  });
+
+  it('clears sessionStorage on auth success', () => {
+    render(<HomePage />);
+    fireEvent.click(screen.getByTestId('type-url'));
+    expect(sessionStorage.getItem('pendingQRType')).toBe('url');
+    fireEvent.click(screen.getByTestId('auth-success'));
+    expect(sessionStorage.getItem('pendingQRType')).toBeNull();
   });
 });

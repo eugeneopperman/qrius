@@ -163,6 +163,21 @@ async function requireAuth() {
   }
 }
 
+// Redirect authenticated users away from landing page
+async function redirectAuthenticatedToDashboard() {
+  try {
+    await waitForAuthInit();
+  } catch {
+    // Allow access if initialization times out
+    return;
+  }
+
+  const currentUser = useAuthStore.getState().user;
+  if (currentUser) {
+    throw redirect({ to: '/dashboard' });
+  }
+}
+
 // Guest check for auth pages
 async function requireGuest() {
   try {
@@ -190,6 +205,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
+  beforeLoad: redirectAuthenticatedToDashboard,
   component: HomePage,
 });
 

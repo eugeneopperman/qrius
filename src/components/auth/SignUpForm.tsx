@@ -9,6 +9,7 @@ import { Mail, Lock, User, Loader2, AlertCircle, CheckCircle } from 'lucide-reac
 
 interface SignUpFormProps {
   onSignIn: () => void;
+  onSuccess?: () => void;
 }
 
 export function SignUpForm({ onSignIn }: SignUpFormProps) {

@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
+import { useQRStore } from '@/stores/qrStore';
+import { useWizardStore } from '@/stores/wizardStore';
 import { Loader2, AlertCircle } from 'lucide-react';
+import type { QRCodeType } from '@/types';
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
@@ -39,8 +42,15 @@ export default function AuthCallbackPage() {
         }
 
         if (session) {
-          // Redirect new users to onboarding, returning users to dashboard
-          if (!hasCompletedOnboarding) {
+          // Check if user selected a QR type before auth
+          const pendingType = sessionStorage.getItem('pendingQRType') as QRCodeType | null;
+          if (pendingType) {
+            sessionStorage.removeItem('pendingQRType');
+            useQRStore.getState().setActiveType(pendingType);
+            useWizardStore.getState().markCompleted(1);
+            useWizardStore.getState().goToStep(2);
+            navigate({ to: '/create' });
+          } else if (!hasCompletedOnboarding) {
             navigate({ to: '/onboarding' });
           } else {
             navigate({ to: '/dashboard' });

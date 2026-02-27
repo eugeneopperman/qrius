@@ -11,9 +11,10 @@ interface SignInFormProps {
   onForgotPassword: () => void;
   onSignUp: () => void;
   redirectTo?: string;
+  onSuccess?: () => void;
 }
 
-export function SignInForm({ onForgotPassword, onSignUp, redirectTo }: SignInFormProps) {
+export function SignInForm({ onForgotPassword, onSignUp, redirectTo, onSuccess }: SignInFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +34,8 @@ export function SignInForm({ onForgotPassword, onSignUp, redirectTo }: SignInFor
     const { error } = await signIn(email, password);
     if (error) {
       setError(error.message);
+    } else if (onSuccess) {
+      onSuccess();
     } else {
       const destination = redirectTo || (hasCompletedOnboarding ? '/dashboard' : '/onboarding');
       navigate({ to: destination });

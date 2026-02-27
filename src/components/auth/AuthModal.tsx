@@ -11,9 +11,10 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultView?: AuthView;
+  onAuthSuccess?: () => void;
 }
 
-export function AuthModal({ isOpen, onClose, defaultView = 'signin' }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, defaultView = 'signin', onAuthSuccess }: AuthModalProps) {
   const [view, setView] = useState<AuthView>(defaultView);
   const modalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(isOpen, modalRef);
@@ -85,6 +86,7 @@ export function AuthModal({ isOpen, onClose, defaultView = 'signin' }: AuthModal
             <SignInForm
               onForgotPassword={() => setView('forgot-password')}
               onSignUp={() => setView('signup')}
+              onSuccess={onAuthSuccess}
             />
           )}
 
