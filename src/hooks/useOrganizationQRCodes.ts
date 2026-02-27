@@ -123,14 +123,15 @@ async function fetchQRCodes(options: UseOrganizationQRCodesOptions = {}): Promis
 export function useOrganizationQRCodes(options: UseOrganizationQRCodesOptions = {}) {
   const { limit, status, folderId, search, sort, order } = options;
   const currentOrganization = useAuthStore((s) => s.currentOrganization);
+  const user = useAuthStore((s) => s.user);
   const queryClient = useQueryClient();
 
-  const queryKey = ['qr-codes', currentOrganization?.id, { limit, status, folderId, search, sort, order }] as const;
+  const queryKey = ['qr-codes', currentOrganization?.id ?? user?.id ?? 'anon', { limit, status, folderId, search, sort, order }] as const;
 
   const { data, isLoading, error } = useQuery({
     queryKey,
     queryFn: () => fetchQRCodes(options),
-    enabled: !!currentOrganization,
+    enabled: !!currentOrganization || !!user,
   });
 
   const qrCodes = data?.qrCodes ?? [];
