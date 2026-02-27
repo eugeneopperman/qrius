@@ -1,12 +1,15 @@
-import { StrictMode } from 'react';
+import { StrictMode, lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
 import { router } from '@/router';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { CookieConsent } from '@/components/legal';
 import { useAuthStore } from '@/stores/authStore';
+
+const CookieConsent = lazy(() =>
+  import('@/components/legal/CookieConsent').then(m => ({ default: m.CookieConsent }))
+);
 
 // Initialize React Query
 const queryClient = new QueryClient({
@@ -18,9 +21,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Initialize auth on app load
-useAuthStore.getState().initialize();
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary
@@ -30,8 +30,14 @@ createRoot(document.getElementById('root')!).render(
     >
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
-        <CookieConsent />
+        <Suspense fallback={null}>
+          <CookieConsent />
+        </Suspense>
       </QueryClientProvider>
     </ErrorBoundary>
   </StrictMode>
 );
+
+// Defer auth init to after first paint — waitForAuthInit() in router.tsx
+// already handles the async case by subscribing to store changes
+setTimeout(() => useAuthStore.getState().initialize(), 0);

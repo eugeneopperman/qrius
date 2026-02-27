@@ -5,9 +5,13 @@ import { useUIStore } from '@/stores/uiStore';
 import { isSupabaseMissing } from '@/lib/supabase';
 import { APP_VERSION, TIMING } from '@/config/constants';
 import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { KeyboardShortcutsModal } from '@/components/features/KeyboardShortcuts';
-
-import { SettingsModal } from '@/components/settings';
+// Lazy-load modals — only fetched when opened (~30KB off critical path)
+const KeyboardShortcutsModal = lazy(() =>
+  import('@/components/features/KeyboardShortcuts').then(m => ({ default: m.KeyboardShortcutsModal }))
+);
+const SettingsModal = lazy(() =>
+  import('@/components/settings/SettingsModal').then(m => ({ default: m.SettingsModal }))
+);
 import { ToastContainer } from '@/components/ui/Toast';
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
@@ -113,9 +117,17 @@ function RootLayout() {
       )}
       <Outlet />
 
-      {/* Global modals */}
-      <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={closeShortcuts} />
-      <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
+      {/* Global modals — lazy-loaded, only fetched when opened */}
+      {isShortcutsOpen && (
+        <Suspense fallback={null}>
+          <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={closeShortcuts} />
+        </Suspense>
+      )}
+      {isSettingsOpen && (
+        <Suspense fallback={null}>
+          <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
+        </Suspense>
+      )}
       <ToastContainer />
 
       <div className="fixed bottom-2 right-2 z-[100] px-2 py-0.5 rounded bg-black/60 text-white text-xs font-mono pointer-events-none select-none">

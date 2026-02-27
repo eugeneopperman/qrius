@@ -30,6 +30,8 @@ export default defineConfig({
           'tanstack-query': ['@tanstack/react-query'],
           'tanstack-router': ['@tanstack/react-router'],
           'icons': ['lucide-react'],
+          'pdf-export': ['jspdf'],
+          'canvas-capture': ['html2canvas'],
         },
       },
     },
@@ -70,7 +72,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{css,ico,png,svg,woff2}'],
         navigateFallback: null,
         runtimeCaching: [
           {
@@ -95,6 +97,17 @@ export default defineConfig({
               },
               cacheableResponse: {
                 statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /\.js$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'js-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
               },
             },
           },

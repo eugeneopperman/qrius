@@ -128,13 +128,13 @@
 
   body {
     @apply antialiased;
-    background: var(--glass-mesh-bg);
-    background-attachment: fixed;
     color: var(--color-text-primary);
     min-height: 100vh;
   }
 
-  /* Decorative Background Shapes — warm organic forms behind glass */
+  /* Mesh background + decorative shapes — uses position: fixed on ::before
+     instead of background-attachment: fixed on body, which causes expensive
+     GPU recomposition on every scroll on mobile */
   body::before {
     content: '';
     position: fixed;
@@ -145,7 +145,8 @@
       radial-gradient(ellipse 80% 70% at 85% 15%, var(--deco-shape-amber) 0%, transparent 70%),
       radial-gradient(ellipse 60% 80% at 10% 85%, var(--deco-shape-gold) 0%, transparent 65%),
       radial-gradient(ellipse 50% 60% at 75% 60%, var(--deco-shape-coral) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 50% at 30% 30%, var(--deco-shape-pink) 0%, transparent 50%);
+      radial-gradient(ellipse 40% 50% at 30% 30%, var(--deco-shape-pink) 0%, transparent 50%),
+      var(--glass-mesh-bg);
   }
 
   /* App root must sit above decorative shapes */
