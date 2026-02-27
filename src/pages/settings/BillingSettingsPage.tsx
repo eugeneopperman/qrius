@@ -679,6 +679,11 @@ export function BillingSettingsContent() {
   const [showPlanPicker, setShowPlanPicker] = useState(false);
   const planPickerRef = useRef<HTMLDivElement>(null);
 
+  // Always re-fetch org data on mount to pick up plan changes
+  useEffect(() => {
+    fetchOrganizations();
+  }, [fetchOrganizations]);
+
   // Fetch subscription details for paid users
   const { subscription, isLoading: isSubLoading } = useSubscription(
     isFree ? undefined : currentOrganization?.id

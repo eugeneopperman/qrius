@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -364,7 +364,7 @@ function SecurityCard({
 export function ProfileSettingsContent() {
   const {
     user, profile, updateProfile, updatePassword,
-    currentOrganization, currentRole, planLimits,
+    currentOrganization, currentRole, planLimits, fetchOrganizations,
   } = useAuthStore(useShallow((s) => ({
     user: s.user,
     profile: s.profile,
@@ -373,7 +373,13 @@ export function ProfileSettingsContent() {
     currentOrganization: s.currentOrganization,
     currentRole: s.currentRole,
     planLimits: s.planLimits,
+    fetchOrganizations: s.fetchOrganizations,
   })));
+
+  // Re-fetch org data on mount to pick up plan changes
+  useEffect(() => {
+    fetchOrganizations();
+  }, [fetchOrganizations]);
 
   // Usage data
   const { totalCount, monthlyScans, teamMembers } = useOrganizationQRCodes({ limit: 1 });
@@ -498,7 +504,9 @@ export function ProfileSettingsContent() {
     .toUpperCase()
     .slice(0, 2);
 
-  const plan = planLimits?.plan || profile?.plan || 'free';
+  // planLimits.plan is the authoritative source (from organization → plan_limits lookup)
+  // profile.plan on the users table is a legacy field and may be stale
+  const plan = planLimits?.plan || currentOrganization?.plan || 'free';
   const provider = user?.app_metadata?.provider as string | undefined;
 
   return (
