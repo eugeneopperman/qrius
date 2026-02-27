@@ -669,7 +669,9 @@ export function BillingSettingsContent() {
     }))
   );
 
-  const currentPlan: Plan = currentOrganization?.plan || 'free';
+  // Use planLimits.plan as source of truth (always freshly fetched from DB)
+  // rather than currentOrganization.plan which may be stale in persist cache
+  const currentPlan: Plan = planLimits?.plan || currentOrganization?.plan || 'free';
   const isFree = currentPlan === 'free';
 
   const [isLoading, setIsLoading] = useState(false);
