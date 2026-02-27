@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, X } from 'lucide-react';
 import { Button } from './Button';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
@@ -47,7 +48,7 @@ export function ConfirmDialog({
     info: 'bg-blue-50 dark:bg-blue-900/20',
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="alertdialog"
@@ -119,6 +120,7 @@ export function ConfirmDialog({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

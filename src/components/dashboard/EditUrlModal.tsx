@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link2, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -56,15 +57,15 @@ export function EditUrlModal({ isOpen, onClose, onSubmit, currentUrl, qrType, is
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Edit destination URL"
-        className="relative glass-heavy rounded-2xl shadow-xl p-6 w-full max-w-md mx-4"
+        className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-6 w-full max-w-md mx-4"
       >
         <button
           onClick={onClose}
@@ -101,6 +102,7 @@ export function EditUrlModal({ isOpen, onClose, onSubmit, currentUrl, qrType, is
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

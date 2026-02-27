@@ -103,8 +103,9 @@ describe('EditUrlModal', () => {
     it('calls onClose when backdrop is clicked', async () => {
       const onClose = vi.fn();
       const user = userEvent.setup();
-      const { container } = render(<EditUrlModal {...defaultProps} onClose={onClose} />);
-      const backdrop = container.querySelector('.bg-black\\/30');
+      render(<EditUrlModal {...defaultProps} onClose={onClose} />);
+      // Portal renders to document.body; backdrop has bg-black/40 class
+      const backdrop = document.body.querySelector('.bg-black\\/40');
       if (backdrop) {
         await user.click(backdrop);
       }
