@@ -332,11 +332,12 @@ async function handleList(
   let paramIdx = 1;
 
   if (effectiveOrgId) {
-    ownershipCondition = `organization_id = $${paramIdx}`;
-    params.push(effectiveOrgId);
-    paramIdx++;
+    // Show org-owned codes + user's personal codes + unowned legacy codes
+    ownershipCondition = `(organization_id = $${paramIdx} OR (user_id = $${paramIdx + 1} AND organization_id IS NULL) OR (user_id IS NULL AND organization_id IS NULL))`;
+    params.push(effectiveOrgId, authContext?.userId ?? '');
+    paramIdx += 2;
   } else if (isPersonalOnly && authContext?.userId) {
-    ownershipCondition = `user_id = $${paramIdx} AND organization_id IS NULL`;
+    ownershipCondition = `(user_id = $${paramIdx} AND organization_id IS NULL) OR (user_id IS NULL AND organization_id IS NULL)`;
     params.push(authContext.userId);
     paramIdx++;
   } else {
@@ -409,11 +410,12 @@ async function handleList(
   let ownerCondition: string;
 
   if (effectiveOrgId) {
-    ownerCondition = `organization_id = $${ownerParamIdx}`;
-    ownerParams.push(effectiveOrgId);
-    ownerParamIdx++;
+    // Match list query: org-owned + user's personal + unowned legacy codes
+    ownerCondition = `(organization_id = $${ownerParamIdx} OR (user_id = $${ownerParamIdx + 1} AND organization_id IS NULL) OR (user_id IS NULL AND organization_id IS NULL))`;
+    ownerParams.push(effectiveOrgId, authContext?.userId ?? '');
+    ownerParamIdx += 2;
   } else if (isPersonalOnly && authContext?.userId) {
-    ownerCondition = `user_id = $${ownerParamIdx} AND organization_id IS NULL`;
+    ownerCondition = `(user_id = $${ownerParamIdx} AND organization_id IS NULL) OR (user_id IS NULL AND organization_id IS NULL)`;
     ownerParams.push(authContext.userId);
     ownerParamIdx++;
   } else {

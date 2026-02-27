@@ -16,7 +16,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({
     status: 'ok',
-    version: '0.49',
+    version: '0.50',
     timestamp: new Date().toISOString(),
   });
 }
