@@ -40,19 +40,23 @@ function makeQRCode(overrides: Partial<QRCode> = {}): QRCode {
 
 describe('QRCodeCard', () => {
   describe('rendering', () => {
-    it('renders QR code name', () => {
+    it('renders QR code name (mobile + desktop)', () => {
       render(<QRCodeCard qrCode={makeQRCode()} />);
-      expect(screen.getByText('Test QR Code')).toBeInTheDocument();
+      const names = screen.getAllByText('Test QR Code');
+      expect(names.length).toBe(2); // mobile + desktop
     });
 
     it('falls back to short_code when name is null', () => {
       render(<QRCodeCard qrCode={makeQRCode({ name: null })} />);
+      // Mobile shows "QR abc123", desktop shows "QR Code abc123"
       expect(screen.getByText('QR Code abc123')).toBeInTheDocument();
+      expect(screen.getByText('QR abc123')).toBeInTheDocument();
     });
 
-    it('renders destination URL', () => {
+    it('renders destination URL (mobile + desktop)', () => {
       render(<QRCodeCard qrCode={makeQRCode()} />);
-      expect(screen.getByText('https://example.com')).toBeInTheDocument();
+      const urls = screen.getAllByText('https://example.com');
+      expect(urls.length).toBe(2); // mobile + desktop
     });
 
     it('renders formatted creation date', () => {
@@ -62,12 +66,15 @@ describe('QRCodeCard', () => {
 
     it('renders QR preview with tracking URL for url type', () => {
       render(<QRCodeCard qrCode={makeQRCode()} />);
-      expect(screen.getByTestId('qr-preview')).toHaveTextContent('https://qrius.app/r/abc123');
+      const previews = screen.getAllByTestId('qr-preview');
+      expect(previews.length).toBe(2); // mobile + desktop
+      expect(previews[0]).toHaveTextContent('https://qrius.app/r/abc123');
     });
 
     it('renders QR preview with destination URL for non-url type', () => {
       render(<QRCodeCard qrCode={makeQRCode({ qr_type: 'text', tracking_url: undefined })} />);
-      expect(screen.getByTestId('qr-preview')).toHaveTextContent('https://example.com');
+      const previews = screen.getAllByTestId('qr-preview');
+      expect(previews[0]).toHaveTextContent('https://example.com');
     });
   });
 
@@ -99,7 +106,7 @@ describe('QRCodeCard', () => {
   });
 
   describe('scan count', () => {
-    it('shows scan count for dynamic QR codes', () => {
+    it('shows scan count for dynamic QR codes (desktop)', () => {
       render(<QRCodeCard qrCode={makeQRCode({ total_scans: 42 })} />);
       expect(screen.getByText('42 scans')).toBeInTheDocument();
     });
@@ -116,17 +123,19 @@ describe('QRCodeCard', () => {
   });
 
   describe('actions menu', () => {
-    it('renders actions button', () => {
+    it('renders actions buttons (mobile + desktop)', () => {
       render(<QRCodeCard qrCode={makeQRCode()} />);
-      expect(screen.getByRole('button', { name: 'QR code actions' })).toBeInTheDocument();
+      const actionButtons = screen.getAllByRole('button', { name: 'QR code actions' });
+      expect(actionButtons.length).toBe(2); // mobile + desktop
     });
 
     it('calls onDelete callback when delete is clicked', async () => {
       const onDelete = vi.fn();
       const { user } = render(<QRCodeCard qrCode={makeQRCode()} onDelete={onDelete} />);
 
-      // Open menu
-      await user.click(screen.getByRole('button', { name: 'QR code actions' }));
+      // Open menu (first = mobile, second = desktop)
+      const actionButtons = screen.getAllByRole('button', { name: 'QR code actions' });
+      await user.click(actionButtons[0]);
       // Click delete
       await user.click(screen.getByText('Delete'));
 
@@ -146,24 +155,24 @@ describe('QRCodeCard', () => {
       });
       render(<QRCodeCard qrCode={qrCode} />);
       // QRMiniPreview is mocked; just verify no crash
-      expect(screen.getByTestId('qr-preview')).toBeInTheDocument();
+      expect(screen.getAllByTestId('qr-preview').length).toBeGreaterThan(0);
     });
 
     it('handles empty metadata gracefully', () => {
       render(<QRCodeCard qrCode={makeQRCode({ metadata: {} })} />);
-      expect(screen.getByTestId('qr-preview')).toBeInTheDocument();
+      expect(screen.getAllByTestId('qr-preview').length).toBeGreaterThan(0);
     });
 
     it('handles null-like metadata gracefully', () => {
       render(<QRCodeCard qrCode={makeQRCode({ metadata: null as unknown as QRCode['metadata'] })} />);
-      expect(screen.getByTestId('qr-preview')).toBeInTheDocument();
+      expect(screen.getAllByTestId('qr-preview').length).toBeGreaterThan(0);
     });
   });
 
   describe('links', () => {
     it('links QR preview to detail page', () => {
       render(<QRCodeCard qrCode={makeQRCode()} />);
-      const previewLink = screen.getByTestId('qr-preview').closest('a');
+      const previewLink = screen.getAllByTestId('qr-preview')[0].closest('a');
       expect(previewLink).toHaveAttribute('href', '/qr-codes/$id/qr-1');
     });
   });

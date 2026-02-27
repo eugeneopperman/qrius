@@ -21,7 +21,7 @@ export function UpgradePrompt({
   if (dismissed) return null;
 
   return (
-    <div className="relative bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl p-6 text-white overflow-hidden">
+    <div className="relative bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl p-4 sm:p-6 text-white overflow-hidden">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -40,11 +40,11 @@ export function UpgradePrompt({
 
       <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="p-2 bg-white/20 rounded-lg">
-            <Sparkles className="w-6 h-6" />
+          <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg">
+            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{title}</h3>
+            <h3 className="text-base sm:text-lg font-semibold">{title}</h3>
             <p className="text-orange-100 mt-1">
               {feature ? `Unlock ${feature} and more with Pro.` : description}
             </p>

@@ -143,18 +143,15 @@ export function WizardProgress({ lastSavedAt, isSaving }: WizardProgressProps) {
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
             Step {currentStep} of {steps.length}
+            <span className="text-sm font-semibold text-orange-600 dark:text-orange-400 ml-2">
+              {steps.find(s => s.step === currentStep)?.label}
+            </span>
           </span>
-          <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">
-            {steps.find(s => s.step === currentStep)?.label}
-          </span>
-        </div>
-
-        {/* Mobile save indicator — below step label row */}
-        {showSaveIndicator && (
-          <div className="mt-1 flex justify-end">
+          {/* Mobile save indicator — inline */}
+          {showSaveIndicator && (
             <SaveIndicator lastSavedAt={lastSavedAt ?? null} isSaving={isSaving ?? false} />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Progress bar */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/10 dark:bg-white/10">

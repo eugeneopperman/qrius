@@ -35,9 +35,9 @@ export const WizardPreview = forwardRef<QRPreviewHandle, WizardPreviewProps>(
     if (compact) {
       return (
         <div className={className}>
-          <div className="flex flex-col items-center gap-2 rounded-2xl glass p-4">
+          <div className="flex flex-col items-center gap-2 rounded-2xl glass p-3">
             <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Live Preview</p>
-            <QRPreview ref={ref} hideActions displaySize={200} />
+            <QRPreview ref={ref} hideActions displaySize={160} />
           </div>
         </div>
       );

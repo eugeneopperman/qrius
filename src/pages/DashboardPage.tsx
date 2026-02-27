@@ -78,7 +78,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 animate-slide-up-page">
+      <div className="space-y-5 sm:space-y-8 animate-slide-up-page">
         {/* Page header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -121,7 +121,7 @@ export default function DashboardPage() {
 
         {/* Usage overview */}
         {usageStats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <UsageBar
               label="Scans this month"
               used={usageStats.scansUsed}

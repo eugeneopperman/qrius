@@ -28,12 +28,12 @@ export function StepCustomize() {
       <div className="card mb-6">
         <TabGroup defaultTab={0}>
           <TabList>
-            <Tab icon={Layers}>Templates</Tab>
-            <Tab icon={Palette}>Colors</Tab>
-            <Tab icon={Image}>Logo</Tab>
-            <Tab icon={Shapes}>Style</Tab>
-            <Tab icon={Frame}>Frame</Tab>
-            <Tab icon={Sparkles}>More</Tab>
+            <Tab icon={Layers}><span className="hidden sm:inline">Templates</span></Tab>
+            <Tab icon={Palette}><span className="hidden sm:inline">Colors</span></Tab>
+            <Tab icon={Image}><span className="hidden sm:inline">Logo</span></Tab>
+            <Tab icon={Shapes}><span className="hidden sm:inline">Style</span></Tab>
+            <Tab icon={Frame}><span className="hidden sm:inline">Frame</span></Tab>
+            <Tab icon={Sparkles}><span className="hidden sm:inline">More</span></Tab>
           </TabList>
           <TabPanels className="pt-4">
             <TabPanel>

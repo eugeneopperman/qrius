@@ -28,6 +28,14 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: Settings, animClass: 'icon-anim-gear-turn' },
 ];
 
+const mobileNavItems = [
+  { name: 'Home', href: '/dashboard' as const, icon: LayoutDashboard },
+  { name: 'QR Codes', href: '/qr-codes' as const, icon: QrCode },
+  { name: 'Create', href: '/create' as const, icon: Plus },
+  { name: 'Templates', href: '/templates' as const, icon: Palette },
+  { name: 'Settings', href: '/settings' as const, icon: Settings },
+];
+
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
@@ -104,7 +112,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Mobile menu button */}
-        <div className="lg:hidden sticky top-0 z-30 p-3 flex items-center justify-between">
+        <div className="lg:hidden sticky top-0 z-30 p-3 flex items-center justify-between bg-[var(--color-bg)]/95 backdrop-blur-md border-b border-black/[0.04] dark:border-white/[0.04]">
           <button
             onClick={() => setSidebarOpen(true)}
             className="btn-icon"
@@ -115,11 +123,49 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6">
-          <div className="glass-panel rounded-3xl p-3 sm:p-6 lg:p-8 min-h-[calc(100vh-5rem)]">
+        <main className="p-4 lg:p-6 pb-24 lg:pb-6">
+          <div className="glass-panel rounded-3xl p-2 sm:p-6 lg:p-8 min-h-[calc(100vh-5rem)]">
             {children}
           </div>
         </main>
+
+        {/* Mobile bottom navigation */}
+        <nav
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg)]/95 backdrop-blur-md border-t border-black/[0.04] dark:border-white/[0.04]"
+          aria-label="Mobile navigation"
+        >
+          <div className="flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
+            {mobileNavItems.map((item) => {
+              const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+              const isCreate = item.name === 'Create';
+
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex flex-col items-center gap-0.5 py-2 px-3 min-w-[48px] min-h-[48px] justify-center ${
+                    isCreate
+                      ? ''
+                      : isActive
+                      ? 'text-orange-600 dark:text-orange-400'
+                      : 'text-gray-400 dark:text-gray-500'
+                  }`}
+                >
+                  {isCreate ? (
+                    <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 -mt-3">
+                      <item.icon className="w-5 h-5 text-white" />
+                    </div>
+                  ) : (
+                    <item.icon className="w-5 h-5" />
+                  )}
+                  <span className={`text-[10px] font-medium ${isCreate ? 'text-orange-600 dark:text-orange-400' : ''}`}>
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   );
