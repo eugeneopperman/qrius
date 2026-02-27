@@ -130,7 +130,7 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
       backgroundOptions: { color: backgroundColor },
       qrOptions: { errorCorrectionLevel },
       imageOptions: {
-        crossOrigin: 'anonymous',
+        crossOrigin: processedLogoUrl?.startsWith('data:') ? undefined : 'anonymous',
         margin: logoMargin,
         imageSize: logoSize,
       },
@@ -160,7 +160,7 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
         backgroundOptions: { color: backgroundColor },
         qrOptions: { errorCorrectionLevel },
         imageOptions: {
-          crossOrigin: 'anonymous',
+          crossOrigin: processedLogoUrl?.startsWith('data:') ? undefined : 'anonymous',
           margin: logoMargin,
           imageSize: logoSize,
         },

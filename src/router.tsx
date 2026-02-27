@@ -7,7 +7,6 @@ import { APP_VERSION, TIMING } from '@/config/constants';
 import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { KeyboardShortcutsModal } from '@/components/features/KeyboardShortcuts';
 
-import { TemplateWizardModal } from '@/components/templates';
 import { SettingsModal } from '@/components/settings';
 import { ToastContainer } from '@/components/ui/Toast';
 
@@ -88,6 +87,7 @@ const CookiesPage = lazy(() => import('@/pages/CookiesPage'));
 
 // Templates
 const TemplatesPage = lazy(() => import('@/pages/TemplatesPage'));
+const TemplateStudioPage = lazy(() => import('@/pages/TemplateStudioPage'));
 
 // Invitation
 const InviteAcceptPage = lazy(() => import('@/pages/InviteAcceptPage'));
@@ -115,7 +115,6 @@ function RootLayout() {
 
       {/* Global modals */}
       <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={closeShortcuts} />
-      <TemplateWizardModal />
       <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
       <ToastContainer />
 
@@ -303,6 +302,22 @@ const templatesRoute = createRoute({
   errorComponent: ErrorPage,
 });
 
+const templateNewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/templates/new',
+  beforeLoad: requireAuth,
+  component: TemplateStudioPage,
+  errorComponent: ErrorPage,
+});
+
+const templateEditRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/templates/$id/edit',
+  beforeLoad: requireAuth,
+  component: TemplateStudioPage,
+  errorComponent: ErrorPage,
+});
+
 const onboardingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/onboarding',
@@ -384,6 +399,8 @@ const routeTree = rootRoute.addChildren([
   qrCodesRoute,
   qrCodeDetailRoute,
   createQRRoute,
+  templateNewRoute,
+  templateEditRoute,
   templatesRoute,
   onboardingRoute,
   readerRoute,

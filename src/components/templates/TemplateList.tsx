@@ -1,5 +1,6 @@
 import { memo, useRef, useState, useCallback } from 'react';
 import { Plus, Download, Upload, Palette } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { useTemplateStore } from '@/stores/templateStore';
 import { usePlanGate } from '@/hooks/usePlanGate';
 import { ProBadge } from '../ui/ProBadge';
@@ -15,9 +16,9 @@ interface TemplateListProps {
 export const TemplateList = memo(function TemplateList({
   compact = false,
 }: TemplateListProps) {
+  const navigate = useNavigate();
   const {
     templates,
-    openWizard,
     deleteTemplate,
     duplicateTemplate,
     applyTemplate,
@@ -50,9 +51,9 @@ export const TemplateList = memo(function TemplateList({
 
   const handleEdit = useCallback(
     (id: string) => {
-      openWizard(id);
+      navigate({ to: '/templates/$id/edit', params: { id } });
     },
-    [openWizard]
+    [navigate]
   );
 
   const handleDuplicate = useCallback(
@@ -128,7 +129,7 @@ export const TemplateList = memo(function TemplateList({
                 toast.info('Upgrade to Pro for unlimited templates');
                 return;
               }
-              openWizard();
+              navigate({ to: '/templates/new' });
             }}
             disabled={isAtLimit}
             className="flex-1 sm:flex-none"
@@ -199,7 +200,7 @@ export const TemplateList = memo(function TemplateList({
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Create your first template to save your brand styles
           </p>
-          <Button variant="secondary" size="sm" onClick={() => openWizard()}>
+          <Button variant="secondary" size="sm" onClick={() => navigate({ to: '/templates/new' })}>
             <Plus className="w-4 h-4" />
             Create Template
           </Button>

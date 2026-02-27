@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import { Edit2, Copy, Trash2, Check, MoreVertical } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { cn } from '@/utils/cn';
 import { useGoogleFont, getFontFamily } from '@/hooks/useGoogleFont';
 import type { BrandTemplate } from '@/types';
@@ -21,6 +22,7 @@ export const TemplateCard = memo(function TemplateCard({
   onDelete,
   isApplied = false,
 }: TemplateCardProps) {
+  const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const { style } = template;
 
@@ -90,7 +92,7 @@ export const TemplateCard = memo(function TemplateCard({
                 <div className="absolute right-0 top-full mt-1 py-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-100 dark:border-gray-800 z-20 min-w-[120px]">
                   <button
                     onClick={() => {
-                      onEdit(template.id);
+                      navigate({ to: '/templates/$id/edit', params: { id: template.id } });
                       setShowMenu(false);
                     }}
                     className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
