@@ -50,7 +50,7 @@ export function ConfirmDialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-[60] flex items-center justify-center"
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
