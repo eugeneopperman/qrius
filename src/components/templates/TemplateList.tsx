@@ -49,13 +49,6 @@ export const TemplateList = memo(function TemplateList({
     [applyTemplate, templates]
   );
 
-  const handleEdit = useCallback(
-    (id: string) => {
-      navigate({ to: '/templates/$id/edit', params: { id } });
-    },
-    [navigate]
-  );
-
   const handleDuplicate = useCallback(
     (id: string) => {
       duplicateTemplate(id);
@@ -184,7 +177,7 @@ export const TemplateList = memo(function TemplateList({
               key={template.id}
               template={template}
               onApply={handleApply}
-              onEdit={handleEdit}
+
               onDuplicate={handleDuplicate}
               onDelete={handleDelete}
               isApplied={appliedId === template.id}

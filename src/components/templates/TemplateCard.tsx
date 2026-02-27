@@ -8,7 +8,6 @@ import type { BrandTemplate } from '@/types';
 interface TemplateCardProps {
   template: BrandTemplate;
   onApply: (id: string) => void;
-  onEdit: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   isApplied?: boolean;
@@ -17,7 +16,6 @@ interface TemplateCardProps {
 export const TemplateCard = memo(function TemplateCard({
   template,
   onApply,
-  onEdit,
   onDuplicate,
   onDelete,
   isApplied = false,
