@@ -71,7 +71,7 @@ export const StudioHeader = memo(function StudioHeader() {
   }, [save]);
 
   return (
-    <header className="flex items-center justify-between h-14 px-4 border-b border-black/[0.06] dark:border-white/[0.06] bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex-shrink-0">
+    <div className="flex items-center justify-between px-4 py-2.5 border-b border-black/[0.06] dark:border-white/[0.06] flex-shrink-0">
       {/* Left: Back + Name */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <Link
@@ -145,7 +145,7 @@ export const StudioHeader = memo(function StudioHeader() {
           Save
         </Button>
       </div>
-    </header>
+    </div>
   );
 });
 

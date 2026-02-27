@@ -34,6 +34,8 @@ function resetStore() {
     redoStack: [],
     isDirty: false,
     originalStyle: null,
+    hasInteracted: false,
+    popover: null,
     _undoTimer: null,
   });
 }

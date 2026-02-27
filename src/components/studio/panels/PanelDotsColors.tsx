@@ -1,13 +1,12 @@
 import { memo, useCallback, type ReactNode } from 'react';
 import { useStudioStore } from '@/stores/studioStore';
 import { useShallow } from 'zustand/react/shallow';
-import { Square, Circle } from 'lucide-react';
 import { ColorPicker } from '@/components/ui/ColorPicker';
 import { Slider } from '@/components/ui/Slider';
 import { InlineToggle } from '@/components/ui/Toggle';
 import { cn } from '@/utils/cn';
 import { COLOR_PALETTES, GRADIENT_PRESETS, DEFAULT_GRADIENT } from '@/config/constants';
-import type { DotType, CornerSquareType, GradientOptions, GradientType, QRPattern } from '@/types';
+import type { DotType, CornerSquareType, GradientOptions, GradientType } from '@/types';
 
 // Dot style SVG previews
 function DotPreview({ type }: { type: DotType }) {
@@ -96,7 +95,6 @@ export const PanelDotsColors = memo(function PanelDotsColors() {
   const useGradient = style.useGradient ?? false;
   const gradient = style.gradient ?? DEFAULT_GRADIENT;
   const qrRoundness = style.qrRoundness ?? 0;
-  const qrPattern = style.qrPattern ?? 'solid';
 
   const handleDotStyleChange = useCallback(
     (dotType: DotType) => {
@@ -144,7 +142,7 @@ export const PanelDotsColors = memo(function PanelDotsColors() {
 
       {/* Dot Style Grid */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Dot Style</label>
+        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Module Shape</label>
         <div className="grid grid-cols-3 gap-2">
           {dotStyleOptions.map((opt) => (
             <button
@@ -166,42 +164,18 @@ export const PanelDotsColors = memo(function PanelDotsColors() {
         </div>
       </div>
 
-      {/* QR Pattern */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Pattern</label>
-        <div className="flex gap-2">
-          {(['solid', 'dots'] as QRPattern[]).map((pattern) => (
-            <button
-              key={pattern}
-              onClick={() => updateStyle({ qrPattern: pattern })}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border transition-colors capitalize',
-                qrPattern === pattern
-                  ? 'border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300'
-                  : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-orange-300'
-              )}
-            >
-              {pattern === 'solid' ? <Square className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
-              {pattern}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Roundness */}
-      {qrPattern === 'solid' && (
-        <Slider
-          label="Roundness"
-          value={qrRoundness}
-          onChange={(v) => updateStyle({ qrRoundness: v })}
-          min={0}
-          max={100}
-          step={25}
-          unit="%"
-          showTicks
-          tickLabels={['Sharp', 'Slight', 'Round', 'More']}
-        />
-      )}
+      {/* Corner Softness */}
+      <Slider
+        label="Corner Softness"
+        value={qrRoundness}
+        onChange={(v) => updateStyle({ qrRoundness: v })}
+        min={0}
+        max={100}
+        step={25}
+        unit="%"
+        showTicks
+        tickLabels={['Sharp', 'Slight', 'Round', 'More']}
+      />
 
       {/* Gradient Toggle */}
       <InlineToggle

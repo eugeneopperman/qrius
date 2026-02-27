@@ -3,6 +3,7 @@ import { useParams, useRouter } from '@tanstack/react-router';
 import { useStudioStore } from '@/stores/studioStore';
 import { useTemplateStore } from '@/stores/templateStore';
 import { StudioLayout } from '@/components/studio/StudioLayout';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { toast } from '@/stores/toastStore';
 
 export default function TemplateStudioPage() {
@@ -31,5 +32,9 @@ export default function TemplateStudioPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [templateId]);
 
-  return <StudioLayout />;
+  return (
+    <DashboardLayout>
+      <StudioLayout />
+    </DashboardLayout>
+  );
 }

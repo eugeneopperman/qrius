@@ -96,19 +96,20 @@ export const StudioLayout = memo(function StudioLayout() {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
+    <div className="flex flex-col -m-3 sm:-m-6 lg:-m-8" style={{ height: 'calc(100vh - 5rem)' }}>
+      {/* Inline toolbar */}
       <StudioHeader />
 
-      {/* Desktop: side-by-side | Mobile: stacked */}
+      {/* Desktop: canvas left + panel right | Mobile: stacked */}
       <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
-        {/* Panel (left on desktop, bottom on mobile) */}
-        <div className="order-2 lg:order-1 lg:w-80 flex-shrink-0 border-t lg:border-t-0 lg:border-r border-black/[0.06] dark:border-white/[0.06] flex flex-col overflow-hidden max-h-[40vh] lg:max-h-none">
-          <StudioPanel />
+        {/* Canvas (main area) */}
+        <div className="order-1 flex-1 min-h-0 overflow-hidden">
+          <StudioCanvas />
         </div>
 
-        {/* Canvas (center) */}
-        <div className="order-1 lg:order-2 flex-1 min-h-0 overflow-hidden">
-          <StudioCanvas />
+        {/* Panel (right on desktop, bottom on mobile) */}
+        <div className="order-2 lg:w-80 flex-shrink-0 border-t lg:border-t-0 lg:border-l border-black/[0.06] dark:border-white/[0.06] flex flex-col overflow-hidden max-h-[40vh] lg:max-h-none">
+          <StudioPanel />
         </div>
       </div>
 

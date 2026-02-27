@@ -10,6 +10,12 @@ import type { BrandTemplate, BrandTemplateStyle } from '@/types';
 
 export type StudioPanel = 'dots-colors' | 'frame' | 'logo' | 'label' | 'background' | null;
 
+const LABEL_SUPPORTING_FRAMES = [
+  'bottom-label', 'top-label', 'badge',
+  'speech-bubble', 'ribbon', 'sticker',
+  'banner-bottom', 'banner-top',
+];
+
 const DEFAULT_STYLE: BrandTemplateStyle = {
   dotsColor: '#000000',
   backgroundColor: '#ffffff',
@@ -25,6 +31,12 @@ const DEFAULT_STYLE: BrandTemplateStyle = {
 
 const MAX_UNDO_STACK = 50;
 
+export interface PopoverState {
+  panel: NonNullable<StudioPanel>;
+  x: number;
+  y: number;
+}
+
 interface StudioState {
   templateId: string | null;
   templateName: string;
@@ -34,6 +46,8 @@ interface StudioState {
   redoStack: BrandTemplateStyle[];
   isDirty: boolean;
   originalStyle: BrandTemplateStyle | null;
+  hasInteracted: boolean;
+  popover: PopoverState | null;
 
   // Debounce timer for undo pushes
   _undoTimer: ReturnType<typeof setTimeout> | null;
@@ -44,6 +58,7 @@ interface StudioState {
   updateStyle: (updates: Partial<BrandTemplateStyle>) => void;
   setActivePanel: (panel: StudioPanel) => void;
   setTemplateName: (name: string) => void;
+  setPopover: (popover: PopoverState | null) => void;
   undo: () => void;
   redo: () => void;
   save: () => string;
@@ -60,6 +75,8 @@ export const useStudioStore = create<StudioState>()((set, get) => ({
   redoStack: [],
   isDirty: false,
   originalStyle: null,
+  hasInteracted: false,
+  popover: null,
   _undoTimer: null,
 
   initNew: () => {
@@ -72,6 +89,8 @@ export const useStudioStore = create<StudioState>()((set, get) => ({
       redoStack: [],
       isDirty: false,
       originalStyle: null,
+      hasInteracted: false,
+      popover: null,
     });
   },
 
@@ -86,6 +105,8 @@ export const useStudioStore = create<StudioState>()((set, get) => ({
       redoStack: [],
       isDirty: false,
       originalStyle: { ...style },
+      hasInteracted: false,
+      popover: null,
     });
   },
 
@@ -93,6 +114,15 @@ export const useStudioStore = create<StudioState>()((set, get) => ({
     const state = get();
     const prevStyle = { ...state.style };
     const newStyle = { ...state.style, ...updates };
+
+    // Auto-populate label when switching to a label-supporting frame with no label
+    if (
+      updates.frameStyle &&
+      LABEL_SUPPORTING_FRAMES.includes(updates.frameStyle) &&
+      !newStyle.frameLabel
+    ) {
+      newStyle.frameLabel = 'Scan Me';
+    }
 
     // Debounced undo push — avoids flooding during slider drags
     if (state._undoTimer) clearTimeout(state._undoTimer);
@@ -111,7 +141,11 @@ export const useStudioStore = create<StudioState>()((set, get) => ({
   },
 
   setActivePanel: (panel: StudioPanel) => {
-    set({ activePanel: panel });
+    set({ activePanel: panel, hasInteracted: true });
+  },
+
+  setPopover: (popover: PopoverState | null) => {
+    set({ popover });
   },
 
   setTemplateName: (name: string) => {

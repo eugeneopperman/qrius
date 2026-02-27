@@ -44,6 +44,8 @@ function resetStore() {
     redoStack: [],
     isDirty: false,
     originalStyle: null,
+    hasInteracted: false,
+    popover: null,
     _undoTimer: null,
   });
 }
@@ -60,7 +62,7 @@ describe('StudioPanel', () => {
 
   it('shows empty state when no panel is active', () => {
     render(<StudioPanel />);
-    expect(screen.getByText(/Click a QR element or tab/)).toBeInTheDocument();
+    expect(screen.getByText(/Click any element on the QR preview/)).toBeInTheDocument();
   });
 
   it('shows dots-colors panel when active', () => {

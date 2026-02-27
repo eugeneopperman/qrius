@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { StudioPreview } from './StudioPreview';
+import { StudioContextPopover } from './StudioContextPopover';
 
 export const StudioCanvas = memo(function StudioCanvas() {
   return (
@@ -16,6 +17,9 @@ export const StudioCanvas = memo(function StudioCanvas() {
       <div className="relative z-10">
         <StudioPreview />
       </div>
+
+      {/* Contextual popover (portal to body) */}
+      <StudioContextPopover />
     </div>
   );
 });

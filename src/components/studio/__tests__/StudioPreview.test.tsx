@@ -42,6 +42,8 @@ function resetStore(styleOverrides: Partial<BrandTemplateStyle> = {}) {
     redoStack: [],
     isDirty: false,
     originalStyle: null,
+    hasInteracted: false,
+    popover: null,
     _undoTimer: null,
   });
 }
@@ -119,5 +121,33 @@ describe('StudioPreview', () => {
     resetStore({ frameStyle: 'bottom-label', frameLabel: 'Scan Me' });
     render(<StudioPreview />);
     expect(screen.getByLabelText('Edit label')).toBeInTheDocument();
+  });
+
+  it('shows hover tooltips on hit zones', () => {
+    render(<StudioPreview />);
+    // Tooltips are present as span text (hidden via opacity)
+    expect(screen.getByText('Click to edit style')).toBeInTheDocument();
+    expect(screen.getByText('Click to edit background')).toBeInTheDocument();
+  });
+
+  it('shows pulse animation on QR body when not interacted', () => {
+    render(<StudioPreview />);
+    const qrBody = screen.getByLabelText('Edit QR style and colors');
+    expect(qrBody.className).toContain('animate-pulse');
+  });
+
+  it('removes pulse animation after interaction', () => {
+    useStudioStore.setState({ hasInteracted: true });
+    render(<StudioPreview />);
+    const qrBody = screen.getByLabelText('Edit QR style and colors');
+    expect(qrBody.className).not.toContain('animate-pulse');
+  });
+
+  it('sets popover state on click', async () => {
+    const { user } = render(<StudioPreview />);
+    await user.click(screen.getByLabelText('Edit QR style and colors'));
+    const popover = useStudioStore.getState().popover;
+    expect(popover).not.toBeNull();
+    expect(popover?.panel).toBe('dots-colors');
   });
 });

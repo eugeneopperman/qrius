@@ -36,9 +36,9 @@ export const StudioPanel = memo(function StudioPanel() {
   const ActivePanelComponent = activePanel ? PANEL_COMPONENTS[activePanel] : null;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Tab bar — horizontal on mobile, vertical icons on desktop */}
-      <div className="flex lg:flex-col border-b lg:border-b-0 lg:border-r border-black/[0.06] dark:border-white/[0.06] bg-gray-50/80 dark:bg-gray-900/50 flex-shrink-0">
+    <div className="flex flex-col lg:flex-row-reverse h-full">
+      {/* Tab bar — horizontal on mobile, vertical icons on desktop (left edge of panel) */}
+      <div className="flex lg:flex-col border-b lg:border-b-0 lg:border-l border-black/[0.06] dark:border-white/[0.06] bg-gray-50/80 dark:bg-gray-900/50 flex-shrink-0">
         {/* Mobile: horizontal scroll tabs */}
         <div className="flex lg:hidden overflow-x-auto gap-1 px-2 py-2 scrollbar-none">
           {PANEL_TABS.map((tab) => {
@@ -96,7 +96,7 @@ export const StudioPanel = memo(function StudioPanel() {
         <div className="flex-1 flex items-center justify-center p-4 text-center">
           <div>
             <p className="text-sm text-gray-400 dark:text-gray-500">
-              Click a QR element or tab to start editing
+              Click any element on the QR preview to edit it, or choose a tab above.
             </p>
           </div>
         </div>

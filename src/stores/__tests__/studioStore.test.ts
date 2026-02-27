@@ -41,6 +41,8 @@ function resetStore() {
     redoStack: [],
     isDirty: false,
     originalStyle: null,
+    hasInteracted: false,
+    popover: null,
     _undoTimer: null,
   });
 }
@@ -77,6 +79,8 @@ describe('studioStore', () => {
       expect(state.isDirty).toBe(false);
       expect(state.undoStack).toHaveLength(0);
       expect(state.redoStack).toHaveLength(0);
+      expect(state.hasInteracted).toBe(false);
+      expect(state.popover).toBeNull();
     });
   });
 
@@ -92,6 +96,8 @@ describe('studioStore', () => {
       expect(state.isDirty).toBe(false);
       expect(state.originalStyle).not.toBeNull();
       expect(state.originalStyle?.dotsColor).toBe('#ff0000');
+      expect(state.hasInteracted).toBe(false);
+      expect(state.popover).toBeNull();
     });
 
     it('clears undo/redo stacks', () => {
@@ -148,6 +154,22 @@ describe('studioStore', () => {
       useStudioStore.getState().updateStyle({ dotsColor: '#bbb' });
       vi.advanceTimersByTime(500);
       expect(useStudioStore.getState().redoStack).toHaveLength(0);
+    });
+
+    it('auto-populates frameLabel when switching to label-supporting frame', () => {
+      useStudioStore.getState().updateStyle({ frameStyle: 'bottom-label' });
+      expect(useStudioStore.getState().style.frameLabel).toBe('Scan Me');
+    });
+
+    it('does not overwrite existing frameLabel on frame change', () => {
+      useStudioStore.getState().updateStyle({ frameLabel: 'Visit Us' });
+      useStudioStore.getState().updateStyle({ frameStyle: 'bottom-label' });
+      expect(useStudioStore.getState().style.frameLabel).toBe('Visit Us');
+    });
+
+    it('does not auto-populate for non-label frames', () => {
+      useStudioStore.getState().updateStyle({ frameStyle: 'simple' });
+      expect(useStudioStore.getState().style.frameLabel).toBeUndefined();
     });
   });
 
@@ -225,6 +247,30 @@ describe('studioStore', () => {
       useStudioStore.getState().setActivePanel('frame');
       useStudioStore.getState().setActivePanel(null);
       expect(useStudioStore.getState().activePanel).toBeNull();
+    });
+
+    it('sets hasInteracted to true', () => {
+      expect(useStudioStore.getState().hasInteracted).toBe(false);
+      useStudioStore.getState().setActivePanel('dots-colors');
+      expect(useStudioStore.getState().hasInteracted).toBe(true);
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // Popover
+  // --------------------------------------------------------------------------
+
+  describe('setPopover', () => {
+    it('sets popover state', () => {
+      useStudioStore.getState().setPopover({ panel: 'dots-colors', x: 100, y: 200 });
+      const state = useStudioStore.getState();
+      expect(state.popover).toEqual({ panel: 'dots-colors', x: 100, y: 200 });
+    });
+
+    it('can clear popover with null', () => {
+      useStudioStore.getState().setPopover({ panel: 'frame', x: 50, y: 50 });
+      useStudioStore.getState().setPopover(null);
+      expect(useStudioStore.getState().popover).toBeNull();
     });
   });
 

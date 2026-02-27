@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { useStudioStore, type StudioPanel } from '@/stores/studioStore';
+import { useStudioStore, type StudioPanel, type PopoverState } from '@/stores/studioStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useQRCodeInstance } from '@/hooks/useQRCodeInstance';
 import { useGoogleFont, getFontFamily } from '@/hooks/useGoogleFont';
@@ -21,11 +21,13 @@ const PREVIEW_SIZE = 240;
 const PREVIEW_DATA = 'https://qrius.app';
 
 export const StudioPreview = memo(function StudioPreview() {
-  const { style, activePanel, setActivePanel } = useStudioStore(
+  const { style, activePanel, setActivePanel, hasInteracted, setPopover } = useStudioStore(
     useShallow((s) => ({
       style: s.style,
       activePanel: s.activePanel,
       setActivePanel: s.setActivePanel,
+      hasInteracted: s.hasInteracted,
+      setPopover: s.setPopover,
     }))
   );
 
@@ -53,10 +55,18 @@ export const StudioPreview = memo(function StudioPreview() {
   });
 
   const handleZoneClick = useCallback(
-    (panel: StudioPanel) => {
+    (panel: NonNullable<StudioPanel>, e: React.MouseEvent) => {
       setActivePanel(panel);
+      // Show contextual popover near click position
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const popoverState: PopoverState = {
+        panel,
+        x: e.clientX,
+        y: rect.top - 8, // Just above the clicked element
+      };
+      setPopover(popoverState);
     },
-    [setActivePanel]
+    [setActivePanel, setPopover]
   );
 
   const frameStyle = style.frameStyle || 'none';
@@ -104,16 +114,20 @@ export const StudioPreview = memo(function StudioPreview() {
     <div className="relative inline-flex flex-col items-center">
       {/* Background hit zone */}
       <button
-        onClick={() => handleZoneClick('background')}
+        onClick={(e) => handleZoneClick('background', e)}
         className={cn(
-          'absolute -inset-6 rounded-2xl transition-all cursor-pointer z-0',
+          'group absolute -inset-6 rounded-2xl transition-all cursor-pointer z-0',
           activePanel === 'background'
             ? 'ring-2 ring-orange-500 ring-offset-4 ring-offset-white dark:ring-offset-gray-900'
             : 'hover:ring-2 hover:ring-orange-300 hover:ring-dashed hover:ring-offset-4 hover:ring-offset-white dark:hover:ring-offset-gray-900'
         )}
         aria-label="Edit background"
         type="button"
-      />
+      >
+        <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+          Click to edit background
+        </span>
+      </button>
 
       {/* Frame container */}
       <div
@@ -131,16 +145,20 @@ export const StudioPreview = memo(function StudioPreview() {
         {/* Frame hit zone */}
         {hasFrame && (
           <button
-            onClick={() => handleZoneClick('frame')}
+            onClick={(e) => handleZoneClick('frame', e)}
             className={cn(
-              'absolute inset-0 z-20 rounded-[inherit] transition-all cursor-pointer',
+              'group absolute inset-0 z-20 rounded-[inherit] transition-all cursor-pointer',
               activePanel === 'frame'
-                ? 'ring-2 ring-orange-500'
-                : 'hover:ring-2 hover:ring-dashed hover:ring-orange-300'
+                ? 'ring-2 ring-orange-500 ring-offset-4 ring-offset-white dark:ring-offset-gray-900'
+                : 'hover:ring-2 hover:ring-dashed hover:ring-orange-300 hover:ring-offset-4 hover:ring-offset-white dark:hover:ring-offset-gray-900'
             )}
             aria-label="Edit frame"
             type="button"
-          />
+          >
+            <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+              Click to edit frame
+            </span>
+          </button>
         )}
 
         {/* Top decorative elements */}
@@ -190,26 +208,31 @@ export const StudioPreview = memo(function StudioPreview() {
         <div className="relative">
           {/* QR Body hit zone */}
           <button
-            onClick={() => handleZoneClick('dots-colors')}
+            onClick={(e) => handleZoneClick('dots-colors', e)}
             className={cn(
-              'absolute inset-0 z-30 rounded-lg transition-all cursor-pointer',
+              'group absolute inset-0 z-30 rounded-lg transition-all cursor-pointer',
               activePanel === 'dots-colors'
                 ? 'ring-2 ring-orange-500'
-                : 'hover:ring-2 hover:ring-dashed hover:ring-orange-300'
+                : 'hover:ring-2 hover:ring-dashed hover:ring-orange-300',
+              !hasInteracted && 'animate-pulse'
             )}
             aria-label="Edit QR style and colors"
             type="button"
-          />
+          >
+            <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+              Click to edit style
+            </span>
+          </button>
 
           {/* Logo hit zone */}
           {hasLogo && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleZoneClick('logo');
+                handleZoneClick('logo', e);
               }}
               className={cn(
-                'absolute z-40 cursor-pointer transition-all',
+                'group absolute z-40 cursor-pointer transition-all',
                 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
                 activePanel === 'logo'
                   ? 'ring-2 ring-orange-500 rounded-lg'
@@ -221,7 +244,11 @@ export const StudioPreview = memo(function StudioPreview() {
               }}
               aria-label="Edit logo"
               type="button"
-            />
+            >
+              <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                Click to edit logo
+              </span>
+            </button>
           )}
 
           <div
@@ -238,16 +265,20 @@ export const StudioPreview = memo(function StudioPreview() {
         {frameStyle === 'bottom-label' && hasLabel && (
           <div className="relative">
             <button
-              onClick={() => handleZoneClick('label')}
+              onClick={(e) => handleZoneClick('label', e)}
               className={cn(
-                'absolute inset-0 z-30 transition-all cursor-pointer',
+                'group absolute inset-0 z-30 transition-all cursor-pointer',
                 activePanel === 'label'
                   ? 'border-b-2 border-orange-500'
                   : 'hover:border-b-2 hover:border-dashed hover:border-orange-300'
               )}
               aria-label="Edit label"
               type="button"
-            />
+            >
+              <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                Click to edit label
+              </span>
+            </button>
             <BottomLabel
               label={frameLabel}
               fontSize={fontSize}
@@ -262,16 +293,20 @@ export const StudioPreview = memo(function StudioPreview() {
         {frameStyle === 'ribbon' && hasLabel && (
           <div className="relative">
             <button
-              onClick={() => handleZoneClick('label')}
+              onClick={(e) => handleZoneClick('label', e)}
               className={cn(
-                'absolute inset-0 z-30 transition-all cursor-pointer',
+                'group absolute inset-0 z-30 transition-all cursor-pointer',
                 activePanel === 'label'
                   ? 'border-b-2 border-orange-500'
                   : 'hover:border-b-2 hover:border-dashed hover:border-orange-300'
               )}
               aria-label="Edit label"
               type="button"
-            />
+            >
+              <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                Click to edit label
+              </span>
+            </button>
             <RibbonLabel
               label={frameLabel}
               fontSize={fontSize}
@@ -287,16 +322,20 @@ export const StudioPreview = memo(function StudioPreview() {
         {frameStyle === 'sticker' && hasLabel && (
           <div className="relative">
             <button
-              onClick={() => handleZoneClick('label')}
+              onClick={(e) => handleZoneClick('label', e)}
               className={cn(
-                'absolute inset-0 z-30 transition-all cursor-pointer',
+                'group absolute inset-0 z-30 transition-all cursor-pointer',
                 activePanel === 'label'
                   ? 'border-b-2 border-orange-500'
                   : 'hover:border-b-2 hover:border-dashed hover:border-orange-300'
               )}
               aria-label="Edit label"
               type="button"
-            />
+            >
+              <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                Click to edit label
+              </span>
+            </button>
             <BottomLabel
               label={frameLabel}
               fontSize={fontSize}
@@ -311,16 +350,20 @@ export const StudioPreview = memo(function StudioPreview() {
         {frameStyle === 'banner-bottom' && hasLabel && (
           <div className="relative">
             <button
-              onClick={() => handleZoneClick('label')}
+              onClick={(e) => handleZoneClick('label', e)}
               className={cn(
-                'absolute inset-0 z-30 transition-all cursor-pointer',
+                'group absolute inset-0 z-30 transition-all cursor-pointer',
                 activePanel === 'label'
                   ? 'ring-2 ring-orange-500'
                   : 'hover:ring-2 hover:ring-dashed hover:ring-orange-300'
               )}
               aria-label="Edit label"
               type="button"
-            />
+            >
+              <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded text-[10px] font-medium bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                Click to edit label
+              </span>
+            </button>
             <BannerLabel
               label={frameLabel}
               fontSize={fontSize}

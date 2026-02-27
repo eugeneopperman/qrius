@@ -10,7 +10,9 @@ export async function applyLogoMask(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    if (!imageDataUrl.startsWith('data:')) {
+      img.crossOrigin = 'anonymous';
+    }
 
     img.onload = () => {
       const size = Math.min(img.width, img.height);

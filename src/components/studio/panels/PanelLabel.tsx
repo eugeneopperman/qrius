@@ -13,12 +13,13 @@ import {
   Fingerprint,
   ChevronDown,
   ChevronUp,
+  Frame,
 } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { SelectButtonGroup, type SelectButtonOption } from '@/components/ui/SelectButtonGroup';
 import { cn } from '@/utils/cn';
 import { FRAME_CONFIG } from '@/config/constants';
-import type { FrameFontSize, FrameFontFamily, FrameIcon, FrameIconPosition } from '@/types';
+import type { FrameFontSize, FrameFontFamily, FrameIcon, FrameIconPosition, FrameStyle } from '@/types';
 
 const fontSizeOptions: { value: FrameFontSize; label: string }[] = [
   { value: 'sm', label: 'Small' },
@@ -58,9 +59,20 @@ const LABEL_FRAMES = [
   'banner-bottom', 'banner-top',
 ];
 
+const LABEL_FRAME_OPTIONS: { id: FrameStyle; label: string }[] = [
+  { id: 'bottom-label', label: 'Bottom Label' },
+  { id: 'top-label', label: 'Top Label' },
+  { id: 'badge', label: 'Badge' },
+  { id: 'banner-bottom', label: 'Bottom Banner' },
+  { id: 'banner-top', label: 'Top Banner' },
+  { id: 'ribbon', label: 'Ribbon' },
+  { id: 'sticker', label: 'Sticker' },
+  { id: 'speech-bubble', label: 'Speech Bubble' },
+];
+
 export const PanelLabel = memo(function PanelLabel() {
-  const { style, updateStyle } = useStudioStore(
-    useShallow((s) => ({ style: s.style, updateStyle: s.updateStyle }))
+  const { style, updateStyle, setActivePanel } = useStudioStore(
+    useShallow((s) => ({ style: s.style, updateStyle: s.updateStyle, setActivePanel: s.setActivePanel }))
   );
 
   const [showIcons, setShowIcons] = useState(false);
@@ -85,14 +97,44 @@ export const PanelLabel = memo(function PanelLabel() {
     [updateStyle, style.frameIconPosition]
   );
 
+  const handlePickLabelFrame = useCallback(
+    (frameId: FrameStyle) => {
+      updateStyle({ frameStyle: frameId });
+    },
+    [updateStyle]
+  );
+
   if (!supportsLabel) {
     return (
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Label</h3>
-        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center">
+        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-center space-y-3">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Select a frame that supports labels (bottom label, badge, banner, etc.) to add text.
+            Labels require a frame that supports text. Choose one below or switch to the Frame panel.
           </p>
+          <button
+            onClick={() => setActivePanel('frame')}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+          >
+            <Frame className="w-3.5 h-3.5" />
+            Open Frame Panel
+          </button>
+        </div>
+
+        {/* Quick-pick label frames */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Quick Pick a Label Frame</label>
+          <div className="grid grid-cols-2 gap-1.5">
+            {LABEL_FRAME_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => handlePickLabelFrame(opt.id)}
+                className="px-2.5 py-2 text-[11px] font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors text-left"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
