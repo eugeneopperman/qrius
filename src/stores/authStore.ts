@@ -410,7 +410,12 @@ export const useAuthStore = create<AuthState>()(
             .eq('user_id', user.id);
 
           if (error) {
-            if (import.meta.env.DEV) console.error('Error fetching organizations:', error);
+            console.error('[fetchOrganizations] query error:', error);
+            return;
+          }
+
+          if (!data || data.length === 0) {
+            console.warn('[fetchOrganizations] no organization memberships found');
             return;
           }
 
@@ -419,28 +424,34 @@ export const useAuthStore = create<AuthState>()(
 
           // Set or refresh current organization (always update to pick up plan changes)
           const { currentOrganization } = get();
-          if (organizations.length > 0) {
-            // If we already have a current org, find the fresh version; otherwise default to first
-            const match = currentOrganization
-              ? organizations.find((m) => m.organization.id === currentOrganization.id)
-              : null;
-            const activeOrg = match || organizations[0];
+          // If we already have a current org, find the fresh version; otherwise default to first
+          const match = currentOrganization
+            ? organizations.find((m) => m.organization.id === currentOrganization.id)
+            : null;
+          const activeOrg = match || organizations[0];
 
-            // Fetch plan limits for the active organization
-            const { data: limits } = await supabase
-              .from('plan_limits')
-              .select('*')
-              .eq('plan', activeOrg.organization.plan)
-              .single();
+          console.log('[fetchOrganizations] org plan:', activeOrg.organization.plan);
 
-            set({
-              currentOrganization: activeOrg.organization,
-              currentRole: activeOrg.role,
-              planLimits: limits || DEFAULT_FREE_PLAN_LIMITS,
-            });
+          // Fetch plan limits for the active organization
+          const { data: limits, error: limitsError } = await supabase
+            .from('plan_limits')
+            .select('*')
+            .eq('plan', activeOrg.organization.plan)
+            .single();
+
+          if (limitsError) {
+            console.error('[fetchOrganizations] plan_limits error:', limitsError);
           }
+
+          console.log('[fetchOrganizations] planLimits:', limits?.plan);
+
+          set({
+            currentOrganization: activeOrg.organization,
+            currentRole: activeOrg.role,
+            planLimits: limits || DEFAULT_FREE_PLAN_LIMITS,
+          });
         } catch (error) {
-          if (import.meta.env.DEV) console.error('Error fetching organizations:', error);
+          console.error('[fetchOrganizations] catch:', error);
         }
       },
 
