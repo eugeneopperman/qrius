@@ -117,7 +117,16 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
     [effectiveCornerDotType, useGradient, gradient, dotsColor],
   );
 
-  // --- Initialize QR code ---
+  // --- Build full QR config ---
+  const imageOptions = useMemo(() => ({
+    crossOrigin: processedLogoUrl?.startsWith('data:') ? undefined : ('anonymous' as const),
+    margin: logoMargin,
+    imageSize: logoSize,
+  }), [processedLogoUrl, logoMargin, logoSize]);
+
+  // --- Create/recreate QR instance when logo changes ---
+  // qr-code-styling's canvas mode doesn't reliably update the image via .update(),
+  // so we recreate the instance whenever processedLogoUrl changes.
   useEffect(() => {
     qrCodeRef.current = new QRCodeStyling({
       width,
@@ -129,11 +138,7 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
       cornersDotOptions,
       backgroundOptions: { color: backgroundColor },
       qrOptions: { errorCorrectionLevel },
-      imageOptions: {
-        crossOrigin: processedLogoUrl?.startsWith('data:') ? undefined : 'anonymous',
-        margin: logoMargin,
-        imageSize: logoSize,
-      },
+      imageOptions,
       image: processedLogoUrl,
     });
 
@@ -146,10 +151,11 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
     return () => {
       if (container) clearChildren(container);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only initialization
-  }, []);
+    // Recreate when logo changes — canvas mode doesn't handle image updates well
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [processedLogoUrl]);
 
-  // --- Update QR code when options change ---
+  // --- Update QR code when non-logo options change ---
   useEffect(() => {
     if (qrCodeRef.current) {
       qrCodeRef.current.update({
@@ -159,11 +165,7 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
         cornersDotOptions,
         backgroundOptions: { color: backgroundColor },
         qrOptions: { errorCorrectionLevel },
-        imageOptions: {
-          crossOrigin: processedLogoUrl?.startsWith('data:') ? undefined : 'anonymous',
-          margin: logoMargin,
-          imageSize: logoSize,
-        },
+        imageOptions,
         image: processedLogoUrl || undefined,
       });
     }
@@ -174,8 +176,7 @@ export function useQRCodeInstance(options: QRCodeInstanceOptions) {
     cornersDotOptions,
     backgroundColor,
     errorCorrectionLevel,
-    logoMargin,
-    logoSize,
+    imageOptions,
     processedLogoUrl,
   ]);
 

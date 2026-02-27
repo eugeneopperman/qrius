@@ -4,7 +4,7 @@ import { StudioContextPopover } from './StudioContextPopover';
 
 export const StudioCanvas = memo(function StudioCanvas() {
   return (
-    <div className="flex-1 flex items-center justify-center p-6 overflow-auto relative min-h-0">
+    <div className="flex-1 flex items-center justify-center p-6 overflow-auto relative min-h-0 h-full">
       {/* Dot grid background */}
       <div
         className="absolute inset-0 opacity-[0.15] dark:opacity-[0.08] pointer-events-none"
