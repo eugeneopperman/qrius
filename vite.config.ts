@@ -13,6 +13,12 @@ export default defineConfig({
     },
   },
   build: {
+    modulePreload: {
+      // Disable Vite's modulepreload polyfill — browsers handle dynamic imports
+      // natively now. This eliminates "preloaded but not used" warnings for
+      // code-split chunks that aren't needed on the current page.
+      polyfill: false,
+    },
     rollupOptions: {
       output: {
         manualChunks: {

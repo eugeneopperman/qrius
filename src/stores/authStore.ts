@@ -410,12 +410,11 @@ export const useAuthStore = create<AuthState>()(
             .eq('user_id', user.id);
 
           if (error) {
-            console.error('[fetchOrganizations] query error:', error);
+            if (import.meta.env.DEV) console.error('Error fetching organizations:', error);
             return;
           }
 
           if (!data || data.length === 0) {
-            console.warn('[fetchOrganizations] no organization memberships found');
             return;
           }
 
@@ -430,8 +429,6 @@ export const useAuthStore = create<AuthState>()(
             : null;
           const activeOrg = match || organizations[0];
 
-          console.log('[fetchOrganizations] org plan:', activeOrg.organization.plan);
-
           // Fetch plan limits for the active organization
           const { data: limits, error: limitsError } = await supabase
             .from('plan_limits')
@@ -440,10 +437,8 @@ export const useAuthStore = create<AuthState>()(
             .single();
 
           if (limitsError) {
-            console.error('[fetchOrganizations] plan_limits error:', limitsError);
+            if (import.meta.env.DEV) console.error('Error fetching plan limits:', limitsError);
           }
-
-          console.log('[fetchOrganizations] planLimits:', limits?.plan);
 
           set({
             currentOrganization: activeOrg.organization,
@@ -451,7 +446,7 @@ export const useAuthStore = create<AuthState>()(
             planLimits: limits || DEFAULT_FREE_PLAN_LIMITS,
           });
         } catch (error) {
-          console.error('[fetchOrganizations] catch:', error);
+          if (import.meta.env.DEV) console.error('Error fetching organizations:', error);
         }
       },
 
