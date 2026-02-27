@@ -567,11 +567,12 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'qrius-auth',
-      version: 1,
+      version: 2,
       partialize: (state) => ({
         currentOrganization: state.currentOrganization
-          ? { id: state.currentOrganization.id }
+          ? { id: state.currentOrganization.id, plan: state.currentOrganization.plan }
           : null,
+        planLimits: state.planLimits,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
     }
