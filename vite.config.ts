@@ -72,9 +72,23 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{css,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{ico,png,svg,woff2}'],
         navigateFallback: null,
+        // Force SW to activate immediately on update — prevents stale CSS/JS
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
+          {
+            urlPattern: /\.css$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'css-cache',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+              },
+            },
+          },
           {
             urlPattern: ({ request }) => request.mode === 'navigate',
             handler: 'NetworkFirst',
