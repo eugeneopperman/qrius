@@ -13,6 +13,7 @@ import { useOrganizationQRCodes } from '@/hooks/useOrganizationQRCodes';
 import { useDashboardStats } from '@/hooks/queries/useDashboardStats';
 import { useUsageStats } from '@/hooks/queries/useUsageStats';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/stores/toastStore';
 
 function UsageBar({ label, used, limit }: { label: string; used: number; limit: number }) {
   const isUnlimited = limit === -1;
@@ -65,9 +66,13 @@ export default function DashboardPage() {
     if (!deleteConfirm) return;
 
     setIsDeleting(true);
+    toast.info('Deleting QR code...');
     const success = await deleteQRCode(deleteConfirm.id);
     if (success) {
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      toast.success('QR code deleted');
+    } else {
+      toast.error('Failed to delete QR code');
     }
     setIsDeleting(false);
     setDeleteConfirm(null);

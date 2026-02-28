@@ -77,9 +77,12 @@ export default function QRCodesPage() {
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
+    toast.info('Deleting QR code...');
     const success = await deleteQRCode(deleteTarget.id);
     if (success) {
       toast.success('QR code deleted');
+    } else {
+      toast.error('Failed to delete QR code');
     }
     setIsDeleting(false);
     setDeleteTarget(null);

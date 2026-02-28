@@ -115,6 +115,7 @@ export default function QRCodeDetailPage() {
     if (!qrCode) return;
 
     setIsDeleting(true);
+    toast.info('Deleting QR code...');
     try {
       const session = await getSession();
       if (!session?.access_token) {
