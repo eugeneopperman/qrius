@@ -1,66 +1,47 @@
 import { memo, useState } from 'react';
-import { Edit2, Copy, Trash2, Check, MoreVertical } from 'lucide-react';
+import { Edit2, Copy, Trash2, MoreVertical } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { cn } from '@/utils/cn';
-import { useGoogleFont, getFontFamily } from '@/hooks/useGoogleFont';
+import { QRMiniPreview } from '../ui/QRMiniPreview';
+import type { QRStyleOptionsForPreview } from '../ui/QRMiniPreview';
+import { QR_CONFIG } from '@/config/constants';
 import type { BrandTemplate } from '@/types';
 
 interface TemplateCardProps {
   template: BrandTemplate;
-  onApply: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
-  isApplied?: boolean;
 }
 
 export const TemplateCard = memo(function TemplateCard({
   template,
-  onApply,
   onDuplicate,
   onDelete,
-  isApplied = false,
 }: TemplateCardProps) {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
-  const { style } = template;
-
-  // Load Google Font for preview if specified
-  useGoogleFont(style.googleFontFamily, style.googleFontWeight);
-
-  // Get gradient preview or solid color
-  const getColorPreview = () => {
-    if (style.useGradient && style.gradient) {
-      const colors = style.gradient.colorStops
-        .map((s) => `${s.color} ${s.offset * 100}%`)
-        .join(', ');
-      if (style.gradient.type === 'radial') {
-        return `radial-gradient(circle, ${colors})`;
-      }
-      return `linear-gradient(${style.gradient.rotation || 0}deg, ${colors})`;
-    }
-    return style.dotsColor || '#000000';
-  };
 
   return (
     <div
       className={cn(
         'relative group rounded-2xl border transition-all shadow-sm',
         'bg-white dark:bg-gray-900',
-        isApplied
-          ? 'border-orange-500 ring-2 ring-orange-500/20'
-          : 'border-gray-100 dark:border-gray-800 hover:border-orange-300 hover:shadow-md'
+        'border-gray-100 dark:border-gray-800 hover:border-orange-300 hover:shadow-md'
       )}
     >
-      {/* Color Preview Bar */}
-      <div
-        className="h-2 rounded-t-2xl"
-        style={{ background: getColorPreview() }}
-      />
+      {/* QR Thumbnail */}
+      <div className="flex items-center justify-center p-4 bg-black/5 dark:bg-white/5 rounded-t-2xl">
+        <QRMiniPreview
+          data={QR_CONFIG.GHOST_DATA}
+          size={160}
+          styleOptions={template.style as QRStyleOptionsForPreview}
+        />
+      </div>
 
       {/* Content */}
       <div className="p-3">
-        {/* Template Info */}
-        <div className="flex items-start justify-between gap-2 mb-2">
+        {/* Name + Date + Menu */}
+        <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-sm text-gray-900 dark:text-white truncate">
               {template.name}
@@ -125,52 +106,12 @@ export const TemplateCard = memo(function TemplateCard({
           </div>
         </div>
 
-        {/* Style Tags */}
-        <div className="flex flex-wrap gap-1 mb-3">
-          {style.useGradient && (
-            <span className="px-1.5 py-0.5 text-[10px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
-              Gradient
-            </span>
-          )}
-          {style.frameStyle && style.frameStyle !== 'none' && (
-            <span className="px-1.5 py-0.5 text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded capitalize">
-              {style.frameStyle.replace('-', ' ')}
-            </span>
-          )}
-          {style.logoUrl && (
-            <span className="px-1.5 py-0.5 text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
-              Logo
-            </span>
-          )}
-          {style.googleFontFamily && (
-            <span
-              className="px-1.5 py-0.5 text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded truncate max-w-[80px]"
-              style={{ fontFamily: getFontFamily(style.googleFontFamily) }}
-            >
-              {style.googleFontFamily}
-            </span>
-          )}
-        </div>
-
-        {/* Apply Button */}
+        {/* Edit Button */}
         <button
-          onClick={() => onApply(template.id)}
-          disabled={isApplied}
-          className={cn(
-            'w-full py-2 text-xs font-medium rounded-lg transition-colors',
-            isApplied
-              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 cursor-default flex items-center justify-center gap-1.5'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300'
-          )}
+          onClick={() => navigate({ to: '/templates/$id/edit', params: { id: template.id } })}
+          className="w-full py-2 text-xs font-medium rounded-lg transition-colors bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:text-orange-700 dark:hover:text-orange-300"
         >
-          {isApplied ? (
-            <>
-              <Check className="w-3.5 h-3.5" />
-              Applied
-            </>
-          ) : (
-            'Apply'
-          )}
+          Edit
         </button>
       </div>
     </div>

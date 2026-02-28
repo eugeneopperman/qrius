@@ -22,7 +22,6 @@ export const TemplateList = memo(function TemplateList({
     isLoading,
     deleteTemplate,
     duplicateTemplate,
-    applyTemplate,
     exportTemplates,
     importTemplates,
   } = useTemplateCRUD();
@@ -34,21 +33,7 @@ export const TemplateList = memo(function TemplateList({
     id: string;
     name: string;
   } | null>(null);
-  const [appliedId, setAppliedId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleApply = useCallback(
-    (id: string) => {
-      applyTemplate(id);
-      setAppliedId(id);
-      const template = templates.find((t) => t.id === id);
-      toast.success(`Applied "${template?.name}" template`);
-
-      // Reset applied state after a delay
-      setTimeout(() => setAppliedId(null), 2000);
-    },
-    [applyTemplate, templates]
-  );
 
   const handleDuplicate = useCallback(
     async (id: string) => {
@@ -169,7 +154,7 @@ export const TemplateList = memo(function TemplateList({
         <div className={compact ? 'space-y-2' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'}>
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="rounded-2xl border border-gray-100 dark:border-gray-800 animate-pulse">
-              <div className="h-2 rounded-t-2xl bg-gray-200 dark:bg-gray-700" />
+              <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-t-2xl" />
               <div className="p-3">
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2" />
                 <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-3" />
@@ -193,11 +178,8 @@ export const TemplateList = memo(function TemplateList({
             <TemplateCard
               key={template.id}
               template={template}
-              onApply={handleApply}
-
               onDuplicate={handleDuplicate}
               onDelete={handleDelete}
-              isApplied={appliedId === template.id}
             />
           ))}
         </div>
