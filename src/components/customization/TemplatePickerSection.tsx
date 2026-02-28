@@ -1,18 +1,28 @@
-import { useTemplateStore } from '@/stores/templateStore';
+import { useTemplateCRUD } from '@/hooks/useTemplateCRUD';
 import { useQRStore } from '@/stores/qrStore';
 import { usePlanGate } from '@/hooks/usePlanGate';
 import { ProBadge } from '../ui/ProBadge';
 import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
 import { cn } from '@/utils/cn';
+import { useNavigate } from '@tanstack/react-router';
 import { Plus, Check, Palette } from 'lucide-react';
 import type { BrandTemplate } from '@/types';
 
 export function TemplatePickerSection() {
-  const { templates, applyTemplate, openWizard } = useTemplateStore();
+  const { templates, applyTemplate } = useTemplateCRUD();
   const styleOptions = useQRStore((s) => s.styleOptions);
   const { templateLimit } = usePlanGate();
+  const navigate = useNavigate();
   const isAtLimit = templateLimit !== -1 && templates.length >= templateLimit;
+
+  const handleCreateTemplate = () => {
+    if (isAtLimit) {
+      toast.info('Upgrade to Pro for unlimited templates');
+      return;
+    }
+    navigate({ to: '/templates/new' });
+  };
 
   const handleApply = (template: BrandTemplate) => {
     applyTemplate(template.id);
@@ -39,7 +49,7 @@ export function TemplatePickerSection() {
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
           Save your favorite styles as reusable templates
         </p>
-        <Button variant="secondary" size="sm" onClick={() => openWizard()} disabled={isAtLimit}>
+        <Button variant="secondary" size="sm" onClick={handleCreateTemplate} disabled={isAtLimit}>
           <Plus className="w-4 h-4" />
           Create Template
         </Button>
@@ -89,13 +99,7 @@ export function TemplatePickerSection() {
 
         {/* Create New */}
         <button
-          onClick={() => {
-            if (isAtLimit) {
-              toast.info('Upgrade to Pro for unlimited templates');
-              return;
-            }
-            openWizard();
-          }}
+          onClick={handleCreateTemplate}
           disabled={isAtLimit}
           className={cn(
             'p-3 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-1 min-h-[80px]',
