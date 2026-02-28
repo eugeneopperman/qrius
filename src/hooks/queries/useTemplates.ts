@@ -49,15 +49,18 @@ async function fetchTemplates(): Promise<BrandTemplate[]> {
 
 export function useTemplates() {
   const user = useAuthStore((s) => s.user);
+  const isInitialized = useAuthStore((s) => s.isInitialized);
   const currentOrganization = useAuthStore((s) => s.currentOrganization);
   const queryClient = useQueryClient();
 
-  const queryKey = ['brand-templates', currentOrganization?.id ?? user?.id ?? 'anon'] as const;
+  const ownerId = currentOrganization?.id ?? user?.id ?? 'anon';
+  const queryKey = ['brand-templates', ownerId] as const;
 
   const { data: templates = [], isLoading, error } = useQuery({
     queryKey,
     queryFn: fetchTemplates,
-    enabled: !!user,
+    enabled: isInitialized && !!user,
+    refetchOnMount: 'always',
   });
 
   const createMutation = useMutation({
