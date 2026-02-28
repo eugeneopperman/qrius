@@ -170,10 +170,8 @@ async function handleCreate(
 
   if (authContext) {
     if (authContext.organizationId) {
-      // API key auth - use the key's organization
       organizationId = authContext.organizationId;
     } else if (authContext.userId) {
-      // JWT auth - get user's organization
       userId = authContext.userId;
       try {
         const orgMembership = await getUserOrganization(authContext.userId);
@@ -182,41 +180,42 @@ async function handleCreate(
         // User has no organization - create without org
       }
     }
-
-    // Check plan limits if we have an organization
-    if (organizationId) {
-      const limitCheck = await checkPlanLimit(organizationId, 'qr_codes');
-      if (!limitCheck.allowed) {
-        return res.status(403).json({
-          error: 'QR code limit reached',
-          current: limitCheck.current,
-          limit: limitCheck.limit,
-        });
-      }
-    }
   }
 
-  // Generate unique short code (with retry for collisions)
-  let shortCode: string;
-  let attempts = 0;
-  const maxAttempts = 5;
+  // Parallelize: plan limit check + short code generation + custom domain lookup
+  // These are independent and hit different databases (Supabase vs Neon)
+  const planLimitPromise = organizationId
+    ? checkPlanLimit(organizationId, 'qr_codes')
+    : Promise.resolve({ allowed: true, current: 0, limit: -1 });
 
-  for (;;) {
-    shortCode = generateShortCode();
-    attempts++;
-
-    // Check if code already exists
-    const existing = await sql`
-      SELECT id FROM qr_codes WHERE short_code = ${shortCode}
-    `;
-
-    if (existing.length === 0) {
-      break;
+  const shortCodePromise = (async () => {
+    let attempts = 0;
+    const maxAttempts = 5;
+    for (;;) {
+      const code = generateShortCode();
+      attempts++;
+      const existing = await sql`SELECT id FROM qr_codes WHERE short_code = ${code}`;
+      if (existing.length === 0) return code;
+      if (attempts >= maxAttempts) throw new Error('Failed to generate unique short code');
     }
+  })();
 
-    if (attempts >= maxAttempts) {
-      return res.status(500).json({ error: 'Failed to generate unique short code' });
-    }
+  const customDomainPromise = organizationId
+    ? getOrgCustomDomain(organizationId)
+    : Promise.resolve(null);
+
+  const [limitCheck, shortCode, customDomain] = await Promise.all([
+    planLimitPromise,
+    shortCodePromise,
+    customDomainPromise,
+  ]);
+
+  if (!limitCheck.allowed) {
+    return res.status(403).json({
+      error: 'QR code limit reached',
+      current: limitCheck.current,
+      limit: limitCheck.limit,
+    });
   }
 
   // Build metadata JSON (merge style_options if provided)
@@ -261,7 +260,6 @@ async function handleCreate(
 
   const row = result[0] as QRCodeRow;
 
-  // Validate required fields exist
   if (!row.id || !row.short_code) {
     logger.qrCodes.error('QR code INSERT returned invalid data', { row });
     return res.status(500).json({ error: 'Failed to create QR code' });
@@ -269,15 +267,12 @@ async function handleCreate(
 
   logger.qrCodes.info('QR code created', { id: row.id, orgId: organizationId, userId, shortCode, qrType: body.qr_type || 'url' });
 
-  // Pre-populate cache for fast redirects (non-blocking — don't delay the response)
+  // Pre-populate cache for fast redirects (non-blocking)
   void setCachedRedirect(shortCode, {
     destinationUrl: body.destination_url,
     qrCodeId: row.id,
     organizationId,
   });
-
-  // Look up custom domain for the org
-  const customDomain = organizationId ? await getOrgCustomDomain(organizationId) : null;
 
   return res.status(201).json(toQRCodeResponse(row, baseUrl, customDomain));
 }

@@ -94,6 +94,9 @@ export function StepDownload({ autosave }: StepDownloadProps) {
       if (styleOptions.qrRoundness !== undefined) style_options.qrRoundness = styleOptions.qrRoundness;
       if (styleOptions.qrPattern) style_options.qrPattern = styleOptions.qrPattern;
 
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
       const response = await fetch('/api/qr-codes', {
         method: 'POST',
         headers: {
@@ -107,7 +110,9 @@ export function StepDownload({ autosave }: StepDownloadProps) {
           name,
           style_options,
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const data = await response.json();
@@ -127,7 +132,11 @@ export function StepDownload({ autosave }: StepDownloadProps) {
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast.success('QR code saved to your dashboard');
     } catch (error) {
-      if (import.meta.env.DEV) console.error('Failed to save QR to DB:', error);
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        toast.error('Save timed out. Your QR code still works — try refreshing.');
+      } else if (import.meta.env.DEV) {
+        console.error('Failed to save QR to DB:', error);
+      }
     } finally {
       setLocalIsSaving(false);
     }
