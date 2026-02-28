@@ -290,7 +290,7 @@ async function handlePatch(
 
   const qrCode = qrResult[0] as QRCodeRow;
 
-  // Check ownership: user owns it directly or through org membership
+  // Check ownership: direct, org membership, or unowned/legacy
   if (qrCode.user_id === user.id) {
     // Direct ownership
   } else if (qrCode.organization_id) {
@@ -300,6 +300,8 @@ async function handlePatch(
       logger.qrCodes.warn('Unauthorized PATCH attempt', { id, userId: user.id, orgId: qrCode.organization_id });
       return res.status(403).json({ error: 'Not authorized to modify this QR code' });
     }
+  } else if (qrCode.user_id === null && qrCode.organization_id === null) {
+    // Legacy/unowned code — allow authenticated users to manage
   } else {
     logger.qrCodes.warn('Unauthorized PATCH attempt', { id, userId: user.id });
     return res.status(403).json({ error: 'Not authorized to modify this QR code' });
@@ -458,7 +460,7 @@ async function handleDelete(
 
   const qrCode = qrResult[0] as { id: string; user_id: string | null; organization_id: string | null; short_code: string };
 
-  // Check ownership
+  // Check ownership: direct, org membership, or unowned/legacy
   if (qrCode.user_id === user.id) {
     // Direct ownership
   } else if (qrCode.organization_id) {
@@ -468,6 +470,8 @@ async function handleDelete(
       logger.qrCodes.warn('Unauthorized DELETE attempt', { id, userId: user.id, orgId: qrCode.organization_id });
       return res.status(403).json({ error: 'Not authorized to delete this QR code' });
     }
+  } else if (qrCode.user_id === null && qrCode.organization_id === null) {
+    // Legacy/unowned code — allow authenticated users to manage
   } else {
     logger.qrCodes.warn('Unauthorized DELETE attempt', { id, userId: user.id });
     return res.status(403).json({ error: 'Not authorized to delete this QR code' });
