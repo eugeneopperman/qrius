@@ -13,6 +13,8 @@ import {
   SortDesc,
   QrCode,
 } from 'lucide-react';
+import { QRMiniPreview } from '@/components/ui/QRMiniPreview';
+import { extractStyleOptions } from '@/utils/extractStyleOptions';
 import type { QRCode } from '@/types/database';
 
 type ViewMode = 'grid' | 'list';
@@ -238,8 +240,12 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
                 <tr key={qrCode.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                        <QrCode className="w-5 h-5 text-gray-400" />
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                        <QRMiniPreview
+                          data={qrCode.destination_url}
+                          size={40}
+                          styleOptions={extractStyleOptions(qrCode.metadata)}
+                        />
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">
