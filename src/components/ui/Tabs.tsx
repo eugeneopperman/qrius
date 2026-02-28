@@ -173,11 +173,12 @@ export function TabList({ children, className }: TabListProps) {
               id={`tab-${index}`}
               aria-selected={activeIndex === index}
               aria-controls={`tabpanel-${index}`}
+              aria-label={typeof element.props.children === 'string' ? element.props.children : undefined}
               tabIndex={activeIndex === index ? 0 : -1}
               onClick={() => setActiveIndex(index)}
               onKeyDown={(e) => handleKeyDown(e, index)}
               className={cn(
-                'group relative flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap',
+                'group relative flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg whitespace-nowrap min-w-[44px] min-h-[44px]',
                 'transition-all duration-200 ease-out',
                 'focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-1',
                 activeIndex === index
@@ -195,7 +196,7 @@ export function TabList({ children, className }: TabListProps) {
                   )}
                 />
               )}
-              <span className="text-sm font-medium">{element.props.children}</span>
+              <span className="text-sm font-medium hidden sm:inline">{element.props.children}</span>
             </button>
           );
         })}
