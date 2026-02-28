@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTemplateCRUD } from '@/hooks/useTemplateCRUD';
 import { useQRStore } from '@/stores/qrStore';
 import { usePlanGate } from '@/hooks/usePlanGate';
@@ -12,10 +13,11 @@ import type { BrandTemplate } from '@/types';
 
 export function TemplatePickerSection() {
   const { templates, applyTemplate } = useTemplateCRUD();
-  const styleOptions = useQRStore((s) => s.styleOptions);
+  const resetToDefaults = useQRStore((s) => s.resetToDefaults);
   const { templateLimit } = usePlanGate();
   const navigate = useNavigate();
   const isAtLimit = templateLimit !== -1 && templates.length >= templateLimit;
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
 
   const handleCreateTemplate = () => {
     if (isAtLimit) {
@@ -25,17 +27,18 @@ export function TemplatePickerSection() {
     navigate({ to: '/templates/new' });
   };
 
-  const handleApply = (template: BrandTemplate) => {
-    applyTemplate(template.id);
-    toast.success(`Template "${template.name}" applied`);
-  };
-
-  // Check if a template is currently active by comparing key style properties
-  const isActive = (template: BrandTemplate) => {
-    return (
-      styleOptions.dotsColor === template.style.dotsColor &&
-      styleOptions.backgroundColor === template.style.backgroundColor
-    );
+  const handleToggle = (template: BrandTemplate) => {
+    if (activeTemplateId === template.id) {
+      // Deselect — reset to defaults
+      setActiveTemplateId(null);
+      resetToDefaults();
+      toast.success('Template removed');
+    } else {
+      // Apply
+      applyTemplate(template.id);
+      setActiveTemplateId(template.id);
+      toast.success(`Template "${template.name}" applied`);
+    }
   };
 
   if (templates.length === 0) {
@@ -63,11 +66,11 @@ export function TemplatePickerSection() {
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {templates.map((template) => {
-          const active = isActive(template);
+          const active = activeTemplateId === template.id;
           return (
             <button
               key={template.id}
-              onClick={() => handleApply(template)}
+              onClick={() => handleToggle(template)}
               className={cn(
                 'relative rounded-xl border transition-all text-center overflow-hidden',
                 active
