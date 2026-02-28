@@ -236,10 +236,15 @@ export function getFrameClasses(frameStyle: FrameStyle): string {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components -- utility co-located with components
-export function getFrameInlineStyles(frameStyle: FrameStyle, styleOptions?: QRStyleOptions): React.CSSProperties {
+export function getFrameInlineStyles(frameStyle: FrameStyle, styleOptions?: QRStyleOptions, qrBgColor?: string): React.CSSProperties {
   const borderColor = styleOptions?.frameBorderColor;
   const bgColor = styleOptions?.frameBgColor;
   const styles: React.CSSProperties = {};
+
+  // Use QR background color as frame fill, specific frame types can override
+  if (qrBgColor) {
+    styles.backgroundColor = qrBgColor;
+  }
 
   if (borderColor) {
     if (['simple', 'rounded', 'bottom-label', 'top-label', 'badge', 'speech-bubble', 'circular', 'ribbon'].includes(frameStyle)) {
@@ -258,7 +263,7 @@ export function getFrameInlineStyles(frameStyle: FrameStyle, styleOptions?: QRSt
   if (frameStyle === 'gradient-border') {
     const colors = styleOptions?.frameGradientColors || ['#6366F1', '#EC4899'];
     styles.border = '4px solid transparent';
-    styles.backgroundImage = `linear-gradient(white, white), linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
+    styles.backgroundImage = `linear-gradient(${qrBgColor || 'white'}, ${qrBgColor || 'white'}), linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
     styles.backgroundOrigin = 'border-box';
     styles.backgroundClip = 'padding-box, border-box';
   }

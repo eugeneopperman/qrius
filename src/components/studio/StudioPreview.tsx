@@ -93,10 +93,11 @@ export const StudioPreview = memo(function StudioPreview() {
   const fontSize = style.frameFontSize || 'base';
   const fontFamily = style.frameFontFamily || 'sans';
 
+  const bgColor = style.backgroundColor || '#ffffff';
   const frameClasses = hasFrame ? getFrameClasses(frameStyle) : '';
   const frameInlineStyles = hasFrame
-    ? getFrameInlineStyles(frameStyle, style)
-    : {};
+    ? getFrameInlineStyles(frameStyle, style, bgColor)
+    : { backgroundColor: bgColor };
 
   // Custom border radius
   const borderRadius =
@@ -107,8 +108,8 @@ export const StudioPreview = memo(function StudioPreview() {
     hasFrame && style.framePadding !== undefined
       ? `${style.framePadding}px`
       : hasFrame
-        ? '12px'
-        : undefined;
+        ? '16px'
+        : '8px';
 
   return (
     <div className="relative inline-flex flex-col items-center">
@@ -131,15 +132,11 @@ export const StudioPreview = memo(function StudioPreview() {
 
       {/* Frame container */}
       <div
-        className={cn('relative z-10 transition-all', frameClasses)}
+        className={cn('relative z-10 transition-all', hasFrame ? frameClasses : 'rounded-2xl')}
         style={{
           ...frameInlineStyles,
           borderRadius,
           padding,
-          backgroundColor:
-            frameStyle === 'sticker'
-              ? style.frameBgColor || '#FEF3C7'
-              : undefined,
         }}
       >
         {/* Frame hit zone */}
@@ -204,13 +201,13 @@ export const StudioPreview = memo(function StudioPreview() {
           />
         )}
 
-        {/* QR Code area */}
-        <div className="relative">
+        {/* QR Code area with inner padding */}
+        <div className="relative rounded-xl p-2" style={{ backgroundColor: bgColor }}>
           {/* QR Body hit zone */}
           <button
             onClick={(e) => handleZoneClick('dots-colors', e)}
             className={cn(
-              'group absolute inset-0 z-30 rounded-lg transition-all cursor-pointer',
+              'group absolute inset-0 z-30 rounded-xl transition-all cursor-pointer',
               activePanel === 'dots-colors'
                 ? 'ring-2 ring-orange-500'
                 : 'hover:ring-2 hover:ring-dashed hover:ring-orange-300',

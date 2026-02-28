@@ -125,6 +125,8 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
     iconPosition: styleOptions.frameIconPosition,
   };
 
+  const bgColor = styleOptions.backgroundColor || '#ffffff';
+
   // Frame container content — shared between ghost and normal modes
   const frameContent = (
     <div
@@ -132,10 +134,13 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
       className={cn(
         'relative transition-all qr-preview-glow animate-scale-in',
         frameStyle === 'none'
-          ? 'p-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md'
-          : cn('p-3', getFrameClasses(frameStyle), 'bg-white dark:bg-gray-800')
+          ? 'p-2 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md'
+          : cn('p-4', getFrameClasses(frameStyle))
       )}
-      style={frameStyle !== 'none' ? getFrameInlineStyles(frameStyle, styleOptions) : undefined}
+      style={{
+        backgroundColor: bgColor,
+        ...(frameStyle !== 'none' ? getFrameInlineStyles(frameStyle, styleOptions, bgColor) : {}),
+      }}
     >
       {/* Decorative Corners */}
       {frameStyle === 'decorative-corners' && <DecorativeCorners color={styleOptions.frameBorderColor} />}
@@ -159,11 +164,17 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
         <SpeechBubblePointer direction="top" color={styleOptions.frameBorderColor} />
       )}
 
+      {/* QR code with inner padding and rounded corners */}
       <div
-        ref={containerRef}
-        className="flex items-center justify-center"
-        style={{ minWidth: QR_CONFIG.SIZE, minHeight: QR_CONFIG.SIZE }}
-      />
+        className="rounded-2xl p-3"
+        style={{ backgroundColor: bgColor }}
+      >
+        <div
+          ref={containerRef}
+          className="flex items-center justify-center"
+          style={{ minWidth: QR_CONFIG.SIZE, minHeight: QR_CONFIG.SIZE }}
+        />
+      </div>
 
       {/* Bottom Label */}
       {frameStyle === 'bottom-label' && frameLabel && <BottomLabel {...labelProps} />}
