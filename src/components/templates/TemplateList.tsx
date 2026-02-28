@@ -1,7 +1,7 @@
 import { memo, useRef, useState, useCallback } from 'react';
 import { Plus, Download, Upload, Palette } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import { useTemplateStore } from '@/stores/templateStore';
+import { useTemplateCRUD } from '@/hooks/useTemplateCRUD';
 import { usePlanGate } from '@/hooks/usePlanGate';
 import { ProBadge } from '../ui/ProBadge';
 import { toast } from '@/stores/toastStore';
@@ -19,12 +19,13 @@ export const TemplateList = memo(function TemplateList({
   const navigate = useNavigate();
   const {
     templates,
+    isLoading,
     deleteTemplate,
     duplicateTemplate,
     applyTemplate,
     exportTemplates,
     importTemplates,
-  } = useTemplateStore();
+  } = useTemplateCRUD();
 
   const { templateLimit, isAuthenticated, isFree } = usePlanGate();
   const isAtLimit = templateLimit !== -1 && templates.length >= templateLimit;
@@ -50,23 +51,23 @@ export const TemplateList = memo(function TemplateList({
   );
 
   const handleDuplicate = useCallback(
-    (id: string) => {
-      duplicateTemplate(id);
+    async (id: string) => {
+      await duplicateTemplate(id);
       toast.success('Template duplicated');
     },
     [duplicateTemplate]
   );
 
   const handleDelete = useCallback((id: string) => {
-    const template = useTemplateStore.getState().templates.find((t) => t.id === id);
+    const template = templates.find((t) => t.id === id);
     if (template) {
       setDeleteConfirm({ id, name: template.name });
     }
-  }, []);
+  }, [templates]);
 
-  const confirmDelete = useCallback(() => {
+  const confirmDelete = useCallback(async () => {
     if (deleteConfirm) {
-      deleteTemplate(deleteConfirm.id);
+      await deleteTemplate(deleteConfirm.id);
       toast.success(`"${deleteConfirm.name}" deleted`);
       setDeleteConfirm(null);
     }
@@ -90,9 +91,9 @@ export const TemplateList = memo(function TemplateList({
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const json = event.target?.result as string;
-        const success = importTemplates(json);
+        const success = await importTemplates(json);
         if (success) {
           toast.success('Templates imported successfully');
         } else {
@@ -163,8 +164,24 @@ export const TemplateList = memo(function TemplateList({
         )}
       </div>
 
+      {/* Loading skeleton */}
+      {isLoading && templates.length === 0 && (
+        <div className={compact ? 'space-y-2' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-2xl border border-gray-100 dark:border-gray-800 animate-pulse">
+              <div className="h-2 rounded-t-2xl bg-gray-200 dark:bg-gray-700" />
+              <div className="p-3">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-3" />
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Template Grid */}
-      {templates.length > 0 ? (
+      {!isLoading && templates.length > 0 ? (
         <div
           className={
             compact
@@ -184,7 +201,7 @@ export const TemplateList = memo(function TemplateList({
             />
           ))}
         </div>
-      ) : (
+      ) : !isLoading ? (
         <div className="text-center py-8">
           <Palette className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
           <h4 className="font-medium text-gray-900 dark:text-white mb-1">
@@ -198,10 +215,10 @@ export const TemplateList = memo(function TemplateList({
             Create Template
           </Button>
         </div>
-      )}
+      ) : null}
 
       {/* Import hint for empty state */}
-      {templates.length === 0 && (
+      {!isLoading && templates.length === 0 && (
         <div className="text-center">
           <button
             onClick={() => fileInputRef.current?.click()}

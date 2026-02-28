@@ -56,6 +56,9 @@ interface TemplateStore {
 
   // Application
   applyTemplate: (id: string) => void;
+
+  // DB sync
+  syncTemplates: (templates: BrandTemplate[]) => void;
 }
 
 // ============================================================================
@@ -335,6 +338,11 @@ export const useTemplateStore = create<TemplateStore>()(
         // Apply to QR store - preserve qrRoundness for smooth rendering
         // The QRPreview will handle the roundness post-processing
         qrStore.setStyleOptions({ ...style });
+      },
+
+      // DB sync — replaces local templates with database data
+      syncTemplates: (templates: BrandTemplate[]) => {
+        set({ templates });
       },
     }),
     {

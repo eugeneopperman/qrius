@@ -2,6 +2,7 @@ import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Undo2, Redo2, Save } from 'lucide-react';
 import { useStudioStore } from '@/stores/studioStore';
+import { useTemplateCRUD } from '@/hooks/useTemplateCRUD';
 import { useShallow } from 'zustand/react/shallow';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils/cn';
@@ -66,9 +67,11 @@ export const StudioHeader = memo(function StudioHeader() {
     [handleNameSubmit, templateName]
   );
 
+  const { saveTemplate } = useTemplateCRUD();
+
   const handleSave = useCallback(() => {
-    save();
-  }, [save]);
+    save(saveTemplate);
+  }, [save, saveTemplate]);
 
   return (
     <div className="flex items-center justify-between px-4 py-2.5 border-b border-black/[0.06] dark:border-white/[0.06] flex-shrink-0">

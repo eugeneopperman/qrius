@@ -97,6 +97,7 @@ export const logger = {
   notifications: createLogger('notifications'),
   domains: createLogger('domains'),
   folders: createLogger('folders'),
+  templates: createLogger('templates'),
 };
 
 export default logger;

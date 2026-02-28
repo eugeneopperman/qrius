@@ -61,7 +61,7 @@ interface StudioState {
   setPopover: (popover: PopoverState | null) => void;
   undo: () => void;
   redo: () => void;
-  save: () => string;
+  save: (dbSave?: (name: string, style: BrandTemplateStyle, id?: string) => Promise<string>) => string;
   canUndo: () => boolean;
   canRedo: () => boolean;
 }
@@ -180,14 +180,31 @@ export const useStudioStore = create<StudioState>()((set, get) => ({
     });
   },
 
-  save: () => {
+  save: (dbSave) => {
     const { templateId, templateName, style } = get();
+
+    // DB mode: delegate to async handler
+    if (dbSave) {
+      dbSave(templateName, style, templateId || undefined)
+        .then((savedId) => {
+          set({ templateId: savedId, isDirty: false, originalStyle: { ...style } });
+          toast.success(templateId ? 'Template updated!' : 'Template created!');
+        })
+        .catch((err: Error) => {
+          if (err.message?.includes('limit reached')) {
+            toast.error('Template limit reached. Upgrade to Pro for unlimited templates.');
+          } else {
+            toast.error('Failed to save template');
+          }
+        });
+      return templateId || 'saving';
+    }
+
+    // localStorage mode: synchronous save via templateStore
     const templateStore = useTemplateStore.getState();
 
     if (templateId) {
       // Update existing
-      templateStore.updateDraft({ name: templateName, style });
-      // We need to use the templateStore's editing flow
       templateStore.openWizard(templateId);
       templateStore.updateDraft({ name: templateName, style });
       const savedId = templateStore.saveTemplate();

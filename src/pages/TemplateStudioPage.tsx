@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from '@tanstack/react-router';
 import { useStudioStore } from '@/stores/studioStore';
-import { useTemplateStore } from '@/stores/templateStore';
+import { useTemplateCRUD } from '@/hooks/useTemplateCRUD';
 import { StudioLayout } from '@/components/studio/StudioLayout';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { toast } from '@/stores/toastStore';
@@ -14,27 +14,40 @@ export default function TemplateStudioPage() {
 
   const initNew = useStudioStore((s) => s.initNew);
   const initFromTemplate = useStudioStore((s) => s.initFromTemplate);
-  const getTemplate = useTemplateStore((s) => s.getTemplate);
+  const { getTemplate, isLoading } = useTemplateCRUD();
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    if (templateId) {
-      const template = getTemplate(templateId);
-      if (template) {
-        initFromTemplate(template);
-      } else {
-        toast.error('Template not found');
-        router.navigate({ to: '/templates' });
-      }
-    } else {
+    // For new templates, initialize immediately
+    if (!templateId) {
       initNew();
+      setInitialized(true);
+      return;
     }
-    // Only run on mount / param change
+
+    // For editing, wait for templates to load
+    if (isLoading) return;
+
+    const template = getTemplate(templateId);
+    if (template) {
+      initFromTemplate(template);
+      setInitialized(true);
+    } else {
+      toast.error('Template not found');
+      router.navigate({ to: '/templates' });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [templateId]);
+  }, [templateId, isLoading]);
 
   return (
     <DashboardLayout>
-      <StudioLayout />
+      {(!templateId || initialized) ? (
+        <StudioLayout />
+      ) : (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-pulse text-gray-400">Loading template...</div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
