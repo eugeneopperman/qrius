@@ -8,10 +8,7 @@ import {
 
   ScanLine,
   Palette,
-  Menu,
-  X,
 } from 'lucide-react';
-import { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Logo } from '../ui/Logo';
 
@@ -37,38 +34,18 @@ const mobileNavItems = [
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
   return (
     <div className="min-h-screen bg-transparent">
-      {/* Mobile sidebar backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 lg:bg-transparent bg-[var(--color-bg)]/95 lg:backdrop-blur-0 backdrop-blur-sm transform transition-transform lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
+      {/* Desktop sidebar — hidden on mobile */}
+      <aside className="fixed inset-y-0 left-0 z-50 w-64 lg:bg-transparent bg-[var(--color-bg)]/95 lg:backdrop-blur-0 backdrop-blur-sm transform transition-transform lg:translate-x-0 -translate-x-full">
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-black/[0.04] dark:border-white/[0.04]">
+          <div className="flex items-center h-16 px-4 border-b border-black/[0.04] dark:border-white/[0.04]">
             <Link to="/dashboard">
               <Logo size="sm" />
             </Link>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden btn-icon"
-              aria-label="Close sidebar"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
           </div>
 
           {/* Navigation */}
@@ -112,13 +89,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content — flex column app shell on mobile, normal flow on desktop */}
       <div className="lg:pl-64 max-lg:flex max-lg:flex-col max-lg:h-[100dvh] max-lg:overflow-hidden">
         {/* Mobile header — flex child, never scrolls */}
-        <div className="lg:hidden flex-shrink-0 z-30 p-3 flex items-center justify-between bg-[var(--color-bg)] border-b border-black/[0.04] dark:border-white/[0.04]">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="btn-icon"
-          >
-            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-          </button>
+        <div className="lg:hidden flex-shrink-0 z-30 p-3 flex items-center justify-center bg-[var(--color-bg)] border-b border-black/[0.04] dark:border-white/[0.04]">
           <Link to="/dashboard"><Logo size="sm" /></Link>
         </div>
 
