@@ -109,10 +109,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="lg:pl-64">
-        {/* Mobile menu button */}
-        <div className="lg:hidden sticky top-0 z-30 p-3 flex items-center justify-between bg-[var(--color-bg)]/95 backdrop-blur-md border-b border-black/[0.04] dark:border-white/[0.04]">
+      {/* Main content — flex column app shell on mobile, normal flow on desktop */}
+      <div className="lg:pl-64 max-lg:flex max-lg:flex-col max-lg:h-[100dvh] max-lg:overflow-hidden">
+        {/* Mobile header — flex child, never scrolls */}
+        <div className="lg:hidden flex-shrink-0 z-30 p-3 flex items-center justify-between bg-[var(--color-bg)] border-b border-black/[0.04] dark:border-white/[0.04]">
           <button
             onClick={() => setSidebarOpen(true)}
             className="btn-icon"
@@ -122,16 +122,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Link to="/dashboard"><Logo size="sm" /></Link>
         </div>
 
-        {/* Page content */}
-        <main className="p-4 lg:p-6 pb-24 lg:pb-6">
+        {/* Page content — scrollable area on mobile */}
+        <main className="max-lg:flex-1 max-lg:min-h-0 max-lg:overflow-y-auto p-4 lg:p-6">
           <div className="glass-panel rounded-3xl p-2 sm:p-6 lg:p-8 min-h-[calc(100vh-5rem)]">
             {children}
           </div>
         </main>
 
-        {/* Mobile bottom navigation */}
+        {/* Mobile bottom navigation — flex child, never scrolls */}
         <nav
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-bg)]/95 backdrop-blur-md border-t border-black/[0.04] dark:border-white/[0.04]"
+          className="lg:hidden flex-shrink-0 z-40 bg-[var(--color-bg)] border-t border-black/[0.04] dark:border-white/[0.04]"
           aria-label="Mobile navigation"
         >
           <div className="flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
