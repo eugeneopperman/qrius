@@ -1,8 +1,10 @@
 // GET /api/api-keys - List organization's API keys
 // POST /api/api-keys - Create new API key
+// DELETE /api/api-keys?id=<uuid> - Revoke API key
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { requireAuth, getSupabaseAdmin, getUserOrganization, requireRole, checkPlanLimit, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
+import { isValidUUID } from '../_lib/validate.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { logger } from '../_lib/logger.js';
 import crypto from 'crypto';
@@ -15,7 +17,7 @@ interface CreateKeyRequest {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
-  setCorsHeaders(res, 'GET, POST, OPTIONS', req.headers.origin);
+  setCorsHeaders(res, 'GET, POST, DELETE, OPTIONS', req.headers.origin);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -43,6 +45,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'POST') {
       return await handleCreate(req, res, user.id, organizationId, limitCheck.limit);
+    }
+
+    if (req.method === 'DELETE') {
+      return await handleDelete(req, res, organizationId);
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
@@ -155,4 +161,39 @@ async function handleCreate(
     },
     warning: 'Store this API key securely. It will not be shown again.',
   });
+}
+
+async function handleDelete(req: VercelRequest, res: VercelResponse, organizationId: string) {
+  const keyId = req.query.id as string;
+
+  if (!keyId || !isValidUUID(keyId)) {
+    return res.status(400).json({ error: 'A valid API key ID is required' });
+  }
+
+  // Verify the key belongs to this organization
+  const { data: key, error: fetchError } = await getSupabaseAdmin()
+    .from('api_keys')
+    .select('id, organization_id')
+    .eq('id', keyId)
+    .single();
+
+  if (fetchError || !key) {
+    return res.status(404).json({ error: 'API key not found' });
+  }
+
+  if (key.organization_id !== organizationId) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const { error: deleteError } = await getSupabaseAdmin()
+    .from('api_keys')
+    .delete()
+    .eq('id', keyId);
+
+  if (deleteError) {
+    logger.apiKeys.error('Error deleting API key', { error: deleteError.message, keyId });
+    return res.status(500).json({ error: 'Failed to delete API key' });
+  }
+
+  return res.status(200).json({ success: true });
 }
