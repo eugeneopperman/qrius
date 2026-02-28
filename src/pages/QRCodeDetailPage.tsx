@@ -323,7 +323,7 @@ export default function QRCodeDetailPage() {
           {/* QR Code preview */}
           <div className="lg:col-span-1">
             <div className={`glass rounded-2xl p-6 ${!qrCode.is_active ? 'opacity-60' : ''}`}>
-              <div className="aspect-square bg-black/5 dark:bg-white/5 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
+              <div className="aspect-square bg-black/5 dark:bg-white/5 rounded-xl flex items-center justify-center mb-6 overflow-hidden">
                 <QRMiniPreview ref={qrPreviewRef} data={qrData} size={240} styleOptions={savedStyle} />
               </div>
 

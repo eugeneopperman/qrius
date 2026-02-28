@@ -96,7 +96,7 @@ export const QRCodeRow = memo(function QRCodeRow({
   return (
     <div className="flex items-center gap-4 px-4 py-3 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
       {/* QR Preview */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 rounded-xl overflow-hidden">
         <QRMiniPreview
           ref={previewRef}
           data={qr.destination_url}

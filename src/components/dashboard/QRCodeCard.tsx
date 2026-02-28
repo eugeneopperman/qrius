@@ -48,7 +48,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
       <div className="sm:hidden card-no-blur rounded-2xl overflow-hidden card-interactive">
         <div className="flex items-center gap-3 p-3">
           <Link to="/qr-codes/$id" params={{ id: qrCode.id }} className="flex-shrink-0">
-            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center overflow-hidden">
               <QRMiniPreview data={qrData} size={48} styleOptions={savedStyle} />
             </div>
           </Link>
@@ -116,7 +116,7 @@ export const QRCodeCard = memo(function QRCodeCard({ qrCode, onDelete }: QRCodeC
         {/* QR Preview */}
         <Link to="/qr-codes/$id" params={{ id: qrCode.id }} className="block">
           <div className="aspect-square p-6 bg-black/5 dark:bg-white/5 flex items-center justify-center">
-            <div className="w-full h-full max-w-[200px] max-h-[200px] bg-white rounded-lg flex items-center justify-center overflow-hidden">
+            <div className="w-full h-full max-w-[200px] max-h-[200px] bg-white rounded-xl flex items-center justify-center overflow-hidden">
               <QRMiniPreview data={qrData} size={180} styleOptions={savedStyle} />
             </div>
           </div>
