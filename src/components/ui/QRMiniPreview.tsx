@@ -106,6 +106,12 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
         cornersDotOptions.color = s.dotsColor;
       }
 
+      // Scale pixel-based logoMargin proportionally to render size
+      // (values are authored for 280px; at 48px a 5px margin would be disproportionately large)
+      const REFERENCE_SIZE = 280;
+      const scaleFactor = size / REFERENCE_SIZE;
+      const scaledMargin = Math.round((s?.logoMargin ?? 5) * scaleFactor);
+
       const config: Record<string, unknown> = {
         type: 'canvas',
         width: size,
@@ -117,7 +123,7 @@ export const QRMiniPreview = forwardRef<QRMiniPreviewHandle, QRMiniPreviewProps>
         cornersDotOptions,
         imageOptions: {
           crossOrigin: 'anonymous',
-          margin: s?.logoMargin ?? 5,
+          margin: scaledMargin,
           imageSize: s?.logoSize || 0.3,
         },
         qrOptions: { errorCorrectionLevel: s?.errorCorrectionLevel || 'H' },
