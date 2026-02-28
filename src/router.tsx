@@ -1,7 +1,8 @@
 import { createRouter, createRootRoute, createRoute, Outlet, redirect, useRouter, type ErrorComponentProps } from '@tanstack/react-router';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { isSupabaseMissing } from '@/lib/supabase';
 import { APP_VERSION, TIMING } from '@/config/constants';
 import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
@@ -102,6 +103,17 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {
   const { isShortcutsOpen, closeShortcuts, isSettingsOpen, closeSettings } = useUIStore();
+
+  // Subscribe to theme store so persist rehydration applies the saved theme
+  // to the DOM immediately on app load (not deferred until Settings page visit)
+  const theme = useThemeStore((s) => s.theme);
+  const autoSchedule = useThemeStore((s) => s.autoSchedule);
+  useEffect(() => {
+    // Force-apply after hydration — covers the mobile timing gap where
+    // FOUC prevention runs but onRehydrateStorage hasn't fired yet
+    const { setTheme } = useThemeStore.getState();
+    setTheme(theme);
+  }, [theme, autoSchedule]);
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
