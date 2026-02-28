@@ -7,7 +7,6 @@ import { cn } from '@/utils/cn';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
   Search,
-  Plus,
   Grid3X3,
   List,
   SortAsc,
@@ -169,13 +168,6 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
             </button>
           </div>
 
-          {/* Create button */}
-          <Link to="/create">
-            <Button size="sm">
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Create</span>
-            </Button>
-          </Link>
         </div>
       </div>
 
@@ -194,12 +186,9 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
               : 'Create your first QR code to get started'}
           </p>
           {!searchQuery && (
-            <Link to="/create">
-              <Button>
-                <Plus className="w-4 h-4" />
-                Create QR Code
-              </Button>
-            </Link>
+            <p className="text-sm text-orange-600 dark:text-orange-400">
+              Use the Create button in the navigation to get started
+            </p>
           )}
         </div>
       )}
