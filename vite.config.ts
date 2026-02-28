@@ -80,12 +80,15 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: /\.css$/,
-            handler: 'StaleWhileRevalidate',
+            handler: 'CacheFirst',
             options: {
               cacheName: 'css-cache',
               expiration: {
                 maxEntries: 20,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+              },
+              cacheableResponse: {
+                statuses: [200],
               },
             },
           },
@@ -116,12 +119,15 @@ export default defineConfig({
           },
           {
             urlPattern: /\.js$/,
-            handler: 'StaleWhileRevalidate',
+            handler: 'CacheFirst',
             options: {
               cacheName: 'js-cache',
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+              },
+              cacheableResponse: {
+                statuses: [200],
               },
             },
           },
