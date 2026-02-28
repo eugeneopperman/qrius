@@ -529,10 +529,10 @@ export function ProfileSettingsContent() {
             Profile Picture
           </h2>
 
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col items-center sm:flex-row sm:items-center gap-5">
             <button
               type="button"
-              className="relative group w-20 h-20 rounded-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              className="relative group w-24 h-24 rounded-full overflow-hidden flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ring-offset-2"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
             >
@@ -540,20 +540,20 @@ export function ProfileSettingsContent() {
                 <img
                   src={profile.avatar_url}
                   alt={profile.name || 'Avatar'}
-                  className="w-20 h-20 rounded-full object-cover"
+                  className="w-24 h-24 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-orange-500/12 dark:bg-orange-400/10 flex items-center justify-center">
-                  <span className="text-2xl font-medium text-orange-600 dark:text-orange-400">
+                <div className="w-24 h-24 rounded-full bg-orange-500/12 dark:bg-orange-400/10 flex items-center justify-center">
+                  <span className="text-3xl font-medium text-orange-600 dark:text-orange-400">
                     {initials}
                   </span>
                 </div>
               )}
               <div className="absolute inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
                 {isUploadingAvatar ? (
-                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  <Loader2 className="w-6 h-6 text-white animate-spin" />
                 ) : (
-                  <Camera className="w-5 h-5 text-white" />
+                  <Camera className="w-6 h-6 text-white" />
                 )}
               </div>
             </button>
@@ -566,7 +566,7 @@ export function ProfileSettingsContent() {
               onChange={handleAvatarUpload}
             />
 
-            <div>
+            <div className="flex flex-col items-center sm:items-start gap-2">
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
@@ -590,7 +590,7 @@ export function ProfileSettingsContent() {
                   </Button>
                 )}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 JPG, PNG, GIF or WebP. Max 2MB.
               </p>
             </div>
