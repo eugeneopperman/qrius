@@ -5,9 +5,8 @@ import { QRCodeList } from '@/components/dashboard/QRCodeList';
 import { UpgradePrompt, UsageLimitWarning } from '@/components/dashboard/UpgradePrompt';
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
-import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { Plus, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { QueryError } from '@/components/ui/QueryError';
 import { useState, useCallback } from 'react';
 import { useOrganizationQRCodes } from '@/hooks/useOrganizationQRCodes';
@@ -80,21 +79,13 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-5 sm:space-y-8 animate-slide-up-page">
         {/* Page header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Welcome back{profile?.name ? `, ${profile.name.split(' ')[0]}` : ''}
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400">
-              Here's what's happening with your QR codes
-            </p>
-          </div>
-          <Link to="/create">
-            <Button>
-              <Plus className="w-4 h-4" />
-              Create QR Code
-            </Button>
-          </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Welcome back{profile?.name ? `, ${profile.name.split(' ')[0]}` : ''}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Here's what's happening with your QR codes
+          </p>
         </div>
 
         {/* Upgrade prompt for free users */}
