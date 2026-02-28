@@ -95,7 +95,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Page content — scrollable area on mobile */}
         <main className="max-lg:flex-1 max-lg:min-h-0 max-lg:overflow-y-auto p-4 lg:p-6">
-          <div className="glass-panel rounded-3xl p-2 sm:p-6 lg:p-8 min-h-[calc(100vh-5rem)]">
+          <div className="glass-panel rounded-3xl p-4 sm:p-6 lg:p-8 min-h-[calc(100vh-5rem)]">
             {children}
           </div>
         </main>
