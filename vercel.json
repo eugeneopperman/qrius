@@ -25,7 +25,7 @@
       "destination": "/api/r/:shortCode"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|assets/).*)",
       "destination": "/index.html"
     }
   ]
