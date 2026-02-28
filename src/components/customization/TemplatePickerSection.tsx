@@ -2,6 +2,7 @@ import { useTemplateCRUD } from '@/hooks/useTemplateCRUD';
 import { useQRStore } from '@/stores/qrStore';
 import { usePlanGate } from '@/hooks/usePlanGate';
 import { ProBadge } from '../ui/ProBadge';
+import { QRMiniPreview } from '../ui/QRMiniPreview';
 import { toast } from '@/stores/toastStore';
 import { Button } from '../ui/Button';
 import { cn } from '@/utils/cn';
@@ -68,29 +69,25 @@ export function TemplatePickerSection() {
               key={template.id}
               onClick={() => handleApply(template)}
               className={cn(
-                'relative p-3 rounded-xl border transition-all text-left',
+                'relative rounded-xl border transition-all text-center overflow-hidden',
                 active
                   ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 ring-1 ring-orange-500'
                   : 'border-gray-200 dark:border-gray-700 hover:border-orange-300 hover:bg-gray-50 dark:hover:bg-gray-800'
               )}
             >
               {active && (
-                <div className="absolute top-2 right-2 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                <div className="absolute top-2 right-2 z-10 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
                   <Check className="w-3 h-3 text-white" />
                 </div>
               )}
-              {/* Color preview */}
-              <div className="flex items-center gap-2 mb-2">
-                <div
-                  className="w-6 h-6 rounded-md border border-gray-200 dark:border-gray-700"
-                  style={{ backgroundColor: template.style.dotsColor }}
-                />
-                <div
-                  className="w-6 h-6 rounded-md border border-gray-200 dark:border-gray-700"
-                  style={{ backgroundColor: template.style.backgroundColor }}
+              <div className="flex items-center justify-center p-3 pb-1">
+                <QRMiniPreview
+                  data="https://example.com"
+                  size={64}
+                  styleOptions={template.style}
                 />
               </div>
-              <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+              <p className="text-xs font-medium text-gray-900 dark:text-white truncate px-3 pb-3">
                 {template.name}
               </p>
             </button>
