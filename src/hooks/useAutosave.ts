@@ -13,11 +13,12 @@ export interface AutosaveState {
   lastSavedAt: Date | null;
   isSaving: boolean;
   saveNow: () => Promise<void>;
+  saveNowAs: (status: 'draft' | 'active') => Promise<void>;
   reset: () => void;
 }
 
 /** Build the save payload from current QR store state */
-function buildSavePayload() {
+function buildSavePayload(status: 'draft' | 'active' = 'draft') {
   const {
     activeType,
     getCurrentData,
@@ -60,6 +61,7 @@ function buildSavePayload() {
     original_data: currentData.data,
     name: name || undefined,
     style_options,
+    status,
   };
 }
 
@@ -100,6 +102,7 @@ export function useAutosave(): AutosaveState {
   const abortControllerRef = useRef<AbortController | null>(null);
   const limitReachedRef = useRef(false);
   const savedIdRef = useRef<string | null>(null);
+  const finalizedRef = useRef(false);
 
   const queryClient = useQueryClient();
 
@@ -108,7 +111,7 @@ export function useAutosave(): AutosaveState {
     savedIdRef.current = savedQRCodeId;
   }, [savedQRCodeId]);
 
-  const performSave = useCallback(async () => {
+  const performSave = useCallback(async (status: 'draft' | 'active' = 'draft') => {
     // Guard: must be authenticated
     const user = useAuthStore.getState().user;
     if (!user) return;
@@ -126,7 +129,10 @@ export function useAutosave(): AutosaveState {
     // Guard: plan limit reached — stop trying
     if (limitReachedRef.current) return;
 
-    const payload = buildSavePayload();
+    // Guard: already finalized as active — don't overwrite with draft
+    if (finalizedRef.current && status === 'draft') return;
+
+    const payload = buildSavePayload(status);
     const payloadHash = JSON.stringify(payload);
 
     // Skip if nothing changed
@@ -169,6 +175,11 @@ export function useAutosave(): AutosaveState {
       lastPayloadHashRef.current = payloadHash;
       setLastSavedAt(new Date());
 
+      // Mark as finalized so interval doesn't overwrite with draft
+      if (status === 'active') {
+        finalizedRef.current = true;
+      }
+
       if (!isUpdate && data.id) {
         setSavedQRCodeId(data.id);
         savedIdRef.current = data.id;
@@ -201,7 +212,11 @@ export function useAutosave(): AutosaveState {
   }, [performSave]);
 
   const saveNow = useCallback(async () => {
-    await performSave();
+    await performSave('draft');
+  }, [performSave]);
+
+  const saveNowAs = useCallback(async (status: 'draft' | 'active') => {
+    await performSave(status);
   }, [performSave]);
 
   const reset = useCallback(() => {
@@ -211,6 +226,7 @@ export function useAutosave(): AutosaveState {
     lastPayloadHashRef.current = '';
     savedIdRef.current = null;
     limitReachedRef.current = false;
+    finalizedRef.current = false;
   }, []);
 
   return {
@@ -219,6 +235,7 @@ export function useAutosave(): AutosaveState {
     lastSavedAt,
     isSaving,
     saveNow,
+    saveNowAs,
     reset,
   };
 }

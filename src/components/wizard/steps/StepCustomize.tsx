@@ -66,7 +66,7 @@ export function StepCustomize() {
         </Button>
 
         <Button variant="primary" onClick={nextStep}>
-          Download
+          Complete
           <ArrowRight className="w-4 h-4" />
         </Button>
       </div>

@@ -7,7 +7,7 @@ const steps: { step: WizardStep; label: string }[] = [
   { step: 1, label: 'Type' },
   { step: 2, label: 'Content' },
   { step: 3, label: 'Style' },
-  { step: 4, label: 'Download' },
+  { step: 4, label: 'Complete' },
 ];
 
 function getRelativeTime(date: Date): string {

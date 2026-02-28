@@ -22,6 +22,7 @@ function makeQRCode(overrides: Partial<QRCode> = {}): QRCode {
     destination_url: 'https://example.com',
     qr_type: 'url',
     original_data: null,
+    status: 'active',
     is_active: true,
     total_scans: 42,
     user_id: 'user-1',

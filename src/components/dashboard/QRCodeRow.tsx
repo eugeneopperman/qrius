@@ -134,11 +134,13 @@ export const QRCodeRow = memo(function QRCodeRow({
           )}
           <span className={cn(
             'px-1.5 py-0.5 rounded-full text-[10px] font-medium',
-            qr.is_active
+            qr.status === 'draft'
+              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+              : qr.is_active
               ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
               : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
           )}>
-            {qr.is_active ? 'Active' : 'Paused'}
+            {qr.status === 'draft' ? 'Draft' : qr.is_active ? 'Active' : 'Paused'}
           </span>
         </div>
       </div>

@@ -16,7 +16,7 @@ import type { QRCode } from '@/types/database';
 
 export default function QRCodesPage() {
   // Filter state
-  const [status, setStatus] = useState<'all' | 'active' | 'paused'>('all');
+  const [status, setStatus] = useState<'all' | 'active' | 'paused' | 'draft'>('all');
   const [folderId, setFolderId] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'created_at' | 'total_scans' | 'name'>('created_at');

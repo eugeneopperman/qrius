@@ -11,11 +11,12 @@ interface StatusCounts {
   all: number;
   active: number;
   paused: number;
+  draft: number;
 }
 
 interface QRCodeFilterBarProps {
-  status: 'all' | 'active' | 'paused';
-  onStatusChange: (status: 'all' | 'active' | 'paused') => void;
+  status: 'all' | 'active' | 'paused' | 'draft';
+  onStatusChange: (status: 'all' | 'active' | 'paused' | 'draft') => void;
   counts: StatusCounts;
   folderId: string | undefined;
   onFolderChange: (folderId: string | undefined) => void;
@@ -28,9 +29,10 @@ interface QRCodeFilterBarProps {
   onCreateFolder: () => void;
 }
 
-const STATUS_TABS: { key: 'all' | 'active' | 'paused'; label: string }[] = [
+const STATUS_TABS: { key: 'all' | 'active' | 'paused' | 'draft'; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'active', label: 'Active' },
+  { key: 'draft', label: 'Draft' },
   { key: 'paused', label: 'Paused' },
 ];
 

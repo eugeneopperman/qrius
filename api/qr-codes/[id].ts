@@ -311,6 +311,7 @@ async function handlePatch(
     destination_url?: string;
     name?: string;
     is_active?: boolean;
+    status?: 'draft' | 'active' | 'paused';
     folder_id?: string | null;
     qr_type?: string;
     original_data?: unknown;
@@ -341,6 +342,13 @@ async function handlePatch(
 
   if (body.is_active !== undefined && typeof body.is_active !== 'boolean') {
     return res.status(400).json({ error: 'is_active must be a boolean' });
+  }
+
+  if (body.status !== undefined) {
+    const validStatuses = ['draft', 'active', 'paused'];
+    if (typeof body.status !== 'string' || !validStatuses.includes(body.status)) {
+      return res.status(400).json({ error: 'status must be draft, active, or paused' });
+    }
   }
 
   if (body.folder_id !== undefined && body.folder_id !== null) {
@@ -386,6 +394,15 @@ async function handlePatch(
     updates.push('name');
     values.push(body.name || null);
   }
+  if (body.status !== undefined) {
+    updates.push('status');
+    values.push(body.status);
+    // Keep is_active in sync: draft/active = true, paused = false
+    if (body.is_active === undefined) {
+      updates.push('is_active');
+      values.push(body.status !== 'paused');
+    }
+  }
   if (body.is_active !== undefined) {
     updates.push('is_active');
     values.push(body.is_active);
@@ -427,8 +444,8 @@ async function handlePatch(
     return res.status(500).json({ error: 'Failed to update QR code' });
   }
 
-  // Invalidate Redis cache if destination_url or is_active changed
-  if (body.destination_url !== undefined || body.is_active !== undefined) {
+  // Invalidate Redis cache if destination_url, is_active, or status changed
+  if (body.destination_url !== undefined || body.is_active !== undefined || body.status !== undefined) {
     await invalidateCachedRedirect(qrCode.short_code);
   }
 

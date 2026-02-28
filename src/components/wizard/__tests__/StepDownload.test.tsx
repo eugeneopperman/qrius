@@ -152,6 +152,7 @@ describe('StepDownload', () => {
         trackingUrl: null,
         lastSavedAt: null,
         saveNow: vi.fn(),
+        saveNowAs: vi.fn(),
         reset: vi.fn(),
       };
 
@@ -163,20 +164,22 @@ describe('StepDownload', () => {
 
       // Re-import not feasible with vi.doMock in same test, so just check the component handles it
       render(<StepDownload autosave={autosave} />);
-      expect(autosave.saveNow).toHaveBeenCalled();
+      expect(autosave.saveNowAs).toHaveBeenCalledWith('active');
     });
 
-    it('calls saveNow on mount when autosave provided', () => {
+    it('calls saveNowAs("active") on mount when autosave provided', () => {
       const autosave = {
         isSaving: false,
         savedQRCodeId: null,
         trackingUrl: null,
         lastSavedAt: null,
         saveNow: vi.fn(),
+        saveNowAs: vi.fn(),
         reset: vi.fn(),
       };
       render(<StepDownload autosave={autosave} />);
-      expect(autosave.saveNow).toHaveBeenCalledTimes(1);
+      expect(autosave.saveNowAs).toHaveBeenCalledTimes(1);
+      expect(autosave.saveNowAs).toHaveBeenCalledWith('active');
     });
 
     it('calls autosave.reset on Create Another when autosave provided', async () => {
@@ -186,6 +189,7 @@ describe('StepDownload', () => {
         trackingUrl: null,
         lastSavedAt: null,
         saveNow: vi.fn(),
+        saveNowAs: vi.fn(),
         reset: vi.fn(),
       };
       const { user } = render(<StepDownload autosave={autosave} />);

@@ -21,6 +21,7 @@ export interface QRCodeRow {
   destination_url: string;
   qr_type: string;
   original_data: unknown;
+  status: 'draft' | 'active' | 'paused';
   is_active: boolean;
   total_scans: number;
   user_id: string | null;
@@ -59,6 +60,7 @@ export function toQRCodeResponse(row: QRCodeRow, baseUrl: string, customDomain?:
     destination_url: row.destination_url,
     qr_type: row.qr_type,
     original_data: row.original_data,
+    status: row.status,
     is_active: row.is_active,
     total_scans: row.total_scans,
     user_id: row.user_id,

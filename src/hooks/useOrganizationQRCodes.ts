@@ -6,7 +6,7 @@ import type { QRCode } from '@/types/database';
 
 export interface UseOrganizationQRCodesOptions {
   limit?: number;
-  status?: 'all' | 'active' | 'paused';
+  status?: 'all' | 'active' | 'paused' | 'draft';
   folderId?: string | null;
   search?: string;
   sort?: 'created_at' | 'total_scans' | 'name';
@@ -20,6 +20,7 @@ interface APIQRCode {
   destination_url: string;
   qr_type: string;
   original_data: unknown;
+  status: 'draft' | 'active' | 'paused';
   is_active: boolean;
   total_scans: number;
   user_id: string | null;
@@ -37,6 +38,7 @@ interface StatusCounts {
   all: number;
   active: number;
   paused: number;
+  draft: number;
 }
 
 interface APIResponse {
@@ -62,6 +64,7 @@ function mapAPIToQRCode(api: APIQRCode): QRCode {
     destination_url: api.destination_url,
     qr_type: api.qr_type,
     original_data: api.original_data as QRCode['original_data'],
+    status: api.status || (api.is_active ? 'active' : 'paused'),
     is_active: api.is_active,
     total_scans: api.total_scans,
     user_id: api.user_id,
@@ -86,7 +89,7 @@ async function fetchQRCodes(options: UseOrganizationQRCodesOptions = {}): Promis
 }> {
   const session = await getSession();
   if (!session?.access_token) {
-    return { qrCodes: [], totalCount: 0, counts: { all: 0, active: 0, paused: 0 }, monthlyScans: 0, teamMembers: 1 };
+    return { qrCodes: [], totalCount: 0, counts: { all: 0, active: 0, paused: 0, draft: 0 }, monthlyScans: 0, teamMembers: 1 };
   }
 
   const params = new URLSearchParams();
@@ -114,7 +117,7 @@ async function fetchQRCodes(options: UseOrganizationQRCodesOptions = {}): Promis
   return {
     qrCodes: data.qrCodes.map(mapAPIToQRCode),
     totalCount: data.pagination.total,
-    counts: data.counts || { all: data.pagination.total, active: 0, paused: 0 },
+    counts: data.counts || { all: data.pagination.total, active: 0, paused: 0, draft: 0 },
     monthlyScans: data.stats.monthlyScans,
     teamMembers: data.stats.teamMembers ?? 1,
   };
@@ -142,7 +145,7 @@ export function useOrganizationQRCodes(options: UseOrganizationQRCodesOptions = 
 
   const qrCodes = data?.qrCodes ?? [];
   const totalCount = data?.totalCount ?? 0;
-  const counts = data?.counts ?? { all: 0, active: 0, paused: 0 };
+  const counts = data?.counts ?? { all: 0, active: 0, paused: 0, draft: 0 };
   const monthlyScans = data?.monthlyScans ?? 0;
   const teamMembers = data?.teamMembers ?? 1;
 

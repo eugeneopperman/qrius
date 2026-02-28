@@ -42,8 +42,8 @@ export function StepDownload({ autosave }: StepDownloadProps) {
   // Auto-save on mount: either via autosave hook or local fallback
   useEffect(() => {
     if (autosave) {
-      // Use autosave's saveNow to ensure final state is persisted
-      autosave.saveNow();
+      // Finalize as active — promotes draft to active status
+      autosave.saveNowAs('active');
     } else {
       // Fallback: local save logic
       if (!user || localSaveAttempted) return;
@@ -109,6 +109,7 @@ export function StepDownload({ autosave }: StepDownloadProps) {
           original_data: currentData.data,
           name,
           style_options,
+          status: 'active',
         }),
         signal: controller.signal,
       });

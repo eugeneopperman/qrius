@@ -69,9 +69,9 @@ describe('StepCustomize', () => {
       expect(screen.getByRole('button', { name: /Back/ })).toBeInTheDocument();
     });
 
-    it('renders Download button', () => {
+    it('renders Complete button', () => {
       render(<StepCustomize />);
-      expect(screen.getByRole('button', { name: /Download/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Complete/ })).toBeInTheDocument();
     });
 
     it('renders Templates section by default (first tab)', () => {
@@ -87,9 +87,9 @@ describe('StepCustomize', () => {
       expect(mockPrevStep).toHaveBeenCalledTimes(1);
     });
 
-    it('calls nextStep when Download button is clicked', async () => {
+    it('calls nextStep when Complete button is clicked', async () => {
       const { user } = render(<StepCustomize />);
-      await user.click(screen.getByRole('button', { name: /Download/ }));
+      await user.click(screen.getByRole('button', { name: /Complete/ }));
       expect(mockNextStep).toHaveBeenCalledTimes(1);
     });
   });

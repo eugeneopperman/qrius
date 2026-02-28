@@ -366,6 +366,7 @@ export interface Database {
           destination_url: string;
           qr_type: string;
           original_data: Json | null;
+          status: 'draft' | 'active' | 'paused';
           is_active: boolean;
           total_scans: number;
           user_id: string | null;
@@ -385,6 +386,7 @@ export interface Database {
           destination_url: string;
           qr_type?: string;
           original_data?: Json | null;
+          status?: 'draft' | 'active' | 'paused';
           is_active?: boolean;
           total_scans?: number;
           user_id?: string | null;
@@ -401,6 +403,7 @@ export interface Database {
           destination_url?: string;
           qr_type?: string;
           original_data?: Json | null;
+          status?: 'draft' | 'active' | 'paused';
           is_active?: boolean;
           folder_id?: string | null;
           name?: string | null;

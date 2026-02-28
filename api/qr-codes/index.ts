@@ -29,6 +29,7 @@ interface CreateQRCodeRequest {
   description?: string;
   tags?: string[];
   style_options?: Record<string, unknown>;
+  status?: 'draft' | 'active';
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -223,6 +224,10 @@ async function handleCreate(
     ? JSON.stringify({ style_options: body.style_options })
     : null;
 
+  // Determine status and is_active
+  const status = body.status === 'draft' ? 'draft' : 'active';
+  const isActive = status !== 'paused'; // draft and active are both scannable
+
   // Insert new QR code
   const result = await sql`
     INSERT INTO qr_codes (
@@ -235,7 +240,9 @@ async function handleCreate(
       name,
       description,
       tags,
-      metadata
+      metadata,
+      status,
+      is_active
     )
     VALUES (
       ${shortCode},
@@ -247,7 +254,9 @@ async function handleCreate(
       ${body.name || null},
       ${body.description || null},
       ${body.tags || []},
-      ${metadata}
+      ${metadata},
+      ${status},
+      ${isActive}
     )
     RETURNING *
   `;
@@ -296,8 +305,8 @@ async function handleList(
   const sortOrder = (req.query.order as string) === 'asc' ? 'ASC' : 'DESC';
 
   // Validate filter params
-  if (!['all', 'active', 'paused'].includes(statusFilter)) {
-    return res.status(400).json({ error: 'status must be all, active, or paused' });
+  if (!['all', 'active', 'paused', 'draft'].includes(statusFilter)) {
+    return res.status(400).json({ error: 'status must be all, active, paused, or draft' });
   }
   if (!['created_at', 'total_scans', 'name'].includes(sortField)) {
     return res.status(400).json({ error: 'sort must be created_at, total_scans, or name' });
@@ -319,7 +328,7 @@ async function handleList(
   }
 
   // Build dynamic WHERE clauses
-  const selectCols = 'id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, is_active, total_scans, user_id, organization_id, created_at, updated_at';
+  const selectCols = 'id, short_code, destination_url, qr_type, original_data, name, description, tags, metadata, status, is_active, total_scans, user_id, organization_id, created_at, updated_at';
 
   // Build base ownership condition
   let ownershipCondition: string;
@@ -342,10 +351,10 @@ async function handleList(
   // Add filter conditions
   const filterConditions: string[] = [ownershipCondition];
 
-  if (statusFilter === 'active') {
-    filterConditions.push('is_active = true');
-  } else if (statusFilter === 'paused') {
-    filterConditions.push('is_active = false');
+  if (statusFilter !== 'all') {
+    filterConditions.push(`status = $${paramIdx}`);
+    params.push(statusFilter);
+    paramIdx++;
   }
 
   if (folderIdFilter !== undefined) {
@@ -420,14 +429,16 @@ async function handleList(
   const countsPromise = sql.query(
     `SELECT
       COUNT(*) as total,
-      COUNT(*) FILTER (WHERE is_active = true) as active,
-      COUNT(*) FILTER (WHERE is_active = false) as paused
+      COUNT(*) FILTER (WHERE status = 'active') as active,
+      COUNT(*) FILTER (WHERE status = 'paused') as paused,
+      COUNT(*) FILTER (WHERE status = 'draft') as draft
     FROM qr_codes WHERE ${ownerCondition}`,
     ownerParams
   ).then(r => ({
     all: parseInt(r[0].total as string) || 0,
     active: parseInt(r[0].active as string) || 0,
     paused: parseInt(r[0].paused as string) || 0,
+    draft: parseInt(r[0].draft as string) || 0,
   }));
 
   // Custom domain lookup (Supabase)

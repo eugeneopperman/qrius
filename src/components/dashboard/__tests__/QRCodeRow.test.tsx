@@ -37,6 +37,7 @@ function makeQRCode(overrides: Partial<QRCode> = {}): QRCode {
     destination_url: 'https://example.com',
     qr_type: 'url',
     original_data: null,
+    status: 'active',
     is_active: true,
     total_scans: 42,
     user_id: 'user-1',
@@ -103,8 +104,13 @@ describe('QRCodeRow', () => {
     });
 
     it('renders Paused status badge for inactive QR', () => {
-      render(<QRCodeRow {...defaultProps} qr={makeQRCode({ is_active: false })} />);
+      render(<QRCodeRow {...defaultProps} qr={makeQRCode({ status: 'paused', is_active: false })} />);
       expect(screen.getByText('Paused')).toBeInTheDocument();
+    });
+
+    it('renders Draft status badge with amber styling', () => {
+      render(<QRCodeRow {...defaultProps} qr={makeQRCode({ status: 'draft' })} />);
+      expect(screen.getByText('Draft')).toBeInTheDocument();
     });
 
     it('renders scan count', () => {

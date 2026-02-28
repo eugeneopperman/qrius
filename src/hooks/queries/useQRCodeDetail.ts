@@ -26,6 +26,7 @@ interface APIDetailResponse {
   destination_url: string;
   qr_type: string;
   original_data: unknown;
+  status?: 'draft' | 'active' | 'paused';
   is_active: boolean;
   total_scans: number;
   user_id: string | null;
@@ -86,6 +87,7 @@ async function fetchQRCodeDetail(id: string): Promise<QRCodeDetail | null> {
     destination_url: data.destination_url,
     qr_type: data.qr_type,
     original_data: data.original_data as QRCode['original_data'],
+    status: data.status || (data.is_active ? 'active' : 'paused'),
     is_active: data.is_active,
     total_scans: data.total_scans,
     user_id: data.user_id,

@@ -19,7 +19,7 @@ const mockFolders: QRCodeFolder[] = [
 const defaultProps = {
   status: 'all' as const,
   onStatusChange: vi.fn(),
-  counts: { all: 25, active: 20, paused: 5 },
+  counts: { all: 25, active: 20, paused: 5, draft: 2 },
   folderId: undefined,
   onFolderChange: vi.fn(),
   folders: mockFolders,
@@ -49,6 +49,12 @@ describe('QRCodeFilterBar', () => {
       expect(screen.getByText('20')).toBeInTheDocument();
     });
 
+    it('renders Draft tab with count', () => {
+      render(<QRCodeFilterBar {...defaultProps} />);
+      expect(screen.getByText('Draft')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
+    });
+
     it('renders Paused tab with count', () => {
       render(<QRCodeFilterBar {...defaultProps} />);
       expect(screen.getByText('Paused')).toBeInTheDocument();
@@ -61,6 +67,14 @@ describe('QRCodeFilterBar', () => {
       render(<QRCodeFilterBar {...defaultProps} onStatusChange={onStatusChange} />);
       await user.click(screen.getByText('Active'));
       expect(onStatusChange).toHaveBeenCalledWith('active');
+    });
+
+    it('calls onStatusChange when Draft tab is clicked', async () => {
+      const onStatusChange = vi.fn();
+      const user = userEvent.setup();
+      render(<QRCodeFilterBar {...defaultProps} onStatusChange={onStatusChange} />);
+      await user.click(screen.getByText('Draft'));
+      expect(onStatusChange).toHaveBeenCalledWith('draft');
     });
 
     it('calls onStatusChange when Paused tab is clicked', async () => {

@@ -81,7 +81,7 @@ describe('useAutosave', () => {
   it('does not save when autosaveEnabled is false', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
     useSettingsStore.setState({ autosaveEnabled: false });
 
     const { result } = renderHook(() => useAutosave());
@@ -107,9 +107,23 @@ describe('useAutosave', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
+  it('does not save on step 2 (below MIN_STEP=3)', async () => {
+    setupAuthenticatedUser();
+    setupQRContent();
+    setupWizardStep(2);
+
+    const { result } = renderHook(() => useAutosave());
+
+    await act(async () => {
+      await result.current.saveNow();
+    });
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
   it('does not save when content is empty/default', async () => {
     setupAuthenticatedUser();
-    setupWizardStep(2);
+    setupWizardStep(3);
     // URL data is empty by default
 
     const { result } = renderHook(() => useAutosave());
@@ -124,7 +138,7 @@ describe('useAutosave', () => {
   it('POSTs on first save', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -148,7 +162,7 @@ describe('useAutosave', () => {
   it('PATCHes on subsequent saves', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     // First save — POST
     mockFetch.mockResolvedValueOnce({
@@ -188,7 +202,7 @@ describe('useAutosave', () => {
   it('skips save when payload hash is unchanged', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     // First save
     mockFetch.mockResolvedValueOnce({
@@ -216,7 +230,7 @@ describe('useAutosave', () => {
   it('saveNow() triggers immediate save', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -236,7 +250,7 @@ describe('useAutosave', () => {
   it('reset() clears all state', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -265,7 +279,7 @@ describe('useAutosave', () => {
   it('handles API errors gracefully', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     mockFetch.mockResolvedValueOnce({
       ok: false,
@@ -288,7 +302,7 @@ describe('useAutosave', () => {
   it('stops retrying on 403 (plan limit)', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     // First attempt — 403
     mockFetch.mockResolvedValueOnce({
@@ -320,7 +334,7 @@ describe('useAutosave', () => {
   it('invalidates query cache on successful save', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -356,10 +370,82 @@ describe('useAutosave', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
+  it('saveNow() includes status: "draft" in payload', async () => {
+    setupAuthenticatedUser();
+    setupQRContent();
+    setupWizardStep(3);
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'qr-draft' }),
+    });
+
+    const { result } = renderHook(() => useAutosave());
+
+    await act(async () => {
+      await result.current.saveNow();
+    });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.status).toBe('draft');
+  });
+
+  it('saveNowAs("active") includes status: "active" in payload', async () => {
+    setupAuthenticatedUser();
+    setupQRContent();
+    setupWizardStep(3);
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'qr-active' }),
+    });
+
+    const { result } = renderHook(() => useAutosave());
+
+    await act(async () => {
+      await result.current.saveNowAs('active');
+    });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body.status).toBe('active');
+  });
+
+  it('saveNowAs("active") prevents subsequent draft saves', async () => {
+    setupAuthenticatedUser();
+    setupQRContent();
+    setupWizardStep(3);
+
+    // First save — finalize as active
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'qr-final' }),
+    });
+
+    const { result } = renderHook(() => useAutosave());
+
+    await act(async () => {
+      await result.current.saveNowAs('active');
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    // Change content
+    act(() => {
+      useQRStore.setState({ urlData: { url: 'https://changed.com', useShortened: false } });
+    });
+
+    // Attempt draft save — should be blocked
+    await act(async () => {
+      await result.current.saveNow();
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1); // still 1
+  });
+
   it('sets lastSavedAt on successful save', async () => {
     setupAuthenticatedUser();
     setupQRContent();
-    setupWizardStep(2);
+    setupWizardStep(3);
 
     mockFetch.mockResolvedValueOnce({
       ok: true,

@@ -34,10 +34,10 @@ describe('WizardProgress', () => {
       // "Type" appears in both desktop and mobile when currentStep=1
       const typeElements = screen.getAllByText('Type');
       expect(typeElements.length).toBeGreaterThanOrEqual(1);
-      // Content, Style, Download appear only in desktop
+      // Content, Style, Complete appear only in desktop
       expect(screen.getByText('Content')).toBeInTheDocument();
       expect(screen.getByText('Style')).toBeInTheDocument();
-      expect(screen.getByText('Download')).toBeInTheDocument();
+      expect(screen.getByText('Complete')).toBeInTheDocument();
     });
 
     it('renders mobile step indicator with step number', () => {
@@ -63,8 +63,8 @@ describe('WizardProgress', () => {
     it('shows different mobile label when step changes', () => {
       mockCurrentStep = 4;
       render(<WizardProgress />);
-      // "Download" appears in desktop view and in mobile current-step label
-      const downloadElements = screen.getAllByText('Download');
+      // "Complete" appears in desktop view and in mobile current-step label
+      const downloadElements = screen.getAllByText('Complete');
       expect(downloadElements.length).toBe(2);
     });
   });
@@ -136,7 +136,7 @@ describe('WizardProgress', () => {
       mockIsStepAccessible = (step: WizardStep) => step === 1;
       const { user } = render(<WizardProgress />);
       const buttons = screen.getAllByRole('button');
-      const downloadButton = buttons.find(btn => btn.textContent?.includes('Download'));
+      const downloadButton = buttons.find(btn => btn.textContent?.includes('Complete'));
       expect(downloadButton).toBeDefined();
       await user.click(downloadButton!);
       expect(mockGoToStep).not.toHaveBeenCalled();
@@ -146,7 +146,7 @@ describe('WizardProgress', () => {
       mockIsStepAccessible = (step: WizardStep) => step <= 2;
       render(<WizardProgress />);
       const buttons = screen.getAllByRole('button');
-      const downloadButton = buttons.find(btn => btn.textContent?.includes('Download'));
+      const downloadButton = buttons.find(btn => btn.textContent?.includes('Complete'));
       expect(downloadButton).toBeDisabled();
     });
 
