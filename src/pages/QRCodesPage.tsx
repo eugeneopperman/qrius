@@ -44,6 +44,7 @@ export default function QRCodesPage() {
   const [createFolderOpen, setCreateFolderOpen] = useState(false);
   const [editUrlTarget, setEditUrlTarget] = useState<QRCode | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<QRCode | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Handlers
   const handleSortChange = useCallback((newSort: 'created_at' | 'total_scans' | 'name', newOrder: 'asc' | 'desc') => {
@@ -75,10 +76,12 @@ export default function QRCodesPage() {
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
+    setIsDeleting(true);
     const success = await deleteQRCode(deleteTarget.id);
     if (success) {
       toast.success('QR code deleted');
     }
+    setIsDeleting(false);
     setDeleteTarget(null);
   }, [deleteTarget, deleteQRCode]);
 
@@ -194,11 +197,12 @@ export default function QRCodesPage() {
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={() => !isDeleting && setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
         title="Delete QR Code"
         message={`Are you sure you want to delete "${deleteTarget?.name || 'this QR code'}"? This action cannot be undone. All scan data will be permanently lost.`}
-        confirmLabel="Delete"
+        confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
+        cancelLabel="Cancel"
         variant="danger"
       />
     </DashboardLayout>
