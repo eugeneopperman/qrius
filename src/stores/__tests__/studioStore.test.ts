@@ -14,7 +14,7 @@ const DEFAULT_STYLE: BrandTemplateStyle = {
   cornersSquareType: 'square',
   cornersDotType: 'square',
   errorCorrectionLevel: 'H',
-  qrRoundness: 0,
+  qrRoundness: undefined,
   qrPattern: 'solid',
   frameBorderRadius: 0,
   frameStyle: 'none',

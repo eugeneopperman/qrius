@@ -100,7 +100,8 @@ export const PanelDotsColors = memo(function PanelDotsColors() {
     (dotType: DotType) => {
       const cornerSquareType = dotToCornerSquareMap[dotType];
       const cornerDotType = cornerSquareType === 'dot' ? 'dot' : cornerSquareType === 'extra-rounded' ? 'extra-rounded' : 'square';
-      updateStyle({ dotsType: dotType, cornersSquareType: cornerSquareType, cornersDotType: cornerDotType });
+      // Clear qrRoundness so explicit types take effect (roundness overrides them in the hook)
+      updateStyle({ dotsType: dotType, cornersSquareType: cornerSquareType, cornersDotType: cornerDotType, qrRoundness: undefined });
     },
     [updateStyle]
   );

@@ -168,10 +168,12 @@ export const StyleSection = memo(function StyleSection() {
   const handleStyleChange = useCallback((dotType: DotType) => {
     const cornerSquareType = dotToCornerSquareMap[dotType];
     const cornerDotType = cornerSquareType === 'dot' ? 'dot' : cornerSquareType === 'extra-rounded' ? 'extra-rounded' : 'square';
+    // Clear qrRoundness so explicit types take effect (roundness overrides them in the hook)
     setStyleOptions({
       dotsType: dotType,
       cornersSquareType: cornerSquareType,
       cornersDotType: cornerDotType,
+      qrRoundness: undefined,
     });
   }, [setStyleOptions]);
 
