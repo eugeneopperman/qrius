@@ -101,13 +101,13 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
+      <div className="flex items-center gap-2 mb-6">
         {/* Search */}
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             type="text"
-            placeholder="Search QR codes..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -115,7 +115,7 @@ export function QRCodeList({ qrCodes, isLoading, onDelete }: QRCodeListProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Sort dropdown */}
           <div className="relative">
             <Button
