@@ -30,7 +30,10 @@ export const TemplateCard = memo(function TemplateCard({
       )}
     >
       {/* QR Thumbnail */}
-      <div className="flex items-center justify-center p-4 bg-black/5 dark:bg-white/5 rounded-t-2xl">
+      <div
+        className="flex items-center justify-center p-4 bg-black/5 dark:bg-white/5 rounded-t-2xl cursor-pointer"
+        onClick={() => navigate({ to: '/templates/$id/edit', params: { id: template.id } })}
+      >
         <QRMiniPreview
           data={QR_CONFIG.GHOST_DATA}
           size={160}
