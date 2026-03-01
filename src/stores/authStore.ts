@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 import type { User as SupabaseUser, Session, Subscription } from '@supabase/supabase-js';
 import type { User, Organization, OrganizationMember, PlanLimits } from '@/types/database';
 import { supabase, checkSupabaseConnection } from '@/lib/supabase';
+import { hasRealDomain, isAppSubdomain, getRootUrl } from '@/lib/domain';
 
 // Track the auth listener subscription to clean up on re-init
 let authSubscription: Subscription | null = null;
@@ -166,12 +167,13 @@ export const useAuthStore = create<AuthState>()(
       signUp: async (email, password, name) => {
         try {
           set({ isLoading: true });
+          const callbackUrl = hasRealDomain ? getRootUrl('/auth/callback') : `${window.location.origin}/auth/callback`;
           const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
               data: { name },
-              emailRedirectTo: `${window.location.origin}/auth/callback`,
+              emailRedirectTo: callbackUrl,
             },
           });
 
@@ -194,10 +196,11 @@ export const useAuthStore = create<AuthState>()(
       // Sign in with OAuth provider
       signInWithOAuth: async (provider) => {
         try {
+          const callbackUrl = hasRealDomain ? getRootUrl('/auth/callback') : `${window.location.origin}/auth/callback`;
           const { error } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
-              redirectTo: `${window.location.origin}/auth/callback`,
+              redirectTo: callbackUrl,
             },
           });
 
@@ -226,6 +229,10 @@ export const useAuthStore = create<AuthState>()(
             planLimits: null,
             isLoading: false,
           });
+          // On app subdomain, redirect to root domain after sign-out
+          if (isAppSubdomain) {
+            window.location.href = getRootUrl('/');
+          }
         } catch (error) {
           if (import.meta.env.DEV) console.error('Error signing out:', error);
           set({ isLoading: false });
@@ -235,8 +242,9 @@ export const useAuthStore = create<AuthState>()(
       // Reset password
       resetPassword: async (email) => {
         try {
+          const resetUrl = hasRealDomain ? getRootUrl('/auth/reset-password') : `${window.location.origin}/auth/reset-password`;
           const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/auth/reset-password`,
+            redirectTo: resetUrl,
           });
 
           if (error) {

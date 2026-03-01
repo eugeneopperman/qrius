@@ -3,7 +3,8 @@ import type { VercelResponse } from '@vercel/node';
 
 /**
  * Allowed origins for CORS.
- * In production, restrict to the app's domain.
+ * In production, restrict to the app's domain(s).
+ * When VITE_BASE_DOMAIN is set, both the root domain and app subdomain are allowed.
  * Falls back to '*' only when APP_URL is not set (local dev).
  */
 function getAllowedOrigin(requestOrigin?: string): string {
@@ -14,21 +15,28 @@ function getAllowedOrigin(requestOrigin?: string): string {
     return '*';
   }
 
-  // Parse the configured app URL to get the origin
+  // Build list of allowed origins
+  const allowedOrigins: string[] = [];
+
   try {
     const url = new URL(appUrl);
-    const configuredOrigin = url.origin;
+    allowedOrigins.push(url.origin);
 
-    // If the request origin matches, echo it back
-    if (requestOrigin === configuredOrigin) {
-      return configuredOrigin;
-    }
-
-    // In production, only allow the configured origin
-    return configuredOrigin;
+    // Derive app subdomain origin from APP_URL hostname
+    // e.g. APP_URL=https://qrius.app → also allow https://app.qrius.app
+    const appSubdomainOrigin = `${url.protocol}//app.${url.hostname}`;
+    allowedOrigins.push(appSubdomainOrigin);
   } catch {
     return '*';
   }
+
+  // Echo back the request origin if it's in our allow list
+  if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+    return requestOrigin;
+  }
+
+  // Default to the primary configured origin
+  return allowedOrigins[0];
 }
 
 /**

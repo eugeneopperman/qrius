@@ -7,11 +7,26 @@ import { useWizardStore } from '@/stores/wizardStore';
 import type { QRCodeType } from '@/types';
 
 export default function CreateQRPage() {
-  // Safety-net: apply pending type from sessionStorage (covers edge cases)
+  // Apply pending type from URL param (cross-subdomain redirect) or sessionStorage (same-origin)
   useEffect(() => {
-    const pendingType = sessionStorage.getItem('pendingQRType') as QRCodeType | null;
+    const params = new URLSearchParams(window.location.search);
+    const urlPendingType = params.get('pendingType') as QRCodeType | null;
+    const storagePendingType = sessionStorage.getItem('pendingQRType') as QRCodeType | null;
+    const pendingType = urlPendingType || storagePendingType;
+
     if (pendingType) {
-      sessionStorage.removeItem('pendingQRType');
+      // Clean up: remove URL param and sessionStorage entry
+      if (urlPendingType) {
+        params.delete('pendingType');
+        const newUrl = params.toString()
+          ? `${window.location.pathname}?${params}`
+          : window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }
+      if (storagePendingType) {
+        sessionStorage.removeItem('pendingQRType');
+      }
+
       const { currentStep } = useWizardStore.getState();
       if (currentStep === 1) {
         useQRStore.getState().setActiveType(pendingType);

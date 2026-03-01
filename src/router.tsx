@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { isSupabaseMissing } from '@/lib/supabase';
+import { isAppSubdomain, isRootDomain, getRootUrl, getAppUrl } from '@/lib/domain';
 import { APP_VERSION, TIMING } from '@/config/constants';
 import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
 // Lazy-load modals — only fetched when opened (~30KB off critical path)
@@ -172,16 +173,30 @@ async function waitForAuthInit(): Promise<void> {
   });
 }
 
+/** Cross-origin redirect: navigate via window.location and return a never-resolving promise to block rendering. */
+function crossOriginRedirect(url: string): never {
+  window.location.href = url;
+  // Block TanStack from rendering while the browser navigates away
+  return new Promise(() => {}) as never;
+}
+
 async function requireAuth() {
   try {
     await waitForAuthInit();
   } catch (error) {
     if (import.meta.env.DEV) console.error('Auth initialization failed:', error);
+    // On app subdomain, redirect to root domain sign-in
+    if (isAppSubdomain) {
+      return crossOriginRedirect(getRootUrl(`/signin?redirect=${encodeURIComponent(window.location.pathname)}`));
+    }
     throw redirect({ to: '/signin', search: { redirect: window.location.pathname } });
   }
 
   const currentUser = useAuthStore.getState().user;
   if (!currentUser) {
+    if (isAppSubdomain) {
+      return crossOriginRedirect(getRootUrl(`/signin?redirect=${encodeURIComponent(window.location.pathname)}`));
+    }
     throw redirect({ to: '/signin', search: { redirect: window.location.pathname } });
   }
 }
@@ -197,12 +212,21 @@ async function redirectAuthenticatedToDashboard() {
 
   const currentUser = useAuthStore.getState().user;
   if (currentUser) {
+    // When on root domain with subdomain feature, redirect to app subdomain
+    if (isRootDomain) {
+      return crossOriginRedirect(getAppUrl('/dashboard'));
+    }
     throw redirect({ to: '/dashboard' });
   }
 }
 
 // Guest check for auth pages
 async function requireGuest() {
+  // Auth pages (signin, signup) belong on root domain — redirect away from app subdomain
+  if (isAppSubdomain) {
+    return crossOriginRedirect(getRootUrl(window.location.pathname + window.location.search));
+  }
+
   try {
     await waitForAuthInit();
   } catch (error) {
@@ -213,6 +237,10 @@ async function requireGuest() {
 
   const currentUser = useAuthStore.getState().user;
   if (currentUser) {
+    // When on root domain with subdomain feature, redirect to app subdomain
+    if (isRootDomain) {
+      return crossOriginRedirect(getAppUrl('/dashboard'));
+    }
     throw redirect({ to: '/dashboard' });
   }
 }

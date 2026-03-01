@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useShallow } from 'zustand/react/shallow';
+import { isRootDomain, getAppUrl } from '@/lib/domain';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { OAuthButtons } from './OAuthButtons';
@@ -38,6 +39,11 @@ export function SignInForm({ onForgotPassword, onSignUp, redirectTo, onSuccess }
       onSuccess();
     } else {
       const destination = redirectTo || (hasCompletedOnboarding ? '/dashboard' : '/onboarding');
+      // On root domain with subdomain split, redirect to app subdomain
+      if (isRootDomain) {
+        window.location.href = getAppUrl(destination);
+        return;
+      }
       navigate({ to: destination });
     }
   };

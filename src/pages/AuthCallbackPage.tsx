@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { useQRStore } from '@/stores/qrStore';
 import { useWizardStore } from '@/stores/wizardStore';
+import { isRootDomain, getAppUrl } from '@/lib/domain';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { QRCodeType } from '@/types';
 
@@ -46,13 +47,26 @@ export default function AuthCallbackPage() {
           const pendingType = sessionStorage.getItem('pendingQRType') as QRCodeType | null;
           if (pendingType) {
             sessionStorage.removeItem('pendingQRType');
+            // Cross-subdomain: pass pendingType as URL param (sessionStorage is origin-scoped)
+            if (isRootDomain) {
+              window.location.href = getAppUrl(`/create?pendingType=${pendingType}`);
+              return;
+            }
             useQRStore.getState().setActiveType(pendingType);
             useWizardStore.getState().markCompleted(1);
             useWizardStore.getState().goToStep(2);
             navigate({ to: '/create' });
           } else if (!hasCompletedOnboarding) {
+            if (isRootDomain) {
+              window.location.href = getAppUrl('/onboarding');
+              return;
+            }
             navigate({ to: '/onboarding' });
           } else {
+            if (isRootDomain) {
+              window.location.href = getAppUrl('/dashboard');
+              return;
+            }
             navigate({ to: '/dashboard' });
           }
         } else {

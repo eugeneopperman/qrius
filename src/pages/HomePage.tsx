@@ -7,6 +7,7 @@ import { PublicFooter } from '@/components/layout/PublicFooter';
 import { useUIStore } from '@/stores/uiStore';
 import { useQRStore } from '@/stores/qrStore';
 import { useWizardStore } from '@/stores/wizardStore';
+import { isRootDomain, getAppUrl } from '@/lib/domain';
 import type { QRCodeType } from '@/types';
 
 const PENDING_TYPE_KEY = 'pendingQRType';
@@ -23,13 +24,22 @@ export default function HomePage() {
 
   const handleAuthSuccess = useCallback(() => {
     const pendingType = sessionStorage.getItem(PENDING_TYPE_KEY) as QRCodeType | null;
+    setShowAuthModal(false);
+
+    // Cross-subdomain: pass pendingType as URL param since sessionStorage is origin-scoped
+    if (isRootDomain) {
+      const path = pendingType ? `/create?pendingType=${pendingType}` : '/create';
+      sessionStorage.removeItem(PENDING_TYPE_KEY);
+      window.location.href = getAppUrl(path);
+      return;
+    }
+
     if (pendingType) {
       sessionStorage.removeItem(PENDING_TYPE_KEY);
       useQRStore.getState().setActiveType(pendingType);
       useWizardStore.getState().markCompleted(1);
       useWizardStore.getState().goToStep(2);
     }
-    setShowAuthModal(false);
     navigate({ to: '/create' });
   }, [navigate]);
 
