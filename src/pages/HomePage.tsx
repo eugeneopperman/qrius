@@ -1,66 +1,469 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Header } from '@/components/Header';
-import { LandingTypeGrid } from '@/components/landing/LandingTypeGrid';
+import {
+  Paintbrush,
+  BarChart3,
+  RefreshCw,
+  Users,
+  QrCode,
+  ArrowRight,
+  Zap,
+  Gift,
+} from 'lucide-react';
+import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { MarketingSection } from '@/components/marketing/MarketingSection';
+import { FeatureCard } from '@/components/marketing/FeatureCard';
+import { StepCard } from '@/components/marketing/StepCard';
+import { ComparisonTable } from '@/components/marketing/ComparisonTable';
+import { CTASection } from '@/components/marketing/CTASection';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { PublicFooter } from '@/components/layout/PublicFooter';
-import { useUIStore } from '@/stores/uiStore';
-import { useQRStore } from '@/stores/qrStore';
-import { useWizardStore } from '@/stores/wizardStore';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { isRootDomain, getAppUrl } from '@/lib/domain';
-import type { QRCodeType } from '@/types';
 
-const PENDING_TYPE_KEY = 'pendingQRType';
+// ─── Comparison data ────────────────────────────────────────────────
+const comparisonRows = [
+  { feature: 'Dynamic QR codes', qrius: '15', competitor: '1–3' },
+  { feature: 'Scans per month', qrius: '5,000', competitor: '0–500' },
+  { feature: 'QR code types', qrius: '9', competitor: '1 (URL only)' },
+  { feature: 'Scan analytics', qrius: true, competitor: false },
+  { feature: 'Logo & brand colors', qrius: true, competitor: false },
+  { feature: 'Codes survive cancellation', qrius: true, competitor: false },
+];
+
+// ─── Use case tiles ─────────────────────────────────────────────────
+const useCases = [
+  {
+    title: 'Restaurants & cafes',
+    description: 'Digital menus, WiFi sharing, Google review codes — all on-brand and easy to update.',
+    color: '#FFF3E8',
+    accent: '#F97316',
+  },
+  {
+    title: 'Retail & packaging',
+    description: 'Product details, promotions, and loyalty programs, right on the shelf or the box.',
+    color: '#EFF6FF',
+    accent: '#0EA5E9',
+  },
+  {
+    title: 'Events & conferences',
+    description: 'Schedules, tickets, speaker bios, and feedback forms. One scan does it all.',
+    color: '#F0FDF4',
+    accent: '#22C55E',
+  },
+  {
+    title: 'Agencies & teams',
+    description: 'Manage client campaigns, apply brand templates, and share access with your team.',
+    color: '#FAF5FF',
+    accent: '#8B5CF6',
+  },
+];
+
+// ─── Trust bar items ────────────────────────────────────────────────
+const trustItems = [
+  { icon: QrCode, stat: '9 QR code types', label: 'URL, vCard, WiFi, Event, and more' },
+  { icon: BarChart3, stat: 'Real-time analytics', label: 'Know where, when, and how people scan' },
+  { icon: Gift, stat: 'Free forever plan', label: '15 dynamic codes, no credit card, no catch' },
+];
 
 export default function HomePage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { openShortcuts, openSettings } = useUIStore();
+  const [authView, setAuthView] = useState<'signin' | 'signup'>('signup');
   const navigate = useNavigate();
+  const containerRef = useScrollReveal<HTMLDivElement>();
 
-  const handleTypeSelect = useCallback((typeId: QRCodeType) => {
-    sessionStorage.setItem(PENDING_TYPE_KEY, typeId);
+  const openSignIn = useCallback(() => {
+    setAuthView('signin');
+    setShowAuthModal(true);
+  }, []);
+
+  const openSignUp = useCallback(() => {
+    setAuthView('signup');
     setShowAuthModal(true);
   }, []);
 
   const handleAuthSuccess = useCallback(() => {
-    const pendingType = sessionStorage.getItem(PENDING_TYPE_KEY) as QRCodeType | null;
     setShowAuthModal(false);
-
-    // Cross-subdomain: pass pendingType as URL param since sessionStorage is origin-scoped
     if (isRootDomain) {
-      const path = pendingType ? `/create?pendingType=${pendingType}` : '/create';
-      sessionStorage.removeItem(PENDING_TYPE_KEY);
-      window.location.href = getAppUrl(path);
+      window.location.href = getAppUrl('/dashboard');
       return;
     }
-
-    if (pendingType) {
-      sessionStorage.removeItem(PENDING_TYPE_KEY);
-      useQRStore.getState().setActiveType(pendingType);
-      useWizardStore.getState().markCompleted(1);
-      useWizardStore.getState().goToStep(2);
-    }
-    navigate({ to: '/create' });
+    navigate({ to: '/dashboard' });
   }, [navigate]);
 
   return (
-    <div className="min-h-screen transition-colors">
-      <Header
-        onSettingsClick={openSettings}
-        onShortcutsClick={openShortcuts}
-      />
+    <MarketingLayout onSignIn={openSignIn} onSignUp={openSignUp}>
+      <div ref={containerRef}>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <LandingTypeGrid onSelect={handleTypeSelect} />
-      </main>
+        {/* ─── Section 1: Hero ─────────────────────────────────────── */}
+        <section
+          className="marketing-section"
+          style={{ backgroundColor: '#FAFAF8', paddingTop: 48, paddingBottom: 48 }}
+        >
+          <div className="marketing-section-inner flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            {/* Left: copy */}
+            <div className="flex-1 max-w-xl">
+              <h1
+                className="font-serif animate-on-scroll"
+                style={{
+                  fontSize: 'clamp(36px, 6vw, 56px)',
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.02em',
+                  color: '#1A1A1A',
+                  marginBottom: 20,
+                }}
+              >
+                QR codes that people actually want to scan.
+              </h1>
+              <p
+                className="animate-on-scroll stagger-1"
+                style={{
+                  fontSize: 'clamp(16px, 2.5vw, 20px)',
+                  lineHeight: 1.5,
+                  color: '#4A4A4A',
+                  marginBottom: 32,
+                  maxWidth: 520,
+                }}
+              >
+                Create beautiful, trackable QR codes in under a minute. Customize every detail, track every scan, and update your codes anytime — even after they're printed.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-3 animate-on-scroll stagger-2">
+                <button
+                  onClick={openSignUp}
+                  className="text-[15px] font-medium text-white rounded-lg transition-all w-full sm:w-auto"
+                  style={{
+                    backgroundColor: '#F97316',
+                    padding: '14px 28px',
+                    fontSize: 16,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#EA580C';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#F97316';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  Start creating — it's free
+                </button>
+                <button
+                  onClick={() => {
+                    const el = document.querySelector('#features');
+                    el?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="text-[15px] font-medium rounded-lg transition-colors w-full sm:w-auto inline-flex items-center justify-center gap-2"
+                  style={{
+                    color: '#1A1A1A',
+                    padding: '14px 28px',
+                    border: '1.5px solid #1A1A1A',
+                    fontSize: 16,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#1A1A1A';
+                    e.currentTarget.style.color = '#ffffff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#1A1A1A';
+                  }}
+                >
+                  See what's inside
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-      <PublicFooter />
+            {/* Right: hero visual placeholder */}
+            <div className="flex-1 flex justify-center animate-on-scroll stagger-2">
+              <div
+                className="w-full max-w-md aspect-square rounded-2xl flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #FFF3E8 0%, #F5F4F2 100%)',
+                  border: '1px solid #E8E6E3',
+                }}
+              >
+                <QrCode className="w-24 h-24" style={{ color: '#F97316', opacity: 0.3 }} />
+              </div>
+            </div>
+          </div>
+        </section>
 
+        {/* ─── Section 2: Trust bar ────────────────────────────────── */}
+        <section style={{ backgroundColor: '#F5F4F2' }}>
+          <div
+            className="mx-auto px-4 sm:px-6 lg:px-8 py-10"
+            style={{ maxWidth: 1200 }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+              {trustItems.map(({ icon: Icon, stat, label }, i) => (
+                <div
+                  key={stat}
+                  className={`flex items-start gap-4 animate-on-scroll stagger-${i + 1}`}
+                >
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: '#FFF3E8' }}
+                  >
+                    <Icon className="w-5 h-5" style={{ color: '#F97316' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A', marginBottom: 2 }}>
+                      {stat}
+                    </p>
+                    <p style={{ fontSize: 14, color: '#4A4A4A' }}>{label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Section 3: Problem → Solution ───────────────────────── */}
+        <MarketingSection bg="ink" narrow>
+          <div className="max-w-2xl animate-on-scroll">
+            <h2
+              className="font-serif mb-6"
+              style={{
+                fontSize: 'clamp(28px, 5vw, 40px)',
+                lineHeight: 1.15,
+                letterSpacing: '-0.01em',
+                color: '#ffffff',
+              }}
+            >
+              You deserve better than a black-and-white square.
+            </h2>
+            <p
+              className="mb-6"
+              style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}
+            >
+              Most QR code tools are stuck in 2015. They give you an ugly code, charge you to track it, and — here's the fun part — kill it the moment you stop paying.
+            </p>
+            <p style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}>
+              Qrius Codes is different. We built the tool we wished existed: one where your codes look like they belong to your brand, your analytics are clear and useful, and your codes keep working no matter what. Because once you've printed 500 flyers, "just make a new one" isn't really an option.
+            </p>
+          </div>
+        </MarketingSection>
+
+        {/* ─── Section 4: Feature highlights ──────────────────────── */}
+        <MarketingSection
+          id="features"
+          bg="snow"
+          overline="Features"
+          headline="Everything you need. Nothing you don't."
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="animate-on-scroll stagger-1">
+              <FeatureCard
+                icon={Paintbrush}
+                headline="Create & customize"
+                body="Your QR code, your brand. Pick your colors, add your logo, choose dot patterns and corner styles, and wrap it in a frame with a custom label. It takes about 60 seconds."
+              />
+            </div>
+            <div className="animate-on-scroll stagger-2">
+              <FeatureCard
+                icon={BarChart3}
+                headline="Track every scan"
+                body="See who's scanning, where they are, what device they're using, and when they do it. Daily trends, geography breakdowns, browser stats — all in real time."
+              />
+            </div>
+            <div className="animate-on-scroll stagger-3">
+              <FeatureCard
+                icon={RefreshCw}
+                headline="Update anytime"
+                body="Dynamic codes let you change where a scan goes — even after you've printed it. New menu? New landing page? Update the destination. Same code, new result."
+              />
+            </div>
+            <div className="animate-on-scroll stagger-4">
+              <FeatureCard
+                icon={Users}
+                headline="Built for teams"
+                body="Invite your team, organize codes into folders, manage everything from one dashboard. Everyone works from the same playbook."
+              />
+            </div>
+          </div>
+        </MarketingSection>
+
+        {/* ─── Section 5: How it works ─────────────────────────────── */}
+        <MarketingSection
+          bg="cloud"
+          overline="How it works"
+          headline="Three steps. One minute. Zero learning curve."
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
+            <div className="animate-on-scroll stagger-1">
+              <StepCard
+                step={1}
+                title="Pick your type"
+                description="Choose from 9 QR code types — URL, vCard, WiFi, Event, and more. Just fill in the details."
+              />
+            </div>
+            <div className="animate-on-scroll stagger-2">
+              <StepCard
+                step={2}
+                title="Make it yours"
+                description="Customize colors, patterns, logos, and frames to match your brand. Or grab a template and go."
+              />
+            </div>
+            <div className="animate-on-scroll stagger-3">
+              <StepCard
+                step={3}
+                title="Download & track"
+                description="Export in PNG, SVG, or PDF. Share it, print it, stick it anywhere. Then watch the scans roll in."
+              />
+            </div>
+          </div>
+          <div className="text-center mt-12 animate-on-scroll stagger-4">
+            <button
+              onClick={openSignUp}
+              className="text-[15px] font-medium text-white rounded-lg transition-colors inline-flex items-center gap-2"
+              style={{ backgroundColor: '#F97316', padding: '12px 24px' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#EA580C')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#F97316')}
+            >
+              Try it now — free
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </MarketingSection>
+
+        {/* ─── Section 6: Pricing teaser ───────────────────────────── */}
+        <MarketingSection
+          id="pricing"
+          bg="snow"
+          overline="Pricing"
+          headline="Everything you need for $9/month."
+          subheadline="Our free plan gives you more than most tools' paid plans. And when you're ready for more, Pro has you covered."
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+            {/* Free */}
+            <div className="marketing-card text-center animate-on-scroll stagger-1">
+              <p style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A4A4A', marginBottom: 8 }}>
+                Free
+              </p>
+              <p style={{ fontSize: 36, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>$0</p>
+              <p style={{ fontSize: 14, color: '#4A4A4A', marginBottom: 16 }}>forever</p>
+              <div className="space-y-2" style={{ fontSize: 15, color: '#4A4A4A' }}>
+                <p><strong style={{ color: '#1A1A1A' }}>15</strong> dynamic codes</p>
+                <p><strong style={{ color: '#1A1A1A' }}>5,000</strong> scans/mo</p>
+                <p>PNG downloads</p>
+              </div>
+            </div>
+
+            {/* Pro */}
+            <div
+              className="marketing-card text-center animate-on-scroll stagger-2"
+              style={{ border: '2px solid #F97316', position: 'relative' }}
+            >
+              <span
+                className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-semibold text-white"
+                style={{ backgroundColor: '#F97316' }}
+              >
+                Popular
+              </span>
+              <p style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#F97316', marginBottom: 8 }}>
+                Pro
+              </p>
+              <p style={{ fontSize: 36, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>$9</p>
+              <p style={{ fontSize: 14, color: '#4A4A4A', marginBottom: 16 }}>/month</p>
+              <div className="space-y-2" style={{ fontSize: 15, color: '#4A4A4A' }}>
+                <p><strong style={{ color: '#1A1A1A' }}>250</strong> dynamic codes</p>
+                <p><strong style={{ color: '#1A1A1A' }}>100,000</strong> scans/mo</p>
+                <p>PNG, SVG, PDF</p>
+              </div>
+            </div>
+
+            {/* Business */}
+            <div className="marketing-card text-center animate-on-scroll stagger-3">
+              <p style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A4A4A', marginBottom: 8 }}>
+                Business
+              </p>
+              <p style={{ fontSize: 36, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>$29</p>
+              <p style={{ fontSize: 14, color: '#4A4A4A', marginBottom: 16 }}>/month</p>
+              <div className="space-y-2" style={{ fontSize: 15, color: '#4A4A4A' }}>
+                <p><strong style={{ color: '#1A1A1A' }}>Unlimited</strong> codes</p>
+                <p><strong style={{ color: '#1A1A1A' }}>Unlimited</strong> scans</p>
+                <p>White-label</p>
+              </div>
+            </div>
+          </div>
+
+          <p
+            className="text-center animate-on-scroll stagger-4"
+            style={{ fontSize: 15, color: '#4A4A4A' }}
+          >
+            No credit card for free. No annual lock-in on any plan. Cancel anytime — your codes keep working.
+          </p>
+        </MarketingSection>
+
+        {/* ─── Section 7: Use case showcase ────────────────────────── */}
+        <MarketingSection
+          id="use-cases"
+          bg="cloud"
+          overline="Use cases"
+          headline="QR codes for the way you work."
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {useCases.map(({ title, description, color, accent }, i) => (
+              <div
+                key={title}
+                className={`rounded-2xl p-6 sm:p-8 transition-all duration-200 hover:translate-y-[-2px] animate-on-scroll stagger-${i + 1}`}
+                style={{
+                  backgroundColor: color,
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
+                  style={{ backgroundColor: `${accent}20` }}
+                >
+                  <Zap className="w-5 h-5" style={{ color: accent }} />
+                </div>
+                <h3 style={{ fontSize: 20, fontWeight: 600, color: '#1A1A1A', marginBottom: 8 }}>
+                  {title}
+                </h3>
+                <p style={{ fontSize: 15, lineHeight: 1.6, color: '#4A4A4A' }}>
+                  {description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </MarketingSection>
+
+        {/* ─── Section 8: Comparison strip ─────────────────────────── */}
+        <MarketingSection
+          bg="snow"
+          overline="Compare"
+          headline="More for less. That's not a typo."
+        >
+          <div className="animate-on-scroll">
+            <ComparisonTable rows={comparisonRows} />
+          </div>
+          <p
+            className="mt-6 animate-on-scroll stagger-1"
+            style={{ fontSize: 15, lineHeight: 1.6, color: '#4A4A4A', fontStyle: 'italic' }}
+          >
+            We're not being generous to be nice. We just think the bar has been set embarrassingly low.
+          </p>
+        </MarketingSection>
+
+        {/* ─── Section 9: Bottom CTA ───────────────────────────────── */}
+        <CTASection
+          headline="Ready to get qrius?"
+          subheadline="Create your first QR code in under a minute. Free, no credit card, no strings."
+          primaryLabel="Start creating"
+          primaryAction={openSignUp}
+          secondaryLabel="Talk to us first"
+          secondaryHref="mailto:hello@qrius.app"
+        />
+      </div>
+
+      {/* Auth modal */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+        defaultView={authView}
         onAuthSuccess={handleAuthSuccess}
       />
-    </div>
+    </MarketingLayout>
   );
 }

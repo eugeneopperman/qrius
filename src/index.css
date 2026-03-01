@@ -876,3 +876,85 @@
   background: rgba(251, 146, 60, 0.2);
   color: inherit;
 }
+
+/* ============================================
+   MARKETING PAGE STYLES
+   ============================================ */
+
+@layer base {
+  .font-serif {
+    font-family: 'Instrument Serif', Georgia, serif;
+  }
+}
+
+@layer components {
+  /* Marketing section — base wrapper with rhythm spacing */
+  .marketing-section {
+    @apply w-full;
+    padding: 64px 24px;
+  }
+  @media (min-width: 640px) {
+    .marketing-section { padding: 96px 48px; }
+  }
+
+  .marketing-section-inner {
+    @apply mx-auto;
+    max-width: 1200px;
+  }
+
+  /* Section background variants */
+  .marketing-bg-snow { background-color: #FAFAF8; }
+  .marketing-bg-cloud { background-color: #F5F4F2; }
+  .marketing-bg-ink { background-color: #1A1A1A; color: #ffffff; }
+  .marketing-bg-ember-light { background-color: #FFF3E8; }
+
+  /* Marketing card */
+  .marketing-card {
+    background: #ffffff;
+    border: 1px solid #E8E6E3;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 200ms ease, transform 200ms ease;
+    padding: 24px;
+  }
+  @media (min-width: 640px) {
+    .marketing-card { padding: 32px; }
+  }
+  .marketing-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* Marketing overline */
+  .marketing-overline {
+    @apply uppercase font-semibold;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: #F97316;
+  }
+
+  /* Scroll-triggered animation */
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 400ms ease-out, transform 400ms ease-out;
+  }
+  .animate-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* Stagger children */
+  .animate-on-scroll.stagger-1 { transition-delay: 80ms; }
+  .animate-on-scroll.stagger-2 { transition-delay: 160ms; }
+  .animate-on-scroll.stagger-3 { transition-delay: 240ms; }
+  .animate-on-scroll.stagger-4 { transition-delay: 320ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-on-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

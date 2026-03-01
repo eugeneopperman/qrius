@@ -10,75 +10,63 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
 }));
 
-// Mock heavy child components
-vi.mock('@/components/Header', () => ({
-  Header: () => <div data-testid="header" />,
+// Mock marketing layout children
+vi.mock('@/components/marketing/MarketingLayout', () => ({
+  MarketingLayout: ({ children, onSignIn, onSignUp }: any) => (
+    <div data-testid="marketing-layout">
+      <button data-testid="sign-in-trigger" onClick={onSignIn}>Sign In</button>
+      <button data-testid="sign-up-trigger" onClick={onSignUp}>Sign Up</button>
+      <main>{children}</main>
+    </div>
+  ),
 }));
 
-vi.mock('@/components/landing/LandingTypeGrid', () => ({
-  LandingTypeGrid: ({ onSelect }: { onSelect: (id: string) => void }) => (
-    <div data-testid="landing-type-grid">
-      <button data-testid="type-url" onClick={() => onSelect('url')}>URL</button>
+vi.mock('@/components/marketing/MarketingSection', () => ({
+  MarketingSection: ({ children, ...props }: any) => <section {...props}>{children}</section>,
+}));
+
+vi.mock('@/components/marketing/FeatureCard', () => ({
+  FeatureCard: ({ headline }: any) => <div data-testid="feature-card">{headline}</div>,
+}));
+
+vi.mock('@/components/marketing/StepCard', () => ({
+  StepCard: ({ title }: any) => <div data-testid="step-card">{title}</div>,
+}));
+
+vi.mock('@/components/marketing/ComparisonTable', () => ({
+  ComparisonTable: () => <div data-testid="comparison-table" />,
+}));
+
+vi.mock('@/components/marketing/CTASection', () => ({
+  CTASection: ({ primaryAction }: any) => (
+    <div data-testid="cta-section">
+      <button data-testid="cta-primary" onClick={primaryAction}>CTA</button>
     </div>
   ),
 }));
 
 vi.mock('@/components/auth/AuthModal', () => ({
-  AuthModal: ({ isOpen, onClose, onAuthSuccess }: any) =>
+  AuthModal: ({ isOpen, onClose, onAuthSuccess, defaultView }: any) =>
     isOpen ? (
-      <div data-testid="auth-modal">
+      <div data-testid="auth-modal" data-view={defaultView}>
         <button data-testid="close-modal" onClick={onClose}>Close</button>
         <button data-testid="auth-success" onClick={onAuthSuccess}>Sign In Success</button>
       </div>
     ) : null,
 }));
 
-vi.mock('@/components/layout/PublicFooter', () => ({
-  PublicFooter: () => <div data-testid="public-footer" />,
-}));
-
-// Mock stores
-vi.mock('@/stores/uiStore', () => ({
-  useUIStore: () => ({ openShortcuts: vi.fn(), openSettings: vi.fn() }),
-}));
-
-const mockSetActiveType = vi.fn();
-const mockMarkCompleted = vi.fn();
-const mockGoToStep = vi.fn();
-
-vi.mock('@/stores/qrStore', () => ({
-  useQRStore: Object.assign(
-    (selector: any) => selector({ setActiveType: mockSetActiveType }),
-    { getState: () => ({ setActiveType: mockSetActiveType }) }
-  ),
-}));
-
-vi.mock('@/stores/wizardStore', () => ({
-  useWizardStore: Object.assign(
-    (selector: any) => selector({ markCompleted: mockMarkCompleted, goToStep: mockGoToStep }),
-    { getState: () => ({ markCompleted: mockMarkCompleted, goToStep: mockGoToStep }) }
-  ),
+vi.mock('@/hooks/useScrollReveal', () => ({
+  useScrollReveal: () => ({ current: null }),
 }));
 
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    sessionStorage.clear();
   });
 
-  it('renders the header', () => {
+  it('renders the marketing layout', () => {
     render(<HomePage />);
-    expect(screen.getByTestId('header')).toBeInTheDocument();
-  });
-
-  it('renders the landing type grid', () => {
-    render(<HomePage />);
-    expect(screen.getByTestId('landing-type-grid')).toBeInTheDocument();
-  });
-
-  it('renders the public footer', () => {
-    render(<HomePage />);
-    expect(screen.getByTestId('public-footer')).toBeInTheDocument();
+    expect(screen.getByTestId('marketing-layout')).toBeInTheDocument();
   });
 
   it('renders the main content area', () => {
@@ -86,52 +74,63 @@ describe('HomePage', () => {
     expect(screen.getByRole('main')).toBeInTheDocument();
   });
 
+  it('renders the hero headline', () => {
+    render(<HomePage />);
+    expect(screen.getByText(/QR codes that people actually want to scan/)).toBeInTheDocument();
+  });
+
   it('does not show auth modal initially', () => {
     render(<HomePage />);
     expect(screen.queryByTestId('auth-modal')).not.toBeInTheDocument();
   });
 
-  it('opens auth modal when a type card is clicked', () => {
+  it('opens auth modal in signup mode when Sign Up is clicked', () => {
     render(<HomePage />);
-    fireEvent.click(screen.getByTestId('type-url'));
+    fireEvent.click(screen.getByTestId('sign-up-trigger'));
     expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('auth-modal')).toHaveAttribute('data-view', 'signup');
   });
 
-  it('stores pending type in sessionStorage on type select', () => {
+  it('opens auth modal in signin mode when Sign In is clicked', () => {
     render(<HomePage />);
-    fireEvent.click(screen.getByTestId('type-url'));
-    expect(sessionStorage.getItem('pendingQRType')).toBe('url');
+    fireEvent.click(screen.getByTestId('sign-in-trigger'));
+    expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
+    expect(screen.getByTestId('auth-modal')).toHaveAttribute('data-view', 'signin');
   });
 
   it('closes auth modal when close button is clicked', () => {
     render(<HomePage />);
-    fireEvent.click(screen.getByTestId('type-url'));
+    fireEvent.click(screen.getByTestId('sign-up-trigger'));
     expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('close-modal'));
     expect(screen.queryByTestId('auth-modal')).not.toBeInTheDocument();
   });
 
-  it('navigates to /create on auth success', () => {
+  it('navigates to /dashboard on auth success', () => {
     render(<HomePage />);
-    fireEvent.click(screen.getByTestId('type-url'));
+    fireEvent.click(screen.getByTestId('sign-up-trigger'));
     fireEvent.click(screen.getByTestId('auth-success'));
-    expect(mockNavigate).toHaveBeenCalledWith({ to: '/create' });
+    expect(mockNavigate).toHaveBeenCalledWith({ to: '/dashboard' });
   });
 
-  it('sets active type and wizard step on auth success', () => {
+  it('opens auth modal from bottom CTA', () => {
     render(<HomePage />);
-    fireEvent.click(screen.getByTestId('type-url'));
-    fireEvent.click(screen.getByTestId('auth-success'));
-    expect(mockSetActiveType).toHaveBeenCalledWith('url');
-    expect(mockMarkCompleted).toHaveBeenCalledWith(1);
-    expect(mockGoToStep).toHaveBeenCalledWith(2);
+    fireEvent.click(screen.getByTestId('cta-primary'));
+    expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
   });
 
-  it('clears sessionStorage on auth success', () => {
+  it('renders 4 feature cards', () => {
     render(<HomePage />);
-    fireEvent.click(screen.getByTestId('type-url'));
-    expect(sessionStorage.getItem('pendingQRType')).toBe('url');
-    fireEvent.click(screen.getByTestId('auth-success'));
-    expect(sessionStorage.getItem('pendingQRType')).toBeNull();
+    expect(screen.getAllByTestId('feature-card')).toHaveLength(4);
+  });
+
+  it('renders 3 step cards', () => {
+    render(<HomePage />);
+    expect(screen.getAllByTestId('step-card')).toHaveLength(3);
+  });
+
+  it('renders the comparison table', () => {
+    render(<HomePage />);
+    expect(screen.getByTestId('comparison-table')).toBeInTheDocument();
   });
 });
