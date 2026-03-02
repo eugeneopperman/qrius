@@ -14,7 +14,7 @@ interface MarketingSectionProps {
   id?: string;
   bg?: BgVariant;
   overline?: string;
-  headline?: string;
+  headline?: React.ReactNode;
   subheadline?: string;
   children: ReactNode;
   className?: string;

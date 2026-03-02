@@ -25,8 +25,8 @@ vi.mock('@/components/marketing/MarketingSection', () => ({
   MarketingSection: ({ children, ...props }: any) => <section {...props}>{children}</section>,
 }));
 
-vi.mock('@/components/marketing/FeatureCard', () => ({
-  FeatureCard: ({ headline }: any) => <div data-testid="feature-card">{headline}</div>,
+vi.mock('@/components/marketing/FeatureRow', () => ({
+  FeatureRow: ({ headline }: any) => <div data-testid="feature-row">{headline}</div>,
 }));
 
 vi.mock('@/components/marketing/StepCard', () => ({
@@ -119,9 +119,9 @@ describe('HomePage', () => {
     expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
   });
 
-  it('renders 4 feature cards', () => {
+  it('renders 4 feature rows', () => {
     render(<HomePage />);
-    expect(screen.getAllByTestId('feature-card')).toHaveLength(4);
+    expect(screen.getAllByTestId('feature-row')).toHaveLength(4);
   });
 
   it('renders 3 step cards', () => {

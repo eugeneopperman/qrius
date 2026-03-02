@@ -881,10 +881,8 @@
    MARKETING PAGE STYLES
    ============================================ */
 
-@layer base {
-  .font-serif {
-    font-family: 'Instrument Serif', Georgia, serif;
-  }
+@theme {
+  --font-serif: 'Instrument Serif', Georgia, serif;
 }
 
 @layer components {

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 import { MarketingSection } from '@/components/marketing/MarketingSection';
-import { FeatureCard } from '@/components/marketing/FeatureCard';
+import { FeatureRow } from '@/components/marketing/FeatureRow';
 import { StepCard } from '@/components/marketing/StepCard';
 import { ComparisonTable } from '@/components/marketing/ComparisonTable';
 import { CTASection } from '@/components/marketing/CTASection';
@@ -244,42 +244,61 @@ export default function HomePage() {
           </div>
         </MarketingSection>
 
-        {/* ─── Section 4: Feature highlights ──────────────────────── */}
+        {/* ─── Section 4: Feature highlights (Mailchimp-style timeline) ── */}
         <MarketingSection
           id="features"
           bg="snow"
           overline="Features"
           headline="Everything you need. Nothing you don't."
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="animate-on-scroll stagger-1">
-              <FeatureCard
-                icon={Paintbrush}
-                headline="Create & customize"
-                body="Your QR code, your brand. Pick your colors, add your logo, choose dot patterns and corner styles, and wrap it in a frame with a custom label. It takes about 60 seconds."
-              />
-            </div>
-            <div className="animate-on-scroll stagger-2">
-              <FeatureCard
-                icon={BarChart3}
-                headline="Track every scan"
-                body="See who's scanning, where they are, what device they're using, and when they do it. Daily trends, geography breakdowns, browser stats — all in real time."
-              />
-            </div>
-            <div className="animate-on-scroll stagger-3">
-              <FeatureCard
-                icon={RefreshCw}
-                headline="Update anytime"
-                body="Dynamic codes let you change where a scan goes — even after you've printed it. New menu? New landing page? Update the destination. Same code, new result."
-              />
-            </div>
-            <div className="animate-on-scroll stagger-4">
-              <FeatureCard
-                icon={Users}
-                headline="Built for teams"
-                body="Invite your team, organize codes into folders, manage everything from one dashboard. Everyone works from the same playbook."
-              />
-            </div>
+          <div className="animate-on-scroll">
+            <FeatureRow
+              icon={Paintbrush}
+              headline="Create & customize"
+              description="Your QR code, your brand. Pick your colors, add your logo, and wrap it in a frame with a custom label. It takes about 60 seconds."
+              bullets={[
+                'Choose from 9 QR code types — URL, vCard, WiFi, and more',
+                'Add your logo, brand colors, and custom dot patterns',
+                'Save brand templates and apply them in one click',
+              ]}
+            />
+          </div>
+          <div className="animate-on-scroll stagger-1">
+            <FeatureRow
+              icon={BarChart3}
+              headline="Track every scan"
+              description="See who's scanning, where they are, what device they're using, and when they do it — all in real time, all without a single line of code."
+              bullets={[
+                'Daily and hourly scan trends with geography breakdown',
+                'Browser, OS, and device type analytics',
+                'Referrer tracking to see how people find your codes',
+              ]}
+            />
+          </div>
+          <div className="animate-on-scroll stagger-2">
+            <FeatureRow
+              icon={RefreshCw}
+              headline="Update anytime"
+              description="Dynamic codes let you change where a scan goes — even after you've printed it. New menu? New promotion? Update the destination."
+              bullets={[
+                'Change the destination URL without reprinting',
+                'Pause and reactivate codes from your dashboard',
+                'Every code on the free plan is dynamic',
+              ]}
+            />
+          </div>
+          <div className="animate-on-scroll stagger-3">
+            <FeatureRow
+              icon={Users}
+              headline="Built for teams"
+              description="Invite your team, assign roles, and keep everyone working from the same dashboard. No more emailing QR code files around."
+              bullets={[
+                'Workspaces for different brands, clients, or projects',
+                'Owner, admin, editor, and viewer permissions',
+                'Shared brand templates available to everyone',
+              ]}
+              isLast
+            />
           </div>
         </MarketingSection>
 
@@ -287,7 +306,7 @@ export default function HomePage() {
         <MarketingSection
           bg="cloud"
           overline="How it works"
-          headline="Three steps. One minute. Zero learning curve."
+          headline={<>Three steps. One minute.<br />Zero learning curve.</>}
         >
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6">
             <div className="animate-on-scroll stagger-1">
@@ -336,22 +355,31 @@ export default function HomePage() {
         >
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
             {/* Free */}
-            <div className="marketing-card text-center animate-on-scroll stagger-1">
+            <div className="marketing-card text-center animate-on-scroll stagger-1 flex flex-col">
               <p style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A4A4A', marginBottom: 8 }}>
                 Free
               </p>
               <p style={{ fontSize: 36, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>$0</p>
               <p style={{ fontSize: 14, color: '#4A4A4A', marginBottom: 16 }}>forever</p>
-              <div className="space-y-2" style={{ fontSize: 15, color: '#4A4A4A' }}>
+              <div className="space-y-2 flex-1" style={{ fontSize: 15, color: '#4A4A4A' }}>
                 <p><strong style={{ color: '#1A1A1A' }}>15</strong> dynamic codes</p>
                 <p><strong style={{ color: '#1A1A1A' }}>5,000</strong> scans/mo</p>
                 <p>PNG downloads</p>
               </div>
+              <a
+                href="#pricing"
+                className="mt-6 inline-flex items-center justify-center gap-1 text-sm font-medium transition-colors"
+                style={{ color: '#F97316' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#EA580C')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#F97316')}
+              >
+                And more <ArrowRight className="w-3.5 h-3.5" />
+              </a>
             </div>
 
             {/* Pro */}
             <div
-              className="marketing-card text-center animate-on-scroll stagger-2"
+              className="marketing-card text-center animate-on-scroll stagger-2 flex flex-col"
               style={{ border: '2px solid #F97316', position: 'relative' }}
             >
               <span
@@ -365,25 +393,43 @@ export default function HomePage() {
               </p>
               <p style={{ fontSize: 36, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>$9</p>
               <p style={{ fontSize: 14, color: '#4A4A4A', marginBottom: 16 }}>/month</p>
-              <div className="space-y-2" style={{ fontSize: 15, color: '#4A4A4A' }}>
+              <div className="space-y-2 flex-1" style={{ fontSize: 15, color: '#4A4A4A' }}>
                 <p><strong style={{ color: '#1A1A1A' }}>250</strong> dynamic codes</p>
                 <p><strong style={{ color: '#1A1A1A' }}>100,000</strong> scans/mo</p>
                 <p>PNG, SVG, PDF</p>
               </div>
+              <a
+                href="#pricing"
+                className="mt-6 inline-flex items-center justify-center gap-1 text-sm font-medium transition-colors"
+                style={{ color: '#F97316' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#EA580C')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#F97316')}
+              >
+                And more <ArrowRight className="w-3.5 h-3.5" />
+              </a>
             </div>
 
             {/* Business */}
-            <div className="marketing-card text-center animate-on-scroll stagger-3">
+            <div className="marketing-card text-center animate-on-scroll stagger-3 flex flex-col">
               <p style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A4A4A', marginBottom: 8 }}>
                 Business
               </p>
               <p style={{ fontSize: 36, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>$29</p>
               <p style={{ fontSize: 14, color: '#4A4A4A', marginBottom: 16 }}>/month</p>
-              <div className="space-y-2" style={{ fontSize: 15, color: '#4A4A4A' }}>
+              <div className="space-y-2 flex-1" style={{ fontSize: 15, color: '#4A4A4A' }}>
                 <p><strong style={{ color: '#1A1A1A' }}>Unlimited</strong> codes</p>
                 <p><strong style={{ color: '#1A1A1A' }}>Unlimited</strong> scans</p>
                 <p>White-label</p>
               </div>
+              <a
+                href="#pricing"
+                className="mt-6 inline-flex items-center justify-center gap-1 text-sm font-medium transition-colors"
+                style={{ color: '#F97316' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#EA580C')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#F97316')}
+              >
+                And more <ArrowRight className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 
