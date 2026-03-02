@@ -2,6 +2,7 @@ import { UseCasePageTemplate, type UseCasePageData } from '@/components/marketin
 import { BookOpen, Map, Library, Upload } from 'lucide-react';
 
 const data: UseCasePageData = {
+  breadcrumbLabel: 'Education',
   hero: {
     headline: 'QR codes that make learning a little easier.',
     subheadline: 'Classroom handouts, campus wayfinding, library resources, and assignment links — one scan instead of a long URL on a whiteboard.',

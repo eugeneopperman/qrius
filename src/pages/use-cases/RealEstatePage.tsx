@@ -2,6 +2,7 @@ import { UseCasePageTemplate, type UseCasePageData } from '@/components/marketin
 import { Home, Video, User, ClipboardList } from 'lucide-react';
 
 const data: UseCasePageData = {
+  breadcrumbLabel: 'Real Estate',
   hero: {
     headline: 'QR codes that open doors. Figuratively, at least.',
     subheadline: 'Listing details, virtual tours, agent contact cards, and open house sign-ins — all from one scan.',

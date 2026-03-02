@@ -2,6 +2,7 @@ import { UseCasePageTemplate, type UseCasePageData } from '@/components/marketin
 import { CalendarDays, Ticket, User, MessageSquare, Clock } from 'lucide-react';
 
 const data: UseCasePageData = {
+  breadcrumbLabel: 'Events',
   hero: {
     headline: 'QR codes that make your event feel effortless.',
     subheadline: 'Schedules, tickets, check-in, speaker bios, feedback forms — everything your attendees need, one scan away.',

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { type LucideIcon } from 'lucide-react';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { ChevronRight, type LucideIcon } from 'lucide-react';
 import { MarketingLayout } from './MarketingLayout';
 import { MarketingSection } from './MarketingSection';
 import { CTASection } from './CTASection';
@@ -30,6 +30,8 @@ interface ScenarioItem {
 type CardLayout = 'grid-2' | 'grid-3' | 'stack' | 'alternating';
 
 export interface UseCasePageData {
+  /** Label shown in the breadcrumb trail (e.g. "Restaurants") */
+  breadcrumbLabel?: string;
   hero: {
     headline: string;
     subheadline: string;
@@ -186,8 +188,21 @@ export function UseCasePageTemplate({ data }: { data: UseCasePageData }) {
     <MarketingLayout onSignIn={openSignIn} onSignUp={openSignUp}>
       <div ref={containerRef}>
 
+        {/* Breadcrumb */}
+        {data.breadcrumbLabel && (
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-6" style={{ maxWidth: 1200 }}>
+            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm" style={{ color: '#9CA3AF' }}>
+              <Link to="/" className="transition-colors hover:text-[#F97316]" style={{ color: '#9CA3AF' }}>Home</Link>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <Link to="/use-cases" className="transition-colors hover:text-[#F97316]" style={{ color: '#9CA3AF' }}>Use Cases</Link>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <span style={{ color: '#1A1A1A', fontWeight: 500 }}>{data.breadcrumbLabel}</span>
+            </nav>
+          </div>
+        )}
+
         {/* Hero */}
-        <MarketingSection bg="snow" className="!pt-12 !pb-12">
+        <MarketingSection bg="snow" className={data.breadcrumbLabel ? '!pt-6 !pb-12' : '!pt-12 !pb-12'}>
           <div className={`flex flex-col ${data.hero.image ? 'lg:flex-row items-center gap-12 lg:gap-16' : ''}`}>
             <div className={data.hero.image ? 'flex-1 max-w-xl' : 'max-w-3xl'}>
               <h1

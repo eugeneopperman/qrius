@@ -2,6 +2,7 @@ import { UseCasePageTemplate, type UseCasePageData } from '@/components/marketin
 import { Package, Tag, Heart, MessageSquare } from 'lucide-react';
 
 const data: UseCasePageData = {
+  breadcrumbLabel: 'Retail',
   hero: {
     headline: 'QR codes that sell as hard as your products.',
     subheadline: 'Product info, promotions, loyalty programs, and reviews — on the shelf, on the packaging, or at the register.',

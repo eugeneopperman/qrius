@@ -2,6 +2,7 @@ import { UseCasePageTemplate, type UseCasePageData } from '@/components/marketin
 import { ClipboardList, Calendar, Map, FileText } from 'lucide-react';
 
 const data: UseCasePageData = {
+  breadcrumbLabel: 'Healthcare',
   hero: {
     headline: 'QR codes that help people find what they need — fast.',
     subheadline: 'Patient intake forms, appointment booking, wayfinding, and information sheets — all accessible in one scan.',

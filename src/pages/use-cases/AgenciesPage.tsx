@@ -2,6 +2,7 @@ import { UseCasePageTemplate, type UseCasePageData } from '@/components/marketin
 import { FolderOpen, Layers, Globe, BarChart3 } from 'lucide-react';
 
 const data: UseCasePageData = {
+  breadcrumbLabel: 'Agencies',
   hero: {
     headline: 'Manage QR codes across every client. Without losing your mind.',
     subheadline: 'Brand templates, team access, white-label options, and analytics your clients will actually understand.',

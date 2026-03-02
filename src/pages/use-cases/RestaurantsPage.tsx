@@ -2,6 +2,7 @@ import { UseCasePageTemplate, type UseCasePageData } from '@/components/marketin
 import { UtensilsCrossed, Wifi, Star, CalendarDays } from 'lucide-react';
 
 const data: UseCasePageData = {
+  breadcrumbLabel: 'Restaurants',
   hero: {
     headline: 'QR codes made for restaurants that care about the details.',
     subheadline: 'Digital menus, WiFi access, review links, and more — all branded, all trackable, and all updatable without reprinting a thing.',

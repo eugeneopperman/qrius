@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { AlertTriangle, Star } from 'lucide-react';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { AlertTriangle, ChevronRight, Star } from 'lucide-react';
 import { MarketingLayout } from './MarketingLayout';
 import { MarketingSection } from './MarketingSection';
 import { PlanComparisonTable } from './PlanComparisonTable';
@@ -105,8 +105,19 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonPageData }) {
     <MarketingLayout onSignIn={openSignIn} onSignUp={openSignUp}>
       <div ref={containerRef}>
 
+        {/* Breadcrumb */}
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-6" style={{ maxWidth: 1200 }}>
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm" style={{ color: '#9CA3AF' }}>
+            <Link to="/" className="transition-colors hover:text-[#F97316]" style={{ color: '#9CA3AF' }}>Home</Link>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <Link to="/compare" className="transition-colors hover:text-[#F97316]" style={{ color: '#9CA3AF' }}>Compare</Link>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span style={{ color: '#1A1A1A', fontWeight: 500 }}>vs {data.competitor}</span>
+          </nav>
+        </div>
+
         {/* Hero */}
-        <MarketingSection bg="snow" className="!pt-12 !pb-12">
+        <MarketingSection bg="snow" className="!pt-6 !pb-12">
           <div className="max-w-3xl">
             <p className="marketing-overline mb-4 animate-on-scroll">Comparison</p>
             <h1
