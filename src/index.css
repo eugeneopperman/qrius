@@ -889,14 +889,15 @@
   /* Marketing section — base wrapper with rhythm spacing */
   .marketing-section {
     @apply w-full;
-    padding: 64px 24px;
+    padding-top: 64px;
+    padding-bottom: 64px;
   }
   @media (min-width: 640px) {
-    .marketing-section { padding: 96px 48px; }
+    .marketing-section { padding-top: 96px; padding-bottom: 96px; }
   }
 
   .marketing-section-inner {
-    @apply mx-auto;
+    @apply mx-auto px-4 sm:px-6 lg:px-8;
     max-width: 1200px;
   }
 
@@ -931,6 +932,73 @@
     letter-spacing: 0.08em;
     color: #F97316;
   }
+
+  /* Marketing buttons */
+  .marketing-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    background-color: #F97316;
+    padding: 14px 28px;
+    border-radius: 8px;
+    transition: background-color 150ms ease, transform 150ms ease;
+  }
+  .marketing-btn-primary:hover {
+    background-color: #EA580C;
+    transform: translateY(-1px);
+  }
+
+  .marketing-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1A1A1A;
+    background-color: transparent;
+    padding: 14px 28px;
+    border: 1.5px solid #1A1A1A;
+    border-radius: 8px;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  .marketing-btn-outline:hover {
+    background-color: #1A1A1A;
+    color: #ffffff;
+  }
+
+  /* Marketing link (orange text with hover) */
+  .marketing-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #F97316;
+    transition: color 150ms ease;
+  }
+  .marketing-link:hover { color: #EA580C; }
+
+  /* Marketing nav link */
+  .marketing-nav-link {
+    font-size: 15px;
+    font-weight: 500;
+    color: #4A4A4A;
+    transition: color 150ms ease;
+  }
+  .marketing-nav-link:hover { color: #1A1A1A; }
+
+  /* Footer link */
+  .marketing-footer-link {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    transition: color 150ms ease;
+  }
+  .marketing-footer-link:hover { color: #ffffff; }
 
   /* Scroll-triggered animation */
   .animate-on-scroll {

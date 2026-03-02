@@ -1,12 +1,13 @@
 import { type LucideIcon } from 'lucide-react';
 
 interface FeatureRowProps {
-  icon: LucideIcon;
   headline: string;
   description: string;
   bullets: string[];
-  /** Optional image URL — replaces the icon placeholder */
+  /** Image URL for the visual. Falls back to icon placeholder when absent. */
   image?: string;
+  /** Fallback icon when no image is provided */
+  icon?: LucideIcon;
   /** Whether to show the timeline connector below this row */
   isLast?: boolean;
   className?: string;
@@ -30,10 +31,7 @@ export function FeatureRow({
           style={{ backgroundColor: '#F97316', marginTop: 8 }}
         />
         {!isLast && (
-          <div
-            className="flex-1"
-            style={{ width: 2, backgroundColor: '#E8E6E3', marginTop: 8 }}
-          />
+          <div className="flex-1" style={{ width: 2, backgroundColor: '#E8E6E3', marginTop: 8 }} />
         )}
       </div>
 
@@ -54,28 +52,13 @@ export function FeatureRow({
             >
               {headline}
             </h3>
-            <p
-              className="mb-5"
-              style={{
-                fontSize: 17,
-                lineHeight: 1.6,
-                color: '#4A4A4A',
-                maxWidth: 480,
-              }}
-            >
+            <p className="mb-5" style={{ fontSize: 17, lineHeight: 1.6, color: '#4A4A4A', maxWidth: 480 }}>
               {description}
             </p>
             <ul className="space-y-2.5">
               {bullets.map((bullet) => (
-                <li
-                  key={bullet}
-                  className="flex items-start gap-3"
-                  style={{ fontSize: 15, lineHeight: 1.5, color: '#4A4A4A' }}
-                >
-                  <span
-                    className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2"
-                    style={{ backgroundColor: '#1A1A1A' }}
-                  />
+                <li key={bullet} className="flex items-start gap-3" style={{ fontSize: 15, lineHeight: 1.5, color: '#4A4A4A' }}>
+                  <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2" style={{ backgroundColor: '#1A1A1A' }} />
                   {bullet}
                 </li>
               ))}
@@ -89,13 +72,10 @@ export function FeatureRow({
                 src={image}
                 alt={headline}
                 className="w-full max-w-sm aspect-[4/3] rounded-xl object-cover"
-                style={{
-                  border: '1px solid #E8E6E3',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.06)',
-                }}
+                style={{ border: '1px solid #E8E6E3', boxShadow: '0 8px 32px rgba(0,0,0,0.06)' }}
                 loading="lazy"
               />
-            ) : (
+            ) : Icon ? (
               <div
                 className="w-full max-w-sm aspect-[4/3] rounded-xl flex items-center justify-center"
                 style={{
@@ -106,7 +86,7 @@ export function FeatureRow({
               >
                 <Icon className="w-12 h-12" style={{ color: '#F97316', opacity: 0.25 }} />
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

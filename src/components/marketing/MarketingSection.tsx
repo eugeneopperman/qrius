@@ -14,12 +14,10 @@ interface MarketingSectionProps {
   id?: string;
   bg?: BgVariant;
   overline?: string;
-  headline?: React.ReactNode;
+  headline?: ReactNode;
   subheadline?: string;
   children: ReactNode;
   className?: string;
-  /** Narrow headline width (for statement sections) */
-  narrow?: boolean;
 }
 
 export function MarketingSection({
@@ -30,7 +28,6 @@ export function MarketingSection({
   subheadline,
   children,
   className,
-  narrow,
 }: MarketingSectionProps) {
   const isDark = bg === 'ink';
 
@@ -47,7 +44,7 @@ export function MarketingSection({
         )}
         {headline && (
           <h2
-            className={cn('font-serif', narrow ? 'max-w-2xl' : 'max-w-3xl')}
+            className="font-serif max-w-3xl"
             style={{
               fontSize: 'clamp(28px, 5vw, 40px)',
               fontWeight: 300,

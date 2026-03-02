@@ -28,7 +28,7 @@ export function Logo({ size = 'md', showText = true, className }: LogoProps) {
       </div>
       {showText && (
         <span className={cn(s.text, 'font-bold text-gray-900 dark:text-white')}>
-          Qrius
+          Qrius Codes
         </span>
       )}
     </div>

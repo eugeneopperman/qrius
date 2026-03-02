@@ -7,15 +7,15 @@ interface NavLink {
   label: string;
   /** Hash anchor (e.g. '#features') for same-page scroll */
   hash?: string;
-  /** Route path for real page navigation */
-  to?: string;
+  /** Callback action instead of scroll (e.g. open auth modal) */
+  action?: 'signin';
 }
 
 const navLinks: NavLink[] = [
   { label: 'Features', hash: '#features' },
   { label: 'Pricing', hash: '#pricing' },
   { label: 'Use Cases', hash: '#use-cases' },
-  { label: 'Sign In', to: '/signin' },
+  { label: 'Sign In', action: 'signin' },
 ];
 
 interface MarketingHeaderProps {
@@ -29,12 +29,9 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
   const handleNavClick = (link: NavLink) => {
     setMobileOpen(false);
     if (link.hash) {
-      const el = document.querySelector(link.hash);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
+      document.querySelector(link.hash)?.scrollIntoView({ behavior: 'smooth' });
     }
-    if (link.to === '/signin') {
+    if (link.action === 'signin') {
       onSignIn();
     }
   };
@@ -43,58 +40,32 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
     <>
       <header
         className="sticky top-0 z-50 border-b"
-        style={{
-          backgroundColor: '#FAFAF8',
-          borderColor: '#E8E6E3',
-        }}
+        style={{ backgroundColor: '#FAFAF8', borderColor: '#E8E6E3' }}
       >
-        <div className="mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8" style={{ maxWidth: 1200 }}>
-          {/* Logo */}
+        <div
+          className="mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8"
+          style={{ maxWidth: 1200 }}
+        >
           <Link to="/" className="flex items-center gap-2">
             <Logo size="sm" showText />
           </Link>
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) =>
-              link.to ? (
-                <button
-                  key={link.label}
-                  onClick={() => handleNavClick(link)}
-                  className="text-[15px] font-medium transition-colors"
-                  style={{ color: '#4A4A4A' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#1A1A1A')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
-                >
-                  {link.label}
-                </button>
-              ) : (
-                <button
-                  key={link.label}
-                  onClick={() => handleNavClick(link)}
-                  className="text-[15px] font-medium transition-colors"
-                  style={{ color: '#4A4A4A' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#1A1A1A')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
-                >
-                  {link.label}
-                </button>
-              )
-            )}
+            {navLinks.map((link) => (
+              <button
+                key={link.label}
+                onClick={() => handleNavClick(link)}
+                className="marketing-nav-link"
+              >
+                {link.label}
+              </button>
+            ))}
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={onSignUp}
-              className="text-[15px] font-medium text-white rounded-lg transition-colors"
-              style={{
-                backgroundColor: '#F97316',
-                padding: '10px 20px',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#EA580C')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#F97316')}
-            >
+          <div className="hidden md:flex items-center">
+            <button onClick={onSignUp} className="marketing-btn-primary" style={{ padding: '10px 20px', fontSize: 15 }}>
               Start free
             </button>
           </div>
@@ -116,10 +87,7 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 flex flex-col pt-16"
-          style={{ backgroundColor: '#FAFAF8' }}
-        >
+        <div className="fixed inset-0 z-40 flex flex-col pt-16" style={{ backgroundColor: '#FAFAF8' }}>
           <nav className="flex flex-col items-center gap-6 pt-12">
             {navLinks.map((link) => (
               <button
@@ -134,8 +102,8 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
             <div className="flex flex-col items-center gap-4 mt-8 w-full px-8">
               <button
                 onClick={() => { setMobileOpen(false); onSignUp(); }}
-                className="text-[15px] font-medium text-white w-full py-3 rounded-lg"
-                style={{ backgroundColor: '#F97316' }}
+                className="marketing-btn-primary w-full"
+                style={{ padding: '12px 20px' }}
               >
                 Start free
               </button>

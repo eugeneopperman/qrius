@@ -1,6 +1,18 @@
 import { Link } from '@tanstack/react-router';
 
-const columns = [
+interface FooterLink {
+  label: string;
+  href: string;
+  internal?: boolean;
+  badge?: string;
+}
+
+interface FooterColumn {
+  title: string;
+  links: FooterLink[];
+}
+
+const columns: FooterColumn[] = [
   {
     title: 'Product',
     links: [
@@ -48,10 +60,7 @@ const columns = [
 export function MarketingFooter() {
   return (
     <footer style={{ backgroundColor: '#1A1A1A', color: '#ffffff' }}>
-      <div
-        className="mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8"
-        style={{ maxWidth: 1200 }}
-      >
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8" style={{ maxWidth: 1200 }}>
         {/* Link columns */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
           {columns.map((col) => (
@@ -65,26 +74,17 @@ export function MarketingFooter() {
               <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    {'internal' in link && link.internal ? (
+                    {link.internal ? (
                       <Link
                         to={link.href as '/terms' | '/privacy' | '/cookies'}
-                        className="text-sm transition-colors inline-flex items-center gap-2"
-                        style={{ color: 'rgba(255,255,255,0.6)' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+                        className="marketing-footer-link inline-flex items-center gap-2"
                       >
                         {link.label}
                       </Link>
                     ) : (
-                      <a
-                        href={link.href}
-                        className="text-sm transition-colors inline-flex items-center gap-2"
-                        style={{ color: 'rgba(255,255,255,0.6)' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
-                      >
+                      <a href={link.href} className="marketing-footer-link inline-flex items-center gap-2">
                         {link.label}
-                        {'badge' in link && (
+                        {link.badge && (
                           <span
                             className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
                             style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}
