@@ -16,7 +16,7 @@ function CellValue({ value, highlight }: { value: string | boolean; highlight?: 
     return <Check className="w-5 h-5" style={{ color: '#22C55E' }} />;
   }
   if (value === false) {
-    return <Minus className="w-5 h-5" style={{ color: '#E8E6E3' }} />;
+    return <Minus className="w-5 h-5" style={{ color: '#9CA3AF' }} />;
   }
   return (
     <span style={{ fontWeight: highlight ? 500 : 400, color: highlight ? '#1A1A1A' : '#4A4A4A' }}>

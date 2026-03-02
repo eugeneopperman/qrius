@@ -26,8 +26,14 @@ export function MarketingLayout({ children, onSignIn, onSignUp }: MarketingLayou
       <div className="fixed inset-0 z-0" style={{ backgroundColor: '#FAFAF8' }} />
 
       <div className="relative z-[1]">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-white focus:text-[#1A1A1A] focus:shadow-lg focus:outline-2 focus:outline-[#F97316]"
+        >
+          Skip to content
+        </a>
         <MarketingHeader onSignIn={onSignIn} onSignUp={onSignUp} />
-        <main>{children}</main>
+        <main id="main-content">{children}</main>
         <MarketingFooter />
       </div>
     </div>

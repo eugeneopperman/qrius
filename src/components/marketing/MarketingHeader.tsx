@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
@@ -25,6 +25,14 @@ interface MarketingHeaderProps {
 
 export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [mobileOpen]);
 
   const handleNavClick = (link: NavLink) => {
     setMobileOpen(false);
@@ -70,11 +78,12 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
             </button>
           </div>
 
-          {/* Mobile hamburger */}
+          {/* Mobile hamburger — 44px min touch target */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 -mr-2"
+            className="md:hidden flex items-center justify-center w-11 h-11 -mr-2"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? (
               <X className="w-6 h-6" style={{ color: '#1A1A1A' }} />
@@ -88,7 +97,7 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 flex flex-col pt-16" style={{ backgroundColor: '#FAFAF8' }}>
-          <nav className="flex flex-col items-center gap-6 pt-12">
+          <nav aria-label="Mobile navigation" className="flex flex-col items-center gap-6 pt-12">
             {navLinks.map((link) => (
               <button
                 key={link.label}

@@ -967,6 +967,10 @@
     background-color: #EA580C;
     transform: translateY(-1px);
   }
+  .marketing-btn-primary:focus-visible {
+    outline: 2px solid #F97316;
+    outline-offset: 2px;
+  }
 
   .marketing-btn-outline {
     display: inline-flex;
@@ -986,6 +990,10 @@
     background-color: #1A1A1A;
     color: #ffffff;
   }
+  .marketing-btn-outline:focus-visible {
+    outline: 2px solid #1A1A1A;
+    outline-offset: 2px;
+  }
 
   /* Marketing link (orange text with hover) */
   .marketing-link {
@@ -998,6 +1006,11 @@
     transition: color 150ms ease;
   }
   .marketing-link:hover { color: #EA580C; }
+  .marketing-link:focus-visible {
+    outline: 2px solid #F97316;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 
   /* Marketing nav link */
   .marketing-nav-link {
@@ -1007,6 +1020,11 @@
     transition: color 150ms ease;
   }
   .marketing-nav-link:hover { color: #1A1A1A; }
+  .marketing-nav-link:focus-visible {
+    outline: 2px solid #F97316;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 
   /* Footer link */
   .marketing-footer-link {
@@ -1015,6 +1033,11 @@
     transition: color 150ms ease;
   }
   .marketing-footer-link:hover { color: #ffffff; }
+  .marketing-footer-link:focus-visible {
+    outline: 2px solid #F97316;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 
   /* Scroll-triggered animation */
   .animate-on-scroll {

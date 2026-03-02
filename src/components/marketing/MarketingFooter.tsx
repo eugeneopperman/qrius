@@ -65,12 +65,12 @@ export function MarketingFooter() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
           {columns.map((col) => (
             <div key={col.title}>
-              <h3
+              <p
                 className="text-sm font-semibold uppercase mb-4"
-                style={{ letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)' }}
+                style={{ letterSpacing: '0.08em', color: 'rgba(255,255,255,0.7)' }}
               >
                 {col.title}
-              </h3>
+              </p>
               <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link.label}>
@@ -106,10 +106,10 @@ export function MarketingFooter() {
           className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8"
           style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
         >
-          <p className="text-sm font-serif italic" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <p className="text-sm font-serif italic" style={{ color: 'rgba(255,255,255,0.8)' }}>
             Stay qrius.
           </p>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
             &copy; {new Date().getFullYear()} Qrius Codes. All rights reserved.
           </p>
         </div>
