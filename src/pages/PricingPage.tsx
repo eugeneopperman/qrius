@@ -307,8 +307,29 @@ export default function PricingPage() {
     setShowAuthModal(true);
   }, []);
 
+  const handlePlanSelect = useCallback((plan: PlanDef, currentBilling: 'monthly' | 'annual') => {
+    if (plan.name !== 'Free') {
+      sessionStorage.setItem('pendingPlan', plan.name.toLowerCase());
+      sessionStorage.setItem('pendingBilling', currentBilling);
+    }
+    openSignUp();
+  }, [openSignUp]);
+
   const handleAuthSuccess = useCallback(() => {
     setShowAuthModal(false);
+    const pendingPlan = sessionStorage.getItem('pendingPlan');
+    const pendingBilling = sessionStorage.getItem('pendingBilling');
+    if (pendingPlan) {
+      sessionStorage.removeItem('pendingPlan');
+      sessionStorage.removeItem('pendingBilling');
+      const billingPath = `/settings?tab=billing&initCheckout=${pendingPlan}&billing=${pendingBilling || 'monthly'}`;
+      if (isRootDomain) {
+        window.location.href = getAppUrl(billingPath);
+        return;
+      }
+      navigate({ to: '/settings', search: { tab: 'billing', initCheckout: pendingPlan, billing: pendingBilling || 'monthly' } });
+      return;
+    }
     if (isRootDomain) {
       window.location.href = getAppUrl('/dashboard');
       return;
@@ -354,7 +375,7 @@ export default function PricingPage() {
                 key={plan.name}
                 plan={plan}
                 billing={billing}
-                onSelect={openSignUp}
+                onSelect={() => handlePlanSelect(plan, billing)}
                 stagger={i + 1}
               />
             ))}

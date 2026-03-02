@@ -704,7 +704,7 @@ export function BillingSettingsContent() {
   }, [showPlanPicker]);
 
   // Handle success/cancel URL params from Stripe redirect
-  const search = useSearch({ strict: false }) as { success?: string; canceled?: string };
+  const search = useSearch({ strict: false }) as { success?: string; canceled?: string; initCheckout?: string; billing?: string };
 
   useEffect(() => {
     if (search.success === 'true') {
@@ -715,14 +715,15 @@ export function BillingSettingsContent() {
     }
   }, [search.success, search.canceled, fetchOrganizations]);
 
-  const handleUpgrade = async (planId: string) => {
+  const handleUpgrade = async (planId: string, cycle?: 'monthly' | 'annual') => {
     if (planId === 'free') return;
 
+    const effectiveCycle = cycle ?? (isAnnual ? 'annual' : 'monthly');
     const prices = STRIPE_PRICES[planId as keyof typeof STRIPE_PRICES];
-    const priceId = prices ? (isAnnual ? prices.annual : prices.monthly) : '';
+    const priceId = prices ? (effectiveCycle === 'annual' ? prices.annual : prices.monthly) : '';
     if (!priceId) {
       toast.error(
-        isAnnual
+        effectiveCycle === 'annual'
           ? 'Annual billing is not yet available. Please select monthly billing or contact support.'
           : 'Stripe is not configured. Please contact support.'
       );
@@ -761,6 +762,25 @@ export function BillingSettingsContent() {
       setIsLoading(false);
     }
   };
+
+  // Auto-trigger checkout when arriving from pricing page signup
+  const initCheckoutTriggered = useRef(false);
+  useEffect(() => {
+    if (initCheckoutTriggered.current) return;
+    const { initCheckout, billing } = search;
+    if (!initCheckout || (initCheckout !== 'pro' && initCheckout !== 'business')) return;
+    initCheckoutTriggered.current = true;
+
+    // Set billing toggle to match
+    const cycle = (billing === 'annual' ? 'annual' : 'monthly') as 'monthly' | 'annual';
+    setIsAnnual(cycle === 'annual');
+
+    // Clean URL params to prevent re-trigger on refresh
+    window.history.replaceState({}, '', window.location.pathname + '?tab=billing');
+
+    // Trigger checkout
+    handleUpgrade(initCheckout, cycle);
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleManageBilling = async () => {
     setIsLoading(true);

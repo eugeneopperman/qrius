@@ -47,7 +47,6 @@ export default function AuthCallbackPage() {
           const pendingType = sessionStorage.getItem('pendingQRType') as QRCodeType | null;
           if (pendingType) {
             sessionStorage.removeItem('pendingQRType');
-            // Cross-subdomain: pass pendingType as URL param (sessionStorage is origin-scoped)
             if (isRootDomain) {
               window.location.href = getAppUrl(`/create?pendingType=${pendingType}`);
               return;
@@ -56,7 +55,25 @@ export default function AuthCallbackPage() {
             useWizardStore.getState().markCompleted(1);
             useWizardStore.getState().goToStep(2);
             navigate({ to: '/create' });
-          } else if (!hasCompletedOnboarding) {
+            return;
+          }
+
+          // Check if user selected a paid plan before auth
+          const pendingPlan = sessionStorage.getItem('pendingPlan');
+          const pendingBilling = sessionStorage.getItem('pendingBilling') || 'monthly';
+          if (pendingPlan) {
+            sessionStorage.removeItem('pendingPlan');
+            sessionStorage.removeItem('pendingBilling');
+            const billingPath = `/settings?tab=billing&initCheckout=${pendingPlan}&billing=${pendingBilling}`;
+            if (isRootDomain) {
+              window.location.href = getAppUrl(billingPath);
+              return;
+            }
+            navigate({ to: '/settings', search: { tab: 'billing', initCheckout: pendingPlan, billing: pendingBilling } });
+            return;
+          }
+
+          if (!hasCompletedOnboarding) {
             if (isRootDomain) {
               window.location.href = getAppUrl('/onboarding');
               return;
