@@ -43,6 +43,7 @@ export function FeatureRow({
               className="font-serif mb-3"
               style={{
                 fontSize: 'clamp(24px, 3.5vw, 32px)',
+                fontWeight: 300,
                 lineHeight: 1.2,
                 letterSpacing: '-0.01em',
                 color: '#1A1A1A',

@@ -50,6 +50,7 @@ export function MarketingSection({
             className={cn('font-serif', narrow ? 'max-w-2xl' : 'max-w-3xl')}
             style={{
               fontSize: 'clamp(28px, 5vw, 40px)',
+              fontWeight: 300,
               lineHeight: 1.15,
               letterSpacing: '-0.01em',
               color: isDark ? '#ffffff' : '#1A1A1A',

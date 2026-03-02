@@ -7,8 +7,11 @@ import {
   Users,
   QrCode,
   ArrowRight,
-  Zap,
   Gift,
+  UtensilsCrossed,
+  ShoppingBag,
+  CalendarDays,
+  Briefcase,
 } from 'lucide-react';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 import { MarketingSection } from '@/components/marketing/MarketingSection';
@@ -33,28 +36,24 @@ const comparisonRows = [
 // ─── Use case tiles ─────────────────────────────────────────────────
 const useCases = [
   {
+    icon: UtensilsCrossed,
     title: 'Restaurants & cafes',
     description: 'Digital menus, WiFi sharing, Google review codes — all on-brand and easy to update.',
-    color: '#FFF3E8',
-    accent: '#F97316',
   },
   {
+    icon: ShoppingBag,
     title: 'Retail & packaging',
     description: 'Product details, promotions, and loyalty programs, right on the shelf or the box.',
-    color: '#EFF6FF',
-    accent: '#0EA5E9',
   },
   {
+    icon: CalendarDays,
     title: 'Events & conferences',
     description: 'Schedules, tickets, speaker bios, and feedback forms. One scan does it all.',
-    color: '#F0FDF4',
-    accent: '#22C55E',
   },
   {
+    icon: Briefcase,
     title: 'Agencies & teams',
     description: 'Manage client campaigns, apply brand templates, and share access with your team.',
-    color: '#FAF5FF',
-    accent: '#8B5CF6',
   },
 ];
 
@@ -106,6 +105,7 @@ export default function HomePage() {
                 className="font-serif animate-on-scroll"
                 style={{
                   fontSize: 'clamp(36px, 6vw, 56px)',
+                  fontWeight: 300,
                   lineHeight: 1.1,
                   letterSpacing: '-0.02em',
                   color: '#1A1A1A',
@@ -225,6 +225,7 @@ export default function HomePage() {
               className="font-serif mb-6"
               style={{
                 fontSize: 'clamp(28px, 5vw, 40px)',
+                fontWeight: 300,
                 lineHeight: 1.15,
                 letterSpacing: '-0.01em',
                 color: '#ffffff',
@@ -449,22 +450,18 @@ export default function HomePage() {
           headline="QR codes for the way you work."
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {useCases.map(({ title, description, color, accent }, i) => (
+            {useCases.map(({ icon: Icon, title, description }, i) => (
               <div
                 key={title}
-                className={`rounded-2xl p-6 sm:p-8 transition-all duration-200 hover:translate-y-[-2px] animate-on-scroll stagger-${i + 1}`}
-                style={{
-                  backgroundColor: color,
-                  cursor: 'pointer',
-                }}
+                className={`marketing-card animate-on-scroll stagger-${i + 1}`}
               >
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
-                  style={{ backgroundColor: `${accent}20` }}
+                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                  style={{ backgroundColor: '#FFF3E8' }}
                 >
-                  <Zap className="w-5 h-5" style={{ color: accent }} />
+                  <Icon className="w-5 h-5" style={{ color: '#F97316' }} />
                 </div>
-                <h3 style={{ fontSize: 20, fontWeight: 600, color: '#1A1A1A', marginBottom: 8 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
                   {title}
                 </h3>
                 <p style={{ fontSize: 15, lineHeight: 1.6, color: '#4A4A4A' }}>

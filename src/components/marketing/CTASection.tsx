@@ -25,6 +25,7 @@ export function CTASection({
           className="font-serif mx-auto"
           style={{
             fontSize: 'clamp(28px, 5vw, 40px)',
+            fontWeight: 300,
             lineHeight: 1.15,
             letterSpacing: '-0.01em',
             color: '#1A1A1A',
