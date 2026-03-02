@@ -16,7 +16,7 @@ interface NavLink {
 const navLinks: NavLink[] = [
   { label: 'Features', href: '/features' },
   { label: 'Pricing', href: '/pricing' },
-  { label: 'Use Cases', hash: '#use-cases' },
+  { label: 'Use Cases', href: '/use-cases' },
   { label: 'Sign In', action: 'signin' },
 ];
 
@@ -51,7 +51,7 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
       return (
         <Link
           key={link.label}
-          to={link.href as '/features' | '/pricing'}
+          to={link.href as string}
           className="marketing-nav-link"
         >
           {link.label}
@@ -119,7 +119,7 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
               link.href ? (
                 <Link
                   key={link.label}
-                  to={link.href as '/features' | '/pricing'}
+                  to={link.href as string}
                   onClick={() => setMobileOpen(false)}
                   className="text-xl font-medium"
                   style={{ color: '#1A1A1A' }}

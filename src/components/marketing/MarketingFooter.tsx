@@ -18,33 +18,33 @@ const columns: FooterColumn[] = [
     links: [
       { label: 'Features', href: '/features', internal: true },
       { label: 'Pricing', href: '/pricing', internal: true },
-      { label: 'Changelog', href: '#' },
+      { label: 'Changelog', href: '/changelog', internal: true },
       { label: 'API', href: '#', badge: 'Soon' },
     ],
   },
   {
     title: 'Use Cases',
     links: [
-      { label: 'Restaurants', href: '#' },
-      { label: 'Retail', href: '#' },
-      { label: 'Events', href: '#' },
-      { label: 'Agencies', href: '#' },
+      { label: 'Restaurants', href: '/use-cases/restaurants', internal: true },
+      { label: 'Retail', href: '/use-cases/retail', internal: true },
+      { label: 'Events', href: '/use-cases/events', internal: true },
+      { label: 'Agencies', href: '/use-cases/agencies', internal: true },
     ],
   },
   {
     title: 'Compare',
     links: [
-      { label: 'vs Bitly', href: '#' },
-      { label: 'vs QR Code Generator', href: '#' },
-      { label: 'vs Uniqode', href: '#' },
+      { label: 'vs Bitly', href: '/compare/bitly', internal: true },
+      { label: 'vs QR Code Generator', href: '/compare/qr-code-generator', internal: true },
+      { label: 'vs Uniqode', href: '/compare/uniqode', internal: true },
     ],
   },
   {
     title: 'Company',
     links: [
-      { label: 'About', href: '#' },
-      { label: 'Blog', href: '#' },
-      { label: 'Contact', href: '#' },
+      { label: 'About', href: '/about', internal: true },
+      { label: 'Blog', href: '/blog', internal: true },
+      { label: 'Contact', href: '/contact', internal: true },
     ],
   },
   {
@@ -76,7 +76,7 @@ export function MarketingFooter() {
                   <li key={link.label}>
                     {link.internal ? (
                       <Link
-                        to={link.href as '/terms' | '/privacy' | '/cookies' | '/features' | '/pricing'}
+                        to={link.href as string}
                         className="marketing-footer-link inline-flex items-center gap-2"
                       >
                         {link.label}

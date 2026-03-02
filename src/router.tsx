@@ -89,6 +89,28 @@ const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
 // Marketing pages
 const FeaturesPage = lazy(() => import('@/pages/FeaturesPage'));
 const PricingPage = lazy(() => import('@/pages/PricingPage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const ContactPage = lazy(() => import('@/pages/ContactPage'));
+const BlogPage = lazy(() => import('@/pages/BlogPage'));
+const ChangelogPage = lazy(() => import('@/pages/ChangelogPage'));
+
+// Use case pages
+const UseCasesPage = lazy(() => import('@/pages/UseCasesPage'));
+const RestaurantsPage = lazy(() => import('@/pages/use-cases/RestaurantsPage'));
+const RetailPage = lazy(() => import('@/pages/use-cases/RetailPage'));
+const EventsPage = lazy(() => import('@/pages/use-cases/EventsPage'));
+const RealEstatePage = lazy(() => import('@/pages/use-cases/RealEstatePage'));
+const AgenciesPage = lazy(() => import('@/pages/use-cases/AgenciesPage'));
+const EducationPage = lazy(() => import('@/pages/use-cases/EducationPage'));
+const HealthcarePage = lazy(() => import('@/pages/use-cases/HealthcarePage'));
+
+// Comparison pages
+const ComparePage = lazy(() => import('@/pages/ComparePage'));
+const BitlyPage = lazy(() => import('@/pages/compare/BitlyPage'));
+const QRCodeGeneratorPage = lazy(() => import('@/pages/compare/QRCodeGeneratorPage'));
+const UniqodePage = lazy(() => import('@/pages/compare/UniqodePage'));
+const QRTigerPage = lazy(() => import('@/pages/compare/QRTigerPage'));
+const FlowcodePage = lazy(() => import('@/pages/compare/FlowcodePage'));
 
 // Legal pages
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
@@ -303,6 +325,116 @@ const pricingRoute = createRoute({
   component: PricingPage,
 });
 
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: AboutPage,
+});
+
+const contactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/contact',
+  component: ContactPage,
+});
+
+const blogRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/blog',
+  component: BlogPage,
+});
+
+const changelogRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/changelog',
+  component: ChangelogPage,
+});
+
+// Use case routes
+const useCasesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/use-cases',
+  component: UseCasesPage,
+});
+
+const restaurantsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/use-cases/restaurants',
+  component: RestaurantsPage,
+});
+
+const retailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/use-cases/retail',
+  component: RetailPage,
+});
+
+const eventsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/use-cases/events',
+  component: EventsPage,
+});
+
+const realEstateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/use-cases/real-estate',
+  component: RealEstatePage,
+});
+
+const agenciesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/use-cases/agencies',
+  component: AgenciesPage,
+});
+
+const educationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/use-cases/education',
+  component: EducationPage,
+});
+
+const healthcareRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/use-cases/healthcare',
+  component: HealthcarePage,
+});
+
+// Comparison routes
+const compareRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compare',
+  component: ComparePage,
+});
+
+const bitlyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compare/bitly',
+  component: BitlyPage,
+});
+
+const qrcgRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compare/qr-code-generator',
+  component: QRCodeGeneratorPage,
+});
+
+const uniqodeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compare/uniqode',
+  component: UniqodePage,
+});
+
+const qrTigerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compare/qr-tiger',
+  component: QRTigerPage,
+});
+
+const flowcodeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compare/flowcode',
+  component: FlowcodePage,
+});
+
 // Legal routes
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -462,6 +594,24 @@ const routeTree = rootRoute.addChildren([
   resetPasswordRoute,
   featuresRoute,
   pricingRoute,
+  aboutRoute,
+  contactRoute,
+  blogRoute,
+  changelogRoute,
+  useCasesRoute,
+  restaurantsRoute,
+  retailRoute,
+  eventsRoute,
+  realEstateRoute,
+  agenciesRoute,
+  educationRoute,
+  healthcareRoute,
+  compareRoute,
+  bitlyRoute,
+  qrcgRoute,
+  uniqodeRoute,
+  qrTigerRoute,
+  flowcodeRoute,
   termsRoute,
   privacyRoute,
   cookiesRoute,
