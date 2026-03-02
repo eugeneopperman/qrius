@@ -228,29 +228,43 @@ export default function HomePage() {
         </section>
 
         {/* ─── Section 3: Problem → Solution ───────────────────────── */}
-        <MarketingSection bg="ink" narrow>
-          <div className="max-w-2xl animate-on-scroll">
-            <h2
-              className="font-serif mb-6"
-              style={{
-                fontSize: 'clamp(28px, 5vw, 40px)',
-                fontWeight: 300,
-                lineHeight: 1.15,
-                letterSpacing: '-0.01em',
-                color: '#ffffff',
-              }}
-            >
-              You deserve better than a black-and-white square.
-            </h2>
-            <p
-              className="mb-6"
-              style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}
-            >
-              Most QR code tools are stuck in 2015. They give you an ugly code, charge you to track it, and — here's the fun part — kill it the moment you stop paying.
-            </p>
-            <p style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}>
-              Qrius Codes is different. We built the tool we wished existed: one where your codes look like they belong to your brand, your analytics are clear and useful, and your codes keep working no matter what. Because once you've printed 500 flyers, "just make a new one" isn't really an option.
-            </p>
+        <MarketingSection bg="ink">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            <div className="flex-1 max-w-xl animate-on-scroll">
+              <h2
+                className="font-serif mb-6"
+                style={{
+                  fontSize: 'clamp(28px, 5vw, 40px)',
+                  fontWeight: 300,
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.01em',
+                  color: '#ffffff',
+                }}
+              >
+                You deserve better than a black-and-white square.
+              </h2>
+              <p
+                className="mb-6"
+                style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}
+              >
+                Most QR code tools are stuck in 2015. They give you an ugly code, charge you to track it, and — here's the fun part — kill it the moment you stop paying.
+              </p>
+              <p style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(255,255,255,0.7)' }}>
+                Qrius Codes is different. We built the tool we wished existed: one where your codes look like they belong to your brand, your analytics are clear and useful, and your codes keep working no matter what. Because once you've printed 500 flyers, "just make a new one" isn't really an option.
+              </p>
+            </div>
+            <div className="flex-1 flex justify-center animate-on-scroll stagger-1">
+              <img
+                src={IMAGES.hero}
+                alt="Modern workspace with branded QR codes"
+                className="w-full max-w-sm aspect-[3/4] rounded-2xl object-cover"
+                style={{
+                  boxShadow: '0 16px 48px rgba(0,0,0,0.3)',
+                  opacity: 0.85,
+                }}
+                loading="lazy"
+              />
+            </div>
           </div>
         </MarketingSection>
 

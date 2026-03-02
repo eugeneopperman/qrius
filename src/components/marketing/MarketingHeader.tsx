@@ -3,10 +3,19 @@ import { Link } from '@tanstack/react-router';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 
-const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Use Cases', href: '#use-cases' },
+interface NavLink {
+  label: string;
+  /** Hash anchor (e.g. '#features') for same-page scroll */
+  hash?: string;
+  /** Route path for real page navigation */
+  to?: string;
+}
+
+const navLinks: NavLink[] = [
+  { label: 'Features', hash: '#features' },
+  { label: 'Pricing', hash: '#pricing' },
+  { label: 'Use Cases', hash: '#use-cases' },
+  { label: 'Sign In', to: '/signin' },
 ];
 
 interface MarketingHeaderProps {
@@ -17,11 +26,16 @@ interface MarketingHeaderProps {
 export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const scrollTo = (hash: string) => {
+  const handleNavClick = (link: NavLink) => {
     setMobileOpen(false);
-    const el = document.querySelector(hash);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (link.hash) {
+      const el = document.querySelector(link.hash);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    if (link.to === '/signin') {
+      onSignIn();
     }
   };
 
@@ -42,29 +56,35 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => scrollTo(link.href)}
-                className="text-[15px] font-medium transition-colors"
-                style={{ color: '#4A4A4A' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#1A1A1A')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
-              >
-                {link.label}
-              </button>
-            ))}
+            {navLinks.map((link) =>
+              link.to ? (
+                <button
+                  key={link.label}
+                  onClick={() => handleNavClick(link)}
+                  className="text-[15px] font-medium transition-colors"
+                  style={{ color: '#4A4A4A' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#1A1A1A')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
+                >
+                  {link.label}
+                </button>
+              ) : (
+                <button
+                  key={link.label}
+                  onClick={() => handleNavClick(link)}
+                  className="text-[15px] font-medium transition-colors"
+                  style={{ color: '#4A4A4A' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#1A1A1A')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
+                >
+                  {link.label}
+                </button>
+              )
+            )}
           </nav>
 
-          {/* Desktop CTAs */}
+          {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={onSignIn}
-              className="text-[15px] font-medium transition-colors"
-              style={{ color: '#1A1A1A' }}
-            >
-              Sign in
-            </button>
             <button
               onClick={onSignUp}
               className="text-[15px] font-medium text-white rounded-lg transition-colors"
@@ -103,8 +123,8 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
           <nav className="flex flex-col items-center gap-6 pt-12">
             {navLinks.map((link) => (
               <button
-                key={link.href}
-                onClick={() => scrollTo(link.href)}
+                key={link.label}
+                onClick={() => handleNavClick(link)}
                 className="text-xl font-medium"
                 style={{ color: '#1A1A1A' }}
               >
@@ -112,13 +132,6 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
               </button>
             ))}
             <div className="flex flex-col items-center gap-4 mt-8 w-full px-8">
-              <button
-                onClick={() => { setMobileOpen(false); onSignIn(); }}
-                className="text-[15px] font-medium w-full py-3 rounded-lg border"
-                style={{ color: '#1A1A1A', borderColor: '#E8E6E3' }}
-              >
-                Sign in
-              </button>
               <button
                 onClick={() => { setMobileOpen(false); onSignUp(); }}
                 className="text-[15px] font-medium text-white w-full py-3 rounded-lg"
