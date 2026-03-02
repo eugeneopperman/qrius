@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { QrCode, ArrowRight, BarChart3, Gift } from 'lucide-react';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 import { MarketingSection } from '@/components/marketing/MarketingSection';
@@ -141,9 +141,9 @@ function PricingCard({ name, nameColor, price, period, lines, featured, stagger 
           );
         })}
       </div>
-      <a href="#pricing" className="marketing-link justify-center mt-6">
+      <Link to="/pricing" className="marketing-link justify-center mt-6">
         And more <ArrowRight className="w-3.5 h-3.5" />
-      </a>
+      </Link>
     </div>
   );
 }
