@@ -297,11 +297,6 @@ export default function PricingPage() {
   const navigate = useNavigate();
   const containerRef = useScrollReveal<HTMLDivElement>();
 
-  const openSignIn = useCallback(() => {
-    setAuthView('signin');
-    setShowAuthModal(true);
-  }, []);
-
   const openSignUp = useCallback(() => {
     setAuthView('signup');
     setShowAuthModal(true);
@@ -338,7 +333,7 @@ export default function PricingPage() {
   }, [navigate]);
 
   return (
-    <MarketingLayout onSignIn={openSignIn} onSignUp={openSignUp}>
+    <MarketingLayout onSignUp={openSignUp}>
       <div ref={containerRef}>
 
         {/* ─── 1. Hero ──────────────────────────────────────── */}

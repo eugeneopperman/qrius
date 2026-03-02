@@ -4,7 +4,6 @@ import { MarketingFooter } from './MarketingFooter';
 
 interface MarketingLayoutProps {
   children: ReactNode;
-  onSignIn: () => void;
   onSignUp: () => void;
 }
 
@@ -12,7 +11,7 @@ interface MarketingLayoutProps {
  * Wrapper for marketing pages.
  * Overrides the app's glassmorphism background with a clean Snow (#FAFAF8) surface.
  */
-export function MarketingLayout({ children, onSignIn, onSignUp }: MarketingLayoutProps) {
+export function MarketingLayout({ children, onSignUp }: MarketingLayoutProps) {
   return (
     <div
       className="min-h-screen"
@@ -32,7 +31,7 @@ export function MarketingLayout({ children, onSignIn, onSignUp }: MarketingLayou
         >
           Skip to content
         </a>
-        <MarketingHeader onSignIn={onSignIn} onSignUp={onSignUp} />
+        <MarketingHeader onSignUp={onSignUp} />
         <main id="main-content">{children}</main>
         <MarketingFooter />
       </div>

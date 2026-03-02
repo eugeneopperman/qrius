@@ -93,7 +93,6 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonPageData }) {
   const navigate = useNavigate();
   const containerRef = useScrollReveal<HTMLDivElement>();
 
-  const openSignIn = useCallback(() => { setAuthView('signin'); setShowAuthModal(true); }, []);
   const openSignUp = useCallback(() => { setAuthView('signup'); setShowAuthModal(true); }, []);
   const handleAuthSuccess = useCallback(() => {
     setShowAuthModal(false);
@@ -102,7 +101,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonPageData }) {
   }, [navigate]);
 
   return (
-    <MarketingLayout onSignIn={openSignIn} onSignUp={openSignUp}>
+    <MarketingLayout onSignUp={openSignUp}>
       <div ref={containerRef}>
 
         {/* Breadcrumb */}

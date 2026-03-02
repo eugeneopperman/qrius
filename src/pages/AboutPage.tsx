@@ -44,7 +44,6 @@ export default function AboutPage() {
   const navigate = useNavigate();
   const containerRef = useScrollReveal<HTMLDivElement>();
 
-  const openSignIn = useCallback(() => { setAuthView('signin'); setShowAuthModal(true); }, []);
   const openSignUp = useCallback(() => { setAuthView('signup'); setShowAuthModal(true); }, []);
   const handleAuthSuccess = useCallback(() => {
     setShowAuthModal(false);
@@ -53,7 +52,7 @@ export default function AboutPage() {
   }, [navigate]);
 
   return (
-    <MarketingLayout onSignIn={openSignIn} onSignUp={openSignUp}>
+    <MarketingLayout onSignUp={openSignUp}>
       <div ref={containerRef}>
 
         {/* ─── Hero ──────────────────────────────────────────── */}

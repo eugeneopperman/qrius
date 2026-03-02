@@ -9,8 +9,6 @@ interface NavLink {
   href?: string;
   /** Hash anchor (e.g. '#use-cases') for same-page scroll */
   hash?: string;
-  /** Callback action instead of scroll (e.g. open auth modal) */
-  action?: 'signin';
   /** Dropdown children */
   children?: { label: string; href: string }[];
 }
@@ -29,15 +27,14 @@ const navLinks: NavLink[] = [
   { label: 'Features', href: '/features' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Use Cases', href: '/use-cases', children: useCaseDropdown },
-  { label: 'Sign In', action: 'signin' },
+  { label: 'Sign In', href: '/signin' },
 ];
 
 interface MarketingHeaderProps {
-  onSignIn: () => void;
   onSignUp: () => void;
 }
 
-export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
+export function MarketingHeader({ onSignUp }: MarketingHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -66,9 +63,6 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
     setMobileOpen(false);
     if (link.hash) {
       document.querySelector(link.hash)?.scrollIntoView({ behavior: 'smooth' });
-    }
-    if (link.action === 'signin') {
-      onSignIn();
     }
   };
 

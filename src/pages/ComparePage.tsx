@@ -22,7 +22,6 @@ export default function ComparePage() {
   const navigate = useNavigate();
   const containerRef = useScrollReveal<HTMLDivElement>();
 
-  const openSignIn = useCallback(() => { setAuthView('signin'); setShowAuthModal(true); }, []);
   const openSignUp = useCallback(() => { setAuthView('signup'); setShowAuthModal(true); }, []);
   const handleAuthSuccess = useCallback(() => {
     setShowAuthModal(false);
@@ -31,7 +30,7 @@ export default function ComparePage() {
   }, [navigate]);
 
   return (
-    <MarketingLayout onSignIn={openSignIn} onSignUp={openSignUp}>
+    <MarketingLayout onSignUp={openSignUp}>
       <div ref={containerRef}>
         <MarketingSection bg="snow" className="!pt-12 !pb-8">
           <div className="max-w-3xl mx-auto text-center">

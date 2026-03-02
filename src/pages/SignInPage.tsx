@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearch, useNavigate } from '@tanstack/react-router';
 import { SignInForm } from '@/components/auth/SignInForm';
 import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
 import { Logo } from '@/components/ui/Logo';
 import { useThemeStore } from '@/stores/themeStore';
+import { toast } from '@/stores/toastStore';
 import { Moon, Sun, CloudSun } from 'lucide-react';
 
 type View = 'signin' | 'forgot-password';
@@ -11,8 +12,16 @@ type View = 'signin' | 'forgot-password';
 export default function SignInPage() {
   const [view, setView] = useState<View>('signin');
   const { resolvedTheme, cycleTheme } = useThemeStore();
-  const search = useSearch({ from: '/signin' }) as { redirect?: string };
+  const search = useSearch({ from: '/signin' }) as { redirect?: string; signedOut?: string };
   const navigate = useNavigate();
+
+  // Show success toast after sign-out redirect
+  useEffect(() => {
+    if (search.signedOut) {
+      toast.success('You have been successfully logged out.');
+      window.history.replaceState({}, '', '/signin');
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen flex">

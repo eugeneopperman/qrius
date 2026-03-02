@@ -12,9 +12,8 @@ vi.mock('@tanstack/react-router', () => ({
 
 // Mock marketing layout children
 vi.mock('@/components/marketing/MarketingLayout', () => ({
-  MarketingLayout: ({ children, onSignIn, onSignUp }: any) => (
+  MarketingLayout: ({ children, onSignUp }: any) => (
     <div data-testid="marketing-layout">
-      <button data-testid="sign-in-trigger" onClick={onSignIn}>Sign In</button>
       <button data-testid="sign-up-trigger" onClick={onSignUp}>Sign Up</button>
       <main>{children}</main>
     </div>
@@ -91,11 +90,10 @@ describe('HomePage', () => {
     expect(screen.getByTestId('auth-modal')).toHaveAttribute('data-view', 'signup');
   });
 
-  it('opens auth modal in signin mode when Sign In is clicked', () => {
+  it('does not pass onSignIn to MarketingLayout (Sign In is now a page link)', () => {
     render(<HomePage />);
-    fireEvent.click(screen.getByTestId('sign-in-trigger'));
-    expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
-    expect(screen.getByTestId('auth-modal')).toHaveAttribute('data-view', 'signin');
+    // Sign In is now a <Link to="/signin"> in the header, not a modal trigger
+    expect(screen.queryByTestId('sign-in-trigger')).not.toBeInTheDocument();
   });
 
   it('closes auth modal when close button is clicked', () => {

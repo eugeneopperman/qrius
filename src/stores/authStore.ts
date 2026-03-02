@@ -229,9 +229,11 @@ export const useAuthStore = create<AuthState>()(
             planLimits: null,
             isLoading: false,
           });
-          // On app subdomain, redirect to root domain after sign-out
+          // Hard-navigate to sign-in page with signedOut flag for toast
           if (isAppSubdomain) {
-            window.location.href = getRootUrl('/');
+            window.location.href = getRootUrl('/signin?signedOut=true');
+          } else {
+            window.location.href = '/signin?signedOut=true';
           }
         } catch (error) {
           if (import.meta.env.DEV) console.error('Error signing out:', error);

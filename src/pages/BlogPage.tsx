@@ -57,7 +57,6 @@ export default function BlogPage() {
   const navigate = useNavigate();
   const containerRef = useScrollReveal<HTMLDivElement>();
 
-  const openSignIn = useCallback(() => { setAuthView('signin'); setShowAuthModal(true); }, []);
   const openSignUp = useCallback(() => { setAuthView('signup'); setShowAuthModal(true); }, []);
   const handleAuthSuccess = useCallback(() => {
     setShowAuthModal(false);
@@ -68,7 +67,7 @@ export default function BlogPage() {
   const filteredPosts = activeCategory === 'All' ? posts : posts.filter((p) => p.category === activeCategory);
 
   return (
-    <MarketingLayout onSignIn={openSignIn} onSignUp={openSignUp}>
+    <MarketingLayout onSignUp={openSignUp}>
       <div ref={containerRef}>
 
         {/* ─── Hero ──────────────────────────────────────────── */}
