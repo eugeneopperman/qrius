@@ -16,8 +16,8 @@ const columns: FooterColumn[] = [
   {
     title: 'Product',
     links: [
-      { label: 'Features', href: '#features' },
-      { label: 'Pricing', href: '#pricing' },
+      { label: 'Features', href: '/features', internal: true },
+      { label: 'Pricing', href: '/pricing', internal: true },
       { label: 'Changelog', href: '#' },
       { label: 'API', href: '#', badge: 'Soon' },
     ],
@@ -76,7 +76,7 @@ export function MarketingFooter() {
                   <li key={link.label}>
                     {link.internal ? (
                       <Link
-                        to={link.href as '/terms' | '/privacy' | '/cookies'}
+                        to={link.href as '/terms' | '/privacy' | '/cookies' | '/features' | '/pricing'}
                         className="marketing-footer-link inline-flex items-center gap-2"
                       >
                         {link.label}

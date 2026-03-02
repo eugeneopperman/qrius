@@ -5,15 +5,17 @@ import { Logo } from '@/components/ui/Logo';
 
 interface NavLink {
   label: string;
-  /** Hash anchor (e.g. '#features') for same-page scroll */
+  /** Route path (e.g. '/features') for page navigation */
+  href?: string;
+  /** Hash anchor (e.g. '#use-cases') for same-page scroll */
   hash?: string;
   /** Callback action instead of scroll (e.g. open auth modal) */
   action?: 'signin';
 }
 
 const navLinks: NavLink[] = [
-  { label: 'Features', hash: '#features' },
-  { label: 'Pricing', hash: '#pricing' },
+  { label: 'Features', href: '/features' },
+  { label: 'Pricing', href: '/pricing' },
   { label: 'Use Cases', hash: '#use-cases' },
   { label: 'Sign In', action: 'signin' },
 ];
@@ -44,6 +46,29 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
     }
   };
 
+  const renderNavItem = (link: NavLink) => {
+    if (link.href) {
+      return (
+        <Link
+          key={link.label}
+          to={link.href as '/features' | '/pricing'}
+          className="marketing-nav-link"
+        >
+          {link.label}
+        </Link>
+      );
+    }
+    return (
+      <button
+        key={link.label}
+        onClick={() => handleNavClick(link)}
+        className="marketing-nav-link"
+      >
+        {link.label}
+      </button>
+    );
+  };
+
   return (
     <>
       <header
@@ -60,15 +85,7 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <button
-                key={link.label}
-                onClick={() => handleNavClick(link)}
-                className="marketing-nav-link"
-              >
-                {link.label}
-              </button>
-            ))}
+            {navLinks.map(renderNavItem)}
           </nav>
 
           {/* Desktop CTA */}
@@ -98,16 +115,28 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 flex flex-col pt-16" style={{ backgroundColor: '#FAFAF8' }}>
           <nav aria-label="Mobile navigation" className="flex flex-col items-center gap-6 pt-12">
-            {navLinks.map((link) => (
-              <button
-                key={link.label}
-                onClick={() => handleNavClick(link)}
-                className="text-xl font-medium"
-                style={{ color: '#1A1A1A' }}
-              >
-                {link.label}
-              </button>
-            ))}
+            {navLinks.map((link) =>
+              link.href ? (
+                <Link
+                  key={link.label}
+                  to={link.href as '/features' | '/pricing'}
+                  onClick={() => setMobileOpen(false)}
+                  className="text-xl font-medium"
+                  style={{ color: '#1A1A1A' }}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <button
+                  key={link.label}
+                  onClick={() => handleNavClick(link)}
+                  className="text-xl font-medium"
+                  style={{ color: '#1A1A1A' }}
+                >
+                  {link.label}
+                </button>
+              )
+            )}
             <div className="flex flex-col items-center gap-4 mt-8 w-full px-8">
               <button
                 onClick={() => { setMobileOpen(false); onSignUp(); }}

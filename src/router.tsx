@@ -86,6 +86,10 @@ const OnboardingPage = lazy(() => import('@/pages/OnboardingPage'));
 const ReaderPage = lazy(() => import('@/pages/ReaderPage'));
 const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
 
+// Marketing pages
+const FeaturesPage = lazy(() => import('@/pages/FeaturesPage'));
+const PricingPage = lazy(() => import('@/pages/PricingPage'));
+
 // Legal pages
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
@@ -286,6 +290,19 @@ const resetPasswordRoute = createRoute({
   component: ResetPasswordPage,
 });
 
+// Marketing routes
+const featuresRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/features',
+  component: FeaturesPage,
+});
+
+const pricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/pricing',
+  component: PricingPage,
+});
+
 // Legal routes
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -443,6 +460,8 @@ const routeTree = rootRoute.addChildren([
   signUpRoute,
   authCallbackRoute,
   resetPasswordRoute,
+  featuresRoute,
+  pricingRoute,
   termsRoute,
   privacyRoute,
   cookiesRoute,
