@@ -1,6 +1,6 @@
 # Development Process & Progress
 
-> Session-by-session development journal for Qrius. For project structure, routes, schema, env vars, and subscription tiers, see [CLAUDE.md](./CLAUDE.md).
+> Session-by-session development journal for Qrius. For project structure, routes, schema, env vars, and subscription tiers, see [CLAUDE.md](../../CLAUDE.md).
 
 ---
 
@@ -108,7 +108,6 @@ Transformed Qrius from a client-side tool into a full multi-tenant SaaS platform
 
 ### Template Wizard
 - 6 use-case templates: business card, marketing, product packaging, event check-in, WiFi sharing, restaurant menu
-- Step-by-step wizard with pre-configured styles per template
 
 ---
 
@@ -131,61 +130,100 @@ Connected the Supabase backend, made auth resilient, deployed to Vercel producti
 - Supabase dashboard: Site URL and redirect URLs configured
 - Schema applied: `api/schema.sql` then `api/schema-saas.sql`
 
-### Post-Deploy Fixes
+### Technical Learnings
 
-| Commit | Fix |
-|--------|-----|
-| `5766401` | Sign-in flow: navigate to dashboard after successful login |
-| `f3f3b12` | API route TypeScript errors: add `.js` extensions and type fixes |
-| `7d54cea` | Onboarding wizard: org creation blocked by RLS SELECT policy |
-| `f0e6ac2` | Reset password route: replace broken inline import with lazy component |
+**Vercel env var gotcha:** `echo` pipes add a trailing `\n` to env values. Use `printf '%s'` instead.
+
+**Build cache:** `npx vercel --prod` may use cached builds even after env var changes. Use `--force` to skip cache.
+
+**PostgreSQL RLS:** `CREATE POLICY` has no `IF NOT EXISTS` — must `DROP POLICY IF EXISTS` first.
+
+---
+
+## Sprints 5–14: Feature Development & Polish — February 18 – March 1, 2026
+
+Rapid iteration across 60+ versions building out the full product.
+
+### Key Milestones
+
+| Version | Date | Summary |
+|---------|------|---------|
+| v0.13–v0.16 | Feb 19–20 | E2E tests, plan limits enforcement, pricing redesign |
+| v0.17–v0.20 | Feb 20 | Feature gap audit: wizard DB save, PATCH/DELETE QR, invite flow, usage stats, QR download fixes |
+| v0.21–v0.27 | Feb 20–21 | Scan tracking fixes, campaign names, styled thumbnails, analytics dashboard (4 tabs) |
+| v0.29–v0.31 | Feb 23 | QR codes encode tracking URL, custom domains, app subdomains |
+| v0.32–v0.36 | Feb 24 | Glassmorphism UI redesign, dashboard perf optimization, QR Codes page with folders |
+| v0.37–v0.43 | Feb 25 | Autosave, multi-theme system (Warm/Cool/Dark/Auto), mobile UX overhaul, settings profile |
+| v0.47–v0.52 | Feb 26–27 | Codebase review & hardening, 1148 unit tests, Template Studio, landing page auth flow |
+| v0.53–v0.61 | Feb 27–28 | Template Studio with click-to-edit, mobile performance (11s→3s), draft status, database-backed templates |
+| v0.64–v0.66 | Mar 1 | App subdomain split, marketing homepage with 10 sections, Instrument Serif font |
+| v0.72–v0.75 | Mar 1 | Features & Pricing pages, 20 marketing pages with templates, Use Cases dropdown nav, plan-intent routing to Stripe checkout |
+
+### Architecture Highlights
+
+- **Dual database**: Supabase for auth/users/orgs, Neon Postgres for QR codes/scans/usage
+- **Glassmorphism**: 3-tier glass token system (glass/glass-medium/glass-heavy) with gradient mesh background
+- **Template Studio**: Full-page interactive editor with click-to-edit zones, undo/redo, keyboard shortcuts
+- **Marketing site**: 20+ pages using `MarketingLayout` wrapper, `MarketingHeader`/`MarketingFooter`, scroll-reveal animations
+- **PWA optimization**: Runtime JS caching, lazy-loaded heavy deps (jspdf, html2canvas), deferred auth init
+
+---
+
+## Sprint 15: Auth Flow & Navigation Polish — March 1, 2026
+
+### v0.76: Sign In as Standalone Page + Sign-Out Redirect
+
+**Problem:** Marketing header "Sign In" link opened an auth modal overlay instead of navigating to the dedicated `/signin` page. Sign-out dumped users back to the homepage with no feedback.
+
+**Changes:**
+1. **MarketingHeader**: Changed "Sign In" from `action: 'signin'` (modal trigger) to `href: '/signin'` (page link). Removed `onSignIn` from props.
+2. **MarketingLayout**: Removed `onSignIn` from interface — only `onSignUp` remains (for "Start free" CTA button).
+3. **11 marketing pages/templates**: Removed `openSignIn` callback and `onSignIn` prop from `<MarketingLayout>`. Signup CTAs still open `AuthModal`.
+4. **SignInPage + SignUpPage**: Replaced custom split-panel layouts (gradient side panel + custom header) with `MarketingLayout`, giving both pages the same marketing nav header and footer as the rest of the site.
+5. **Sign-out flow**: `authStore.signOut()` now hard-navigates to `/signin?signedOut=true`. `SignInPage` reads the param on mount, fires a success toast, and cleans the URL with `replaceState`.
+6. **Pricing "And more" links**: Changed `<a href="#pricing">` anchors on homepage pricing cards to `<Link to="/pricing">` for proper page navigation.
+
+**Files changed:** 17 files across 3 commits. Tests updated (1232 passing across 68 files).
 
 ### Technical Learnings
 
-**Vercel env var gotcha:** `echo` pipes add a trailing `\n` to env values. Use `printf '%s'` instead:
-```bash
-# Wrong — trailing newline breaks URLs
-echo "https://foo.supabase.co" | npx vercel env add VITE_SUPABASE_URL production
+**Marketing page auth pattern:** All marketing pages share the same structure: `openSignUp` + `AuthModal` for signup CTAs, while "Sign In" is a simple page link. When removing a prop from a shared layout component, grep all consumers — there were 11 pages plus 2 templates using `onSignIn`.
 
-# Correct
-printf '%s' 'https://foo.supabase.co' | npx vercel env add VITE_SUPABASE_URL production
-```
-
-**Build cache:** `npx vercel --prod` may use cached builds even after env var changes. Use `--force` to skip cache. Verify bundle hash changed in output.
-
-**PostgreSQL RLS:** `CREATE POLICY` has no `IF NOT EXISTS` — must `DROP POLICY IF EXISTS` first. Self-referential RLS policies work for SELECT but need special handling for INSERT (new row doesn't exist yet to check against).
+**Sign-out with toast feedback:** Hard navigation (`window.location.href`) is intentional after sign-out to ensure full React state teardown. The `?signedOut` search param + `useEffect` + `replaceState` pattern gives one-shot toast feedback without re-triggering on refresh.
 
 ---
 
 ## Current Status
 
-**Version:** Beta v0.02
+**Version:** Beta v0.76
 
-**All checks passing:**
-- TypeScript compilation
-- 166 unit tests (Vitest)
-- ESLint (0 errors, 0 warnings)
-- Production build
+**Test counts:**
+- 1232 unit tests across 68 files (Vitest)
+- 63 E2E tests across 7 files (Playwright)
 
 **Working:**
+- Full marketing site (20+ pages with consistent header/footer/nav)
+- Sign-in and sign-up pages with marketing layout
+- Sign-out → redirect to /signin with success toast
 - User sign-up/sign-in (email + OAuth)
-- Post-login redirect to dashboard
-- Onboarding wizard (org auto-creation)
-- Password reset flow
-- Dashboard with QR code listing
-- Settings pages (profile, team, billing, API keys)
-- API serverless functions (TypeScript errors fixed)
-- Production deployment on Vercel
+- Dashboard with QR code listing, folders, filtering
+- 9 QR code types with full customization
+- Scan tracking with 4-tab analytics
+- Template Studio with click-to-edit editing
+- Multi-theme system (Warm/Cool/Dark/Auto)
+- Mobile-optimized UX with bottom nav
+- PWA with offline support
+- API access with key management
+- Custom domains (Business plan)
+- Draft auto-save from wizard step 3
 
-## Next Steps
+## Remaining Work
 
-1. **End-to-end verification** — Full auth flow testing on production
-2. **Stripe setup** — Create products, set price IDs, configure webhook endpoint
-3. **Team invitations** — Implement email sending for invites
-4. **Scan analytics** — Real scan tracking integration
-5. **API documentation** — OpenAPI spec for programmatic endpoints
-6. **API rate limiting** — Application-level throttling
-7. **PWA icons** — Replace placeholder solid-color icons with branded assets
+1. **Stripe integration completion** — deferred until user is ready to activate
+2. **CSV export** — Coming Soon badge in place
+3. **Email notifications** — Resend/SendGrid not set up yet
+4. **Database migrations** — Several pending Neon/Supabase migrations (see MEMORY.md)
+5. **App subdomains** — Need real domain with wildcard DNS
 
 ## Testing Notes
 - Dev server with network access: `npm run dev -- --host 0.0.0.0`

@@ -137,10 +137,18 @@ Copy `.env.example` to `.env.local` and configure:
 - `KV_REST_API_TOKEN` - Upstash Redis token
 
 ## Routes
-**Public:**
-- `/` - Home page (QR generator)
-- `/signin` - Sign in
-- `/signup` - Sign up
+**Public (Marketing):**
+- `/` - Marketing homepage
+- `/features` - Features overview
+- `/pricing` - Pricing plans with billing toggle
+- `/use-cases` - Use cases index (+ `/use-cases/:slug` detail pages)
+- `/about` - About page
+- `/blog` - Blog index
+- `/changelog` - Changelog timeline
+- `/compare` - Competitor comparison index (+ `/compare/:slug` detail pages)
+- `/contact` - Contact form
+- `/signin` - Sign in (uses MarketingLayout with nav header + footer)
+- `/signup` - Sign up (uses MarketingLayout with nav header + footer)
 - `/auth/callback` - OAuth callback
 - `/auth/reset-password` - Password reset
 - `/terms` - Terms of service
@@ -183,6 +191,8 @@ Copy `.env.example` to `.env.local` and configure:
 - QR codes without user/org ownership are public (backward compatibility)
 - **Style metadata**: QR code style options (colors, gradients, logos, dot patterns) are saved in the `metadata` JSONB column as `{ style_options: {...} }`. The `QRStyleOptionsForPreview` type (exported from `QRMiniPreview.tsx`) defines the shape. `QRMiniPreview` accepts an optional `styleOptions` prop to render styled thumbnails.
 - **Campaign Name**: `qrStore.campaignName` is an optional label set in wizard step 2 (StepContent). Used as the QR code `name` on save; falls back to auto-generated name if empty.
+- **Marketing Layout pattern**: All public marketing pages (including `/signin` and `/signup`) use `MarketingLayout` which provides `MarketingHeader` (nav + "Start free" CTA) and `MarketingFooter`. The layout only requires an `onSignUp` callback — "Sign In" in the header is a `<Link to="/signin">` page navigation, not a modal trigger. Signup CTAs on marketing pages still open `AuthModal` in signup mode.
+- **Sign-out flow**: `authStore.signOut()` hard-navigates to `/signin?signedOut=true`. `SignInPage` reads the `signedOut` search param on mount, fires `toast.success()`, and cleans the URL with `replaceState`. Hard navigation ensures full React state teardown.
 
 ## Architecture Decisions
 
@@ -235,7 +245,7 @@ Copy `.env.example` to `.env.local` and configure:
 - CORS headers set on all API routes
 
 ## Testing
-- **Unit Tests**: 1148 tests passing across 63 test files (Vitest)
+- **Unit Tests**: 1232 tests passing across 68 test files (Vitest)
 - **E2E Tests**: 63 tests across 7 Playwright test files (app, navigation, 404, theme, keyboard, wizard, mobile)
 - **Unit command**: `npm run test:run` (single run) or `npm run test` (watch mode)
 - **E2E command**: `npm run e2e` (all browsers) or `npx playwright test --project=chromium` (fast)
