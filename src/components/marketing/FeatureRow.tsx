@@ -5,6 +5,8 @@ interface FeatureRowProps {
   headline: string;
   description: string;
   bullets: string[];
+  /** Optional image URL — replaces the icon placeholder */
+  image?: string;
   /** Whether to show the timeline connector below this row */
   isLast?: boolean;
   className?: string;
@@ -15,6 +17,7 @@ export function FeatureRow({
   headline,
   description,
   bullets,
+  image,
   isLast,
   className,
 }: FeatureRowProps) {
@@ -79,18 +82,31 @@ export function FeatureRow({
             </ul>
           </div>
 
-          {/* Visual placeholder */}
+          {/* Visual */}
           <div className="flex-1 flex justify-center lg:justify-end">
-            <div
-              className="w-full max-w-sm aspect-[4/3] rounded-xl flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #F5F4F2 0%, #ffffff 100%)',
-                border: '1px solid #E8E6E3',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.06)',
-              }}
-            >
-              <Icon className="w-12 h-12" style={{ color: '#F97316', opacity: 0.25 }} />
-            </div>
+            {image ? (
+              <img
+                src={image}
+                alt={headline}
+                className="w-full max-w-sm aspect-[4/3] rounded-xl object-cover"
+                style={{
+                  border: '1px solid #E8E6E3',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.06)',
+                }}
+                loading="lazy"
+              />
+            ) : (
+              <div
+                className="w-full max-w-sm aspect-[4/3] rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #F5F4F2 0%, #ffffff 100%)',
+                  border: '1px solid #E8E6E3',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.06)',
+                }}
+              >
+                <Icon className="w-12 h-12" style={{ color: '#F97316', opacity: 0.25 }} />
+              </div>
+            )}
           </div>
         </div>
       </div>

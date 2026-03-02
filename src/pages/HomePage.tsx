@@ -8,10 +8,6 @@ import {
   QrCode,
   ArrowRight,
   Gift,
-  UtensilsCrossed,
-  ShoppingBag,
-  CalendarDays,
-  Briefcase,
 } from 'lucide-react';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 import { MarketingSection } from '@/components/marketing/MarketingSection';
@@ -33,25 +29,38 @@ const comparisonRows = [
   { feature: 'Codes survive cancellation', qrius: true, competitor: false },
 ];
 
+// ─── Unsplash images ────────────────────────────────────────────────
+const IMAGES = {
+  hero: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&fit=crop&q=80',
+  create: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&fit=crop&q=80',
+  track: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&fit=crop&q=80',
+  update: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&fit=crop&q=80',
+  teams: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&fit=crop&q=80',
+  restaurants: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&fit=crop&q=80',
+  retail: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&fit=crop&q=80',
+  events: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&fit=crop&q=80',
+  agencies: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&fit=crop&q=80',
+};
+
 // ─── Use case tiles ─────────────────────────────────────────────────
 const useCases = [
   {
-    icon: UtensilsCrossed,
+    image: IMAGES.restaurants,
     title: 'Restaurants & cafes',
     description: 'Digital menus, WiFi sharing, Google review codes — all on-brand and easy to update.',
   },
   {
-    icon: ShoppingBag,
+    image: IMAGES.retail,
     title: 'Retail & packaging',
     description: 'Product details, promotions, and loyalty programs, right on the shelf or the box.',
   },
   {
-    icon: CalendarDays,
+    image: IMAGES.events,
     title: 'Events & conferences',
     description: 'Schedules, tickets, speaker bios, and feedback forms. One scan does it all.',
   },
   {
-    icon: Briefcase,
+    image: IMAGES.agencies,
     title: 'Agencies & teams',
     description: 'Manage client campaigns, apply brand templates, and share access with your team.',
   },
@@ -173,17 +182,17 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: hero visual placeholder */}
+            {/* Right: hero visual */}
             <div className="flex-1 flex justify-center animate-on-scroll stagger-2">
-              <div
-                className="w-full max-w-md aspect-square rounded-2xl flex items-center justify-center"
+              <img
+                src={IMAGES.hero}
+                alt="Entrepreneur working at a modern workspace"
+                className="w-full max-w-md aspect-square rounded-2xl object-cover"
                 style={{
-                  background: 'linear-gradient(135deg, #FFF3E8 0%, #F5F4F2 100%)',
                   border: '1px solid #E8E6E3',
+                  boxShadow: '0 16px 48px rgba(0,0,0,0.08)',
                 }}
-              >
-                <QrCode className="w-24 h-24" style={{ color: '#F97316', opacity: 0.3 }} />
-              </div>
+              />
             </div>
           </div>
         </section>
@@ -255,6 +264,7 @@ export default function HomePage() {
           <div className="animate-on-scroll">
             <FeatureRow
               icon={Paintbrush}
+              image={IMAGES.create}
               headline="Create & customize"
               description="Your QR code, your brand. Pick your colors, add your logo, and wrap it in a frame with a custom label. It takes about 60 seconds."
               bullets={[
@@ -267,6 +277,7 @@ export default function HomePage() {
           <div className="animate-on-scroll stagger-1">
             <FeatureRow
               icon={BarChart3}
+              image={IMAGES.track}
               headline="Track every scan"
               description="See who's scanning, where they are, what device they're using, and when they do it — all in real time, all without a single line of code."
               bullets={[
@@ -279,6 +290,7 @@ export default function HomePage() {
           <div className="animate-on-scroll stagger-2">
             <FeatureRow
               icon={RefreshCw}
+              image={IMAGES.update}
               headline="Update anytime"
               description="Dynamic codes let you change where a scan goes — even after you've printed it. New menu? New promotion? Update the destination."
               bullets={[
@@ -291,6 +303,7 @@ export default function HomePage() {
           <div className="animate-on-scroll stagger-3">
             <FeatureRow
               icon={Users}
+              image={IMAGES.teams}
               headline="Built for teams"
               description="Invite your team, assign roles, and keep everyone working from the same dashboard. No more emailing QR code files around."
               bullets={[
@@ -450,23 +463,26 @@ export default function HomePage() {
           headline="QR codes for the way you work."
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {useCases.map(({ icon: Icon, title, description }, i) => (
+            {useCases.map(({ image, title, description }, i) => (
               <div
                 key={title}
-                className={`marketing-card animate-on-scroll stagger-${i + 1}`}
+                className={`marketing-card overflow-hidden animate-on-scroll stagger-${i + 1}`}
+                style={{ padding: 0 }}
               >
-                <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
-                  style={{ backgroundColor: '#FFF3E8' }}
-                >
-                  <Icon className="w-5 h-5" style={{ color: '#F97316' }} />
+                <img
+                  src={image}
+                  alt={title}
+                  className="w-full aspect-[16/9] object-cover"
+                  loading="lazy"
+                />
+                <div style={{ padding: '20px 24px 24px' }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
+                    {title}
+                  </h3>
+                  <p style={{ fontSize: 15, lineHeight: 1.6, color: '#4A4A4A' }}>
+                    {description}
+                  </p>
                 </div>
-                <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1A1A1A', marginBottom: 6 }}>
-                  {title}
-                </h3>
-                <p style={{ fontSize: 15, lineHeight: 1.6, color: '#4A4A4A' }}>
-                  {description}
-                </p>
               </div>
             ))}
           </div>
