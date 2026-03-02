@@ -47,7 +47,7 @@ export function MarketingHeader({ onSignIn, onSignUp }: MarketingHeaderProps) {
           style={{ maxWidth: 1200 }}
         >
           <Link to="/" className="flex items-center gap-2">
-            <Logo size="sm" showText />
+            <Logo size="sm" showText className="[&_span]:!text-gray-900" />
           </Link>
 
           {/* Desktop nav */}
