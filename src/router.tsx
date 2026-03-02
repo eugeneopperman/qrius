@@ -92,6 +92,7 @@ const PricingPage = lazy(() => import('@/pages/PricingPage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const BlogPage = lazy(() => import('@/pages/BlogPage'));
+const BlogPostPage = lazy(() => import('@/pages/BlogPostPage'));
 const ChangelogPage = lazy(() => import('@/pages/ChangelogPage'));
 
 // Use case pages
@@ -341,6 +342,12 @@ const blogRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/blog',
   component: BlogPage,
+});
+
+const blogPostRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/blog/$slug',
+  component: BlogPostPage,
 });
 
 const changelogRoute = createRoute({
@@ -597,6 +604,7 @@ const routeTree = rootRoute.addChildren([
   aboutRoute,
   contactRoute,
   blogRoute,
+  blogPostRoute,
   changelogRoute,
   useCasesRoute,
   restaurantsRoute,

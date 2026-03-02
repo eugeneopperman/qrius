@@ -27,6 +27,7 @@ const navLinks: NavLink[] = [
   { label: 'Features', href: '/features' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Use Cases', href: '/use-cases', children: useCaseDropdown },
+  { label: 'Blog', href: '/blog' },
   { label: 'Sign In', href: '/signin' },
 ];
 
