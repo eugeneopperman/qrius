@@ -156,7 +156,7 @@ export function MarketingHeader({ onSignUp }: MarketingHeaderProps) {
     <>
       <header
         className={`sticky top-0 z-50 border-b transition-transform duration-300 ${
-          headerHidden && !mobileOpen ? '-translate-y-full md:translate-y-0' : 'translate-y-0'
+          headerHidden && !mobileOpen ? '-translate-y-[calc(100%+env(safe-area-inset-top))] md:translate-y-0' : 'translate-y-0'
         }`}
         style={{ backgroundColor: '#FAFAF8', borderColor: '#E8E6E3' }}
       >
