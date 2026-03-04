@@ -38,7 +38,26 @@ interface MarketingHeaderProps {
 export function MarketingHeader({ onSignUp }: MarketingHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
+  // Hide header on scroll down, show on scroll up (mobile only)
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+      // Only hide after scrolling down past 60px, show immediately on scroll up
+      if (delta > 0 && y > 60) {
+        setHeaderHidden(true);
+      } else if (delta < 0) {
+        setHeaderHidden(false);
+      }
+      lastScrollY.current = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -136,7 +155,9 @@ export function MarketingHeader({ onSignUp }: MarketingHeaderProps) {
   return (
     <>
       <header
-        className="sticky top-0 z-50 border-b"
+        className={`sticky top-0 z-50 border-b transition-transform duration-300 ${
+          headerHidden && !mobileOpen ? '-translate-y-full md:translate-y-0' : 'translate-y-0'
+        }`}
         style={{ backgroundColor: '#FAFAF8', borderColor: '#E8E6E3' }}
       >
         <div
