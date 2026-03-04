@@ -94,17 +94,19 @@ Run `api/schema.sql` followed by `api/schema-saas.sql` to set up:
 - `plan_limits` - Tier limits reference
 
 ## Subscription Tiers
-| Feature | Free | Pro ($9/mo) | Business ($29/mo) |
-|---------|------|-------------|-------------------|
-| Dynamic QR codes | 15 | 250 | Unlimited |
-| Scans/month | 5,000 | 100,000 | Unlimited |
-| History | 30 days | 1 year | Unlimited |
-| Team | 1 | 5 | 25 |
-| API | No | 1K req/day | 10K req/day |
-| Downloads | PNG | PNG, SVG, PDF | PNG, SVG, PDF |
-| Brand templates | 3 | Unlimited | Unlimited |
-| White-label | No | No | Yes |
-| Support | Community | Email | Priority |
+| Feature | Free | Starter ($12/mo) | Pro ($29/mo) | Business ($79/mo) |
+|---------|------|-------------------|--------------|-------------------|
+| Dynamic QR codes | 5 | 50 | 500 | Unlimited |
+| Scans/month | Unlimited | Unlimited | Unlimited | Unlimited |
+| History | 7 days | 90 days | 1 year | Unlimited |
+| Team | 1 | 1 | 5 | 25 |
+| API | No | No | 1K req/day | 10K req/day |
+| Downloads | PNG | PNG, SVG | PNG, SVG, PDF | PNG, SVG, PDF |
+| Brand templates | 1 | 5 | Unlimited | Unlimited |
+| Custom domain | No | No | 1 | Unlimited |
+| White-label | No | No | No | Yes |
+| Bulk creation | No | No | Yes | Yes |
+| Support | Community | Email | Priority | Dedicated |
 
 ## Commands
 ```bash

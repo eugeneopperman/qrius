@@ -21,7 +21,7 @@ const data: UseCasePageData = {
   benefits: {
     headline: 'Why Qrius Codes for education.',
     items: [
-      { title: 'Free plan covers most classrooms.', description: '15 dynamic codes and 5,000 scans per month is enough for most teachers and departments — no budget approval needed.' },
+      { title: 'Free plan covers most classrooms.', description: '5 dynamic codes with unlimited scans is enough for most teachers — no budget approval needed. Need more? Starter is just $12/month.' },
       { title: 'Update without reprinting.', description: 'Semester changes, new resources, updated links — change the destination and reuse the same handouts.' },
       { title: 'Simple enough for anyone.', description: 'No training needed. If you can fill in a form and click download, you can make a QR code.' },
     ],

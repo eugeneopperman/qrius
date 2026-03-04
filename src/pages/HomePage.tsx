@@ -28,7 +28,7 @@ const IMAGES = {
 const trustItems = [
   { icon: QrCode, stat: '9 QR code types', label: 'URL, vCard, WiFi, Event, and more' },
   { icon: BarChart3, stat: 'Real-time analytics', label: 'Know where, when, and how people scan' },
-  { icon: Gift, stat: 'Free forever plan', label: '15 dynamic codes, no credit card, no catch' },
+  { icon: Gift, stat: 'Free forever plan', label: '5 dynamic codes, unlimited scans, no catch' },
 ];
 
 const features = [
@@ -81,9 +81,10 @@ const steps = [
 ];
 
 const pricingPlans = [
-  { name: 'Free', nameColor: '#4A4A4A', price: '$0', period: 'forever', lines: ['15 dynamic codes', '5,000 scans/mo', 'PNG downloads'] },
-  { name: 'Pro', nameColor: '#F97316', price: '$9', period: '/month', lines: ['250 dynamic codes', '100,000 scans/mo', 'PNG, SVG, PDF'], featured: true },
-  { name: 'Business', nameColor: '#4A4A4A', price: '$29', period: '/month', lines: ['Unlimited codes', 'Unlimited scans', 'White-label'] },
+  { name: 'Free', nameColor: '#4A4A4A', price: '$0', period: 'forever', lines: ['5 dynamic codes', 'Unlimited scans', 'PNG downloads'] },
+  { name: 'Starter', nameColor: '#4A4A4A', price: '$12', period: '/month', lines: ['50 dynamic codes', 'Unlimited scans', 'PNG, SVG downloads'] },
+  { name: 'Pro', nameColor: '#F97316', price: '$29', period: '/month', lines: ['500 dynamic codes', 'API + team + domains', 'PNG, SVG, PDF'], featured: true },
+  { name: 'Business', nameColor: '#4A4A4A', price: '$79', period: '/month', lines: ['Unlimited codes', 'White-label branding', 'Dedicated support'] },
 ];
 
 const useCases = [
@@ -94,8 +95,8 @@ const useCases = [
 ];
 
 const comparisonRows = [
-  { feature: 'Dynamic QR codes', qrius: '15', competitor: '1–3' },
-  { feature: 'Scans per month', qrius: '5,000', competitor: '0–500' },
+  { feature: 'Dynamic QR codes', qrius: '5 (free)', competitor: '1–3' },
+  { feature: 'Scans per month', qrius: 'Unlimited', competitor: '0–500' },
   { feature: 'QR code types', qrius: '9', competitor: '1 (URL only)' },
   { feature: 'Scan analytics', qrius: true as const, competitor: false as const },
   { feature: 'Logo & brand colors', qrius: true as const, competitor: false as const },
@@ -300,10 +301,10 @@ export default function HomePage() {
           id="pricing"
           bg="snow"
           overline="Pricing"
-          headline="Everything you need for $9/month."
-          subheadline="Our free plan gives you more than most tools' paid plans. And when you're ready for more, Pro has you covered."
+          headline="Plans that grow with you."
+          subheadline="Start free with unlimited scans. Upgrade when you need more codes, formats, or team features."
         >
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {pricingPlans.map((plan, i) => (
               <PricingCard key={plan.name} {...plan} stagger={i + 1} />
             ))}

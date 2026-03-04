@@ -9,7 +9,7 @@ import type { BrandTemplate, BrandTemplateStyle, DotType, CornerSquareType } fro
 import { useQRStore } from './qrStore';
 import { useAuthStore } from './authStore';
 
-const FREE_TEMPLATE_LIMIT = 3;
+const FREE_TEMPLATE_LIMIT = 1;
 
 function isAtTemplateLimit(): boolean {
   const { user, currentOrganization } = useAuthStore.getState();

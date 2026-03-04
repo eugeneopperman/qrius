@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(255),
     display_name VARCHAR(100),
     avatar_url TEXT,
-    plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'pro', 'business')),
+    plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'starter', 'pro', 'business')),
     stripe_customer_id VARCHAR(255),
     onboarding_completed BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS organizations (
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(100) UNIQUE NOT NULL,
     logo_url TEXT,
-    plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'pro', 'business')),
+    plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'starter', 'pro', 'business')),
     stripe_customer_id VARCHAR(255),
     stripe_subscription_id VARCHAR(255),
     settings JSONB DEFAULT '{}',
@@ -168,8 +168,9 @@ CREATE TABLE IF NOT EXISTS plan_limits (
 -- Insert plan limits
 INSERT INTO plan_limits (plan, qr_codes_limit, scans_per_month, scan_history_days, team_members, api_requests_per_day, custom_branding, white_label, priority_support)
 VALUES
-    ('free', 15, 5000, 30, 1, 0, false, false, false),
-    ('pro', 250, 100000, 365, 5, 1000, true, false, false),
+    ('free', 5, -1, 7, 1, 0, false, false, false),
+    ('starter', 50, -1, 90, 1, 0, true, false, false),
+    ('pro', 500, -1, 365, 5, 1000, true, false, false),
     ('business', -1, -1, -1, 25, 10000, true, true, true)
 ON CONFLICT (plan) DO UPDATE SET
     qr_codes_limit = EXCLUDED.qr_codes_limit,

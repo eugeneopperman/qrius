@@ -9,7 +9,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Plan = 'free' | 'pro' | 'business';
+export type Plan = 'free' | 'starter' | 'pro' | 'business';
 export type OrgRole = 'owner' | 'admin' | 'editor' | 'viewer';
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing' | 'incomplete';
 

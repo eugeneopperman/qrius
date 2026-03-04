@@ -12,7 +12,7 @@ interface UpgradePromptProps {
 
 export function UpgradePrompt({
   title = 'Upgrade to Pro',
-  description = 'Get 250 QR codes, advanced analytics, and team collaboration — starting at $9/mo.',
+  description = 'Get more QR codes, advanced analytics, and team collaboration — plans from $12/mo.',
   feature,
   dismissable = true,
 }: UpgradePromptProps) {

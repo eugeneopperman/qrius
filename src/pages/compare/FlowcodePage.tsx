@@ -8,7 +8,7 @@ const data: ComparisonPageData = {
   },
   callout: {
     type: 'price',
-    text: "Flowcode's analytics with geo data starts at $250/month. Team collaboration starts at $750/month. Qrius offers both starting at $9/month.",
+    text: "Flowcode's analytics with geo data starts at $250/month. Team collaboration starts at $750/month. Qrius offers both starting at $29/month.",
   },
   verdict: {
     body: [
@@ -22,10 +22,10 @@ const data: ComparisonPageData = {
       { key: 'flowcode', label: 'Flowcode' },
     ],
     rows: [
-      { feature: 'Free dynamic QR codes', values: { qrius: '15', flowcode: '2' } },
-      { feature: 'Free plan scans', values: { qrius: '5,000/month', flowcode: '500 total' } },
-      { feature: 'Analytics with geo data', values: { qrius: '$9/mo', flowcode: '$250/mo' } },
-      { feature: 'Team collaboration', values: { qrius: '$29/mo (25 members)', flowcode: '$750/mo' } },
+      { feature: 'Free dynamic QR codes', values: { qrius: '5', flowcode: '2' } },
+      { feature: 'Free plan scans', values: { qrius: 'Unlimited', flowcode: '500 total' } },
+      { feature: 'Analytics with geo data', values: { qrius: '$12/mo (Starter)', flowcode: '$250/mo' } },
+      { feature: 'Team collaboration', values: { qrius: '$29/mo (5 members)', flowcode: '$750/mo' } },
       { feature: 'Customization depth', values: { qrius: 'Full', flowcode: 'Limited palette' } },
       { feature: 'CRM integrations', values: { qrius: false, flowcode: true } },
       { feature: 'SOC 2 / GDPR', values: { qrius: false, flowcode: true } },
@@ -34,8 +34,8 @@ const data: ComparisonPageData = {
   wins: {
     headline: 'Where Qrius wins.',
     items: [
-      { title: 'Accessible pricing.', description: "Qrius Pro at $9/month includes analytics that Flowcode gates behind their $250/month Growth tier. For a small business, that's not a comparison — it's a different universe." },
-      { title: 'A real free plan.', description: "Flowcode's free tier gives you 2 codes and 500 total scans. After that, you're done. Qrius gives you 15 dynamic codes with 5,000 scans per month, ongoing." },
+      { title: 'Accessible pricing.', description: "Qrius Starter at $12/month includes analytics that Flowcode gates behind their $250/month Growth tier. For a small business, that's not a comparison — it's a different universe." },
+      { title: 'A real free plan.', description: "Flowcode's free tier gives you 2 codes and 500 total scans. After that, you're done. Qrius gives you 5 dynamic codes with unlimited scans, ongoing." },
       { title: 'Design freedom.', description: "Flowcode's QR code builder has limited color palettes. Qrius gives you full control over colors, gradients, dot patterns, corner styles, logos, and frames." },
     ],
   },

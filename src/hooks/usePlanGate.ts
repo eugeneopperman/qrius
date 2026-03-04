@@ -14,6 +14,7 @@ export function usePlanGate() {
   const isAuthenticated = !!user;
   const plan = currentOrganization?.plan ?? 'free';
   const isFree = !isAuthenticated || plan === 'free';
+  const isStarter = plan === 'starter';
   const isPro = plan === 'pro';
   const isBusiness = plan === 'business';
 
@@ -23,6 +24,7 @@ export function usePlanGate() {
 
     switch (feature) {
       case 'svg_download':
+        return isStarter || isPro || isBusiness;
       case 'pdf_download':
         return isPro || isBusiness;
       case 'unlimited_templates':
@@ -34,13 +36,15 @@ export function usePlanGate() {
     }
   };
 
-  const templateLimit = isFree && isAuthenticated ? 3 : -1;
+  // Free: 1 template, Starter: 5, Pro/Business: unlimited
+  const templateLimit = !isAuthenticated ? -1 : isFree ? 1 : isStarter ? 5 : -1;
 
   return {
     canUse,
     templateLimit,
     plan,
     isFree,
+    isStarter,
     isPro,
     isBusiness,
     isAuthenticated,

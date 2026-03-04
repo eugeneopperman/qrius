@@ -28,55 +28,72 @@ const plans: PlanDef[] = [
     monthly: 0,
     annual: 0,
     period: 'forever',
-    tagline: 'For individuals and small projects getting started with QR codes.',
+    tagline: 'For side projects and personal use. More generous than most paid plans.',
     features: [
-      '15 dynamic QR codes',
-      '5,000 scans per month',
+      '5 dynamic QR codes',
+      'Unlimited scans',
       '9 QR code types',
       'Full customization',
       'Scan analytics',
-      '30-day scan history',
+      '7-day scan history',
       'PNG downloads',
-      '3 brand templates',
+      '1 brand template',
     ],
     cta: 'Get started',
     note: 'No credit card required. Not now, not ever.',
   },
   {
-    name: 'Pro',
-    monthly: 9,
-    annual: 7,
+    name: 'Starter',
+    monthly: 12,
+    annual: 10,
     period: '/month',
-    tagline: 'For businesses and creators who need more codes, more data, and more formats.',
+    tagline: 'For small businesses and creators who need more codes and formats.',
     features: [
       'Everything in Free, plus:',
-      '250 dynamic QR codes',
-      '100,000 scans per month',
+      '50 dynamic QR codes',
+      '90-day scan history',
+      'PNG and SVG downloads',
+      '5 brand templates',
+      'Email support',
+    ],
+    cta: 'Start free, upgrade anytime',
+  },
+  {
+    name: 'Pro',
+    monthly: 29,
+    annual: 23,
+    period: '/month',
+    tagline: 'For growing businesses that need API access, team collaboration, and custom domains.',
+    features: [
+      'Everything in Starter, plus:',
+      '500 dynamic QR codes',
       '1-year scan history',
       'PNG, SVG, and PDF downloads',
       'Unlimited brand templates',
       'Up to 5 team members',
       'API access (1,000 req/day)',
-      'Email support',
+      '1 custom domain',
+      'Bulk QR creation',
+      'Priority support',
     ],
     cta: 'Start free, upgrade anytime',
     featured: true,
   },
   {
     name: 'Business',
-    monthly: 29,
-    annual: 23,
+    monthly: 79,
+    annual: 63,
     period: '/month',
-    tagline: 'For teams and agencies managing QR codes at scale.',
+    tagline: 'For teams and agencies managing QR codes at scale with white-label branding.',
     features: [
       'Everything in Pro, plus:',
       'Unlimited dynamic QR codes',
-      'Unlimited scans',
       'Unlimited scan history',
       'Up to 25 team members',
-      'White-label (custom domains)',
+      'White-label branding',
+      'Unlimited custom domains',
       'API access (10,000 req/day)',
-      'Priority support',
+      'Dedicated support',
     ],
     cta: 'Start free, upgrade anytime',
   },
@@ -85,27 +102,29 @@ const plans: PlanDef[] = [
 // ─── Full comparison table ──────────────────────────────────────────
 const comparisonColumns = [
   { key: 'free', label: 'Free' },
+  { key: 'starter', label: 'Starter' },
   { key: 'pro', label: 'Pro', highlight: true },
   { key: 'business', label: 'Business' },
 ];
 
 const comparisonRows = [
-  { feature: 'Dynamic QR codes', values: { free: '15', pro: '250', business: 'Unlimited' } },
-  { feature: 'Scans per month', values: { free: '5,000', pro: '100,000', business: 'Unlimited' } },
-  { feature: 'QR code types', values: { free: 'All 9', pro: 'All 9', business: 'All 9' } },
-  { feature: 'Customization', values: { free: 'Full', pro: 'Full', business: 'Full' } },
-  { feature: 'Scan analytics', values: { free: true, pro: true, business: true } },
-  { feature: 'Scan history', values: { free: '30 days', pro: '1 year', business: 'Unlimited' } },
-  { feature: 'PNG download', values: { free: true, pro: true, business: true } },
-  { feature: 'SVG download', values: { free: false, pro: true, business: true } },
-  { feature: 'PDF download', values: { free: false, pro: true, business: true } },
-  { feature: 'Brand templates', values: { free: '3', pro: 'Unlimited', business: 'Unlimited' } },
-  { feature: 'Team members', values: { free: '1', pro: '5', business: '25' } },
-  { feature: 'Folders', values: { free: false, pro: true, business: true } },
-  { feature: 'Custom domain', values: { free: false, pro: false, business: true } },
-  { feature: 'White-label', values: { free: false, pro: false, business: true } },
-  { feature: 'API access', values: { free: false, pro: '1K req/day', business: '10K req/day' } },
-  { feature: 'Support', values: { free: 'Community', pro: 'Email', business: 'Priority' } },
+  { feature: 'Dynamic QR codes', values: { free: '5', starter: '50', pro: '500', business: 'Unlimited' } },
+  { feature: 'Scans per month', values: { free: 'Unlimited', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' } },
+  { feature: 'QR code types', values: { free: 'All 9', starter: 'All 9', pro: 'All 9', business: 'All 9' } },
+  { feature: 'Customization', values: { free: 'Full', starter: 'Full', pro: 'Full', business: 'Full' } },
+  { feature: 'Scan analytics', values: { free: true, starter: true, pro: true, business: true } },
+  { feature: 'Scan history', values: { free: '7 days', starter: '90 days', pro: '1 year', business: 'Unlimited' } },
+  { feature: 'PNG download', values: { free: true, starter: true, pro: true, business: true } },
+  { feature: 'SVG download', values: { free: false, starter: true, pro: true, business: true } },
+  { feature: 'PDF download', values: { free: false, starter: false, pro: true, business: true } },
+  { feature: 'Brand templates', values: { free: '1', starter: '5', pro: 'Unlimited', business: 'Unlimited' } },
+  { feature: 'Team members', values: { free: '1', starter: '1', pro: '5', business: '25' } },
+  { feature: 'Folders', values: { free: false, starter: false, pro: true, business: true } },
+  { feature: 'Custom domain', values: { free: false, starter: false, pro: '1', business: 'Unlimited' } },
+  { feature: 'White-label', values: { free: false, starter: false, pro: false, business: true } },
+  { feature: 'Bulk creation', values: { free: false, starter: false, pro: true, business: true } },
+  { feature: 'API access', values: { free: false, starter: false, pro: '1K req/day', business: '10K req/day' } },
+  { feature: 'Support', values: { free: 'Community', starter: 'Email', pro: 'Priority', business: 'Dedicated' } },
 ];
 
 // ─── Trust signals ──────────────────────────────────────────────────
@@ -131,7 +150,7 @@ const trustCards = [
 const faqItems = [
   {
     q: 'What happens to my QR codes if I downgrade?',
-    a: "They keep working. If you go from Pro to Free and have more than 15 codes, your existing codes continue to scan and redirect. You just can't create new ones until you're back under the limit. We will never deactivate codes you've already printed.",
+    a: "They keep working. If you go from Pro to Free and have more than 5 codes, your existing codes continue to scan and redirect. You just can't create new ones until you're back under the limit. We will never deactivate codes you've already printed.",
   },
   {
     q: 'Can I switch plans anytime?',
@@ -172,11 +191,11 @@ const industryColumns = [
 ];
 
 const industryRows = [
-  { feature: 'Free dynamic codes', values: { qrius: '15', bitly: '2', qrcg: '1 (14-day trial)', uniqode: '0' } },
-  { feature: 'Paid from', values: { qrius: '$9/mo', bitly: '$10/mo', qrcg: '~$8/mo (annual)', uniqode: '$9/mo (annual)' } },
-  { feature: 'Codes at $9/mo', values: { qrius: '250', bitly: '5', qrcg: '~2', uniqode: '50' } },
+  { feature: 'Free dynamic codes', values: { qrius: '5', bitly: '2', qrcg: '0 (trial only)', uniqode: '0' } },
+  { feature: 'Paid from', values: { qrius: '$12/mo', bitly: '$10/mo', qrcg: '~$8/mo (annual)', uniqode: '$9/mo (annual)' } },
+  { feature: '500 codes tier', values: { qrius: '$29/mo', bitly: '$199/mo', qrcg: '$89/mo', uniqode: '$99/mo' } },
   { feature: 'QR code types', values: { qrius: '9', bitly: '1 (URL)', qrcg: '8', uniqode: '10+' } },
-  { feature: 'Monthly billing', values: { qrius: true, bitly: false, qrcg: false, uniqode: false } },
+  { feature: 'Unlimited scans', values: { qrius: 'All plans', bitly: 'Paid only', qrcg: 'Paid only', uniqode: 'Paid only' } },
   { feature: 'Codes survive cancellation', values: { qrius: true, bitly: false, qrcg: false, uniqode: false } },
 ];
 
@@ -364,7 +383,7 @@ export default function PricingPage() {
         {/* ─── 2. Billing toggle + Plan cards ───────────────── */}
         <MarketingSection bg="snow" className="!pt-4">
           <BillingToggle billing={billing} onChange={setBilling} />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan, i) => (
               <PlanCard
                 key={plan.name}

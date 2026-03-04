@@ -301,6 +301,7 @@ export default function FeaturesPage() {
               <tbody>
                 {[
                   { plan: 'Free', members: 'Just you' },
+                  { plan: 'Starter', members: 'Just you' },
                   { plan: 'Pro', members: 'Up to 5' },
                   { plan: 'Business', members: 'Up to 25' },
                 ].map(({ plan, members }, i) => (
@@ -353,8 +354,8 @@ export default function FeaturesPage() {
         >
           <div className="space-y-3 mb-6 animate-on-scroll">
             {[
-              { label: 'Pro plan', detail: '1,000 API requests per day' },
-              { label: 'Business plan', detail: '10,000 API requests per day' },
+              { label: 'Pro plan ($29/mo)', detail: '1,000 API requests per day' },
+              { label: 'Business plan ($79/mo)', detail: '10,000 API requests per day' },
             ].map(({ label, detail }) => (
               <div key={label} className="flex items-center gap-3" style={{ fontSize: 16, color: '#4A4A4A' }}>
                 <span className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#F97316' }} />
@@ -392,7 +393,7 @@ export default function FeaturesPage() {
         {/* ─── 10. Bottom CTA ───────────────────────────────── */}
         <CTASection
           headline="See something you like?"
-          subheadline="Start building with 15 free dynamic QR codes. No credit card, no time limit."
+          subheadline="Start building with 5 free dynamic QR codes and unlimited scans. No credit card, no time limit."
           primaryLabel="Create your first code"
           primaryAction={openSignUp}
           secondaryLabel="Compare plans"

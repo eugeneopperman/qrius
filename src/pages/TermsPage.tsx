@@ -78,8 +78,9 @@ export default function TermsPage() {
         </p>
         <ul className="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2 mb-4">
           <li><strong>Free:</strong> Limited features at no cost</li>
-          <li><strong>Pro ($12/month):</strong> Enhanced features for individuals and small teams</li>
-          <li><strong>Business ($39/month):</strong> Full features for larger teams and enterprises</li>
+          <li><strong>Starter ($12/month):</strong> More codes and formats for individuals</li>
+          <li><strong>Pro ($29/month):</strong> Team collaboration, API access, and custom domains</li>
+          <li><strong>Business ($79/month):</strong> Unlimited codes, white-label, and dedicated support</li>
         </ul>
         <p className="text-gray-600 dark:text-gray-300 mb-4">
           Paid subscriptions are billed in advance on a monthly basis. Your subscription will automatically renew at the end of each billing period unless you cancel it before the renewal date.

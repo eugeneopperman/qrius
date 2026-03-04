@@ -43,9 +43,9 @@ export const blogPosts: BlogPost[] = [
 
 <h2>What we built</h2>
 
-<p>Qrius Codes gives you 15 free dynamic QR codes. Not one, not three — fifteen. That's enough for most small businesses to get real value without paying a cent.</p>
+<p>Qrius Codes gives you 5 free dynamic QR codes with unlimited scans. That's enough for most small businesses to get real value without paying a cent.</p>
 
-<p>When you do need more, Pro starts at $9 a month. Monthly billing, cancel anytime, and your codes keep working even if you leave. Because holding someone's printed materials hostage is a terrible business model.</p>
+<p>When you do need more, Starter begins at $12 a month. Monthly billing, cancel anytime, and your codes keep working even if you leave. Because holding someone's printed materials hostage is a terrible business model.</p>
 
 <p>Here's what you get out of the box:</p>
 
@@ -138,7 +138,7 @@ export const blogPosts: BlogPost[] = [
 
 <p>At Qrius, your codes keep working even if you downgrade or cancel. We think holding your printed materials hostage is a terrible way to do business.</p>
 
-<p>With 15 free dynamic codes on our free plan, you can get started without worrying about any of this. And if you need more, Pro is $9 a month — not $30, not $50.</p>
+<p>With 5 free dynamic codes and unlimited scans on our free plan, you can get started without worrying about any of this. And if you need more, plans start at $12 a month.</p>
     `,
   },
 

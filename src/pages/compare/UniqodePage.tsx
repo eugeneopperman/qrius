@@ -4,11 +4,11 @@ const data: ComparisonPageData = {
   competitor: 'Uniqode',
   hero: {
     headline: 'Qrius Codes vs Uniqode',
-    subheadline: "Uniqode is built for enterprise. Qrius Codes is built for everyone — including businesses that don't have a $49/month QR code budget.",
+    subheadline: "Uniqode is built for enterprise. Qrius Codes is built for everyone — with plans starting at $12/month.",
   },
   callout: {
     type: 'price',
-    text: "Uniqode's pricing starts at $9/month for 50 codes with annual billing only, jumps to $49 for 250 codes, and reserves team features for the $99+ tiers.",
+    text: "Uniqode's pricing starts at $9/month for 50 codes with annual billing only, jumps to $49 for 250 codes, and reserves team features for the $99+ tiers. Qrius offers 500 codes with team features for $29/month.",
   },
   verdict: {
     body: [
@@ -22,13 +22,13 @@ const data: ComparisonPageData = {
       { key: 'uniqode', label: 'Uniqode' },
     ],
     rows: [
-      { feature: 'Free dynamic QR codes', values: { qrius: '15', uniqode: '0 (static only)' } },
-      { feature: '250 dynamic codes', values: { qrius: '$9/mo (Pro)', uniqode: '$49/mo (Essential)' } },
+      { feature: 'Free dynamic QR codes', values: { qrius: '5', uniqode: '0 (static only)' } },
+      { feature: '500 dynamic codes', values: { qrius: '$29/mo (Pro)', uniqode: '$99/mo (Plus)' } },
       { feature: 'Monthly billing', values: { qrius: true, uniqode: false } },
       { feature: 'Scan analytics on free', values: { qrius: true, uniqode: false } },
       { feature: 'Data retention (entry paid)', values: { qrius: '1 year', uniqode: '60 days' } },
-      { feature: 'Team members at $9/mo', values: { qrius: '5', uniqode: '1' } },
-      { feature: 'Custom domain', values: { qrius: 'Business ($29/mo)', uniqode: 'Add-on ($2,000/year)' } },
+      { feature: 'Team members at $29/mo', values: { qrius: '5', uniqode: '1' } },
+      { feature: 'Custom domain', values: { qrius: 'Pro ($29/mo)', uniqode: 'Add-on ($2,000/year)' } },
       { feature: 'Codes survive cancellation', values: { qrius: true, uniqode: false } },
       { feature: 'SOC 2 / HIPAA', values: { qrius: false, uniqode: true } },
     ],
@@ -36,10 +36,10 @@ const data: ComparisonPageData = {
   wins: {
     headline: 'Where Qrius wins.',
     items: [
-      { title: '5x cheaper for the same code volume.', description: '250 dynamic codes costs $9/month on Qrius and $49/month on Uniqode. Over a year, that\'s $108 vs $588.' },
-      { title: 'A free plan with actual QR codes.', description: "Uniqode's free tier only makes static codes — no analytics, no editing, no dynamic behavior. Qrius gives you 15 dynamic codes with full analytics on the free plan." },
+      { title: '3x cheaper for double the codes.', description: '500 dynamic codes costs $29/month on Qrius and $99/month on Uniqode for 500. Over a year, that\'s $348 vs $1,188.' },
+      { title: 'A free plan with actual QR codes.', description: "Uniqode's free tier only makes static codes — no analytics, no editing, no dynamic behavior. Qrius gives you 5 dynamic codes with full analytics on the free plan." },
       { title: 'Longer data retention.', description: 'Uniqode keeps scan data for 60 days on their entry plan. Qrius keeps it for a year on Pro, and forever on Business.' },
-      { title: "Custom domains that don't cost $2,000/year.", description: 'Uniqode charges $2,000 per year per custom domain as an add-on. On Qrius, custom domains are included in the Business plan at $29/month.' },
+      { title: "Custom domains that don't cost $2,000/year.", description: 'Uniqode charges $2,000 per year per custom domain as an add-on. On Qrius, custom domains start on Pro at $29/month, with unlimited domains on Business at $79/month.' },
     ],
   },
   concessions: {
