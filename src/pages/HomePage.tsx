@@ -346,7 +346,7 @@ export default function HomePage() {
           primaryLabel="Start creating"
           primaryAction={openSignUp}
           secondaryLabel="Talk to us first"
-          secondaryHref="mailto:hello@qrius.app"
+          secondaryHref="mailto:hello@qriuscodes.com"
         />
       </div>
 

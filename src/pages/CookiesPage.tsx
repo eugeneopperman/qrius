@@ -252,7 +252,7 @@ export default function CookiesPage() {
           If you have any questions about our use of cookies, please contact us:
         </p>
         <p className="text-gray-600 dark:text-gray-300">
-          <strong>Email:</strong> privacy@qrius.app
+          <strong>Email:</strong> privacy@qriuscodes.com
         </p>
       </section>
     </LegalPageLayout>

@@ -23,7 +23,7 @@ export const QR_CONFIG = {
   /** PDF export size in mm */
   PDF_SIZE_MM: 80,
   /** Placeholder data for ghost QR preview when no content is entered */
-  GHOST_DATA: 'https://qrius.app',
+  GHOST_DATA: 'https://qriuscodes.com',
 } as const;
 
 // ============================================================================

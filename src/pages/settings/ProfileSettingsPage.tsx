@@ -752,7 +752,7 @@ export function ProfileSettingsContent() {
           Danger Zone
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          To delete your account, please contact support at support@qrius.app.
+          To delete your account, please contact support at support@qriuscodes.com.
         </p>
       </div>
     </div>

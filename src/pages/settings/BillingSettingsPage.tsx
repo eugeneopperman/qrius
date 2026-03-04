@@ -908,10 +908,10 @@ export function BillingSettingsContent() {
       <div className="text-center text-sm text-gray-500 dark:text-gray-400">
         Need help? Contact us at{' '}
         <a
-          href="mailto:support@qrius.app"
+          href="mailto:support@qriuscodes.com"
           className="text-orange-600 dark:text-orange-400 hover:underline"
         >
-          support@qrius.app
+          support@qriuscodes.com
         </a>
       </div>
     </div>

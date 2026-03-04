@@ -20,7 +20,7 @@ import {
   Lock,
 } from 'lucide-react';
 
-// Will be set to a real domain once configured (e.g., qrius.app)
+// Will be set to a real domain once configured (e.g., qriuscodes.com)
 // Until then, subdomain creation is disabled and the API returns 503
 const SUBDOMAIN_BASE_DOMAIN: string | null = null;
 
@@ -272,7 +272,7 @@ export function DomainsSettingsContent() {
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-1">
               {SUBDOMAIN_BASE_DOMAIN
                 ? 'Get a branded subdomain instantly. No DNS setup needed.'
-                : 'App subdomains are coming soon. Get a branded URL like my-brand.qrius.app with no DNS setup.'}
+                : 'App subdomains are coming soon. Get a branded URL like my-brand.qriuscodes.com with no DNS setup.'}
             </p>
 
             {SUBDOMAIN_BASE_DOMAIN ? (

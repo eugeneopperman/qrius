@@ -132,8 +132,11 @@ Copy `.env.example` to `.env.local` and configure:
 - `VITE_STRIPE_PUBLISHABLE_KEY` - Stripe public key
 - `STRIPE_SECRET_KEY` - Stripe secret key (server only)
 - `STRIPE_WEBHOOK_SECRET` - Stripe webhook signing secret
-- `STRIPE_PRICE_PRO` - Pro plan price ID
-- `STRIPE_PRICE_BUSINESS` - Business plan price ID
+- `VITE_STRIPE_PRICE_STARTER` - Starter plan price ID
+- `VITE_STRIPE_PRICE_PRO` - Pro plan price ID
+- `VITE_STRIPE_PRICE_BUSINESS` - Business plan price ID
+- `APP_URL` - Production domain (https://qriuscodes.com)
+- `SHORT_URL_DOMAIN` - Short redirect domain (qrslnk.com)
 - `POSTGRES_URL` - Database connection (if not using Supabase DB)
 - `KV_REST_API_URL` - Upstash Redis URL
 - `KV_REST_API_TOKEN` - Upstash Redis token
@@ -171,7 +174,7 @@ Copy `.env.example` to `.env.local` and configure:
 - `/onboarding` - Onboarding wizard
 
 ## Deployment
-- **Frontend**: Vercel at `https://design-sandbox-theta.vercel.app`
+- **Frontend**: Vercel at `https://qriuscodes.com` (also `design-sandbox-theta.vercel.app`)
 - **Auth/DB**: Supabase (Postgres + Auth)
 - **QR/Scans DB**: Neon Postgres (via `POSTGRES_URL`)
 - **Deploy**: `npx vercel --prod` (or git push triggers auto-deploy)

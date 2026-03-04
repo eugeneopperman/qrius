@@ -209,7 +209,7 @@ export default function TermsPage() {
           If you have any questions about these Terms, please contact us at:
         </p>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
-          <strong>Email:</strong> legal@qrius.app
+          <strong>Email:</strong> legal@qriuscodes.com
         </p>
       </section>
     </LegalPageLayout>

@@ -102,7 +102,7 @@ export default function ContactPage() {
                 </button>
               </form>
               <p className="mt-4" style={{ fontSize: 14, color: '#9CA3AF' }}>
-                Or just email us directly: <a href="mailto:hello@qrius.app" style={{ color: '#F97316', fontWeight: 500 }}>hello@qrius.app</a>
+                Or just email us directly: <a href="mailto:hello@qriuscodes.com" style={{ color: '#F97316', fontWeight: 500 }}>hello@qriuscodes.com</a>
               </p>
             </div>
 
@@ -114,7 +114,7 @@ export default function ContactPage() {
                 </div>
                 <h3 style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A', marginBottom: 4 }}>Email</h3>
                 <p style={{ fontSize: 14, lineHeight: 1.5, color: '#4A4A4A' }}>
-                  <a href="mailto:hello@qrius.app" style={{ color: '#F97316' }}>hello@qrius.app</a>
+                  <a href="mailto:hello@qriuscodes.com" style={{ color: '#F97316' }}>hello@qriuscodes.com</a>
                 </p>
               </div>
 

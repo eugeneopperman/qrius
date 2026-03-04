@@ -32,7 +32,7 @@ function makeQRCode(overrides: Partial<QRCode> = {}): QRCode {
     description: null,
     tags: [],
     metadata: {},
-    tracking_url: 'https://qrius.app/r/abc123',
+    tracking_url: 'https://qrslnk.com/r/abc123',
     created_at: '2026-02-20T12:00:00Z',
     updated_at: '2026-02-20T12:00:00Z',
     ...overrides,
@@ -69,7 +69,7 @@ describe('QRCodeCard', () => {
       render(<QRCodeCard qrCode={makeQRCode()} />);
       const previews = screen.getAllByTestId('qr-preview');
       expect(previews.length).toBe(2); // mobile + desktop
-      expect(previews[0]).toHaveTextContent('https://qrius.app/r/abc123');
+      expect(previews[0]).toHaveTextContent('https://qrslnk.com/r/abc123');
     });
 
     it('renders QR preview with destination URL for non-url type', () => {

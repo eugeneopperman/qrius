@@ -22,7 +22,7 @@ export interface URLData {
   useShortened?: boolean;
   // Tracking-related fields
   trackingEnabled?: boolean;
-  trackingUrl?: string;        // The tracking URL (e.g., https://qrius.app/r/xK9mP2)
+  trackingUrl?: string;        // The tracking URL (e.g., https://qrslnk.com/r/xK9mP2)
   trackingId?: string;         // The trackable QR code ID
   trackingShortCode?: string;  // The short code for display
 }
@@ -221,7 +221,7 @@ export interface BrandedUrlSettings {
 export interface TrackableQRCode {
   id: string;
   shortCode: string;
-  trackingUrl: string;        // e.g., https://qrius.app/r/xK9mP2
+  trackingUrl: string;        // e.g., https://qrslnk.com/r/xK9mP2
   destinationUrl: string;
   qrType: string;
   originalData?: QRData;

@@ -153,7 +153,7 @@ export default function PrivacyPage() {
           <li><strong>Withdraw Consent:</strong> Withdraw consent at any time where we rely on consent</li>
         </ul>
         <p className="text-gray-600 dark:text-gray-300 mt-4">
-          To exercise these rights, please visit your account settings or contact us at privacy@qrius.app. We will respond to your request within 30 days.
+          To exercise these rights, please visit your account settings or contact us at privacy@qriuscodes.com. We will respond to your request within 30 days.
         </p>
       </section>
 
@@ -214,10 +214,10 @@ export default function PrivacyPage() {
           If you have any questions about this Privacy Policy or our privacy practices, please contact us:
         </p>
         <p className="text-gray-600 dark:text-gray-300">
-          <strong>Email:</strong> privacy@qrius.app
+          <strong>Email:</strong> privacy@qriuscodes.com
         </p>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
-          <strong>Data Protection Officer:</strong> dpo@qrius.app
+          <strong>Data Protection Officer:</strong> dpo@qriuscodes.com
         </p>
       </section>
     </LegalPageLayout>

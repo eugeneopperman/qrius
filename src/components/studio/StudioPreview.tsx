@@ -18,7 +18,7 @@ import {
 import { cn } from '@/utils/cn';
 
 const PREVIEW_SIZE = 240;
-const PREVIEW_DATA = 'https://qrius.app';
+const PREVIEW_DATA = 'https://qriuscodes.com';
 
 export const StudioPreview = memo(function StudioPreview() {
   const { style, activePanel, setActivePanel, hasInteracted, setPopover } = useStudioStore(

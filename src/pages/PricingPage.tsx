@@ -488,7 +488,7 @@ export default function PricingPage() {
           primaryLabel="Create your free account"
           primaryAction={openSignUp}
           secondaryLabel="Have questions? Let's talk"
-          secondaryHref="mailto:hello@qrius.app"
+          secondaryHref="mailto:hello@qriuscodes.com"
         />
       </div>
 

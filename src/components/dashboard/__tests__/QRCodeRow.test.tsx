@@ -47,7 +47,7 @@ function makeQRCode(overrides: Partial<QRCode> = {}): QRCode {
     description: null,
     tags: [],
     metadata: {},
-    tracking_url: 'https://qrius.app/r/abc123',
+    tracking_url: 'https://qrslnk.com/r/abc123',
     created_at: '2026-02-20T12:00:00Z',
     updated_at: '2026-02-20T12:00:00Z',
     ...overrides,

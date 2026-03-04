@@ -2,7 +2,7 @@
 
 Full-featured SaaS QR code generator with user authentication, multi-tenancy, subscription billing, and API access.
 
-**Live:** [design-sandbox-theta.vercel.app](https://design-sandbox-theta.vercel.app)
+**Live:** [qriuscodes.com](https://qriuscodes.com)
 
 ## Quick Start
 
