@@ -1,5 +1,8 @@
 -- Migration 012: Pricing restructure — 4-tier system
--- Run in BOTH Supabase SQL Editor AND Neon SQL Editor
+--
+-- Supabase SQL Editor: Run the FULL file (CHECK constraints + plan_limits)
+-- Neon SQL Editor:     Run ONLY section 2 (plan_limits upsert) — Neon does
+--                      not have organizations/subscriptions tables
 --
 -- Changes:
 -- 1. Add 'starter' to plan CHECK constraints on organizations and subscriptions
