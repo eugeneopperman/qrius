@@ -4,7 +4,7 @@
  */
 
 /** App version — bump by 0.01 with each release */
-export const APP_VERSION = '0.79';
+export const APP_VERSION = '0.80';
 
 /** Marketing site version — bump by 0.1 with each commit+push */
 export const MARKETING_VERSION = '0.1';
@@ -272,4 +272,13 @@ export const QR_TYPES = [
   'vcard',
   'event',
   'location',
+] as const;
+
+// ============================================================================
+// Admin Configuration
+// ============================================================================
+
+/** Email addresses with access to /admin dashboard */
+export const ADMIN_EMAILS: readonly string[] = [
+  'eugeneopperman11@gmail.com',
 ] as const;

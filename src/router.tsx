@@ -5,7 +5,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { isSupabaseMissing } from '@/lib/supabase';
 import { isAppSubdomain, isRootDomain, getRootUrl, getAppUrl } from '@/lib/domain';
-import { APP_VERSION, TIMING } from '@/config/constants';
+import { APP_VERSION, TIMING, ADMIN_EMAILS } from '@/config/constants';
 import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
 // Lazy-load modals — only fetched when opened (~30KB off critical path)
 const KeyboardShortcutsModal = lazy(() =>
@@ -125,10 +125,13 @@ const TemplateStudioPage = lazy(() => import('@/pages/TemplateStudioPage'));
 // Invitation
 const InviteAcceptPage = lazy(() => import('@/pages/InviteAcceptPage'));
 
+// Admin
+const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'));
+
 // Error pages
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
-const appPathPrefixes = ['/dashboard', '/qr-codes', '/create', '/settings', '/templates', '/reader', '/onboarding'];
+const appPathPrefixes = ['/dashboard', '/qr-codes', '/create', '/settings', '/templates', '/reader', '/onboarding', '/admin'];
 
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {
@@ -274,6 +277,15 @@ async function requireGuest() {
     if (isRootDomain) {
       return crossOriginRedirect(getAppUrl('/dashboard'));
     }
+    throw redirect({ to: '/dashboard' });
+  }
+}
+
+// Admin check — requires auth + email whitelist
+async function requireAdmin() {
+  await requireAuth();
+  const email = useAuthStore.getState().user?.email;
+  if (!email || !ADMIN_EMAILS.includes(email.toLowerCase())) {
     throw redirect({ to: '/dashboard' });
   }
 }
@@ -557,6 +569,15 @@ const settingsRoute = createRoute({
   errorComponent: ErrorPage,
 });
 
+// Admin route
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  beforeLoad: requireAdmin,
+  component: AdminDashboardPage,
+  errorComponent: ErrorPage,
+});
+
 // Redirects for old settings sub-routes
 const profileSettingsRedirect = createRoute({
   getParentRoute: () => rootRoute,
@@ -640,6 +661,7 @@ const routeTree = rootRoute.addChildren([
   onboardingRoute,
   readerRoute,
   settingsRoute,
+  adminRoute,
   profileSettingsRedirect,
   teamSettingsRedirect,
   billingSettingsRedirect,

@@ -226,7 +226,7 @@ async function handleCreate(
 
   // Determine status and is_active
   const status = body.status === 'draft' ? 'draft' : 'active';
-  const isActive = status !== 'paused'; // draft and active are both scannable
+  const isActive = true; // draft and active are both scannable
 
   // Insert new QR code
   const result = await sql`
