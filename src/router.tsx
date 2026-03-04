@@ -1,4 +1,4 @@
-import { createRouter, createRootRoute, createRoute, Outlet, redirect, useRouter, type ErrorComponentProps } from '@tanstack/react-router';
+import { createRouter, createRootRoute, createRoute, Outlet, redirect, useRouter, useLocation, type ErrorComponentProps } from '@tanstack/react-router';
 import { lazy, Suspense, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -128,9 +128,13 @@ const InviteAcceptPage = lazy(() => import('@/pages/InviteAcceptPage'));
 // Error pages
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
+const appPathPrefixes = ['/dashboard', '/qr-codes', '/create', '/settings', '/templates', '/reader', '/onboarding'];
+
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {
   const { isShortcutsOpen, closeShortcuts, isSettingsOpen, closeSettings } = useUIStore();
+  const location = useLocation();
+  const isAppRoute = appPathPrefixes.some((p) => location.pathname === p || location.pathname.startsWith(p + '/'));
 
   // Subscribe to theme store so persist rehydration applies the saved theme
   // to the DOM immediately on app load (not deferred until Settings page visit)
@@ -170,9 +174,11 @@ function RootLayout() {
       )}
       <ToastContainer />
 
-      <div className="fixed bottom-2 right-2 max-lg:bottom-[4.5rem] z-[100] px-2 py-0.5 rounded bg-black/60 text-white text-xs font-mono pointer-events-none select-none">
-        Beta v{APP_VERSION}
-      </div>
+      {isAppRoute && (
+        <div className="fixed bottom-2 right-2 max-lg:bottom-[4.5rem] z-[100] px-2 py-0.5 rounded bg-black/60 text-white text-xs font-mono pointer-events-none select-none">
+          Beta v{APP_VERSION}
+        </div>
+      )}
     </Suspense>
   );
 }

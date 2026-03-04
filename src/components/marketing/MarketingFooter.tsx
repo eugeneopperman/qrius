@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { MARKETING_VERSION } from '@/config/constants';
 
 interface FooterLink {
   label: string;
@@ -111,6 +112,7 @@ export function MarketingFooter() {
           </p>
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
             &copy; {new Date().getFullYear()} Qrius Codes. All rights reserved.
+            <span className="ml-2 opacity-50">v{MARKETING_VERSION}</span>
           </p>
         </div>
       </div>
