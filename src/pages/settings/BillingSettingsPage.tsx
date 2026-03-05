@@ -769,14 +769,16 @@ export function BillingSettingsContent() {
               Authorization: `Bearer ${session.access_token}`,
             },
           });
+          const data = await resp.json();
+          console.log('[Billing Sync]', resp.status, data);
           if (resp.ok) {
-            const data = await resp.json();
             if (data.previous_plan && data.previous_plan_end_date) {
               setPreviousPlan({ plan: data.previous_plan, endDate: data.previous_plan_end_date });
             }
           }
         }
-      } catch {
+      } catch (err) {
+        console.error('[Billing Sync] error', err);
         // Sync failure is non-fatal — still show cached data
       }
       await fetchOrganizations();

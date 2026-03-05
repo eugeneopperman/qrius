@@ -60,7 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Route sync requests
     if (req.query.action === 'sync') {
-      return await handleSync(res, organizationId);
+      return await handleSync(res, organizationId, user.email);
     }
 
     const body = req.body as CheckoutRequest;
@@ -210,13 +210,15 @@ function buildPriceToPlan(): Record<string, string> {
   return map;
 }
 
-/** Infer plan from a Stripe subscription's product name when price ID isn't in env var mapping */
-function inferPlanFromSubscription(sub: Stripe.Subscription, priceToPlan: Record<string, string>): string {
+/** Infer plan from a Stripe subscription — checks price map, then product name */
+async function inferPlanFromSubscription(sub: Stripe.Subscription, priceToPlan: Record<string, string>): Promise<string> {
   const priceId = sub.items.data[0]?.price.id;
   if (priceId && priceToPlan[priceId]) return priceToPlan[priceId];
 
-  // Fallback: check product name (expanded or string)
+  // Fallback: check product name (may be expanded object or string ID)
   const product = sub.items.data[0]?.price?.product;
+
+  // If product is already expanded as object
   if (product && typeof product === 'object' && 'name' in product) {
     const name = (product as { name: string }).name.toLowerCase();
     if (name.includes('business')) return 'business';
@@ -224,12 +226,26 @@ function inferPlanFromSubscription(sub: Stripe.Subscription, priceToPlan: Record
     if (name.includes('starter')) return 'starter';
   }
 
+  // If product is a string ID, fetch it from Stripe
+  if (product && typeof product === 'string') {
+    try {
+      const prod = await getStripe().products.retrieve(product);
+      const name = prod.name.toLowerCase();
+      if (name.includes('business')) return 'business';
+      if (name.includes('pro')) return 'pro';
+      if (name.includes('starter')) return 'starter';
+    } catch {
+      // fall through
+    }
+  }
+
   return 'free';
 }
 
 async function handleSync(
   res: VercelResponse,
-  organizationId: string
+  organizationId: string,
+  userEmail: string
 ) {
   // Get organization details
   const { data: org, error: orgError } = await getSupabaseAdmin()
@@ -247,11 +263,31 @@ async function handleSync(
     currentPlan: org.plan,
     stripeCustomerId: org.stripe_customer_id,
     stripeSubscriptionId: org.stripe_subscription_id,
+    userEmail,
   });
 
-  // No Stripe customer — ensure plan is free
-  if (!org.stripe_customer_id) {
-    logger.billing.info('Sync: no stripe_customer_id, returning free');
+  // If no Stripe customer ID stored, try to find one by email
+  let customerId = org.stripe_customer_id;
+  if (!customerId) {
+    try {
+      const customers = await getStripe().customers.list({ email: userEmail, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        // Save it for future use
+        await getSupabaseAdmin()
+          .from('organizations')
+          .update({ stripe_customer_id: customerId })
+          .eq('id', organizationId);
+        logger.billing.info('Sync: found customer by email', { organizationId, customerId });
+      }
+    } catch (err) {
+      logger.billing.warn('Sync: customer email search failed', { error: String(err) });
+    }
+  }
+
+  // No Stripe customer at all — ensure plan is free
+  if (!customerId) {
+    logger.billing.info('Sync: no stripe customer found, returning free');
 
     if (org.plan !== 'free') {
       await getSupabaseAdmin()
@@ -269,11 +305,9 @@ async function handleSync(
   }
 
   // List ALL subscriptions for this customer from Stripe (source of truth)
-  // Expand product so we can infer plan from product name as fallback
   const allSubs = await getStripe().subscriptions.list({
-    customer: org.stripe_customer_id,
+    customer: customerId,
     limit: 10,
-    expand: ['data.items.data.price.product'],
   });
 
   const priceToPlan = buildPriceToPlan();
@@ -288,11 +322,10 @@ async function handleSync(
       status: s.status,
       cancel_at_period_end: s.cancel_at_period_end,
       priceId: s.items.data[0]?.price.id,
-      productType: typeof s.items.data[0]?.price?.product,
-      productName: typeof s.items.data[0]?.price?.product === 'object'
-        ? (s.items.data[0].price.product as { name?: string }).name
-        : s.items.data[0]?.price?.product,
-      inferred: inferPlanFromSubscription(s, priceToPlan),
+      productId: typeof s.items.data[0]?.price?.product === 'string'
+        ? s.items.data[0].price.product
+        : 'expanded',
+      directLookup: s.items.data[0]?.price.id ? (priceToPlan[s.items.data[0].price.id] || 'not-in-map') : 'no-price',
     })),
   });
 
@@ -337,14 +370,14 @@ async function handleSync(
 
   // Determine plan from the primary (active) subscription
   const priceId = primarySub.items.data[0]?.price.id;
-  const effectivePlan = inferPlanFromSubscription(primarySub, priceToPlan);
+  const effectivePlan = await inferPlanFromSubscription(primarySub, priceToPlan);
   const cancelAtPeriodEnd = primarySub.cancel_at_period_end;
 
   // Build previous plan info (old subscription that's winding down)
   let previousPlan: string | null = null;
   let previousPlanEndDate: string | null = null;
   if (windingDownSub) {
-    const inferred = inferPlanFromSubscription(windingDownSub, priceToPlan);
+    const inferred = await inferPlanFromSubscription(windingDownSub, priceToPlan);
     previousPlan = inferred !== 'free' ? inferred : null;
     previousPlanEndDate = new Date(windingDownSub.current_period_end * 1000).toISOString();
   }
