@@ -45,6 +45,9 @@ const STRIPE_PRICES = {
   },
 };
 
+/** Plan tier order for upgrade/downgrade comparison */
+const PLAN_TIER: Record<string, number> = { free: 0, starter: 1, pro: 2, business: 3 };
+
 const plans = [
   {
     id: 'free',
@@ -63,7 +66,6 @@ const plans = [
       'QR code reader',
       'Scannability score',
     ],
-    cta: 'Current plan',
     popular: false,
   },
   {
@@ -82,7 +84,6 @@ const plans = [
       'PNG, SVG download',
       'Email support',
     ],
-    cta: 'Upgrade to Starter',
     popular: false,
   },
   {
@@ -104,7 +105,6 @@ const plans = [
       'Bulk QR creation',
       'Priority support',
     ],
-    cta: 'Upgrade to Pro',
     popular: true,
   },
   {
@@ -126,10 +126,18 @@ const plans = [
       'Unlimited custom domains',
       'Dedicated support',
     ],
-    cta: 'Upgrade to Business',
     popular: false,
   },
 ];
+
+/** Dynamic CTA label based on whether plan is upgrade, downgrade, or current */
+function getPlanCTA(planId: string, currentPlan: Plan): string {
+  if (planId === currentPlan) return 'Current plan';
+  const planName = plans.find((p) => p.id === planId)?.name ?? planId;
+  return (PLAN_TIER[planId] ?? 0) > (PLAN_TIER[currentPlan] ?? 0)
+    ? `Upgrade to ${planName}`
+    : `Switch to ${planName}`;
+}
 
 const FAQ_ITEMS = [
   {
@@ -208,6 +216,7 @@ function useSubscription(organizationId: string | undefined) {
 function getBillingCycle(priceId: string | null): 'monthly' | 'annual' | null {
   if (!priceId) return null;
   const annualPrices = [
+    import.meta.env.VITE_STRIPE_PRICE_STARTER_ANNUAL,
     import.meta.env.VITE_STRIPE_PRICE_PRO_ANNUAL,
     import.meta.env.VITE_STRIPE_PRICE_BUSINESS_ANNUAL,
   ].filter(Boolean);
@@ -506,6 +515,7 @@ function PlanPicker({
   isAnnual,
   onToggleAnnual,
   onSelectPlan,
+  onManageBilling,
   isLoading,
 }: {
   isOpen: boolean;
@@ -514,6 +524,7 @@ function PlanPicker({
   isAnnual: boolean;
   onToggleAnnual: () => void;
   onSelectPlan: (planId: string) => void;
+  onManageBilling: () => void;
   isLoading: boolean;
 }) {
   if (!isOpen) return null;
@@ -567,10 +578,12 @@ function PlanPicker({
           </div>
 
           {/* Plan cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map((plan) => {
               const isCurrent = plan.id === currentPlan;
+              const isDowngrade = (PLAN_TIER[plan.id] ?? 0) < (PLAN_TIER[currentPlan] ?? 0);
               const displayPrice = isAnnual ? plan.annualPrice : plan.monthlyPrice;
+              const cta = getPlanCTA(plan.id, currentPlan);
 
               return (
                 <div
@@ -626,7 +639,14 @@ function PlanPicker({
                     className="w-full"
                     variant={isCurrent ? 'secondary' : plan.popular ? 'primary' : 'secondary'}
                     disabled={isCurrent || isLoading}
-                    onClick={() => onSelectPlan(plan.id)}
+                    onClick={() => {
+                      // "Switch to Free" = cancel subscription via billing portal
+                      if (plan.id === 'free' && !isCurrent) {
+                        onManageBilling();
+                      } else {
+                        onSelectPlan(plan.id);
+                      }
+                    }}
                   >
                     {isCurrent ? (
                       <>
@@ -635,8 +655,13 @@ function PlanPicker({
                       </>
                     ) : isLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isDowngrade && plan.id === 'free' ? (
+                      <>
+                        <ExternalLink className="w-4 h-4" />
+                        {cta}
+                      </>
                     ) : (
-                      plan.cta
+                      cta
                     )}
                   </Button>
                 </div>
@@ -890,6 +915,7 @@ export function BillingSettingsContent() {
           isAnnual={isAnnual}
           onToggleAnnual={() => setIsAnnual(!isAnnual)}
           onSelectPlan={handleUpgrade}
+          onManageBilling={handleManageBilling}
           isLoading={isLoading}
         />
       </div>
