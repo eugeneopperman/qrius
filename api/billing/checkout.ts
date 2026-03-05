@@ -242,8 +242,17 @@ async function handleSync(
     return res.status(404).json({ error: 'Organization not found' });
   }
 
+  logger.billing.info('Sync: org state', {
+    organizationId,
+    currentPlan: org.plan,
+    stripeCustomerId: org.stripe_customer_id,
+    stripeSubscriptionId: org.stripe_subscription_id,
+  });
+
   // No Stripe customer — ensure plan is free
   if (!org.stripe_customer_id) {
+    logger.billing.info('Sync: no stripe_customer_id, returning free');
+
     if (org.plan !== 'free') {
       await getSupabaseAdmin()
         .from('organizations')

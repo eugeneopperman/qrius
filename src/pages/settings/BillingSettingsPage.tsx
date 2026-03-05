@@ -806,11 +806,32 @@ export function BillingSettingsContent() {
 
   // Handle success/cancel URL params from Stripe redirect
   const search = useSearch({ strict: false }) as { success?: string; canceled?: string; initCheckout?: string; billing?: string };
+  const successHandled = useRef(false);
 
   useEffect(() => {
-    if (search.success === 'true') {
+    if (search.success === 'true' && !successHandled.current) {
+      successHandled.current = true;
       toast.success('Subscription updated successfully!');
-      fetchOrganizations();
+
+      // Run sync again after checkout to pick up the new subscription
+      (async () => {
+        try {
+          const session = await getSession();
+          if (session?.access_token) {
+            await fetch('/api/billing/checkout?action=sync', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.access_token}`,
+              },
+            });
+          }
+        } catch {
+          // non-fatal
+        }
+        await fetchOrganizations();
+        setSubRefreshKey((k) => k + 1);
+      })();
     } else if (search.canceled === 'true') {
       toast.info('Checkout canceled');
     }
