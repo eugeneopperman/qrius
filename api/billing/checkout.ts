@@ -193,15 +193,16 @@ async function handlePortal(
 }
 
 // Plan mapping from Stripe price IDs (monthly + annual for each tier)
+// Checks both STRIPE_PRICE_X and VITE_STRIPE_PRICE_X env vars
 function buildPriceToPlan(): Record<string, string> {
   const map: Record<string, string> = {};
   const entries: [string | undefined, string][] = [
-    [process.env.STRIPE_PRICE_STARTER, 'starter'],
-    [process.env.STRIPE_PRICE_STARTER_ANNUAL, 'starter'],
-    [process.env.STRIPE_PRICE_PRO, 'pro'],
-    [process.env.STRIPE_PRICE_PRO_ANNUAL, 'pro'],
-    [process.env.STRIPE_PRICE_BUSINESS, 'business'],
-    [process.env.STRIPE_PRICE_BUSINESS_ANNUAL, 'business'],
+    [process.env.STRIPE_PRICE_STARTER || process.env.VITE_STRIPE_PRICE_STARTER, 'starter'],
+    [process.env.STRIPE_PRICE_STARTER_ANNUAL || process.env.VITE_STRIPE_PRICE_STARTER_ANNUAL, 'starter'],
+    [process.env.STRIPE_PRICE_PRO || process.env.VITE_STRIPE_PRICE_PRO, 'pro'],
+    [process.env.STRIPE_PRICE_PRO_ANNUAL || process.env.VITE_STRIPE_PRICE_PRO_ANNUAL, 'pro'],
+    [process.env.STRIPE_PRICE_BUSINESS || process.env.VITE_STRIPE_PRICE_BUSINESS, 'business'],
+    [process.env.STRIPE_PRICE_BUSINESS_ANNUAL || process.env.VITE_STRIPE_PRICE_BUSINESS_ANNUAL, 'business'],
   ];
   for (const [priceId, plan] of entries) {
     if (priceId) map[priceId] = plan;
@@ -267,6 +268,24 @@ async function handleSync(
   });
 
   const priceToPlan = buildPriceToPlan();
+
+  // Log all subscriptions for debugging
+  logger.billing.info('Sync: found subscriptions', {
+    organizationId,
+    count: allSubs.data.length,
+    priceMapKeys: Object.keys(priceToPlan),
+    subscriptions: allSubs.data.map((s) => ({
+      id: s.id,
+      status: s.status,
+      cancel_at_period_end: s.cancel_at_period_end,
+      priceId: s.items.data[0]?.price.id,
+      productType: typeof s.items.data[0]?.price?.product,
+      productName: typeof s.items.data[0]?.price?.product === 'object'
+        ? (s.items.data[0].price.product as { name?: string }).name
+        : s.items.data[0]?.price?.product,
+      inferred: inferPlanFromSubscription(s, priceToPlan),
+    })),
+  });
 
   // Categorize subscriptions:
   // - "primary": active and NOT cancel_at_period_end (the real current plan)

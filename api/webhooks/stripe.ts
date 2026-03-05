@@ -19,15 +19,16 @@ function getStripe(): Stripe {
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
 // Plan mapping from Stripe price IDs (monthly + annual for each tier)
+// Checks both STRIPE_PRICE_X and VITE_STRIPE_PRICE_X env vars
 function buildPriceToPlan(): Record<string, string> {
   const map: Record<string, string> = {};
   const entries: [string | undefined, string][] = [
-    [process.env.STRIPE_PRICE_STARTER, 'starter'],
-    [process.env.STRIPE_PRICE_STARTER_ANNUAL, 'starter'],
-    [process.env.STRIPE_PRICE_PRO, 'pro'],
-    [process.env.STRIPE_PRICE_PRO_ANNUAL, 'pro'],
-    [process.env.STRIPE_PRICE_BUSINESS, 'business'],
-    [process.env.STRIPE_PRICE_BUSINESS_ANNUAL, 'business'],
+    [process.env.STRIPE_PRICE_STARTER || process.env.VITE_STRIPE_PRICE_STARTER, 'starter'],
+    [process.env.STRIPE_PRICE_STARTER_ANNUAL || process.env.VITE_STRIPE_PRICE_STARTER_ANNUAL, 'starter'],
+    [process.env.STRIPE_PRICE_PRO || process.env.VITE_STRIPE_PRICE_PRO, 'pro'],
+    [process.env.STRIPE_PRICE_PRO_ANNUAL || process.env.VITE_STRIPE_PRICE_PRO_ANNUAL, 'pro'],
+    [process.env.STRIPE_PRICE_BUSINESS || process.env.VITE_STRIPE_PRICE_BUSINESS, 'business'],
+    [process.env.STRIPE_PRICE_BUSINESS_ANNUAL || process.env.VITE_STRIPE_PRICE_BUSINESS_ANNUAL, 'business'],
   ];
   for (const [priceId, plan] of entries) {
     if (priceId) map[priceId] = plan;
