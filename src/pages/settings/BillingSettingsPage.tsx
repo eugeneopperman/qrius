@@ -186,13 +186,18 @@ interface SubscriptionRow {
   updated_at: string;
 }
 
-function useSubscription(organizationId: string | undefined) {
+function useSubscription(organizationId: string | undefined, refreshKey?: number) {
   const [subscription, setSubscription] = useState<SubscriptionRow | null>(null);
   const [isLoading, setIsLoading] = useState(!!organizationId);
 
   useEffect(() => {
-    if (!organizationId) return;
+    if (!organizationId) {
+      setSubscription(null);
+      setIsLoading(false);
+      return;
+    }
 
+    setIsLoading(true);
     let cancelled = false;
     supabase
       .from('subscriptions')
@@ -208,7 +213,7 @@ function useSubscription(organizationId: string | undefined) {
       });
 
     return () => { cancelled = true; };
-  }, [organizationId]);
+  }, [organizationId, refreshKey]);
 
   return { subscription, isLoading };
 }
@@ -723,16 +728,39 @@ export function BillingSettingsContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
   const [showPlanPicker, setShowPlanPicker] = useState(false);
+  const [subRefreshKey, setSubRefreshKey] = useState(0);
   const planPickerRef = useRef<HTMLDivElement>(null);
 
-  // Always re-fetch org data on mount to pick up plan changes
+  // Sync subscription status from Stripe on mount, then refresh org data
+  const syncTriggered = useRef(false);
   useEffect(() => {
-    fetchOrganizations();
+    if (syncTriggered.current) return;
+    syncTriggered.current = true;
+
+    (async () => {
+      try {
+        const session = await getSession();
+        if (session?.access_token) {
+          await fetch('/api/billing/sync', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          });
+        }
+      } catch {
+        // Sync failure is non-fatal — still show cached data
+      }
+      await fetchOrganizations();
+      setSubRefreshKey((k) => k + 1);
+    })();
   }, [fetchOrganizations]);
 
-  // Fetch subscription details for paid users
+  // Fetch subscription details (refreshes after sync completes)
   const { subscription, isLoading: isSubLoading } = useSubscription(
-    isFree ? undefined : currentOrganization?.id
+    currentOrganization?.id,
+    subRefreshKey
   );
 
   // Fetch usage data
