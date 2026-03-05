@@ -89,8 +89,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content — flex column app shell on mobile, normal flow on desktop */}
       <div className="lg:pl-64 max-lg:flex max-lg:flex-col max-lg:h-[100dvh] max-lg:overflow-hidden">
         {/* Mobile header — flex child, never scrolls */}
-        <div className="lg:hidden flex-shrink-0 z-30 p-3 flex items-center justify-center bg-[var(--color-bg)] border-b border-black/[0.04] dark:border-white/[0.04]">
+        <div className="lg:hidden flex-shrink-0 z-30 px-3 py-2 flex items-center justify-between bg-[var(--color-bg)] border-b border-black/[0.04] dark:border-white/[0.04]">
           <Link to="/dashboard"><Logo size="sm" /></Link>
+          <UserButton />
         </div>
 
         {/* Page content — scrollable area on mobile */}
