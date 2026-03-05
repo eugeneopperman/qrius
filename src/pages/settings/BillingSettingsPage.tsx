@@ -11,7 +11,6 @@ import { useUsageStats } from '@/hooks/queries/useUsageStats';
 import { cn } from '@/utils/cn';
 import type { Plan, SubscriptionStatus } from '@/types/database';
 import {
-  ArrowRight,
   Check,
   ChevronDown,
   ChevronRight,
@@ -325,7 +324,7 @@ function SubscriptionCard({
   onChangePlan,
   onManageBilling,
   isBillingLoading,
-  pendingPlan,
+  previousPlan,
 }: {
   subscription: SubscriptionRow | null;
   plan: Plan;
@@ -333,7 +332,7 @@ function SubscriptionCard({
   onChangePlan: () => void;
   onManageBilling: () => void;
   isBillingLoading: boolean;
-  pendingPlan: { plan: string; date: string } | null;
+  previousPlan: { plan: string; endDate: string } | null;
 }) {
   const badge = PLAN_BADGE[plan];
   const cycle = getBillingCycle(subscription?.stripe_price_id ?? null);
@@ -368,18 +367,8 @@ function SubscriptionCard({
       ) : (
         <div className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           <DetailRow label="Plan">
-            <span className="flex items-center gap-2">
-              <span className={cn('px-2.5 py-0.5 rounded-full text-xs font-semibold', badge.className)}>
-                {badge.label}
-              </span>
-              {pendingPlan && (
-                <>
-                  <ArrowRight className="w-3.5 h-3.5 text-gray-400" />
-                  <span className={cn('px-2.5 py-0.5 rounded-full text-xs font-semibold', PLAN_BADGE[pendingPlan.plan as Plan]?.className || PLAN_BADGE.free.className)}>
-                    {PLAN_BADGE[pendingPlan.plan as Plan]?.label || pendingPlan.plan}
-                  </span>
-                </>
-              )}
+            <span className={cn('px-2.5 py-0.5 rounded-full text-xs font-semibold', badge.className)}>
+              {badge.label}
             </span>
           </DetailRow>
           <DetailRow label="Status">
@@ -394,14 +383,8 @@ function SubscriptionCard({
             </DetailRow>
           )}
           {subscription?.current_period_end && (
-            <DetailRow label={
-              subscription.cancel_at_period_end ? 'Ends On'
-              : pendingPlan ? 'Switches On'
-              : 'Renews'
-            }>
-              {pendingPlan
-                ? formatDate(pendingPlan.date)
-                : formatDate(subscription.current_period_end)}
+            <DetailRow label={subscription.cancel_at_period_end ? 'Ends On' : 'Renews'}>
+              {formatDate(subscription.current_period_end)}
             </DetailRow>
           )}
           <DetailRow label="Amount">
@@ -410,24 +393,25 @@ function SubscriptionCard({
         </div>
       )}
 
-      {/* Scheduled plan change notice */}
-      {pendingPlan && (
+      {/* Previous plan winding down notice */}
+      {previousPlan && (
         <div className="mt-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40">
           <div className="flex items-start gap-2">
             <Clock className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
             <p className="text-sm text-blue-800 dark:text-blue-300">
-              Your <span className="font-semibold">{badge.label}</span> plan is active until{' '}
-              <span className="font-medium">{formatDate(pendingPlan.date)}</span>.
-              After that, you&apos;ll switch to the{' '}
-              <span className="font-semibold">{PLAN_BADGE[pendingPlan.plan as Plan]?.label || pendingPlan.plan}</span> plan.
-              You can change this anytime via Manage Billing.
+              Your previous{' '}
+              <span className="font-semibold">{PLAN_BADGE[previousPlan.plan as Plan]?.label || previousPlan.plan}</span>{' '}
+              plan is still active until{' '}
+              <span className="font-medium">{formatDate(previousPlan.endDate)}</span>{' '}
+              and will then be canceled automatically.
+              You can manage this via Manage Billing.
             </p>
           </div>
         </div>
       )}
 
       {/* Cancellation warning */}
-      {subscription?.cancel_at_period_end && !pendingPlan && (
+      {subscription?.cancel_at_period_end && !previousPlan && (
         <div className="mt-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40">
           <p className="text-sm text-amber-800 dark:text-amber-300">
             Your plan will be downgraded to Free on{' '}
@@ -765,7 +749,7 @@ export function BillingSettingsContent() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [showPlanPicker, setShowPlanPicker] = useState(false);
   const [subRefreshKey, setSubRefreshKey] = useState(0);
-  const [pendingPlan, setPendingPlan] = useState<{ plan: string; date: string } | null>(null);
+  const [previousPlan, setPreviousPlan] = useState<{ plan: string; endDate: string } | null>(null);
   const planPickerRef = useRef<HTMLDivElement>(null);
 
   // Sync subscription status from Stripe on mount, then refresh org data
@@ -787,8 +771,8 @@ export function BillingSettingsContent() {
           });
           if (resp.ok) {
             const data = await resp.json();
-            if (data.pending_plan && data.pending_plan_date) {
-              setPendingPlan({ plan: data.pending_plan, date: data.pending_plan_date });
+            if (data.previous_plan && data.previous_plan_end_date) {
+              setPreviousPlan({ plan: data.previous_plan, endDate: data.previous_plan_end_date });
             }
           }
         }
@@ -964,7 +948,7 @@ export function BillingSettingsContent() {
             onChangePlan={() => setShowPlanPicker(true)}
             onManageBilling={handleManageBilling}
             isBillingLoading={isLoading}
-            pendingPlan={pendingPlan}
+            previousPlan={previousPlan}
           />
 
           {/* Usage this period */}

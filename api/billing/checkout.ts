@@ -213,7 +213,7 @@ async function handleSync(
   res: VercelResponse,
   organizationId: string
 ) {
-  // Get organization's Stripe subscription ID
+  // Get organization details
   const { data: org, error: orgError } = await getSupabaseAdmin()
     .from('organizations')
     .select('id, plan, stripe_customer_id, stripe_subscription_id')
@@ -224,15 +224,13 @@ async function handleSync(
     return res.status(404).json({ error: 'Organization not found' });
   }
 
-  // No Stripe subscription — ensure plan is free
-  if (!org.stripe_subscription_id) {
+  // No Stripe customer — ensure plan is free
+  if (!org.stripe_customer_id) {
     if (org.plan !== 'free') {
       await getSupabaseAdmin()
         .from('organizations')
-        .update({ plan: 'free' })
+        .update({ plan: 'free', stripe_subscription_id: null })
         .eq('id', organizationId);
-
-      logger.billing.info('Sync: org had no subscription but non-free plan, corrected to free', { organizationId });
     }
 
     return res.status(200).json({
@@ -243,27 +241,44 @@ async function handleSync(
     });
   }
 
-  // Fetch the actual subscription from Stripe
-  let stripeSubscription: Stripe.Subscription;
-  try {
-    stripeSubscription = await getStripe().subscriptions.retrieve(org.stripe_subscription_id);
-  } catch (stripeError) {
-    // Subscription doesn't exist in Stripe (deleted, invalid ID, etc.)
-    logger.billing.warn('Sync: Stripe subscription not found, downgrading to free', {
-      organizationId,
-      subscriptionId: org.stripe_subscription_id,
-      error: String(stripeError),
-    });
+  // List ALL subscriptions for this customer from Stripe (source of truth)
+  const allSubs = await getStripe().subscriptions.list({
+    customer: org.stripe_customer_id,
+    limit: 10,
+  });
 
+  const priceToPlan = buildPriceToPlan();
+
+  // Categorize subscriptions:
+  // - "primary": active and NOT cancel_at_period_end (the real current plan)
+  // - "winding_down": active but cancel_at_period_end (old plan being phased out)
+  // - "canceled": already ended
+  let primarySub: Stripe.Subscription | null = null;
+  let windingDownSub: Stripe.Subscription | null = null;
+
+  for (const sub of allSubs.data) {
+    if (sub.status === 'active' && !sub.cancel_at_period_end) {
+      // Prefer the most recently created active subscription
+      if (!primarySub || sub.created > primarySub.created) {
+        primarySub = sub;
+      }
+    } else if (sub.status === 'active' && sub.cancel_at_period_end) {
+      windingDownSub = sub;
+    }
+  }
+
+  // If no active non-canceling subscription, fall back to any active sub
+  if (!primarySub && windingDownSub) {
+    primarySub = windingDownSub;
+    windingDownSub = null;
+  }
+
+  // No active subscriptions at all — downgrade to free
+  if (!primarySub) {
     await getSupabaseAdmin()
       .from('organizations')
       .update({ plan: 'free', stripe_subscription_id: null })
       .eq('id', organizationId);
-
-    await getSupabaseAdmin()
-      .from('subscriptions')
-      .update({ status: 'canceled' })
-      .eq('stripe_subscription_id', org.stripe_subscription_id);
 
     return res.status(200).json({
       synced: true,
@@ -273,93 +288,57 @@ async function handleSync(
     });
   }
 
-  const priceToPlan = buildPriceToPlan();
-  const priceId = stripeSubscription.items.data[0]?.price.id;
-  const stripePlan = priceId ? (priceToPlan[priceId] || 'free') : 'free';
-  const stripeStatus = stripeSubscription.status;
-  const cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
+  // Determine plan from the primary (active) subscription
+  const priceId = primarySub.items.data[0]?.price.id;
+  const effectivePlan = priceId ? (priceToPlan[priceId] || 'free') : 'free';
+  const cancelAtPeriodEnd = primarySub.cancel_at_period_end;
 
-  // Check for scheduled plan change (e.g., downgrade at end of period)
-  let pendingPlan: string | null = null;
-  let pendingPlanDate: string | null = null;
-
-  const scheduleId = stripeSubscription.schedule;
-  if (scheduleId) {
-    try {
-      const schedule = await getStripe().subscriptionSchedules.retrieve(
-        typeof scheduleId === 'string' ? scheduleId : scheduleId.id
-      );
-
-      if (schedule.phases && schedule.phases.length > 1) {
-        // Find the next phase (after current)
-        const currentPhaseIndex = schedule.current_phase
-          ? schedule.phases.findIndex(
-              (p) =>
-                p.start_date === (schedule.current_phase as { start_date: number; end_date: number }).start_date
-            )
-          : 0;
-        const nextPhase = schedule.phases[currentPhaseIndex + 1];
-
-        if (nextPhase) {
-          const nextPriceId = nextPhase.items?.[0]?.price;
-          const nextPriceStr = typeof nextPriceId === 'string' ? nextPriceId : (nextPriceId as { id: string })?.id;
-          if (nextPriceStr) {
-            pendingPlan = priceToPlan[nextPriceStr] || null;
-          }
-          pendingPlanDate = new Date(nextPhase.start_date * 1000).toISOString();
-        }
-      }
-    } catch (scheduleError) {
-      logger.billing.warn('Failed to retrieve subscription schedule', {
-        organizationId,
-        scheduleId: String(scheduleId),
-        error: String(scheduleError),
-      });
-    }
+  // Build previous plan info (old subscription that's winding down)
+  let previousPlan: string | null = null;
+  let previousPlanEndDate: string | null = null;
+  if (windingDownSub) {
+    const oldPriceId = windingDownSub.items.data[0]?.price.id;
+    previousPlan = oldPriceId ? (priceToPlan[oldPriceId] || null) : null;
+    previousPlanEndDate = new Date(windingDownSub.current_period_end * 1000).toISOString();
   }
 
-  // If subscription is canceled or incomplete_expired, plan is free
-  const isCanceled = stripeStatus === 'canceled' || stripeStatus === 'incomplete_expired';
-  const effectivePlan = isCanceled ? 'free' : stripePlan;
-
-  // Update organization plan
-  const orgUpdate: Record<string, unknown> = { plan: effectivePlan };
-  if (isCanceled) {
-    orgUpdate.stripe_subscription_id = null;
-  }
-
+  // Update organization to point to the correct (primary) subscription
   await getSupabaseAdmin()
     .from('organizations')
-    .update(orgUpdate)
+    .update({
+      plan: effectivePlan,
+      stripe_subscription_id: primarySub.id,
+    })
     .eq('id', organizationId);
 
-  // Upsert subscription record
+  // Upsert subscription record for the primary subscription
   await getSupabaseAdmin().from('subscriptions').upsert({
     organization_id: organizationId,
-    stripe_subscription_id: stripeSubscription.id,
+    stripe_subscription_id: primarySub.id,
     stripe_price_id: priceId || null,
-    status: stripeStatus === 'incomplete_expired' ? 'canceled' : stripeStatus,
-    current_period_start: new Date(stripeSubscription.current_period_start * 1000).toISOString(),
-    current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+    status: primarySub.status,
+    current_period_start: new Date(primarySub.current_period_start * 1000).toISOString(),
+    current_period_end: new Date(primarySub.current_period_end * 1000).toISOString(),
     cancel_at_period_end: cancelAtPeriodEnd,
   });
 
   logger.billing.info('Sync completed', {
     organizationId,
-    stripePlan,
     effectivePlan,
-    stripeStatus,
+    status: primarySub.status,
     cancelAtPeriodEnd,
-    pendingPlan,
-    pendingPlanDate,
+    previousPlan,
+    previousPlanEndDate,
+    totalSubscriptions: allSubs.data.length,
   });
 
   return res.status(200).json({
     synced: true,
     plan: effectivePlan,
-    status: stripeStatus,
+    status: primarySub.status,
     cancel_at_period_end: cancelAtPeriodEnd,
-    pending_plan: pendingPlan,
-    pending_plan_date: pendingPlanDate,
+    // previous_plan: the old plan that's still active but canceling at period end
+    previous_plan: previousPlan,
+    previous_plan_end_date: previousPlanEndDate,
   });
 }
