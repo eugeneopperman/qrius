@@ -589,7 +589,7 @@ function PlanPicker({
                 <div
                   key={plan.id}
                   className={cn(
-                    'relative glass rounded-2xl border-2 p-6',
+                    'relative glass rounded-2xl border-2 p-6 flex flex-col',
                     plan.popular
                       ? 'border-orange-500'
                       : isCurrent
@@ -625,7 +625,7 @@ function PlanPicker({
                     )}
                   </div>
 
-                  <ul className="space-y-3 mb-6">
+                  <ul className="space-y-3 mb-6 flex-1">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-center gap-2 text-sm">
                         <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -637,7 +637,7 @@ function PlanPicker({
 
                   <Button
                     className="w-full"
-                    variant={isCurrent ? 'secondary' : plan.popular ? 'primary' : 'secondary'}
+                    variant={isCurrent ? 'secondary' : 'primary'}
                     disabled={isCurrent || isLoading}
                     onClick={() => {
                       // "Switch to Free" = cancel subscription via billing portal
