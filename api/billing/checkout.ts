@@ -279,6 +279,45 @@ async function handleSync(
   const stripeStatus = stripeSubscription.status;
   const cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end;
 
+  // Check for scheduled plan change (e.g., downgrade at end of period)
+  let pendingPlan: string | null = null;
+  let pendingPlanDate: string | null = null;
+
+  const scheduleId = stripeSubscription.schedule;
+  if (scheduleId) {
+    try {
+      const schedule = await getStripe().subscriptionSchedules.retrieve(
+        typeof scheduleId === 'string' ? scheduleId : scheduleId.id
+      );
+
+      if (schedule.phases && schedule.phases.length > 1) {
+        // Find the next phase (after current)
+        const currentPhaseIndex = schedule.current_phase
+          ? schedule.phases.findIndex(
+              (p) =>
+                p.start_date === (schedule.current_phase as { start_date: number; end_date: number }).start_date
+            )
+          : 0;
+        const nextPhase = schedule.phases[currentPhaseIndex + 1];
+
+        if (nextPhase) {
+          const nextPriceId = nextPhase.items?.[0]?.price;
+          const nextPriceStr = typeof nextPriceId === 'string' ? nextPriceId : (nextPriceId as { id: string })?.id;
+          if (nextPriceStr) {
+            pendingPlan = priceToPlan[nextPriceStr] || null;
+          }
+          pendingPlanDate = new Date(nextPhase.start_date * 1000).toISOString();
+        }
+      }
+    } catch (scheduleError) {
+      logger.billing.warn('Failed to retrieve subscription schedule', {
+        organizationId,
+        scheduleId: String(scheduleId),
+        error: String(scheduleError),
+      });
+    }
+  }
+
   // If subscription is canceled or incomplete_expired, plan is free
   const isCanceled = stripeStatus === 'canceled' || stripeStatus === 'incomplete_expired';
   const effectivePlan = isCanceled ? 'free' : stripePlan;
@@ -311,6 +350,8 @@ async function handleSync(
     effectivePlan,
     stripeStatus,
     cancelAtPeriodEnd,
+    pendingPlan,
+    pendingPlanDate,
   });
 
   return res.status(200).json({
@@ -318,5 +359,7 @@ async function handleSync(
     plan: effectivePlan,
     status: stripeStatus,
     cancel_at_period_end: cancelAtPeriodEnd,
+    pending_plan: pendingPlan,
+    pending_plan_date: pendingPlanDate,
   });
 }
