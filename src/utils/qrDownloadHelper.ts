@@ -1,11 +1,27 @@
 import type QRCodeStyling from 'qr-code-styling';
 
+/** Race a promise against a timeout. Rejects with a descriptive error on timeout. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Download timed out. Please try again.')), ms)
+    ),
+  ]);
+}
+
+/** Default timeout for individual download operations (ms) */
+const DOWNLOAD_TIMEOUT = 10_000;
+
 /**
  * Robust QR code rasterization with multiple fallbacks.
  *
  * 1. Try library's getRawData (canvas.toBlob — works when type is 'canvas')
  * 2. Fallback: access internal canvas directly and export
  * 3. Fallback: serialize SVG to Blob URL and rasterize (avoids btoa)
+ *
+ * Each approach is guarded by a timeout to prevent indefinite hangs
+ * (e.g. if the library's internal drawing promise never resolves).
  */
 export async function rasterizeQRToBlob(
   qrInstance: QRCodeStyling,
@@ -16,7 +32,7 @@ export async function rasterizeQRToBlob(
 
   // Approach 1: library's getRawData (uses canvas.toBlob directly for canvas type)
   try {
-    const rawData = await qrInstance.getRawData(format);
+    const rawData = await withTimeout(qrInstance.getRawData(format), DOWNLOAD_TIMEOUT);
     if (rawData && rawData instanceof Blob) {
       return rawData;
     }
@@ -34,15 +50,18 @@ export async function rasterizeQRToBlob(
   // Approach 2: access internal canvas directly
   if (instance._canvasDrawingPromise) {
     try {
-      await instance._canvasDrawingPromise;
-    } catch { /* ignore */ }
+      await withTimeout(instance._canvasDrawingPromise, DOWNLOAD_TIMEOUT);
+    } catch { /* ignore — fall through to try canvas anyway */ }
   }
 
   if (instance._domCanvas) {
     try {
-      const blob = await new Promise<Blob | null>((resolve) => {
-        instance._domCanvas!.toBlob((b) => resolve(b), mimeType, quality);
-      });
+      const blob = await withTimeout(
+        new Promise<Blob | null>((resolve) => {
+          instance._domCanvas!.toBlob((b) => resolve(b), mimeType, quality);
+        }),
+        DOWNLOAD_TIMEOUT,
+      );
       if (blob) return blob;
     } catch (e) {
       if (import.meta.env.DEV) console.warn('QR canvas.toBlob failed, trying SVG fallback:', e);
@@ -52,7 +71,7 @@ export async function rasterizeQRToBlob(
   // Approach 3: SVG → Blob URL → Image → Canvas → Blob (avoids btoa)
   if (instance._svgDrawingPromise) {
     try {
-      await instance._svgDrawingPromise;
+      await withTimeout(instance._svgDrawingPromise, DOWNLOAD_TIMEOUT);
     } catch { /* ignore */ }
   }
 

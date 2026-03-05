@@ -91,20 +91,16 @@ export function useQRDownload({
             const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
             const quality = format === 'jpeg' ? 0.92 : undefined;
 
-            canvas.toBlob(
-              (blob) => {
-                if (blob) {
-                  downloadBlob(blob, `qrcode.${format}`);
-                  toast.success(`QR code with frame downloaded as ${format.toUpperCase()}`);
-                  onSuccess?.();
-                } else {
-                  toast.error('Failed to generate image. Please try again.');
-                }
-                setIsDownloading(false);
-              },
-              mimeType,
-              quality
-            );
+            const blob = await new Promise<Blob | null>((resolve) => {
+              canvas.toBlob((b) => resolve(b), mimeType, quality);
+            });
+            if (blob) {
+              downloadBlob(blob, `qrcode.${format}`);
+              toast.success(`QR code with frame downloaded as ${format.toUpperCase()}`);
+              onSuccess?.();
+            } else {
+              toast.error('Failed to generate image. Please try again.');
+            }
             return;
           }
           // html2canvas failed — fall through to QR-only download

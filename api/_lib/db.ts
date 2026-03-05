@@ -14,6 +14,19 @@ if (!connectionString) {
 
 export const sql = connectionString ? neon(connectionString) : null;
 
+/**
+ * Execute a parameterized SQL query and return typed results.
+ * Centralizes the cast from Neon's generic Record<string, unknown> rows
+ * to our application-specific row types (QRCodeRow, ScanEventRow, etc.).
+ *
+ * Use this instead of `sql.query()` + `as unknown as` double casts.
+ */
+export async function typedQuery<T>(queryText: string, params?: unknown[]): Promise<T[]> {
+  if (!sql) throw new Error('Database not configured');
+  const result = await sql.query(queryText, params);
+  return result as unknown as T[];
+}
+
 // Type definitions for database rows
 export interface QRCodeRow {
   id: string;

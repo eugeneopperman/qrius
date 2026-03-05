@@ -11,6 +11,13 @@ export interface PaymentFailureDetails {
   nextAttempt?: Date;
 }
 
+/** Shape of the Supabase join result for user:users(email) */
+interface MemberWithUser {
+  user_id: string;
+  role: string;
+  user: { email: string } | null;
+}
+
 /**
  * Get organization admin emails for notifications
  */
@@ -30,8 +37,8 @@ async function getOrgAdminEmails(organizationId: string): Promise<string[]> {
     return [];
   }
 
-  return members
-    .map((m) => (m.user as unknown as { email: string } | null)?.email)
+  return (members as unknown as MemberWithUser[])
+    .map((m) => m.user?.email)
     .filter((email): email is string => !!email);
 }
 

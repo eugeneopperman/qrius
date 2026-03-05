@@ -3,7 +3,7 @@
 // PATCH /api/qr-codes?action=bulk - Bulk update QR codes
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, toQRCodeResponse, type QRCodeRow } from '../_lib/db.js';
+import { sql, typedQuery, toQRCodeResponse, type QRCodeRow } from '../_lib/db.js';
 import { generateShortCode } from '../_lib/shortCode.js';
 import { setCachedRedirect } from '../_lib/kv.js';
 import { logger } from '../_lib/logger.js';
@@ -77,6 +77,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
+      // Rate limit unauthenticated QR creation by IP (10/day)
+      if (!authContext) {
+        const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || 'unknown';
+        const rl = await checkRateLimit(`qr-unauth:${ip}`, 10);
+        setRateLimitHeaders(res, rl);
+        if (!rl.allowed) {
+          return res.status(429).json({ error: 'Rate limit exceeded. Sign in for higher limits.' });
+        }
+      }
       return await handleCreate(req, res, baseUrl, authContext);
     }
 
@@ -397,10 +406,10 @@ async function handleList(
   // Parallelize: list + count + status counts + customDomain + monthlyScans + teamMembers
   const currentMonth = new Date().toISOString().slice(0, 7) + '-01';
 
-  const listPromise = sql.query(
+  const listPromise = typedQuery<QRCodeRow>(
     `SELECT ${selectCols} FROM qr_codes WHERE ${whereClause} ${orderClause} LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
     [...params, limit, offset]
-  ) as unknown as Promise<QRCodeRow[]>;
+  );
 
   const countPromise = sql.query(
     `SELECT COUNT(*) as count FROM qr_codes WHERE ${whereClause}`,

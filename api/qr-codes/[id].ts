@@ -1,7 +1,7 @@
 // GET/PATCH/DELETE /api/qr-codes/:id - Get, update, or delete a QR code
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { sql, toQRCodeResponse, toScanEventResponse, type QRCodeRow, type ScanEventRow } from '../_lib/db.js';
+import { sql, typedQuery, toQRCodeResponse, toScanEventResponse, type QRCodeRow, type ScanEventRow } from '../_lib/db.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { isValidHttpUrl, isValidUUID, validateOptionalString } from '../_lib/validate.js';
 import { invalidateCachedRedirect } from '../_lib/kv.js';
@@ -435,7 +435,7 @@ async function handlePatch(
     return `${field} = $${i + 2}`;
   }).join(', ');
 
-  const result = await sql.query(
+  const result = await typedQuery<QRCodeRow>(
     `UPDATE qr_codes SET ${setClauses}, updated_at = NOW() WHERE id = $1 RETURNING *`,
     [id, ...values]
   );
@@ -449,7 +449,7 @@ async function handlePatch(
     await invalidateCachedRedirect(qrCode.short_code);
   }
 
-  const updated = result[0] as unknown as QRCodeRow;
+  const updated = result[0];
 
   logger.qrCodes.info('QR code updated', { id, userId: user.id, fields: updates });
 

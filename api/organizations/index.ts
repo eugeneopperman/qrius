@@ -5,6 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'node:crypto';
 import { requireAuth, getSupabaseAdmin, UnauthorizedError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
+import { checkRateLimit } from '../_lib/rateLimit.js';
 import { logger } from '../_lib/logger.js';
 
 interface CreateOrgRequest {
@@ -74,6 +75,12 @@ async function handleList(req: VercelRequest, res: VercelResponse, userId: strin
 }
 
 async function handleCreate(req: VercelRequest, res: VercelResponse, userId: string) {
+  // Rate limit: 5 org creates per day per user
+  const rateLimit = await checkRateLimit(`org:${userId}`, 5);
+  if (!rateLimit.allowed) {
+    return res.status(429).json({ error: 'Too many organizations created. Please try again later.' });
+  }
+
   const body = req.body as CreateOrgRequest;
 
   if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {

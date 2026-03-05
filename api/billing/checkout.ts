@@ -5,6 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { requireAuth, getSupabaseAdmin, getUserOrganization, requireRole, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { setCorsHeaders } from '../_lib/cors.js';
+import { checkRateLimit } from '../_lib/rateLimit.js';
 import { isValidHttpUrl } from '../_lib/validate.js';
 import { logger } from '../_lib/logger.js';
 
@@ -39,6 +40,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Authenticate user
     const user = await requireAuth(req);
+
+    // Rate limit: 10 checkout/portal requests per day per user
+    const rateLimit = await checkRateLimit(`billing:${user.id}`, 10);
+    if (!rateLimit.allowed) {
+      return res.status(429).json({ error: 'Too many billing requests. Please try again later.' });
+    }
+
     const { organizationId } = await getUserOrganization(user.id);
 
     // Only owners and admins can manage billing
