@@ -36,6 +36,12 @@ export function PublicFooter({ className = 'glass-medium mt-16' }: PublicFooterP
               >
                 Cookies
               </Link>
+              <Link
+                to="/acceptable-use"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Acceptable Use
+              </Link>
             </div>
           </div>
           <button

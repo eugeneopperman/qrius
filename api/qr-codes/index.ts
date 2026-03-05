@@ -20,6 +20,7 @@ import {
 import { setCorsHeaders } from '../_lib/cors.js';
 import { checkRateLimit, setRateLimitHeaders } from '../_lib/rateLimit.js';
 import { isValidHttpUrl, isValidUUID, validateOptionalString, validateStringArray, validateOriginalData } from '../_lib/validate.js';
+import { checkUrlBlocklist } from '../_lib/blocklist.js';
 
 interface CreateQRCodeRequest {
   destination_url: string;
@@ -136,6 +137,21 @@ async function handleCreate(
 
   if (body.destination_url.length > 4096) {
     return res.status(400).json({ error: 'destination_url must be 4096 characters or fewer' });
+  }
+
+  // Blocklist check for URL-type codes
+  let blocklistFlagged = false;
+  let blocklistReason: string | null = null;
+  if (isUrlType) {
+    const blResult = checkUrlBlocklist(body.destination_url);
+    if (blResult.blocked) {
+      logger.qrCodes.warn('Blocked URL on create', { url: body.destination_url, reason: blResult.reason, domain: blResult.domain });
+      return res.status(400).json({ error: 'This URL has been flagged as potentially harmful and cannot be used.' });
+    }
+    if (blResult.flagged) {
+      blocklistFlagged = true;
+      blocklistReason = blResult.reason;
+    }
   }
 
   // Validate optional string fields
@@ -291,6 +307,20 @@ async function handleCreate(
     qrCodeId: row.id,
     organizationId,
   });
+
+  // Auto-flag suspicious URLs (fire-and-forget)
+  if (blocklistFlagged && sql) {
+    void (async () => {
+      try {
+        await sql`UPDATE qr_codes SET moderation_status = 'flagged', updated_at = NOW() WHERE id = ${row.id}`;
+        await sql`INSERT INTO moderation_reports (qr_code_id, short_code, reported_url, reason, source, description)
+          VALUES (${row.id}, ${shortCode}, ${body.destination_url}, 'scam', 'auto', ${blocklistReason})`;
+        logger.qrCodes.info('Auto-flagged QR code on create', { id: row.id, reason: blocklistReason });
+      } catch (e) {
+        logger.qrCodes.error('Auto-flag failed', { id: row.id, error: String(e) });
+      }
+    })();
+  }
 
   return res.status(201).json(toQRCodeResponse(row, baseUrl, customDomain));
 }

@@ -4,6 +4,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, typedQuery, toQRCodeResponse, toScanEventResponse, type QRCodeRow, type ScanEventRow } from '../_lib/db.js';
 import { setCorsHeaders } from '../_lib/cors.js';
 import { isValidHttpUrl, isValidUUID, validateOptionalString } from '../_lib/validate.js';
+import { checkUrlBlocklist } from '../_lib/blocklist.js';
 import { invalidateCachedRedirect } from '../_lib/kv.js';
 import { requireAuth, getUserOrganization, getOrgCustomDomain, UnauthorizedError, ForbiddenError } from '../_lib/auth.js';
 import { logger } from '../_lib/logger.js';
@@ -330,6 +331,14 @@ async function handlePatch(
     }
     if (body.destination_url.length > 4096) {
       return res.status(400).json({ error: 'destination_url must be 4096 characters or fewer' });
+    }
+    // Blocklist check on URL update
+    if (isUrlType) {
+      const blResult = checkUrlBlocklist(body.destination_url);
+      if (blResult.blocked) {
+        logger.qrCodes.warn('Blocked URL on PATCH', { id, url: body.destination_url, reason: blResult.reason });
+        return res.status(400).json({ error: 'This URL has been flagged as potentially harmful and cannot be used.' });
+      }
     }
   }
 

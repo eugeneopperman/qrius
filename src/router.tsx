@@ -127,6 +127,11 @@ const InviteAcceptPage = lazy(() => import('@/pages/InviteAcceptPage'));
 
 // Admin
 const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'));
+const AdminModerationPage = lazy(() => import('@/pages/AdminModerationPage'));
+
+// Moderation / Legal
+const ReportPage = lazy(() => import('@/pages/ReportPage'));
+const AcceptableUsePage = lazy(() => import('@/pages/AcceptableUsePage'));
 
 // Error pages
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
@@ -578,6 +583,28 @@ const adminRoute = createRoute({
   errorComponent: ErrorPage,
 });
 
+// Public moderation routes
+const reportRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/report',
+  component: ReportPage,
+});
+
+const acceptableUseRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/acceptable-use',
+  component: AcceptableUsePage,
+});
+
+// Admin moderation route
+const adminModerationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/moderation',
+  beforeLoad: requireAdmin,
+  component: AdminModerationPage,
+  errorComponent: ErrorPage,
+});
+
 // Redirects for old settings sub-routes
 const profileSettingsRedirect = createRoute({
   getParentRoute: () => rootRoute,
@@ -662,6 +689,9 @@ const routeTree = rootRoute.addChildren([
   readerRoute,
   settingsRoute,
   adminRoute,
+  adminModerationRoute,
+  reportRoute,
+  acceptableUseRoute,
   profileSettingsRedirect,
   teamSettingsRedirect,
   billingSettingsRedirect,

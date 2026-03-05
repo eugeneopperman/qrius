@@ -26,6 +26,7 @@ interface CachedRedirect {
   destinationUrl: string;
   qrCodeId: string;
   organizationId: string | null;
+  moderationStatus?: string;
 }
 
 export default async function handler(req: Request): Promise<Response> {
@@ -98,7 +99,7 @@ export default async function handler(req: Request): Promise<Response> {
     // Cache miss - query database
     if (!redirectData) {
       const result = await sql`
-        SELECT id, destination_url, is_active, organization_id
+        SELECT id, destination_url, is_active, organization_id, moderation_status
         FROM qr_codes
         WHERE short_code = ${shortCode}
       `;
@@ -122,6 +123,7 @@ export default async function handler(req: Request): Promise<Response> {
         destinationUrl: row.destination_url as string,
         qrCodeId: row.id as string,
         organizationId: (row.organization_id as string) || null,
+        moderationStatus: (row.moderation_status as string) || 'clean',
       };
 
       // Cache for next time (non-blocking)
@@ -130,6 +132,15 @@ export default async function handler(req: Request): Promise<Response> {
           logger.kv.warn('Cache write error', { shortCode, error: String(error) });
         });
       }
+    }
+
+    // Check moderation status — suspended codes show violation page
+    if (redirectData.moderationStatus === 'suspended') {
+      logger.redirect.warn('Suspended QR code accessed', { shortCode });
+      return new Response(
+        '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Content Removed</title></head><body style="font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#fef2f2;color:#374151;text-align:center"><div style="max-width:420px;padding:2rem"><h1 style="font-size:1.5rem;margin-bottom:0.5rem;color:#991b1b">Content Removed</h1><p style="color:#6b7280;margin-bottom:1rem">This QR code has been suspended for violating our <a href="https://qriuscodes.com/acceptable-use" style="color:#ea580c;text-decoration:underline">Acceptable Use Policy</a>.</p><p style="color:#9ca3af;font-size:0.875rem">If you believe this is an error, please contact <a href="mailto:support@qriuscodes.com" style="color:#ea580c">support@qriuscodes.com</a>.</p></div></body></html>',
+        { status: 451, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+      );
     }
 
     // Validate redirect URL protocol before redirecting

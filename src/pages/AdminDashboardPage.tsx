@@ -1,6 +1,7 @@
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useAdminStats } from '@/hooks/queries/useAdminStats';
 import type { AdminStats } from '@/hooks/queries/useAdminStats';
+import { Link } from '@tanstack/react-router';
 import {
   Users,
   UserPlus,
@@ -14,6 +15,7 @@ import {
   Loader2,
   AlertTriangle,
   RefreshCw,
+  ShieldAlert,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -240,6 +242,20 @@ export default function AdminDashboardPage() {
             Refresh
           </button>
         </div>
+        {/* Moderation Queue link */}
+        <Link
+          to="/admin/moderation"
+          className="glass rounded-2xl p-4 mb-6 flex items-center gap-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+        >
+          <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+            <ShieldAlert className="w-5 h-5 text-red-600 dark:text-red-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">Content Moderation Queue</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Review abuse reports and flagged QR codes</p>
+          </div>
+        </Link>
+
         <AdminContent data={data} />
       </div>
     </DashboardLayout>

@@ -35,6 +35,7 @@ export interface QRCodeRow {
   qr_type: string;
   original_data: unknown;
   status: 'draft' | 'active' | 'paused';
+  moderation_status: 'clean' | 'flagged' | 'suspended';
   is_active: boolean;
   total_scans: number;
   user_id: string | null;
@@ -74,6 +75,7 @@ export function toQRCodeResponse(row: QRCodeRow, baseUrl: string, customDomain?:
     qr_type: row.qr_type,
     original_data: row.original_data,
     status: row.status,
+    moderation_status: row.moderation_status,
     is_active: row.is_active,
     total_scans: row.total_scans,
     user_id: row.user_id,
