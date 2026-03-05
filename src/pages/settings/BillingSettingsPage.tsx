@@ -741,7 +741,7 @@ export function BillingSettingsContent() {
       try {
         const session = await getSession();
         if (session?.access_token) {
-          await fetch('/api/billing/sync', {
+          await fetch('/api/billing/checkout?action=sync', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
