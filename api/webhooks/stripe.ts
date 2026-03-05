@@ -36,6 +36,29 @@ function buildPriceToPlan(): Record<string, string> {
 }
 const priceToPlan = buildPriceToPlan();
 
+/** Infer plan from a Stripe price ID, falling back to product name lookup */
+async function inferPlan(priceId: string | undefined): Promise<string> {
+  if (priceId && priceToPlan[priceId]) return priceToPlan[priceId];
+
+  // Fallback: fetch the price's product name from Stripe
+  if (priceId) {
+    try {
+      const price = await getStripe().prices.retrieve(priceId, { expand: ['product'] });
+      const product = price.product;
+      if (product && typeof product === 'object' && 'name' in product) {
+        const name = (product as { name: string }).name.toLowerCase();
+        if (name.includes('business')) return 'business';
+        if (name.includes('pro')) return 'pro';
+        if (name.includes('starter')) return 'starter';
+      }
+    } catch {
+      // If price lookup fails, fall through to 'free'
+    }
+  }
+
+  return 'free';
+}
+
 export const config = {
   api: {
     bodyParser: false, // Stripe webhooks require raw body
@@ -118,7 +141,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
   const priceId = subscription.items.data[0]?.price.id;
-  const plan = priceToPlan[priceId] || 'free';
+  const plan = await inferPlan(priceId);
 
   // Update organization with subscription info
   const { error: orgUpdateError } = await getSupabaseAdmin()
@@ -153,7 +176,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
 async function updateSubscription(orgId: string, subscription: Stripe.Subscription) {
   const priceId = subscription.items.data[0]?.price.id;
-  const plan = priceToPlan[priceId] || 'free';
+  const plan = await inferPlan(priceId);
 
   // Update organization plan
   const { error: orgUpdateError } = await getSupabaseAdmin()

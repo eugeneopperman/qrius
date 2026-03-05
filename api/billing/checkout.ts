@@ -209,6 +209,23 @@ function buildPriceToPlan(): Record<string, string> {
   return map;
 }
 
+/** Infer plan from a Stripe subscription's product name when price ID isn't in env var mapping */
+function inferPlanFromSubscription(sub: Stripe.Subscription, priceToPlan: Record<string, string>): string {
+  const priceId = sub.items.data[0]?.price.id;
+  if (priceId && priceToPlan[priceId]) return priceToPlan[priceId];
+
+  // Fallback: check product name (expanded or string)
+  const product = sub.items.data[0]?.price?.product;
+  if (product && typeof product === 'object' && 'name' in product) {
+    const name = (product as { name: string }).name.toLowerCase();
+    if (name.includes('business')) return 'business';
+    if (name.includes('pro')) return 'pro';
+    if (name.includes('starter')) return 'starter';
+  }
+
+  return 'free';
+}
+
 async function handleSync(
   res: VercelResponse,
   organizationId: string
@@ -242,9 +259,11 @@ async function handleSync(
   }
 
   // List ALL subscriptions for this customer from Stripe (source of truth)
+  // Expand product so we can infer plan from product name as fallback
   const allSubs = await getStripe().subscriptions.list({
     customer: org.stripe_customer_id,
     limit: 10,
+    expand: ['data.items.data.price.product'],
   });
 
   const priceToPlan = buildPriceToPlan();
@@ -290,15 +309,15 @@ async function handleSync(
 
   // Determine plan from the primary (active) subscription
   const priceId = primarySub.items.data[0]?.price.id;
-  const effectivePlan = priceId ? (priceToPlan[priceId] || 'free') : 'free';
+  const effectivePlan = inferPlanFromSubscription(primarySub, priceToPlan);
   const cancelAtPeriodEnd = primarySub.cancel_at_period_end;
 
   // Build previous plan info (old subscription that's winding down)
   let previousPlan: string | null = null;
   let previousPlanEndDate: string | null = null;
   if (windingDownSub) {
-    const oldPriceId = windingDownSub.items.data[0]?.price.id;
-    previousPlan = oldPriceId ? (priceToPlan[oldPriceId] || null) : null;
+    const inferred = inferPlanFromSubscription(windingDownSub, priceToPlan);
+    previousPlan = inferred !== 'free' ? inferred : null;
     previousPlanEndDate = new Date(windingDownSub.current_period_end * 1000).toISOString();
   }
 
