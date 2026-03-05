@@ -478,7 +478,7 @@ function FreeOverviewCard({
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Unlock more with Pro</h3>
         </div>
         <ul className="space-y-2 mb-4">
-          {['250 dynamic QR codes', '100K scans/month', 'SVG & PDF downloads', 'API access & advanced analytics'].map((feature) => (
+          {['500 dynamic QR codes', 'Unlimited scans', 'SVG & PDF downloads', 'API access & advanced analytics'].map((feature) => (
             <li key={feature} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <Check className="w-3.5 h-3.5 text-orange-500 flex-shrink-0" />
               {feature}

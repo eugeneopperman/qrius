@@ -128,7 +128,7 @@ export default function PrivacyPage() {
         <ul className="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2">
           <li><strong>Account Data:</strong> Retained until you delete your account</li>
           <li><strong>QR Code Data:</strong> Retained until you delete the QR code or your account</li>
-          <li><strong>Scan Analytics:</strong> Retained based on your plan (30 days for Free, 1 year for Pro, 2 years for Business)</li>
+          <li><strong>Scan Analytics:</strong> Retained based on your plan (7 days for Free, 90 days for Starter, 1 year for Pro, unlimited for Business)</li>
           <li><strong>Payment Records:</strong> Retained for 7 years for tax and legal compliance</li>
         </ul>
         <p className="text-gray-600 dark:text-gray-300 mt-4">

@@ -189,7 +189,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonPageData }) {
         {/* CTA */}
         <CTASection
           headline={data.cta.headline}
-          subheadline="Start building with 15 free dynamic QR codes. No credit card, no time limit."
+          subheadline="Start building with 5 free dynamic QR codes. No credit card, no time limit."
           primaryLabel={data.cta.primaryLabel ?? 'Try Qrius Codes free'}
           primaryAction={openSignUp}
           secondaryLabel={data.cta.secondaryLabel ?? 'Compare all plans'}

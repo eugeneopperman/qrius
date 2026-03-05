@@ -69,7 +69,7 @@ export default function ComparePage() {
 
         <CTASection
           headline="Or skip the comparisons and just try it."
-          subheadline="15 free dynamic QR codes. No credit card, no time limit."
+          subheadline="5 free dynamic QR codes. No credit card, no time limit."
           primaryLabel="Start free"
           primaryAction={openSignUp}
         />

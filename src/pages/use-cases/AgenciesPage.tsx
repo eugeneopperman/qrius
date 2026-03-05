@@ -22,7 +22,7 @@ const data: UseCasePageData = {
     headline: 'Why Qrius Codes for agencies.',
     items: [
       { title: 'Scale without mess.', description: 'Templates and folders keep 50 clients as organized as 5. Role-based access lets team members manage their accounts without stepping on each other.' },
-      { title: 'Price that works for agencies.', description: "Business plan at $29/mo with unlimited codes and 25 team seats. That's a client-services margin you can actually live with." },
+      { title: 'Price that works for agencies.', description: "Business plan at $79/mo with unlimited codes and 25 team seats. That's a client-services margin you can actually live with." },
       { title: 'White-label when it matters.', description: "Custom domains on the Business plan mean your client's QR codes carry their brand — in the URL, not just the design." },
     ],
   },

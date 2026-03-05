@@ -285,7 +285,7 @@ export function UseCasePageTemplate({ data }: { data: UseCasePageData }) {
         {/* CTA */}
         <CTASection
           headline={data.cta.headline}
-          subheadline={data.cta.subheadline ?? 'Start building with 15 free dynamic QR codes. No credit card, no time limit.'}
+          subheadline={data.cta.subheadline ?? 'Start building with 5 free dynamic QR codes. No credit card, no time limit.'}
           primaryLabel="Start free"
           primaryAction={openSignUp}
           secondaryLabel={data.cta.secondaryLabel ?? 'See pricing'}

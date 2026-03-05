@@ -43,7 +43,7 @@ We know our product is good. We can say so without tearing competitors down by n
 
 | Do | Don't |
 |---|---|
-| "15 free dynamic QR codes. Most tools give you one or two." | "Unlike [Competitor], we don't rip you off." |
+| "5 free dynamic QR codes. Most tools give you one or two." | "Unlike [Competitor], we don't rip you off." |
 | "Built for teams that move fast." | "The world's most advanced QR platform." |
 
 ### 4. Honest, always
@@ -51,8 +51,8 @@ The QR code industry has a trust problem — bait-and-switch pricing, codes that
 
 | Do | Don't |
 |---|---|
-| "Free plan includes 15 dynamic codes and 5,000 scans per month." | "Unlimited free codes!*" *(asterisk buried in ToS)* |
-| "Pro starts at $9/month, billed monthly. Cancel anytime." | "Starting at just $9" *(but actually $108 upfront, annual only)* |
+| "Free plan includes 5 dynamic codes with unlimited scans." | "Unlimited free codes!*" *(asterisk buried in ToS)* |
+| "Starter begins at $12/month, billed monthly. Cancel anytime." | "Starting at just $12" *(but actually $120 upfront, annual only)* |
 
 ### 5. Guiding, not gatekeeping
 We're the friendly guide. We assume our reader is smart but maybe new to QR codes. We explain without over-explaining. We show the way without being patronizing.
@@ -108,8 +108,8 @@ Our voice stays the same, but the tone flexes depending on context:
 - Self-aware > sarcastic. Playful > punny.
 
 ### Numbers & data
-- Use specific numbers when they make us look good. "15 free dynamic codes" is better than "a generous free plan."
-- Compare to industry norms when the gap is dramatic. "Most tools give you 1-3 free codes. We give you 15."
+- Use specific numbers when they make us look good. "5 free dynamic codes" is better than "a generous free plan."
+- Compare to industry norms when the gap is dramatic. "Most tools give you 1-3 free codes. We give you 5."
 - Don't inflate. If something is fast, say how fast. If it's easy, show the steps.
 
 ---
