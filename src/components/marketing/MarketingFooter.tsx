@@ -46,6 +46,7 @@ const columns: FooterColumn[] = [
       { label: 'About', href: '/about', internal: true },
       { label: 'Blog', href: '/blog', internal: true },
       { label: 'Contact', href: '/contact', internal: true },
+      { label: 'Help Center', href: 'https://support.qriuscodes.com' },
     ],
   },
   {

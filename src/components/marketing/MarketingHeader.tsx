@@ -9,6 +9,8 @@ interface NavLink {
   href?: string;
   /** Hash anchor (e.g. '#use-cases') for same-page scroll */
   hash?: string;
+  /** External URL — renders <a> instead of <Link> */
+  external?: boolean;
   /** Dropdown children */
   children?: { label: string; href: string }[];
 }
@@ -28,6 +30,7 @@ const navLinks: NavLink[] = [
   { label: 'Pricing', href: '/pricing' },
   { label: 'Use Cases', href: '/use-cases', children: useCaseDropdown },
   { label: 'Blog', href: '/blog' },
+  { label: 'Support', href: 'https://support.qriuscodes.com', external: true },
   { label: 'Sign In', href: '/signin' },
 ];
 
@@ -130,6 +133,19 @@ export function MarketingHeader({ onSignUp }: MarketingHeaderProps) {
         </div>
       );
     }
+    if (link.href && link.external) {
+      return (
+        <a
+          key={link.label}
+          href={link.href}
+          className="marketing-nav-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {link.label}
+        </a>
+      );
+    }
     if (link.href) {
       return (
         <Link
@@ -225,6 +241,18 @@ export function MarketingHeader({ onSignUp }: MarketingHeaderProps) {
                     ))}
                   </div>
                 </div>
+              ) : link.href && link.external ? (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="text-xl font-medium"
+                  style={{ color: '#1A1A1A' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {link.label}
+                </a>
               ) : link.href ? (
                 <Link
                   key={link.label}

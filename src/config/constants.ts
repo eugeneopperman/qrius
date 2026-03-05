@@ -4,7 +4,7 @@
  */
 
 /** App version — bump by 0.01 with each release */
-export const APP_VERSION = '0.84';
+export const APP_VERSION = '0.85';
 
 /** Marketing site version — bump by 0.1 with each commit+push */
 export const MARKETING_VERSION = '0.1';
