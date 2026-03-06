@@ -35,10 +35,11 @@ export function TermsConsentModal() {
         throw new Error(data.error || 'Failed to save consent');
       }
 
-      await fetchProfile();
+      // Dismiss modal immediately, then refresh profile in background
+      useAuthStore.setState({ needsTermsAcceptance: false });
+      fetchProfile();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
       setLoading(false);
     }
   };
@@ -64,6 +65,7 @@ export function TermsConsentModal() {
             href="/terms"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => { e.preventDefault(); window.open('/terms', '_blank'); }}
             className="block w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium text-gray-900 dark:text-white"
           >
             Terms of Service
@@ -73,6 +75,7 @@ export function TermsConsentModal() {
             href="/privacy"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => { e.preventDefault(); window.open('/privacy', '_blank'); }}
             className="block w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium text-gray-900 dark:text-white"
           >
             Privacy Policy
