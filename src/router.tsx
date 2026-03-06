@@ -188,7 +188,7 @@ function RootLayout() {
 
       {isAppRoute && (
         <div className="fixed bottom-2 right-2 max-lg:bottom-[4.5rem] z-[100] px-2 py-0.5 rounded bg-black/60 text-white text-xs font-mono pointer-events-none select-none">
-          Beta v{APP_VERSION}
+          v{APP_VERSION}
         </div>
       )}
     </Suspense>

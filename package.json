@@ -1,7 +1,7 @@
 {
   "name": "qrius",
   "private": true,
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "QR Code Generator SaaS with advanced customization and analytics",
   "type": "module",
   "scripts": {
