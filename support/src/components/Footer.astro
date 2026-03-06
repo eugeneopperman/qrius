@@ -1,0 +1,56 @@
+---
+import EditLink from 'virtual:starlight/components/EditLink';
+import LastUpdated from 'virtual:starlight/components/LastUpdated';
+import Pagination from 'virtual:starlight/components/Pagination';
+---
+
+<footer class="sl-flex" style="flex-direction: column; gap: 1.5rem;">
+  <div class="meta sl-flex" style="gap: 0.75rem 3rem; justify-content: space-between; flex-wrap: wrap; margin-top: 3rem; font-size: var(--sl-text-sm); color: var(--sl-color-gray-3);">
+    <EditLink />
+    <LastUpdated />
+  </div>
+  <Pagination />
+</footer>
+
+<div class="qr-site-footer">
+  <div class="qr-footer-grid">
+    <div class="qr-footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="https://qriuscodes.com/features">Features</a></li>
+        <li><a href="https://qriuscodes.com/pricing">Pricing</a></li>
+        <li><a href="https://qriuscodes.com/use-cases">Use Cases</a></li>
+        <li><a href="https://qriuscodes.com/changelog">Changelog</a></li>
+      </ul>
+    </div>
+    <div class="qr-footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="/">Help Center</a></li>
+        <li><a href="/getting-started/create-account">Getting Started</a></li>
+        <li><a href="/troubleshooting/common-issues">Troubleshooting</a></li>
+        <li><a href="https://qriuscodes.com/contact">Contact Us</a></li>
+      </ul>
+    </div>
+    <div class="qr-footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="https://qriuscodes.com/terms">Terms of Service</a></li>
+        <li><a href="https://qriuscodes.com/privacy">Privacy Policy</a></li>
+        <li><a href="https://qriuscodes.com/cookies">Cookie Policy</a></li>
+      </ul>
+    </div>
+    <div class="qr-footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="https://qriuscodes.com/about">About</a></li>
+        <li><a href="https://qriuscodes.com/blog">Blog</a></li>
+        <li><a href="https://qriuscodes.com/compare">Compare</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="qr-footer-bottom">
+    <span class="qr-footer-tagline">Stay qrius.</span>
+    <span class="qr-footer-copy">&copy; {new Date().getFullYear()} Qrius Codes. All rights reserved.</span>
+  </div>
+</div>

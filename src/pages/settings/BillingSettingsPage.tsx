@@ -55,6 +55,7 @@ const plans = [
     name: 'Free',
     monthlyPrice: 0,
     annualPrice: 0,
+    annualTotal: 0,
     features: [
       '5 dynamic QR codes',
       'Unlimited scans',
@@ -73,7 +74,8 @@ const plans = [
     id: 'starter',
     name: 'Starter',
     monthlyPrice: 12,
-    annualPrice: 10,
+    annualPrice: 9,
+    annualTotal: 112,
     features: [
       '50 dynamic QR codes',
       'Unlimited scans',
@@ -91,7 +93,8 @@ const plans = [
     id: 'pro',
     name: 'Pro',
     monthlyPrice: 29,
-    annualPrice: 23,
+    annualPrice: 22,
+    annualTotal: 271,
     features: [
       '500 dynamic QR codes',
       'Unlimited scans',
@@ -112,7 +115,8 @@ const plans = [
     id: 'business',
     name: 'Business',
     monthlyPrice: 79,
-    annualPrice: 63,
+    annualPrice: 61,
+    annualTotal: 739,
     features: [
       'Unlimited dynamic QR codes',
       'Unlimited scans',
@@ -645,7 +649,7 @@ function PlanPicker({
                     </div>
                     {isAnnual && plan.monthlyPrice > 0 && (
                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        ${plan.annualPrice * 12}/year (billed annually)
+                        ${plan.annualTotal}/year (billed annually)
                       </p>
                     )}
                   </div>

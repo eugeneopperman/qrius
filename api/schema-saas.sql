@@ -532,13 +532,15 @@ BEGIN
         split_part(NEW.email, '@', 1)
     );
 
-    -- Create user profile
-    INSERT INTO public.users (id, email, name, avatar_url)
+    -- Create user profile (copy terms consent from auth metadata if present)
+    INSERT INTO public.users (id, email, name, avatar_url, terms_accepted_at, terms_version)
     VALUES (
         NEW.id,
         NEW.email,
         user_name,
-        NEW.raw_user_meta_data->>'avatar_url'
+        NEW.raw_user_meta_data->>'avatar_url',
+        (NEW.raw_user_meta_data->>'terms_accepted_at')::TIMESTAMPTZ,
+        NEW.raw_user_meta_data->>'terms_version'
     );
 
     -- Create personal organization (plan must be 'free' per RLS policy)

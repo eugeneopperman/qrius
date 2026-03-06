@@ -62,7 +62,7 @@ Want a fresh start? Cancel your subscription and your account gets paused. You c
 
 Bought annual billing and want out? If you're within 14 days, we refund the full year. After 14 days, we can refund a prorated amount for unused months. [Contact support](https://qriuscodes.com/contact) to discuss.
 
-*Example:* You bought annual Pro ($304) on January 1st. On March 15th (over 14 days), you cancel. We'd refund roughly $213 for the remaining 9 months.
+*Example:* You bought annual Pro ($271) on January 1st. On March 15th (over 14 days), you cancel. We'd refund roughly $190 for the remaining 9 months.
 
 ## Refund Processing Time
 

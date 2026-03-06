@@ -5,6 +5,7 @@ import type { User as SupabaseUser, Session, Subscription } from '@supabase/supa
 import type { User, Organization, OrganizationMember, PlanLimits } from '@/types/database';
 import { supabase, checkSupabaseConnection } from '@/lib/supabase';
 import { hasRealDomain, isAppSubdomain, getRootUrl } from '@/lib/domain';
+import { TERMS_VERSION } from '@/config/constants';
 
 // Track the auth listener subscription to clean up on re-init
 let authSubscription: Subscription | null = null;
@@ -43,7 +44,8 @@ export interface AuthState {
   // Actions
   initialize: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, name?: string) => Promise<{ error: Error | null }>;
+  needsTermsAcceptance: boolean;
+  signUp: (email: string, password: string, name?: string, consent?: { terms_accepted_at: string; terms_version: string }) => Promise<{ error: Error | null }>;
   signInWithOAuth: (provider: 'google' | 'github') => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
@@ -71,6 +73,7 @@ export const useAuthStore = create<AuthState>()(
       isInitialized: false,
       connectionError: null,
       hasCompletedOnboarding: false,
+      needsTermsAcceptance: false,
       organizations: [],
       currentOrganization: null,
       currentRole: null,
@@ -118,6 +121,7 @@ export const useAuthStore = create<AuthState>()(
             } else if (event === 'SIGNED_OUT') {
               set({
                 profile: null,
+                needsTermsAcceptance: false,
                 organizations: [],
                 currentOrganization: null,
                 currentRole: null,
@@ -164,7 +168,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // Sign up with email/password
-      signUp: async (email, password, name) => {
+      signUp: async (email, password, name, consent) => {
         try {
           set({ isLoading: true });
           const callbackUrl = hasRealDomain ? getRootUrl('/auth/callback') : `${window.location.origin}/auth/callback`;
@@ -172,7 +176,13 @@ export const useAuthStore = create<AuthState>()(
             email,
             password,
             options: {
-              data: { name },
+              data: {
+                name,
+                ...(consent && {
+                  terms_accepted_at: consent.terms_accepted_at,
+                  terms_version: consent.terms_version,
+                }),
+              },
               emailRedirectTo: callbackUrl,
             },
           });
@@ -223,6 +233,7 @@ export const useAuthStore = create<AuthState>()(
             session: null,
             user: null,
             profile: null,
+            needsTermsAcceptance: false,
             organizations: [],
             currentOrganization: null,
             currentRole: null,
@@ -309,7 +320,8 @@ export const useAuthStore = create<AuthState>()(
             .single();
 
           if (data) {
-            set({ profile: data });
+            const needsTerms = !data.terms_accepted_at || data.terms_version !== TERMS_VERSION;
+            set({ profile: data, needsTermsAcceptance: needsTerms });
             return;
           }
 
@@ -322,12 +334,16 @@ export const useAuthStore = create<AuthState>()(
               user.email?.split('@')[0] ??
               'User';
 
-            // 1. Create user profile
+            // 1. Create user profile (copy consent from auth metadata if present)
+            const metaTermsAcceptedAt = user.user_metadata?.terms_accepted_at ?? null;
+            const metaTermsVersion = user.user_metadata?.terms_version ?? null;
             const { error: insertError } = await supabase.from('users').insert({
               id: user.id,
               email: user.email!,
               name: userName,
               avatar_url: user.user_metadata?.avatar_url ?? null,
+              terms_accepted_at: metaTermsAcceptedAt,
+              terms_version: metaTermsVersion,
             });
 
             if (insertError) {
@@ -369,7 +385,8 @@ export const useAuthStore = create<AuthState>()(
               .single();
 
             if (newProfile) {
-              set({ profile: newProfile });
+              const needsTerms = !newProfile.terms_accepted_at || newProfile.terms_version !== TERMS_VERSION;
+              set({ profile: newProfile, needsTermsAcceptance: needsTerms });
             }
             return;
           }

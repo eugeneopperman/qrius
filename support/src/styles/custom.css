@@ -1,13 +1,401 @@
-/* Qrius Codes brand overrides for Starlight */
-:root {
-	--sl-color-accent-low: #fff7ed;
-	--sl-color-accent: #f97316;
-	--sl-color-accent-high: #9a3412;
-	--sl-font: 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+/* ==========================================================================
+   Qrius Codes — Support Site Brand Overrides
+   Matches the main app's warm glassmorphism design system
+   ========================================================================== */
+
+/* ---- Fonts ---- */
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
-:root[data-theme='dark'] {
-	--sl-color-accent-low: #431407;
-	--sl-color-accent: #fb923c;
-	--sl-color-accent-high: #fed7aa;
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/InstrumentSerif-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ==========================================================================
+   Dark theme (Starlight default — :root without data-theme)
+   ========================================================================== */
+:root {
+  --sl-color-accent-low: #431407;
+  --sl-color-accent: #fb923c;
+  --sl-color-accent-high: #fed7aa;
+  --sl-font: 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', sans-serif;
+
+  --qr-bg: #141413;
+  --qr-bg-warm: #1e1e1b;
+  --qr-card: #232320;
+  --qr-text: #f0ede6;
+  --qr-text-secondary: #a8a49c;
+  --qr-border: rgba(255, 255, 255, 0.08);
+  --qr-glass-bg: rgba(255, 255, 255, 0.04);
+  --qr-glass-border: rgba(255, 255, 255, 0.07);
+  --qr-glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --qr-scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --qr-scrollbar-hover: rgba(255, 255, 255, 0.25);
+  --qr-grain-opacity: 0.03;
+  --qr-selection-bg: rgba(251, 146, 60, 0.3);
+  --qr-selection-text: #fff;
+  --qr-mesh:
+    radial-gradient(ellipse at 20% 0%, rgba(251, 146, 60, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 0% 60%, rgba(20, 184, 166, 0.05) 0%, transparent 40%),
+    linear-gradient(180deg, #111110 0%, #161614 50%, #141413 100%);
+  --qr-deco-amber: rgba(251, 146, 60, 0.18);
+  --qr-deco-gold: rgba(245, 158, 11, 0.14);
+  --qr-deco-coral: rgba(239, 68, 68, 0.07);
+  --qr-deco-pink: rgba(236, 72, 153, 0.04);
+}
+
+/* ==========================================================================
+   Light theme
+   ========================================================================== */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #fff7ed;
+  --sl-color-accent: #f97316;
+  --sl-color-accent-high: #9a3412;
+
+  --qr-bg: #f9f6f1;
+  --qr-bg-warm: #f2ebe0;
+  --qr-card: #ffffff;
+  --qr-text: #1a1a1a;
+  --qr-text-secondary: #6b6b6b;
+  --qr-border: rgba(0, 0, 0, 0.06);
+  --qr-glass-bg: rgba(255, 255, 255, 0.55);
+  --qr-glass-border: rgba(255, 255, 255, 0.2);
+  --qr-glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --qr-scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --qr-scrollbar-hover: rgba(0, 0, 0, 0.25);
+  --qr-grain-opacity: 0.03;
+  --qr-selection-bg: rgba(251, 146, 60, 0.25);
+  --qr-selection-text: #1a1a1a;
+  --qr-mesh:
+    radial-gradient(ellipse at 20% 0%, rgba(251, 146, 60, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 0% 60%, rgba(20, 184, 166, 0.05) 0%, transparent 40%),
+    linear-gradient(180deg, #f9f6f1 0%, #f2ebe0 100%);
+  --qr-deco-amber: rgba(251, 146, 60, 0.28);
+  --qr-deco-gold: rgba(245, 158, 11, 0.22);
+  --qr-deco-coral: rgba(239, 68, 68, 0.10);
+  --qr-deco-pink: rgba(236, 72, 153, 0.06);
+}
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+body {
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Instrument Serif on major headings */
+.sl-markdown-content h1,
+.sl-markdown-content h2 {
+  font-family: 'Instrument Serif', Georgia, serif !important;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Hero / page title */
+h1.content-title,
+[data-page-title] h1,
+.hero h1,
+header h1 {
+  font-family: 'Instrument Serif', Georgia, serif !important;
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   Mesh gradient background
+   ========================================================================== */
+body {
+  background: var(--qr-bg) !important;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 70% at 85% 15%, var(--qr-deco-amber) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 10% 85%, var(--qr-deco-gold) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 75% 60%, var(--qr-deco-coral) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 30% 30%, var(--qr-deco-pink) 0%, transparent 50%),
+    var(--qr-mesh);
+}
+
+/* ==========================================================================
+   Grain texture overlay
+   ========================================================================== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: var(--qr-grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* ==========================================================================
+   Glassmorphism — Header
+   ========================================================================== */
+header.header {
+  background: var(--qr-glass-bg) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-bottom: 1px solid var(--qr-glass-border) !important;
+  box-shadow: var(--qr-glass-inset), 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* ==========================================================================
+   Glassmorphism — Sidebar
+   ========================================================================== */
+nav.sidebar {
+  background: var(--qr-glass-bg) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  border-right: 1px solid var(--qr-glass-border) !important;
+}
+
+/* Mobile sidebar overlay */
+.sidebar-pane {
+  background: var(--qr-glass-bg) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+}
+
+/* ==========================================================================
+   Glassmorphism — Content cards (asides, code blocks, callouts)
+   ========================================================================== */
+.sl-markdown-content aside,
+.starlight-aside {
+  background: var(--qr-glass-bg) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  border: 1px solid var(--qr-glass-border) !important;
+  border-radius: 12px;
+  box-shadow: var(--qr-glass-inset), 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* Table of contents card */
+starlight-toc nav {
+  background: var(--qr-glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--qr-glass-border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* ==========================================================================
+   Pagination links — glass style
+   ========================================================================== */
+a.pagination-link {
+  background: var(--qr-glass-bg) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  border: 1px solid var(--qr-glass-border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--qr-glass-inset), 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+a.pagination-link:hover {
+  border-color: var(--sl-color-accent) !important;
+  box-shadow: var(--qr-glass-inset), 0 4px 12px rgba(251, 146, 60, 0.1);
+}
+
+/* ==========================================================================
+   Selection color
+   ========================================================================== */
+::selection {
+  background: var(--qr-selection-bg);
+  color: var(--qr-selection-text);
+}
+
+::-moz-selection {
+  background: var(--qr-selection-bg);
+  color: var(--qr-selection-text);
+}
+
+/* ==========================================================================
+   Scrollbar styling
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--qr-scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--qr-scrollbar-hover);
+}
+
+/* ==========================================================================
+   Buttons — orange primary
+   ========================================================================== */
+.sl-markdown-content a[href]:not(:where(.not-content *)),
+a.action.primary {
+  transition: opacity 0.15s ease;
+}
+
+/* ==========================================================================
+   Sidebar link active state
+   ========================================================================== */
+nav.sidebar a[aria-current='page'] {
+  background: rgba(251, 146, 60, 0.12);
+  border-radius: 8px;
+}
+
+/* ==========================================================================
+   Code blocks — warm tint
+   ========================================================================== */
+.sl-markdown-content pre {
+  border: 1px solid var(--qr-glass-border);
+  border-radius: 12px;
+}
+
+/* ==========================================================================
+   Search dialog glass
+   ========================================================================== */
+dialog[aria-label] {
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* ==========================================================================
+   @supports fallback — solid backgrounds if no backdrop-filter
+   ========================================================================== */
+@supports not (backdrop-filter: blur(1px)) {
+  header.header {
+    background: var(--qr-card) !important;
+  }
+
+  nav.sidebar,
+  .sidebar-pane {
+    background: var(--qr-card) !important;
+  }
+
+  .sl-markdown-content aside,
+  .starlight-aside {
+    background: var(--qr-card) !important;
+  }
+
+  a.pagination-link {
+    background: var(--qr-card) !important;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion — disable transitions
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   Custom footer bar
+   ========================================================================== */
+.qr-site-footer {
+  background: #1a1a1a;
+  color: #a8a49c;
+  padding: 3rem 1.5rem 2rem;
+  margin-top: 3rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.qr-site-footer a {
+  color: #d4d0c8;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.qr-site-footer a:hover {
+  color: #fb923c;
+}
+
+.qr-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .qr-footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.qr-footer-col h4 {
+  color: #f0ede6;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.75rem;
+}
+
+.qr-footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.qr-footer-col li {
+  margin: 0.375rem 0;
+}
+
+.qr-footer-bottom {
+  max-width: 64rem;
+  margin: 2.5rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.qr-footer-tagline {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-size: 1.125rem;
+  color: #d4d0c8;
+}
+
+.qr-footer-copy {
+  font-size: 0.75rem;
+  color: #6b6862;
 }

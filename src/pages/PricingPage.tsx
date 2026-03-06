@@ -45,7 +45,7 @@ const plans: PlanDef[] = [
   {
     name: 'Starter',
     monthly: 12,
-    annual: 10,
+    annual: 9,
     period: '/month',
     tagline: 'For small businesses and creators who need more codes and formats.',
     features: [
@@ -61,7 +61,7 @@ const plans: PlanDef[] = [
   {
     name: 'Pro',
     monthly: 29,
-    annual: 23,
+    annual: 22,
     period: '/month',
     tagline: 'For growing businesses that need API access, team collaboration, and custom domains.',
     features: [
@@ -82,7 +82,7 @@ const plans: PlanDef[] = [
   {
     name: 'Business',
     monthly: 79,
-    annual: 63,
+    annual: 61,
     period: '/month',
     tagline: 'For teams and agencies managing QR codes at scale with white-label branding.',
     features: [

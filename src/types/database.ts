@@ -33,6 +33,8 @@ export interface Database {
           zip: string | null;
           country: string | null;
           website: string | null;
+          terms_accepted_at: string | null;
+          terms_version: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -52,6 +54,8 @@ export interface Database {
           zip?: string | null;
           country?: string | null;
           website?: string | null;
+          terms_accepted_at?: string | null;
+          terms_version?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -71,6 +75,8 @@ export interface Database {
           zip?: string | null;
           country?: string | null;
           website?: string | null;
+          terms_accepted_at?: string | null;
+          terms_version?: string | null;
           updated_at?: string;
         };
         Relationships: [];

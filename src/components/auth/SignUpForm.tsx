@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { OAuthButtons } from './OAuthButtons';
 import { Link } from '@tanstack/react-router';
+import { TERMS_VERSION } from '@/config/constants';
 import { Mail, Lock, User, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface SignUpFormProps {
@@ -17,6 +18,7 @@ export function SignUpForm({ onSignIn }: SignUpFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -41,7 +43,10 @@ export function SignUpForm({ onSignIn }: SignUpFormProps) {
       return;
     }
 
-    const { error } = await signUp(email, password, name || undefined);
+    const { error } = await signUp(email, password, name || undefined, {
+      terms_accepted_at: new Date().toISOString(),
+      terms_version: TERMS_VERSION,
+    });
     if (error) {
       setError(error.message);
     } else {
@@ -147,10 +152,30 @@ export function SignUpForm({ onSignIn }: SignUpFormProps) {
           required
         />
 
+        <label className="flex items-start gap-2 cursor-pointer text-sm text-gray-600 dark:text-gray-400">
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="mt-0.5 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+            disabled={isLoading}
+          />
+          <span>
+            I agree to the{' '}
+            <Link to="/terms" className="underline hover:text-gray-700 dark:hover:text-gray-300" target="_blank">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" className="underline hover:text-gray-700 dark:hover:text-gray-300" target="_blank">
+              Privacy Policy
+            </Link>
+          </span>
+        </label>
+
         <Button
           type="submit"
           className="w-full"
-          disabled={isLoading}
+          disabled={isLoading || !termsAccepted}
         >
           {isLoading ? (
             <>
@@ -178,16 +203,6 @@ export function SignUpForm({ onSignIn }: SignUpFormProps) {
         </button>
       </p>
 
-      <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
-        By creating an account, you agree to our{' '}
-        <Link to="/terms" className="underline hover:text-gray-700 dark:hover:text-gray-300">
-          Terms of Service
-        </Link>{' '}
-        and{' '}
-        <Link to="/privacy" className="underline hover:text-gray-700 dark:hover:text-gray-300">
-          Privacy Policy
-        </Link>
-      </p>
     </div>
   );
 }

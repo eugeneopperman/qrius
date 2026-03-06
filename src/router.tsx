@@ -6,6 +6,7 @@ import { useThemeStore } from '@/stores/themeStore';
 import { isSupabaseMissing } from '@/lib/supabase';
 import { isAppSubdomain, isRootDomain, getRootUrl, getAppUrl } from '@/lib/domain';
 import { APP_VERSION, TIMING, ADMIN_EMAILS } from '@/config/constants';
+import { TermsConsentModal } from '@/components/auth/TermsConsentModal';
 import { Loader2, AlertTriangle, RefreshCw, Home } from 'lucide-react';
 // Lazy-load modals — only fetched when opened (~30KB off critical path)
 const KeyboardShortcutsModal = lazy(() =>
@@ -141,6 +142,8 @@ const appPathPrefixes = ['/dashboard', '/qr-codes', '/create', '/settings', '/te
 // eslint-disable-next-line react-refresh/only-export-components -- router file, cannot split
 function RootLayout() {
   const { isShortcutsOpen, closeShortcuts, isSettingsOpen, closeSettings } = useUIStore();
+  const isAuthenticated = useAuthStore((s) => !!s.user);
+  const needsTermsAcceptance = useAuthStore((s) => s.needsTermsAcceptance);
   const location = useLocation();
   const isAppRoute = appPathPrefixes.some((p) => location.pathname === p || location.pathname.startsWith(p + '/'));
 
@@ -180,6 +183,7 @@ function RootLayout() {
           <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
         </Suspense>
       )}
+      {isAuthenticated && needsTermsAcceptance && <TermsConsentModal />}
       <ToastContainer />
 
       {isAppRoute && (

@@ -117,7 +117,12 @@ describe('SignUpForm', () => {
     expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
   });
 
-  it('submits and calls signUp with email, password, and name', async () => {
+  it('create account button is disabled until terms checkbox is checked', () => {
+    renderSignUp();
+    expect(screen.getByRole('button', { name: /create account/i })).toBeDisabled();
+  });
+
+  it('submits and calls signUp with email, password, name, and consent', async () => {
     const user = userEvent.setup();
     renderSignUp();
 
@@ -127,10 +132,17 @@ describe('SignUpForm', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     await user.type(passwordFields[0], 'password123');
     await user.type(passwordFields[1], 'password123');
+    // Accept terms
+    await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /create account/i }));
 
     await waitFor(() => {
-      expect(mockSignUp).toHaveBeenCalledWith('john@example.com', 'password123', 'John Doe');
+      expect(mockSignUp).toHaveBeenCalledWith(
+        'john@example.com',
+        'password123',
+        'John Doe',
+        expect.objectContaining({ terms_version: expect.any(String), terms_accepted_at: expect.any(String) }),
+      );
     });
   });
 
@@ -142,10 +154,16 @@ describe('SignUpForm', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     await user.type(passwordFields[0], 'password123');
     await user.type(passwordFields[1], 'password123');
+    await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /create account/i }));
 
     await waitFor(() => {
-      expect(mockSignUp).toHaveBeenCalledWith('john@example.com', 'password123', undefined);
+      expect(mockSignUp).toHaveBeenCalledWith(
+        'john@example.com',
+        'password123',
+        undefined,
+        expect.objectContaining({ terms_version: expect.any(String) }),
+      );
     });
   });
 
@@ -157,6 +175,7 @@ describe('SignUpForm', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     await user.type(passwordFields[0], 'password123');
     await user.type(passwordFields[1], 'differentpass');
+    await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /create account/i }));
 
     await waitFor(() => {
@@ -173,6 +192,7 @@ describe('SignUpForm', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     await user.type(passwordFields[0], 'short');
     await user.type(passwordFields[1], 'short');
+    await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /create account/i }));
 
     await waitFor(() => {
@@ -208,6 +228,7 @@ describe('SignUpForm', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     await user.type(passwordFields[0], 'password123');
     await user.type(passwordFields[1], 'password123');
+    await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /create account/i }));
 
     await waitFor(() => {
@@ -226,6 +247,7 @@ describe('SignUpForm', () => {
     const passwordFields = screen.getAllByPlaceholderText('••••••••');
     await user.type(passwordFields[0], 'password123');
     await user.type(passwordFields[1], 'password123');
+    await user.click(screen.getByRole('checkbox'));
     await user.click(screen.getByRole('button', { name: /create account/i }));
 
     await waitFor(() => {

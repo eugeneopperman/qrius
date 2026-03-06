@@ -34,7 +34,7 @@ Choose a monthly plan and we charge you on the same date each month. Simple and 
 
 Choose annual billing at checkout and save **22% compared to month-to-month**. We charge once per year. Still fully flexible — you can downgrade or cancel anytime.
 
-*Example:* Pro plan is $29/month. Annual Pro costs $304/year instead of $348/year — that's $44 savings.
+*Example:* Pro plan is $29/month. Annual Pro costs $271/year instead of $348/year — that's $77 savings.
 
 ## Updating Your Payment Method
 
