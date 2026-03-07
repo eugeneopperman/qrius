@@ -49,12 +49,12 @@ function UsageBar({ label, used, limit }: { label: string; used: number; limit: 
 
 export default function DashboardPage() {
   const { currentOrganization, planLimits, profile } = useAuthStore(useShallow((s) => ({ currentOrganization: s.currentOrganization, planLimits: s.planLimits, profile: s.profile })));
-  const { qrCodes, totalCount, monthlyScans, teamMembers, isLoading, error: qrError, deleteQRCode, refetch } = useOrganizationQRCodes({ limit: 10 });
+  const { qrCodes, totalCount, monthlyScans, teamMembers, scansToday, isLoading, error: qrError, deleteQRCode, refetch } = useOrganizationQRCodes({ limit: 10 });
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string | null } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: stats } = useDashboardStats({ qrCodes, totalCount, monthlyScans, teamMembers });
+  const { data: stats } = useDashboardStats({ qrCodes, totalCount, monthlyScans, teamMembers, scansToday });
   const { data: usageStats } = useUsageStats({ totalQRCodes: totalCount, monthlyScans });
 
   const handleDeleteClick = useCallback((id: string) => {

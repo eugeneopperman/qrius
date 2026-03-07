@@ -53,6 +53,7 @@ interface APIResponse {
   stats: {
     monthlyScans: number;
     teamMembers: number;
+    scansToday?: number;
   };
 }
 
@@ -86,10 +87,11 @@ async function fetchQRCodes(options: UseOrganizationQRCodesOptions = {}): Promis
   counts: StatusCounts;
   monthlyScans: number;
   teamMembers: number;
+  scansToday: number;
 }> {
   const session = await getSession();
   if (!session?.access_token) {
-    return { qrCodes: [], totalCount: 0, counts: { all: 0, active: 0, paused: 0, draft: 0 }, monthlyScans: 0, teamMembers: 1 };
+    return { qrCodes: [], totalCount: 0, counts: { all: 0, active: 0, paused: 0, draft: 0 }, monthlyScans: 0, teamMembers: 1, scansToday: 0 };
   }
 
   const params = new URLSearchParams();
@@ -120,6 +122,7 @@ async function fetchQRCodes(options: UseOrganizationQRCodesOptions = {}): Promis
     counts: data.counts || { all: data.pagination.total, active: 0, paused: 0, draft: 0 },
     monthlyScans: data.stats.monthlyScans,
     teamMembers: data.stats.teamMembers ?? 1,
+    scansToday: data.stats.scansToday ?? 0,
   };
 }
 
@@ -148,6 +151,7 @@ export function useOrganizationQRCodes(options: UseOrganizationQRCodesOptions = 
   const counts = data?.counts ?? { all: 0, active: 0, paused: 0, draft: 0 };
   const monthlyScans = data?.monthlyScans ?? 0;
   const teamMembers = data?.teamMembers ?? 1;
+  const scansToday = data?.scansToday ?? 0;
 
   const patchMutation = useMutation({
     mutationFn: async (params: { id: string; destination_url?: string; name?: string; is_active?: boolean; folder_id?: string | null }) => {
@@ -235,6 +239,7 @@ export function useOrganizationQRCodes(options: UseOrganizationQRCodesOptions = 
     counts,
     monthlyScans,
     teamMembers,
+    scansToday,
     isLoading,
     error,
     patchQRCode,

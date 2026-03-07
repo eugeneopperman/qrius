@@ -503,14 +503,29 @@ async function handleList(
        .catch(() => 1)
     : Promise.resolve(1);
 
-  // Fire all 6 queries in parallel
-  const [result, total, counts, customDomain, monthlyScans, teamMembers] = await Promise.all([
+  // Today's scans (Neon) — count scan_events for this user's QR codes since midnight UTC
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+  const scansTodayPromise: Promise<number> = (effectiveOrgId || (authContext?.userId))
+    ? sql.query(
+        `SELECT COUNT(*) as count FROM scan_events se
+         JOIN qr_codes qr ON qr.id = se.qr_code_id
+         WHERE (qr.organization_id = $1 OR qr.user_id = $2)
+         AND se.scanned_at >= $3`,
+        [effectiveOrgId || '', authContext?.userId || '', todayStart.toISOString()]
+      ).then(r => parseInt(r[0].count as string) || 0)
+       .catch(() => 0)
+    : Promise.resolve(0);
+
+  // Fire all 7 queries in parallel
+  const [result, total, counts, customDomain, monthlyScans, teamMembers, scansToday] = await Promise.all([
     listPromise,
     countPromise,
     countsPromise,
     domainPromise,
     scansPromise,
     teamPromise,
+    scansTodayPromise,
   ]);
 
   // If no org from auth context, try to get custom domain from first result's org
@@ -536,6 +551,7 @@ async function handleList(
     stats: {
       monthlyScans,
       teamMembers,
+      scansToday,
     },
   });
 }

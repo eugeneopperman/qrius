@@ -13,21 +13,22 @@ interface DashboardStatsInput {
   totalCount: number;
   monthlyScans: number;
   teamMembers: number;
+  scansToday: number;
 }
 
 export function useDashboardStats(input: DashboardStatsInput): { data: DashboardStats } {
-  const { qrCodes, totalCount, monthlyScans, teamMembers } = input;
+  const { qrCodes, totalCount, monthlyScans, teamMembers, scansToday } = input;
 
   const data = useMemo(() => {
     const totalScans = qrCodes.reduce((sum, qr) => sum + (qr.total_scans || 0), 0);
 
     return {
       qrCodesCount: totalCount,
-      scansToday: 0, // Requires scan_events query from Neon — deferred
+      scansToday,
       scansThisMonth: monthlyScans || totalScans,
       teamMembers,
     };
-  }, [qrCodes, totalCount, monthlyScans, teamMembers]);
+  }, [qrCodes, totalCount, monthlyScans, teamMembers, scansToday]);
 
   return { data };
 }
