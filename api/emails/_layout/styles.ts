@@ -28,8 +28,8 @@ export const BRAND = {
   dashboardUrl: 'https://qriuscodes.com/dashboard',
 
   // Sender addresses
-  fromHello: 'Qrius Codes <hello@qrcodes.com>',
-  fromNoreply: 'Qrius Codes <noreply@qrcodes.com>',
+  fromHello: 'Qrius Codes <hello@qriuscodes.com>',
+  fromNoreply: 'Qrius Codes <noreply@qriuscodes.com>',
 
   // Tagline
   tagline: 'Stay qrius.',

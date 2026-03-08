@@ -101,7 +101,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<string | nul
     to,
     subject,
     react,
-    from = 'Qrius Codes <noreply@qrcodes.com>',
+    from = 'Qrius Codes <noreply@qriuscodes.com>',
     category = 'transactional',
     userId,
     metadata,
@@ -199,7 +199,7 @@ export async function sendBatchEmail(
     try {
       const { data, error } = await resend.batch.send(
         batch.map((e) => ({
-          from: e.from || 'Qrius Codes <noreply@qrcodes.com>',
+          from: e.from || 'Qrius Codes <noreply@qriuscodes.com>',
           to: e.to,
           subject: e.subject,
           react: e.react,

@@ -93,7 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               totalScans: qr.total_scans,
               unsubscribeUrl: `${APP_URL}/unsubscribe?token=${token}`,
             }),
-            from: 'Qrius Codes <hello@qrcodes.com>',
+            from: 'Qrius Codes <hello@qriuscodes.com>',
             category: 'scan_milestones' as EmailCategory,
             userId: qr.user_id,
           });

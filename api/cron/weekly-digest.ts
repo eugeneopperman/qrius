@@ -137,7 +137,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           newQRCodes: digest.new_qr_codes,
           unsubscribeUrl: `${APP_URL}/unsubscribe?token=${token}`,
         }),
-        from: 'Qrius Codes <hello@qrcodes.com>',
+        from: 'Qrius Codes <hello@qriuscodes.com>',
         category: 'weekly_digest' as EmailCategory,
         userId: digest.user_id,
       });

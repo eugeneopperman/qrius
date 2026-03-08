@@ -91,7 +91,7 @@ export async function notifyWelcome(userId: string, email: string, userName?: st
     to: email,
     subject: 'Welcome to Qrius Codes!',
     react: React.createElement(WelcomeEmail, { userName }),
-    from: 'Qrius Codes <hello@qrcodes.com>',
+    from: 'Qrius Codes <hello@qriuscodes.com>',
     category: 'transactional',
     userId,
   });
@@ -269,7 +269,7 @@ export async function notifyFirstQRCreated(
     to: email,
     subject: 'Your first QR code is live! 🎉',
     react: React.createElement(FirstQRCreatedEmail, { userName, qrCodeName, unsubscribeUrl }),
-    from: 'Qrius Codes <hello@qrcodes.com>',
+    from: 'Qrius Codes <hello@qriuscodes.com>',
     category: 'product_updates',
     userId,
   });

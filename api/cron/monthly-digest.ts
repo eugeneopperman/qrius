@@ -119,7 +119,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             totalActiveQRCodes: parseInt(activeCodes?.count || '0'),
             unsubscribeUrl: `${APP_URL}/unsubscribe?token=${token}`,
           }),
-          from: 'Qrius Codes <hello@qrcodes.com>',
+          from: 'Qrius Codes <hello@qriuscodes.com>',
           category: 'monthly_digest' as EmailCategory,
           userId: user_id,
         });
