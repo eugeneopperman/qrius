@@ -3,8 +3,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { getSupabaseAdmin } from '../_lib/auth.js';
-import { notifyPaymentFailed } from '../_lib/notifications.js';
+import { notifyPaymentFailed, notifyPaymentReceipt, notifySubscriptionChanged } from '../_lib/notifications.js';
 import { logger } from '../_lib/logger.js';
+import { waitUntil } from '@vercel/functions';
 
 let _stripe: Stripe | null = null;
 function getStripe(): Stripe {
@@ -227,8 +228,26 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     organizationId = org.id;
   }
 
+  // Get previous plan before updating
+  const { data: prevOrg } = await getSupabaseAdmin()
+    .from('organizations')
+    .select('plan')
+    .eq('id', organizationId)
+    .single();
+  const previousPlan = prevOrg?.plan || 'free';
+
   await updateSubscription(organizationId, subscription);
+
+  const newPlan = await inferPlan(subscription.items.data[0]?.price.id);
   logger.webhooks.info('Subscription updated', { organizationId, status: subscription.status });
+
+  // Send subscription changed email (non-blocking)
+  if (previousPlan !== newPlan) {
+    const changeType = newPlan === 'free' ? 'downgraded'
+      : previousPlan === 'free' || ['starter', 'pro', 'business'].indexOf(newPlan) > ['starter', 'pro', 'business'].indexOf(previousPlan) ? 'upgraded'
+      : 'downgraded';
+    waitUntil(notifySubscriptionChanged(organizationId, previousPlan, newPlan, changeType));
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -243,6 +262,14 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     logger.webhooks.error('Could not find subscription record', { subscriptionId: subscription.id });
     return;
   }
+
+  // Get previous plan before downgrading
+  const { data: prevOrgData } = await getSupabaseAdmin()
+    .from('organizations')
+    .select('plan')
+    .eq('id', sub.organization_id)
+    .single();
+  const prevPlan = prevOrgData?.plan || 'free';
 
   // Downgrade to free plan
   const { error: orgUpdateError } = await getSupabaseAdmin()
@@ -268,6 +295,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   logger.webhooks.info('Subscription deleted', { organizationId: sub.organization_id });
+
+  // Send subscription canceled email (non-blocking)
+  waitUntil(notifySubscriptionChanged(sub.organization_id, prevPlan, 'free', 'canceled'));
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
@@ -285,6 +315,26 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   }
 
   logger.webhooks.info('Payment succeeded', { subscriptionId });
+
+  // Send payment receipt email (non-blocking)
+  const { data: sub } = await getSupabaseAdmin()
+    .from('subscriptions')
+    .select('organization_id, stripe_price_id')
+    .eq('stripe_subscription_id', subscriptionId)
+    .single();
+
+  if (sub?.organization_id) {
+    const plan = await inferPlan(sub.stripe_price_id);
+    const planNames: Record<string, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', business: 'Business' };
+    waitUntil(
+      notifyPaymentReceipt(sub.organization_id, {
+        amount: `$${(invoice.amount_paid / 100).toFixed(2)} ${invoice.currency.toUpperCase()}`,
+        planName: planNames[plan] || plan,
+        invoiceDate: new Date(invoice.created * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        invoiceUrl: invoice.hosted_invoice_url || undefined,
+      })
+    );
+  }
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {

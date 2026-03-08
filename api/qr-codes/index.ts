@@ -308,6 +308,27 @@ async function handleCreate(
     organizationId,
   });
 
+  // "First QR created" email (fire-and-forget)
+  if (userId && status === 'active') {
+    void (async () => {
+      try {
+        const countResult = await sql`SELECT COUNT(*) as count FROM qr_codes WHERE user_id = ${userId} AND status = 'active'`;
+        const count = parseInt(countResult[0]?.count as string || '0');
+        if (count === 1) {
+          const { getSupabaseAdmin: getSB } = await import('../_lib/auth.js');
+          const { data: u } = await getSB().from('users').select('email, raw_user_meta_data').eq('id', userId).single();
+          if (u?.email) {
+            const { notifyFirstQRCreated } = await import('../_lib/notifications.js');
+            const userName = (u.raw_user_meta_data as Record<string, unknown>)?.full_name as string | undefined;
+            await notifyFirstQRCreated(userId, u.email, userName, body.name || undefined);
+          }
+        }
+      } catch (e) {
+        logger.qrCodes.error('First QR email failed', { error: String(e) });
+      }
+    })();
+  }
+
   // Auto-flag suspicious URLs (fire-and-forget)
   if (blocklistFlagged && sql) {
     void (async () => {

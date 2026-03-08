@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@/components/ui/Tabs';
-import { User, Users, CreditCard, Key, Globe, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { User, Users, CreditCard, Key, Globe, SlidersHorizontal, Bell, Loader2 } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 
 // Lazy load settings content components
@@ -12,6 +12,7 @@ const BillingSettingsContent = lazy(() => import('./settings/BillingSettingsPage
 const ApiKeysSettingsContent = lazy(() => import('./settings/ApiKeysSettingsPage').then(m => ({ default: m.ApiKeysSettingsContent })));
 const DomainsSettingsContent = lazy(() => import('./settings/DomainsSettingsPage').then(m => ({ default: m.DomainsSettingsContent })));
 const SystemSettingsContent = lazy(() => import('./settings/SystemSettingsPage').then(m => ({ default: m.SystemSettingsContent })));
+const NotificationsSettingsContent = lazy(() => import('./settings/NotificationsSettingsPage').then(m => ({ default: m.NotificationsSettingsContent })));
 
 function SettingsLoading() {
   return (
@@ -21,7 +22,7 @@ function SettingsLoading() {
   );
 }
 
-const TAB_KEYS = ['profile', 'team', 'billing', 'api-keys', 'domains', 'system'] as const;
+const TAB_KEYS = ['profile', 'team', 'billing', 'api-keys', 'domains', 'notifications', 'system'] as const;
 type SettingsTab = (typeof TAB_KEYS)[number];
 
 function getTabIndex(tab: string | undefined): number {
@@ -59,6 +60,7 @@ export default function SettingsPage() {
             <Tab icon={CreditCard}>Billing</Tab>
             <Tab icon={Key}>API Keys</Tab>
             <Tab icon={Globe}>Domains</Tab>
+            <Tab icon={Bell}>Notifications</Tab>
             <Tab icon={SlidersHorizontal}>System</Tab>
           </TabList>
 
@@ -86,6 +88,11 @@ export default function SettingsPage() {
             <TabPanel>
               <Suspense fallback={<SettingsLoading />}>
                 <DomainsSettingsContent />
+              </Suspense>
+            </TabPanel>
+            <TabPanel>
+              <Suspense fallback={<SettingsLoading />}>
+                <NotificationsSettingsContent />
               </Suspense>
             </TabPanel>
             <TabPanel>

@@ -153,6 +153,20 @@ async function handleCreate(
     return res.status(500).json({ error: 'Failed to create API key' });
   }
 
+  // Send API key created email (fire-and-forget)
+  void (async () => {
+    try {
+      const { notifyApiKeyCreated } = await import('../_lib/notifications.js');
+      const { data: u } = await getSupabaseAdmin().from('users').select('email, raw_user_meta_data').eq('id', userId).single();
+      if (u?.email) {
+        const userName = (u.raw_user_meta_data as Record<string, unknown>)?.full_name as string | undefined;
+        await notifyApiKeyCreated(userId, u.email, body.name.trim(), keyPrefix, userName);
+      }
+    } catch (e) {
+      logger.apiKeys.error('API key email failed', { error: String(e) });
+    }
+  })();
+
   // Return the full key ONLY on creation (never stored in plain text)
   return res.status(201).json({
     apiKey: {

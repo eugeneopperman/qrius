@@ -5,8 +5,10 @@ import { requireAuth, getSupabaseAdmin, requireRole, checkPlanLimit, Unauthorize
 import { setCorsHeaders } from '../../_lib/cors.js';
 import { isValidUUID } from '../../_lib/validate.js';
 import { logger } from '../../_lib/logger.js';
+import { notifyTeamInvite } from '../../_lib/notifications.js';
 import crypto from 'crypto';
 import { checkRateLimit } from '../../_lib/rateLimit.js';
+import { waitUntil } from '@vercel/functions';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -121,14 +123,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     logger.organizations.info('Invitation sent', { orgId: organizationId, email: body.email, role: body.role });
 
-    // TODO: Send invitation email
-    // For now, return the invite link
     const baseUrl = process.env.APP_URL;
     if (!baseUrl) {
       logger.organizations.error('APP_URL not configured - cannot generate invite link');
       return res.status(500).json({ error: 'Server configuration error' });
     }
     const inviteLink = `${baseUrl}/invite/accept?token=${token}`;
+
+    // Send invitation email (non-blocking)
+    const { data: org } = await getSupabaseAdmin()
+      .from('organizations')
+      .select('name')
+      .eq('id', organizationId)
+      .single();
+
+    const { data: inviter } = await getSupabaseAdmin()
+      .from('users')
+      .select('raw_user_meta_data')
+      .eq('id', user.id)
+      .single();
+
+    const inviterName = (inviter?.raw_user_meta_data as Record<string, unknown>)?.full_name as string || user.email;
+    const orgName = org?.name || 'Your organization';
+
+    waitUntil(notifyTeamInvite(body.email, inviterName, orgName, body.role, inviteLink));
 
     return res.status(201).json({
       invitation: {

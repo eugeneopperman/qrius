@@ -133,6 +133,7 @@ const AdminModerationPage = lazy(() => import('@/pages/AdminModerationPage'));
 // Moderation / Legal
 const ReportPage = lazy(() => import('@/pages/ReportPage'));
 const AcceptableUsePage = lazy(() => import('@/pages/AcceptableUsePage'));
+const UnsubscribePage = lazy(() => import('@/pages/UnsubscribePage'));
 
 // Error pages
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
@@ -600,6 +601,13 @@ const acceptableUseRoute = createRoute({
   component: AcceptableUsePage,
 });
 
+// Unsubscribe route (public)
+const unsubscribeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/unsubscribe',
+  component: UnsubscribePage,
+});
+
 // Admin moderation route
 const adminModerationRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -696,6 +704,7 @@ const routeTree = rootRoute.addChildren([
   adminModerationRoute,
   reportRoute,
   acceptableUseRoute,
+  unsubscribeRoute,
   profileSettingsRedirect,
   teamSettingsRedirect,
   billingSettingsRedirect,

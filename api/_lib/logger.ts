@@ -98,6 +98,7 @@ export const logger = {
   domains: createLogger('domains'),
   folders: createLogger('folders'),
   templates: createLogger('templates'),
+  email: createLogger('email'),
 };
 
 export default logger;
