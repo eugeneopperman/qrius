@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User as SupabaseUser, Session, Subscription } from '@supabase/supabase-js';
 import type { User, Organization, OrganizationMember, PlanLimits } from '@/types/database';
-import { supabase, checkSupabaseConnection } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { hasRealDomain, isAppSubdomain, getRootUrl } from '@/lib/domain';
 import { TERMS_VERSION } from '@/config/constants';
 
