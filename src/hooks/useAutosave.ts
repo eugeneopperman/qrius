@@ -132,21 +132,34 @@ export function useAutosave(): AutosaveState {
     // Guard: already finalized as active — don't overwrite with draft
     if (finalizedRef.current && status === 'draft') return;
 
+    // Mark finalized BEFORE the fetch so the interval can't abort us
+    if (status === 'active') {
+      finalizedRef.current = true;
+    }
+
     const payload = buildSavePayload(status);
     const payloadHash = JSON.stringify(payload);
 
-    // Skip if nothing changed
-    if (payloadHash === lastPayloadHashRef.current) return;
+    // Skip if nothing changed (but always allow active finalization)
+    if (status !== 'active' && payloadHash === lastPayloadHashRef.current) return;
 
-    // Abort any in-flight request
-    abortControllerRef.current?.abort();
+    // Abort any in-flight request (only for draft — don't abort active finalization)
+    if (status === 'draft') {
+      abortControllerRef.current?.abort();
+    }
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
     setIsSaving(true);
     try {
       const session = await getSession();
-      if (!session?.access_token) return;
+      if (!session?.access_token) {
+        if (status === 'active') {
+          const { toast } = await import('@/stores/toastStore');
+          toast.error('Not authenticated — QR code was not saved.');
+        }
+        return;
+      }
 
       const isUpdate = savedIdRef.current !== null;
       const url = isUpdate
@@ -166,6 +179,14 @@ export function useAutosave(): AutosaveState {
       if (!response.ok) {
         if (response.status === 403) {
           limitReachedRef.current = true;
+          if (status === 'active') {
+            const { toast } = await import('@/stores/toastStore');
+            toast.info('QR code limit reached. Download still works as a static QR code.');
+          }
+        } else if (status === 'active') {
+          // Show error for explicit finalization (not silent interval saves)
+          const { toast } = await import('@/stores/toastStore');
+          toast.error('Failed to save QR code. Please try again.');
         }
         return;
       }
@@ -175,14 +196,13 @@ export function useAutosave(): AutosaveState {
       lastPayloadHashRef.current = payloadHash;
       setLastSavedAt(new Date());
 
-      // Mark as finalized so interval doesn't overwrite with draft
-      if (status === 'active') {
-        finalizedRef.current = true;
-      }
-
       if (!isUpdate && data.id) {
         setSavedQRCodeId(data.id);
         savedIdRef.current = data.id;
+        if (status === 'active') {
+          const { toast } = await import('@/stores/toastStore');
+          toast.success('QR code saved to your dashboard');
+        }
       }
       if (data.tracking_url) {
         setTrackingUrl(data.tracking_url);
@@ -191,8 +211,18 @@ export function useAutosave(): AutosaveState {
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     } catch (error) {
-      // Ignore abort errors
-      if (error instanceof DOMException && error.name === 'AbortError') return;
+      // Ignore abort errors for drafts; show error for active finalization
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        if (status === 'active') {
+          // Active finalization was aborted — reset flag so fallback can try
+          finalizedRef.current = false;
+        }
+        return;
+      }
+      if (status === 'active') {
+        const { toast } = await import('@/stores/toastStore');
+        toast.error('Failed to save QR code. Please try again.');
+      }
       if (import.meta.env.DEV) console.error('Autosave failed:', error);
     } finally {
       setIsSaving(false);
