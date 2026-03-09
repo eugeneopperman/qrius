@@ -25,33 +25,33 @@ export function TeamInviteEmail({
   const name = inviteeName || 'there';
 
   return (
-    <EmailLayout preview={`${inviterName} invited you to join ${organizationName} on Qrius Codes`}>
+    <EmailLayout preview={`${inviterName} wants you on the team — join ${organizationName} on Qrius Codes`}>
       <Text style={{ fontFamily: BRAND.serifFont, fontSize: '24px', fontWeight: 700, color: BRAND.ink, margin: '0 0 16px' }}>
-        You've been invited!
+        You've got a seat at the table.
       </Text>
 
       <Text style={{ fontFamily: BRAND.sansFont, fontSize: '16px', color: BRAND.charcoal, lineHeight: '1.6', margin: '0 0 16px' }}>
-        Hi {name}, {inviterName} has invited you to join <strong>{organizationName}</strong> on Qrius Codes.
+        Hi {name}, {inviterName} invited you to join <strong>{organizationName}</strong> on Qrius Codes. You'll be able to create, manage, and track QR codes together.
       </Text>
 
       <EmailCard accent>
         <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: '0 0 4px' }}>
-          <strong>Organization:</strong> {organizationName}
+          <strong>Team:</strong> {organizationName}
         </Text>
         <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: '0 0 4px' }}>
-          <strong>Role:</strong> {role.charAt(0).toUpperCase() + role.slice(1)}
+          <strong>Your role:</strong> {role.charAt(0).toUpperCase() + role.slice(1)}
         </Text>
         <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: 0 }}>
-          <strong>Expires:</strong> {expiresIn}
+          <strong>Link expires in:</strong> {expiresIn}
         </Text>
       </EmailCard>
 
       <div style={{ textAlign: 'center' as const, margin: '24px 0' }}>
-        <EmailButton href={inviteLink}>Accept invitation</EmailButton>
+        <EmailButton href={inviteLink}>Join the team</EmailButton>
       </div>
 
       <Text style={{ fontFamily: BRAND.sansFont, fontSize: '13px', color: BRAND.charcoal, lineHeight: '1.6', margin: '16px 0 0' }}>
-        If you weren't expecting this invitation, you can safely ignore this email.
+        Wasn't expecting this? No worries — just ignore this email and nothing happens.
       </Text>
     </EmailLayout>
   );

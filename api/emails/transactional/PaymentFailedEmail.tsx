@@ -19,13 +19,13 @@ export function PaymentFailedEmail({
   nextRetryDate,
 }: PaymentFailedEmailProps) {
   return (
-    <EmailLayout preview={`Action required — payment of ${amount} failed for ${organizationName}`}>
+    <EmailLayout preview={`Heads up — your ${amount} payment for ${organizationName} didn't go through`}>
       <Text style={{ fontFamily: BRAND.serifFont, fontSize: '24px', fontWeight: 700, color: BRAND.ink, margin: '0 0 16px' }}>
-        Payment failed
+        Your payment didn't go through.
       </Text>
 
       <Text style={{ fontFamily: BRAND.sansFont, fontSize: '16px', color: BRAND.charcoal, lineHeight: '1.6', margin: '0 0 16px' }}>
-        We weren't able to process your payment for <strong>{organizationName}</strong>. Please update your payment method to keep your subscription active.
+        We tried to charge {amount} for <strong>{organizationName}</strong>, but it was declined. This usually means an expired card or insufficient funds — a quick update should fix it.
       </Text>
 
       <EmailCard>
@@ -37,13 +37,13 @@ export function PaymentFailedEmail({
         </Text>
         {nextRetryDate && (
           <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: 0 }}>
-            <strong>Next retry:</strong> {nextRetryDate}
+            <strong>We'll try again:</strong> {nextRetryDate}
           </Text>
         )}
       </EmailCard>
 
-      <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.warning, lineHeight: '1.6', margin: '0 0 16px' }}>
-        If payment continues to fail, your account will be downgraded to the Free plan after 3 attempts.
+      <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, lineHeight: '1.6', margin: '0 0 16px' }}>
+        After 3 failed attempts, your account moves to the Free plan. Your QR codes keep working — but you'll lose access to paid features until it's sorted.
       </Text>
 
       <div style={{ textAlign: 'center' as const, margin: '24px 0' }}>

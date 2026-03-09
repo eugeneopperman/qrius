@@ -32,21 +32,21 @@ export function MonthlyDigestEmail({
   unsubscribeUrl,
 }: MonthlyDigestEmailProps) {
   const changeText = scanChange > 0
-    ? `↑ ${scanChange}% from last month`
+    ? `↑ ${scanChange}% vs ${getPreviousMonth(monthName)}`
     : scanChange < 0
-      ? `↓ ${Math.abs(scanChange)}% from last month`
-      : 'Same as last month';
+      ? `↓ ${Math.abs(scanChange)}% vs ${getPreviousMonth(monthName)}`
+      : `Holding steady vs ${getPreviousMonth(monthName)}`;
 
   const changeColor = scanChange > 0 ? BRAND.success : scanChange < 0 ? BRAND.warning : BRAND.charcoal;
 
   return (
-    <EmailLayout preview={`${monthName} recap: ${totalScans.toLocaleString()} scans`} unsubscribeUrl={unsubscribeUrl}>
+    <EmailLayout preview={`${monthName}: ${totalScans.toLocaleString()} scans across ${totalActiveQRCodes} codes`} unsubscribeUrl={unsubscribeUrl}>
       <Text style={{ fontFamily: BRAND.serifFont, fontSize: '24px', fontWeight: 700, color: BRAND.ink, margin: '0 0 16px' }}>
-        Your {monthName} recap
+        {monthName} — the full picture
       </Text>
 
       <Text style={{ fontFamily: BRAND.sansFont, fontSize: '16px', color: BRAND.charcoal, lineHeight: '1.6', margin: '0 0 16px' }}>
-        Hi {userName || 'there'}, here's your monthly summary.
+        Hi {userName || 'there'}, here's how your QR codes did last month.
       </Text>
 
       <EmailCard accent>
@@ -97,8 +97,14 @@ export function MonthlyDigestEmail({
       )}
 
       <div style={{ textAlign: 'center' as const, margin: '24px 0' }}>
-        <EmailButton href={BRAND.dashboardUrl}>View your dashboard →</EmailButton>
+        <EmailButton href={BRAND.dashboardUrl}>Explore your analytics</EmailButton>
       </div>
     </EmailLayout>
   );
+}
+
+function getPreviousMonth(monthName: string): string {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const idx = months.indexOf(monthName);
+  return idx > 0 ? months[idx - 1] : months[11];
 }

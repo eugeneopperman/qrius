@@ -13,7 +13,7 @@ interface TopQR {
 interface WeeklyDigestEmailProps {
   userName?: string;
   totalScans: number;
-  scanChange: number; // percentage change vs previous week
+  scanChange: number;
   topQRCodes: TopQR[];
   newQRCodes: number;
   unsubscribeUrl: string;
@@ -28,21 +28,21 @@ export function WeeklyDigestEmail({
   unsubscribeUrl,
 }: WeeklyDigestEmailProps) {
   const changeText = scanChange > 0
-    ? `↑ ${scanChange}% from last week`
+    ? `↑ ${scanChange}% vs last week`
     : scanChange < 0
-      ? `↓ ${Math.abs(scanChange)}% from last week`
-      : 'Same as last week';
+      ? `↓ ${Math.abs(scanChange)}% vs last week`
+      : 'Holding steady from last week';
 
   const changeColor = scanChange > 0 ? BRAND.success : scanChange < 0 ? BRAND.warning : BRAND.charcoal;
 
   return (
-    <EmailLayout preview={`Your week: ${totalScans} scans`} unsubscribeUrl={unsubscribeUrl}>
+    <EmailLayout preview={`This week: ${totalScans.toLocaleString()} scans across your QR codes`} unsubscribeUrl={unsubscribeUrl}>
       <Text style={{ fontFamily: BRAND.serifFont, fontSize: '24px', fontWeight: 700, color: BRAND.ink, margin: '0 0 16px' }}>
-        Your weekly scan report
+        Your week in scans
       </Text>
 
       <Text style={{ fontFamily: BRAND.sansFont, fontSize: '16px', color: BRAND.charcoal, lineHeight: '1.6', margin: '0 0 16px' }}>
-        Hi {userName || 'there'}, here's how your QR codes performed this week.
+        Hi {userName || 'there'}, here's what happened with your QR codes over the last 7 days.
       </Text>
 
       <EmailCard accent>
@@ -60,7 +60,7 @@ export function WeeklyDigestEmail({
       {topQRCodes.length > 0 && (
         <>
           <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', fontWeight: 600, color: BRAND.ink, margin: '16px 0 8px' }}>
-            Top QR codes
+            Your top performers
           </Text>
           {topQRCodes.map((qr, i) => (
             <Text key={i} style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: '0 0 4px' }}>
@@ -72,12 +72,12 @@ export function WeeklyDigestEmail({
 
       {newQRCodes > 0 && (
         <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: '16px 0 0' }}>
-          📎 {newQRCodes} new QR code{newQRCodes === 1 ? '' : 's'} created this week
+          You also created {newQRCodes} new code{newQRCodes === 1 ? '' : 's'} this week.
         </Text>
       )}
 
       <div style={{ textAlign: 'center' as const, margin: '24px 0' }}>
-        <EmailButton href={BRAND.dashboardUrl}>View your dashboard →</EmailButton>
+        <EmailButton href={BRAND.dashboardUrl}>Dig into the details</EmailButton>
       </div>
     </EmailLayout>
   );

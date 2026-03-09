@@ -21,13 +21,13 @@ export function PaymentReceiptEmail({
   invoiceUrl,
 }: PaymentReceiptEmailProps) {
   return (
-    <EmailLayout preview={`Payment received — ${amount} for ${planName} plan`}>
+    <EmailLayout preview={`Receipt: ${amount} for your ${planName} plan`}>
       <Text style={{ fontFamily: BRAND.serifFont, fontSize: '24px', fontWeight: 700, color: BRAND.ink, margin: '0 0 16px' }}>
-        Payment received
+        Payment received — you're all set.
       </Text>
 
       <Text style={{ fontFamily: BRAND.sansFont, fontSize: '16px', color: BRAND.charcoal, lineHeight: '1.6', margin: '0 0 16px' }}>
-        Thanks for your payment. Here's a summary for {organizationName}:
+        Here's your receipt for {organizationName}. No action needed — just keeping your records tidy.
       </Text>
 
       <EmailCard accent>
@@ -44,7 +44,7 @@ export function PaymentReceiptEmail({
 
       {invoiceUrl && (
         <div style={{ textAlign: 'center' as const, margin: '24px 0' }}>
-          <EmailButton href={invoiceUrl}>View invoice</EmailButton>
+          <EmailButton href={invoiceUrl}>View full invoice</EmailButton>
         </div>
       )}
     </EmailLayout>

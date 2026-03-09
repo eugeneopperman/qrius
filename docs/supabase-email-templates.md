@@ -24,7 +24,7 @@ Click **Save**.
 
 Go to **Supabase Dashboard → Authentication → Email Templates**
 
-For each template type below, paste the HTML into the "Body" field.
+For each template type below, paste the **Subject** and **Body** (HTML).
 
 ---
 
@@ -38,18 +38,20 @@ For each template type below, paste the HTML into the "Body" field.
 <body style="margin:0;padding:0;background-color:#FAFAF8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
 <div style="max-width:600px;margin:0 auto;padding:40px 20px">
 
-<!-- Header -->
 <div style="text-align:center;margin-bottom:32px">
 <img src="https://qriuscodes.com/icon.svg" alt="Qrius Codes" width="40" height="40" style="display:inline-block;vertical-align:middle;margin-right:10px">
 <span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:#1A1A1A;vertical-align:middle">Qrius Codes</span>
 </div>
 
-<!-- Body -->
 <div style="background-color:#FFFFFF;border:1px solid #E8E6E3;border-radius:12px;padding:32px">
-<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Confirm your email</h1>
+<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">One quick step — confirm your email.</h1>
+
+<p style="font-size:16px;color:#4A4A4A;line-height:1.6;margin:0 0 16px">
+You just signed up for Qrius Codes. Click below to confirm your email and start creating beautiful, trackable QR codes.
+</p>
 
 <p style="font-size:16px;color:#4A4A4A;line-height:1.6;margin:0 0 24px">
-Thanks for signing up for Qrius Codes! Click the button below to confirm your email address and start creating QR codes.
+It takes about 30 seconds to make your first one.
 </p>
 
 <div style="text-align:center;margin:24px 0">
@@ -57,11 +59,10 @@ Thanks for signing up for Qrius Codes! Click the button below to confirm your em
 </div>
 
 <p style="font-size:13px;color:#4A4A4A;line-height:1.6;margin:16px 0 0">
-If you didn't create an account with Qrius Codes, you can safely ignore this email.
+Didn't sign up for Qrius Codes? No worries — just ignore this email and nothing happens.
 </p>
 </div>
 
-<!-- Footer -->
 <div style="text-align:center;margin-top:32px">
 <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;font-style:italic;color:#4A4A4A;margin:0 0 16px">Stay qrius.</p>
 <hr style="border:none;border-top:1px solid #E8E6E3;margin:16px 0">
@@ -77,7 +78,7 @@ If you didn't create an account with Qrius Codes, you can safely ignore this ema
 
 ### Invite User
 
-**Subject:** `You've been invited to Qrius Codes`
+**Subject:** `You've got a seat — join Qrius Codes`
 
 ```html
 <html>
@@ -91,18 +92,18 @@ If you didn't create an account with Qrius Codes, you can safely ignore this ema
 </div>
 
 <div style="background-color:#FFFFFF;border:1px solid #E8E6E3;border-radius:12px;padding:32px">
-<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">You've been invited!</h1>
+<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Someone wants you on the team.</h1>
 
 <p style="font-size:16px;color:#4A4A4A;line-height:1.6;margin:0 0 24px">
-You've been invited to join Qrius Codes. Click the button below to accept and set up your account.
+You've been invited to join a team on Qrius Codes — where you can create, customize, and track QR codes together. Click below to accept and set up your account.
 </p>
 
 <div style="text-align:center;margin:24px 0">
-<a href="{{ .ConfirmationURL }}" style="display:inline-block;background-color:#F97316;color:#FFFFFF;font-size:16px;font-weight:600;text-decoration:none;border-radius:8px;padding:14px 28px">Accept invitation</a>
+<a href="{{ .ConfirmationURL }}" style="display:inline-block;background-color:#F97316;color:#FFFFFF;font-size:16px;font-weight:600;text-decoration:none;border-radius:8px;padding:14px 28px">Accept and join</a>
 </div>
 
 <p style="font-size:13px;color:#4A4A4A;line-height:1.6;margin:16px 0 0">
-If you weren't expecting this invitation, you can safely ignore this email.
+Wasn't expecting this? Just ignore the email — no account gets created unless you click.
 </p>
 </div>
 
@@ -135,10 +136,10 @@ If you weren't expecting this invitation, you can safely ignore this email.
 </div>
 
 <div style="background-color:#FFFFFF;border:1px solid #E8E6E3;border-radius:12px;padding:32px">
-<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Sign in to Qrius Codes</h1>
+<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Here's your sign-in link.</h1>
 
 <p style="font-size:16px;color:#4A4A4A;line-height:1.6;margin:0 0 24px">
-Click the button below to sign in. This link expires in 24 hours and can only be used once.
+Click below to sign in to Qrius Codes. This link is single-use and expires in 24 hours — no password needed.
 </p>
 
 <div style="text-align:center;margin:24px 0">
@@ -146,7 +147,7 @@ Click the button below to sign in. This link expires in 24 hours and can only be
 </div>
 
 <p style="font-size:13px;color:#4A4A4A;line-height:1.6;margin:16px 0 0">
-If you didn't request this link, you can safely ignore this email. Your account is secure.
+Didn't request this? Your account is safe — just ignore this email.
 </p>
 </div>
 
@@ -179,10 +180,10 @@ If you didn't request this link, you can safely ignore this email. Your account 
 </div>
 
 <div style="background-color:#FFFFFF;border:1px solid #E8E6E3;border-radius:12px;padding:32px">
-<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Confirm your new email</h1>
+<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Confirm your new email address.</h1>
 
 <p style="font-size:16px;color:#4A4A4A;line-height:1.6;margin:0 0 24px">
-Click the button below to confirm changing your email address to this one.
+You asked to change the email on your Qrius Codes account to this address. Click below to confirm — once you do, this becomes your new login.
 </p>
 
 <div style="text-align:center;margin:24px 0">
@@ -190,7 +191,7 @@ Click the button below to confirm changing your email address to this one.
 </div>
 
 <p style="font-size:13px;color:#4A4A4A;line-height:1.6;margin:16px 0 0">
-If you didn't request this change, please contact support immediately.
+Didn't request this change? Your current email stays in place. If you're concerned, update your password from Settings.
 </p>
 </div>
 
@@ -223,10 +224,10 @@ If you didn't request this change, please contact support immediately.
 </div>
 
 <div style="background-color:#FFFFFF;border:1px solid #E8E6E3;border-radius:12px;padding:32px">
-<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Reset your password</h1>
+<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Let's get you back in.</h1>
 
 <p style="font-size:16px;color:#4A4A4A;line-height:1.6;margin:0 0 24px">
-We received a request to reset your password. Click the button below to choose a new one.
+Someone (hopefully you) requested a password reset for your Qrius Codes account. Click below to choose a new password.
 </p>
 
 <div style="text-align:center;margin:24px 0">
@@ -234,7 +235,51 @@ We received a request to reset your password. Click the button below to choose a
 </div>
 
 <p style="font-size:13px;color:#4A4A4A;line-height:1.6;margin:16px 0 0">
-If you didn't request a password reset, you can safely ignore this email. Your password won't be changed.
+Didn't ask for this? Your password stays the same — just ignore this email.
+</p>
+</div>
+
+<div style="text-align:center;margin-top:32px">
+<p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;font-style:italic;color:#4A4A4A;margin:0 0 16px">Stay qrius.</p>
+<hr style="border:none;border-top:1px solid #E8E6E3;margin:16px 0">
+<p style="font-size:12px;color:#4A4A4A;margin:0">© 2026 Qrius Codes. All rights reserved.</p>
+</div>
+
+</div>
+</body>
+</html>
+```
+
+---
+
+### Reauthentication
+
+**Subject:** `Confirm it's you — Qrius Codes`
+
+```html
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#FAFAF8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+<div style="max-width:600px;margin:0 auto;padding:40px 20px">
+
+<div style="text-align:center;margin-bottom:32px">
+<img src="https://qriuscodes.com/icon.svg" alt="Qrius Codes" width="40" height="40" style="display:inline-block;vertical-align:middle;margin-right:10px">
+<span style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:#1A1A1A;vertical-align:middle">Qrius Codes</span>
+</div>
+
+<div style="background-color:#FFFFFF;border:1px solid #E8E6E3;border-radius:12px;padding:32px">
+<h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:#1A1A1A;margin:0 0 16px">Quick security check.</h1>
+
+<p style="font-size:16px;color:#4A4A4A;line-height:1.6;margin:0 0 24px">
+You're trying to do something sensitive on your Qrius Codes account — like changing your email or password. Click below to confirm it's really you.
+</p>
+
+<div style="text-align:center;margin:24px 0">
+<a href="{{ .ConfirmationURL }}" style="display:inline-block;background-color:#F97316;color:#FFFFFF;font-size:16px;font-weight:600;text-decoration:none;border-radius:8px;padding:14px 28px">Confirm it's me</a>
+</div>
+
+<p style="font-size:13px;color:#4A4A4A;line-height:1.6;margin:16px 0 0">
+Didn't trigger this? Someone may be trying to access your account. Change your password from Settings right away.
 </p>
 </div>
 

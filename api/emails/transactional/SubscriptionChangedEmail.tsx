@@ -28,17 +28,17 @@ export function SubscriptionChangedEmail({
   effectiveDate,
 }: SubscriptionChangedEmailProps) {
   const titles: Record<string, string> = {
-    upgraded: 'Plan upgraded!',
-    downgraded: 'Plan changed',
-    canceled: 'Subscription canceled',
-    reactivated: 'Subscription reactivated!',
+    upgraded: 'You just leveled up.',
+    downgraded: 'Your plan has changed.',
+    canceled: 'We've canceled your subscription.',
+    reactivated: 'Welcome back.',
   };
 
   const descriptions: Record<string, string> = {
-    upgraded: `Great news! ${organizationName} has been upgraded to the ${planNames[newPlan] || newPlan} plan.`,
-    downgraded: `${organizationName} has been moved to the ${planNames[newPlan] || newPlan} plan.`,
-    canceled: `Your subscription for ${organizationName} has been canceled. You'll keep access until the end of your billing period.`,
-    reactivated: `Your ${planNames[newPlan] || newPlan} subscription for ${organizationName} is active again.`,
+    upgraded: `${organizationName} is now on the ${planNames[newPlan] || newPlan} plan. More codes, more features, more room to grow.`,
+    downgraded: `${organizationName} has moved to the ${planNames[newPlan] || newPlan} plan. Your existing QR codes still work — nothing breaks.`,
+    canceled: `Your subscription for ${organizationName} has been canceled. You'll keep full access until the end of your current billing period, then you'll move to the Free plan. Your QR codes stay active either way.`,
+    reactivated: `Good to have you back. ${organizationName} is on the ${planNames[newPlan] || newPlan} plan again — everything's right where you left it.`,
   };
 
   return (
@@ -54,11 +54,11 @@ export function SubscriptionChangedEmail({
       <EmailCard accent>
         {changeType !== 'canceled' && (
           <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: '0 0 4px' }}>
-            <strong>Previous plan:</strong> {planNames[previousPlan] || previousPlan}
+            <strong>Was:</strong> {planNames[previousPlan] || previousPlan}
           </Text>
         )}
         <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: '0 0 4px' }}>
-          <strong>{changeType === 'canceled' ? 'Plan' : 'New plan'}:</strong> {planNames[newPlan] || newPlan}
+          <strong>{changeType === 'canceled' ? 'Current plan' : 'Now'}:</strong> {planNames[newPlan] || newPlan}
         </Text>
         {effectiveDate && (
           <Text style={{ fontFamily: BRAND.sansFont, fontSize: '14px', color: BRAND.charcoal, margin: 0 }}>
@@ -68,7 +68,9 @@ export function SubscriptionChangedEmail({
       </EmailCard>
 
       <div style={{ textAlign: 'center' as const, margin: '24px 0' }}>
-        <EmailButton href={`${BRAND.appUrl}/settings?tab=billing`}>View billing details</EmailButton>
+        <EmailButton href={`${BRAND.appUrl}/settings?tab=billing`}>
+          {changeType === 'canceled' ? 'Manage billing' : 'View your plan'}
+        </EmailButton>
       </div>
     </EmailLayout>
   );
