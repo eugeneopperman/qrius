@@ -88,30 +88,14 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, connectionError: null });
 
-          // Check connection + get session in one call (avoids redundant getSession)
-          const connectionCheck = await checkSupabaseConnection();
-          if (!connectionCheck.ok) {
-            if (import.meta.env.DEV) console.warn('Supabase connection issue:', connectionCheck.message);
-            set({ isLoading: false, isInitialized: true, connectionError: connectionCheck.message ?? 'Connection failed' });
-            return;
-          }
-
-          // Re-use the session from the connection check
-          const session = connectionCheck.session ?? null;
-
-          if (session) {
-            set({ session, user: session.user });
-            await get().fetchProfile();
-            await get().fetchOrganizations();
-          }
-
           // Clean up previous listener if initialize() is called multiple times
           if (authSubscription) {
             authSubscription.unsubscribe();
             authSubscription = null;
           }
 
-          // Listen for auth changes
+          // Set up auth listener FIRST — so even if getSession() fails/aborts,
+          // the listener can still restore the session on subsequent auth events
           const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             set({ session, user: session?.user ?? null });
 
@@ -131,8 +115,27 @@ export const useAuthStore = create<AuthState>()(
           });
           authSubscription = subscription;
 
+          // Check connection + get session
+          const connectionCheck = await checkSupabaseConnection();
+          if (!connectionCheck.ok) {
+            if (import.meta.env.DEV) console.warn('Supabase connection issue:', connectionCheck.message);
+            set({ isLoading: false, isInitialized: true, connectionError: connectionCheck.message ?? 'Connection failed' });
+            return;
+          }
+
+          // Re-use the session from the connection check
+          const session = connectionCheck.session ?? null;
+
+          if (session) {
+            set({ session, user: session.user });
+            await get().fetchProfile();
+            await get().fetchOrganizations();
+          }
+
           set({ isLoading: false, isInitialized: true });
         } catch (error) {
+          // On AbortError or transient failure, still mark as initialized
+          // so the auth listener (already set up above) can recover the session
           if (import.meta.env.DEV) console.error('Error initializing auth:', error);
           set({ isLoading: false, isInitialized: true });
         }
@@ -387,6 +390,19 @@ export const useAuthStore = create<AuthState>()(
             if (newProfile) {
               const needsTerms = !newProfile.terms_accepted_at || newProfile.terms_version !== TERMS_VERSION;
               set({ profile: newProfile, needsTermsAcceptance: needsTerms });
+
+              // Fire-and-forget welcome email for newly provisioned users
+              const session = get().session;
+              if (session?.access_token) {
+                fetch('/api/users/welcome', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.access_token}`,
+                  },
+                  body: JSON.stringify({ userName }),
+                }).catch(() => {/* welcome email is best-effort */});
+              }
             }
             return;
           }

@@ -116,12 +116,12 @@ export function useAutosave(): AutosaveState {
     const user = useAuthStore.getState().user;
     if (!user) return;
 
-    // Guard: autosave must be enabled
-    if (!useSettingsStore.getState().autosaveEnabled) return;
+    // Guard: autosave must be enabled (skip check for explicit finalization)
+    if (status !== 'active' && !useSettingsStore.getState().autosaveEnabled) return;
 
-    // Guard: must be on step >= MIN_STEP
+    // Guard: must be on step >= MIN_STEP (skip check for explicit finalization)
     const currentStep = useWizardStore.getState().currentStep;
-    if (currentStep < AUTOSAVE.MIN_STEP) return;
+    if (status !== 'active' && currentStep < AUTOSAVE.MIN_STEP) return;
 
     // Guard: must have real content
     if (!hasRealContent()) return;

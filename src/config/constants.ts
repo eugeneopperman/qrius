@@ -4,13 +4,13 @@
  */
 
 /** App version — bump by 0.01 with each release */
-export const APP_VERSION = '1.02';
+export const APP_VERSION = '1.03';
 
 /** Current terms of service version — bump when terms change to re-prompt users */
 export const TERMS_VERSION = '2026.02';
 
 /** Marketing site version — bump by 0.1 with each commit+push */
-export const MARKETING_VERSION = '0.22';
+export const MARKETING_VERSION = '0.23';
 
 // ============================================================================
 // QR Code Configuration
