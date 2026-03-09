@@ -177,8 +177,8 @@ async function handleCreate(
     if (typeof body.style_options !== 'object' || body.style_options === null || Array.isArray(body.style_options)) {
       return res.status(400).json({ error: 'style_options must be an object' });
     }
-    if (JSON.stringify(body.style_options).length > 4096) {
-      return res.status(400).json({ error: 'style_options must be 4KB or less' });
+    if (JSON.stringify(body.style_options).length > 65536) {
+      return res.status(400).json({ error: 'style_options must be 64KB or less' });
     }
   }
 
