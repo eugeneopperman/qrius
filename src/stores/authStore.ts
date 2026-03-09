@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User as SupabaseUser, Session, Subscription } from '@supabase/supabase-js';
 import type { User, Organization, OrganizationMember, PlanLimits } from '@/types/database';
-import { supabase } from '@/lib/supabase';
+import { supabase, checkSupabaseConnection } from '@/lib/supabase';
 import { hasRealDomain, isAppSubdomain, getRootUrl } from '@/lib/domain';
 import { TERMS_VERSION } from '@/config/constants';
 
@@ -94,14 +94,28 @@ export const useAuthStore = create<AuthState>()(
             authSubscription = null;
           }
 
-          // onAuthStateChange fires INITIAL_SESSION immediately with the current
-          // session (calls getSession() internally). This is the single source of
-          // truth — no need for a separate checkSupabaseConnection()/getSession().
+          // Quick connection check (detects paused Supabase projects)
+          const connectionCheck = await checkSupabaseConnection();
+          if (!connectionCheck.ok) {
+            if (import.meta.env.DEV) console.warn('Supabase connection issue:', connectionCheck.message);
+            set({ isLoading: false, isInitialized: true, connectionError: connectionCheck.message ?? 'Connection failed' });
+            return;
+          }
+
+          // Use session from connection check directly (avoids second getSession round-trip)
+          const initialSession = connectionCheck.session ?? null;
+          if (initialSession) {
+            set({ session: initialSession, user: initialSession.user });
+          }
+
+          // Set up auth listener for future changes (sign-in, sign-out, token refresh)
           const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            // Skip INITIAL_SESSION — we already handled it above
+            if (event === 'INITIAL_SESSION') return;
+
             set({ session, user: session?.user ?? null });
 
-            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-              // fetchProfile may auto-provision user + org, so run it first
+            if (event === 'SIGNED_IN' && session) {
               await get().fetchProfile();
               await get().fetchOrganizations();
             } else if (event === 'SIGNED_OUT') {
@@ -114,13 +128,16 @@ export const useAuthStore = create<AuthState>()(
                 planLimits: null,
               });
             }
-
-            // Mark initialized after the first event (session or no session)
-            if (!get().isInitialized) {
-              set({ isLoading: false, isInitialized: true });
-            }
           });
           authSubscription = subscription;
+
+          // Fetch profile + orgs for existing session
+          if (initialSession) {
+            await get().fetchProfile();
+            await get().fetchOrganizations();
+          }
+
+          set({ isLoading: false, isInitialized: true });
         } catch (error) {
           if (import.meta.env.DEV) console.error('Error initializing auth:', error);
           set({ isLoading: false, isInitialized: true });
