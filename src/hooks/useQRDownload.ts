@@ -12,6 +12,7 @@ interface UseQRDownloadOptions {
   styleOptions: QRStyleOptions;
   processedLogoUrl?: string;
   hasFrame?: boolean;
+  fileName?: string;
   onSuccess?: () => void;
 }
 
@@ -26,8 +27,11 @@ export function useQRDownload({
   styleOptions,
   processedLogoUrl,
   hasFrame = false,
+  fileName,
   onSuccess,
 }: UseQRDownloadOptions) {
+  // Sanitize fileName for use as a file name (remove special chars, limit length)
+  const baseName = fileName?.trim().replace(/[^a-zA-Z0-9_\- ]/g, '').slice(0, 100) || 'qrcode';
   const [copied, setCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -95,7 +99,7 @@ export function useQRDownload({
               canvas.toBlob((b) => resolve(b), mimeType, quality);
             });
             if (blob) {
-              downloadBlob(blob, `qrcode.${format}`);
+              downloadBlob(blob, `${baseName}.${format}`);
               toast.success(`QR code with frame downloaded as ${format.toUpperCase()}`);
               onSuccess?.();
             } else {
@@ -121,7 +125,7 @@ export function useQRDownload({
 
           if (!hasValidQrMatrix) {
             await qrCodeRef.current.download({
-              name: 'qrcode',
+              name: baseName,
               extension: 'svg',
             });
           } else {
@@ -132,7 +136,7 @@ export function useQRDownload({
               styleOptions,
               processedLogoUrl,
             });
-            downloadSVG(svgString, 'qrcode');
+            downloadSVG(svgString, baseName);
           }
           toast.success('SVG downloaded (Illustrator ready)');
           if (hasFrame) {
@@ -145,7 +149,7 @@ export function useQRDownload({
             format,
             format === 'jpeg' ? 0.92 : undefined,
           );
-          downloadBlob(blob, `qrcode.${format}`);
+          downloadBlob(blob, `${baseName}.${format}`);
           toast.success(`QR code downloaded as ${format.toUpperCase()}`);
           if (hasFrame) {
             toast.info('Note: Frame styling is not included in this download');
@@ -160,7 +164,7 @@ export function useQRDownload({
         setIsDownloading(false);
       }
     },
-    [qrCodeRef, frameContainerRef, styleOptions, processedLogoUrl, hasFrame, captureFrameAsCanvas, onSuccess]
+    [qrCodeRef, frameContainerRef, styleOptions, processedLogoUrl, hasFrame, captureFrameAsCanvas, baseName, onSuccess]
   );
 
   const handlePdfDownload = useCallback(async () => {
@@ -201,7 +205,7 @@ export function useQRDownload({
       const y = (pageHeight - qrSize) / 2;
 
       pdf.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
-      pdf.save('qrcode.pdf');
+      pdf.save(`${baseName}.pdf`);
       toast.success('QR code downloaded as PDF');
       if (hasFrame && !frameIncluded) {
         toast.info('Note: Frame styling is not included in this download');
@@ -214,7 +218,7 @@ export function useQRDownload({
     } finally {
       setIsDownloading(false);
     }
-  }, [qrCodeRef, frameContainerRef, hasFrame, captureFrameAsCanvas, onSuccess]);
+  }, [qrCodeRef, frameContainerRef, hasFrame, captureFrameAsCanvas, baseName, onSuccess]);
 
   const handleCopy = useCallback(async () => {
     if (!qrCodeRef.current) return;

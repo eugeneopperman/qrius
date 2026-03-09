@@ -30,10 +30,10 @@ interface QRPreviewProps {
 export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActions, displaySize, overrideData }, ref) => {
   const frameContainerRef = useRef<HTMLDivElement>(null);
   const [showFormatMenu, setShowFormatMenu] = useState(false);
-  const { getQRValue, styleOptions, activeType,
+  const { getQRValue, styleOptions, activeType, campaignName,
     urlData, textData, emailData, phoneData, smsData, wifiData, vcardData, eventData, locationData,
   } = useQRStore(useShallow((s) => ({
-    getQRValue: s.getQRValue, styleOptions: s.styleOptions, activeType: s.activeType,
+    getQRValue: s.getQRValue, styleOptions: s.styleOptions, activeType: s.activeType, campaignName: s.campaignName,
     urlData: s.urlData, textData: s.textData, emailData: s.emailData, phoneData: s.phoneData,
     smsData: s.smsData, wifiData: s.wifiData, vcardData: s.vcardData, eventData: s.eventData, locationData: s.locationData,
   })));
@@ -91,6 +91,7 @@ export const QRPreview = forwardRef<QRPreviewHandle, QRPreviewProps>(({ hideActi
     styleOptions,
     processedLogoUrl,
     hasFrame,
+    fileName: campaignName || undefined,
   });
 
   // Wrap handlers to close menu after action
