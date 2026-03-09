@@ -94,12 +94,14 @@ export const useAuthStore = create<AuthState>()(
             authSubscription = null;
           }
 
-          // Set up auth listener FIRST — so even if getSession() fails/aborts,
-          // the listener can still restore the session on subsequent auth events
+          // onAuthStateChange fires INITIAL_SESSION immediately with the current
+          // session (calls getSession() internally). This is the single source of
+          // truth — no need for a separate checkSupabaseConnection()/getSession().
           const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             set({ session, user: session?.user ?? null });
 
-            if (event === 'SIGNED_IN' && session) {
+            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+              // fetchProfile may auto-provision user + org, so run it first
               await get().fetchProfile();
               await get().fetchOrganizations();
             } else if (event === 'SIGNED_OUT') {
@@ -112,30 +114,14 @@ export const useAuthStore = create<AuthState>()(
                 planLimits: null,
               });
             }
+
+            // Mark initialized after the first event (session or no session)
+            if (!get().isInitialized) {
+              set({ isLoading: false, isInitialized: true });
+            }
           });
           authSubscription = subscription;
-
-          // Check connection + get session
-          const connectionCheck = await checkSupabaseConnection();
-          if (!connectionCheck.ok) {
-            if (import.meta.env.DEV) console.warn('Supabase connection issue:', connectionCheck.message);
-            set({ isLoading: false, isInitialized: true, connectionError: connectionCheck.message ?? 'Connection failed' });
-            return;
-          }
-
-          // Re-use the session from the connection check
-          const session = connectionCheck.session ?? null;
-
-          if (session) {
-            set({ session, user: session.user });
-            await get().fetchProfile();
-            await get().fetchOrganizations();
-          }
-
-          set({ isLoading: false, isInitialized: true });
         } catch (error) {
-          // On AbortError or transient failure, still mark as initialized
-          // so the auth listener (already set up above) can recover the session
           if (import.meta.env.DEV) console.error('Error initializing auth:', error);
           set({ isLoading: false, isInitialized: true });
         }
