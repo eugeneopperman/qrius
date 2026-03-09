@@ -6,6 +6,7 @@ import { useWizardStore } from '@/stores/wizardStore';
 import { getSession } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { AUTOSAVE } from '@/config/constants';
+import { trackEvent } from '@/lib/posthog';
 
 export interface AutosaveState {
   savedQRCodeId: string | null;
@@ -199,6 +200,7 @@ export function useAutosave(): AutosaveState {
       if (!isUpdate && data.id) {
         setSavedQRCodeId(data.id);
         savedIdRef.current = data.id;
+        trackEvent('qr_created', { qr_type: payload.qr_type, status });
         if (status === 'active') {
           const { toast } = await import('@/stores/toastStore');
           toast.success('QR code saved to your dashboard');

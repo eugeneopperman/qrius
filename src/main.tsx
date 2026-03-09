@@ -6,6 +6,10 @@ import './index.css';
 import { router } from '@/router';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useAuthStore } from '@/stores/authStore';
+import { initSentry } from '@/lib/sentry';
+import { initPostHog } from '@/lib/posthog';
+import { inject as injectVercelAnalytics } from '@vercel/analytics';
+import { injectSpeedInsights } from '@vercel/speed-insights';
 
 const CookieConsent = lazy(() =>
   import('@/components/legal/CookieConsent').then(m => ({ default: m.CookieConsent }))
@@ -21,11 +25,19 @@ const queryClient = new QueryClient({
   },
 });
 
+// Initialize observability
+initSentry();
+initPostHog();
+injectVercelAnalytics();
+injectSpeedInsights();
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary
-      onError={(error, errorInfo) => {
-        console.error('Root ErrorBoundary caught:', error, errorInfo);
+      onError={(error) => {
+        if (import.meta.env.PROD) {
+          import('@sentry/react').then(Sentry => Sentry.captureException(error));
+        }
       }}
     >
       <QueryClientProvider client={queryClient}>

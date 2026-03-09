@@ -1,4 +1,15 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /admin
+Disallow: /create
+Disallow: /qr-codes
+Disallow: /reader
+Disallow: /onboarding
+Disallow: /templates
+Disallow: /invite
+Disallow: /auth
+Disallow: /api/
 
-Sitemap: https://qrius.app/sitemap.xml
+Sitemap: https://qriuscodes.com/sitemap.xml

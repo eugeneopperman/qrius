@@ -5,6 +5,7 @@ import { generateIllustratorSVG, downloadSVG } from '@/utils/qrSvgGenerator';
 import { rasterizeQRToBlob, downloadBlob } from '@/utils/qrDownloadHelper';
 import { QR_CONFIG } from '@/config/constants';
 import type { QRStyleOptions } from '@/types';
+import { trackEvent } from '@/lib/posthog';
 
 interface UseQRDownloadOptions {
   qrCodeRef: React.MutableRefObject<QRCodeStyling | null>;
@@ -155,6 +156,7 @@ export function useQRDownload({
             toast.info('Note: Frame styling is not included in this download');
           }
         }
+        trackEvent('qr_downloaded', { format });
         onSuccess?.();
       } catch (error) {
         if (import.meta.env.DEV) console.error('Download failed:', error);
@@ -207,6 +209,7 @@ export function useQRDownload({
       pdf.addImage(dataUrl, 'PNG', x, y, qrSize, qrSize);
       pdf.save(`${baseName}.pdf`);
       toast.success('QR code downloaded as PDF');
+      trackEvent('qr_downloaded', { format: 'pdf' });
       if (hasFrame && !frameIncluded) {
         toast.info('Note: Frame styling is not included in this download');
       }

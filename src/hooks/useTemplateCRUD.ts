@@ -9,6 +9,7 @@ import { useTemplates } from './queries/useTemplates';
 import { useTemplateStore } from '@/stores/templateStore';
 import { useQRStore } from '@/stores/qrStore';
 import type { BrandTemplate, BrandTemplateStyle } from '@/types';
+import { trackEvent } from '@/lib/posthog';
 
 export function useTemplateCRUD() {
   const user = useAuthStore((s) => s.user);
@@ -25,9 +26,11 @@ export function useTemplateCRUD() {
       if (isAuthenticated) {
         if (existingId) {
           const result = await db.updateTemplate({ id: existingId, name, style });
+          trackEvent('template_saved', { action: 'update' });
           return result.id;
         } else {
           const result = await db.createTemplate({ name, style });
+          trackEvent('template_saved', { action: 'create' });
           return result.id;
         }
       } else {
@@ -37,12 +40,14 @@ export function useTemplateCRUD() {
           store.updateDraft({ name, style });
           const id = store.saveTemplate();
           store.closeWizard();
+          trackEvent('template_saved', { action: 'update' });
           return id;
         } else {
           store.openWizard();
           store.updateDraft({ name, style });
           const id = store.saveTemplate();
           store.closeWizard();
+          trackEvent('template_saved', { action: 'create' });
           return id;
         }
       }

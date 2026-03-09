@@ -6,6 +6,7 @@ import type { User, Organization, OrganizationMember, PlanLimits } from '@/types
 import { supabase, checkSupabaseConnection } from '@/lib/supabase';
 import { hasRealDomain, isAppSubdomain, getRootUrl } from '@/lib/domain';
 import { TERMS_VERSION } from '@/config/constants';
+import { identifyUser, resetPostHog } from '@/lib/posthog';
 
 // Track the auth listener subscription to clean up on re-init
 let authSubscription: Subscription | null = null;
@@ -235,6 +236,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
           await supabase.auth.signOut();
+          resetPostHog();
           set({
             session: null,
             user: null,
@@ -328,6 +330,7 @@ export const useAuthStore = create<AuthState>()(
           if (data) {
             const needsTerms = !data.terms_accepted_at || data.terms_version !== TERMS_VERSION;
             set({ profile: data, needsTermsAcceptance: needsTerms });
+            identifyUser(user.id, { email: data.email, name: data.name, plan: get().currentOrganization?.plan });
             return;
           }
 

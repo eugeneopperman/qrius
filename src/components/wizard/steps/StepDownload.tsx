@@ -10,6 +10,7 @@ import { getSession } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Download, Copy, RotateCcw, Check, Settings2, Loader2, ExternalLink } from 'lucide-react';
 import type { AutosaveState } from '@/hooks/useAutosave';
+import { trackEvent } from '@/lib/posthog';
 
 interface StepDownloadProps {
   autosave?: AutosaveState;
@@ -139,6 +140,7 @@ export function StepDownload({ autosave }: StepDownloadProps) {
       if (data.tracking_url) {
         setLocalTrackingUrl(data.tracking_url);
       }
+      trackEvent('qr_created', { qr_type: activeType, status: 'active' });
       queryClient.invalidateQueries({ queryKey: ['qr-codes'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast.success('QR code saved to your dashboard');

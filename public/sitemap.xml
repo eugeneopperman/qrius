@@ -1,27 +1,183 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://qrius.app/</loc>
+    <loc>https://qriuscodes.com/</loc>
+    <lastmod>2026-03-09</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://qrius.app/signin</loc>
+    <loc>https://qriuscodes.com/features</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/pricing</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/signup</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/signin</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/use-cases</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/compare</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/about</loc>
+    <lastmod>2026-03-09</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://qrius.app/signup</loc>
+    <loc>https://qriuscodes.com/contact</loc>
+    <lastmod>2026-03-09</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://qrius.app/terms</loc>
+    <loc>https://qriuscodes.com/changelog</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog/introducing-qrius-codes</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog/static-vs-dynamic-qr-codes</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog/qr-code-design-mistakes</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog/qr-code-restaurant-menu</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog/why-qr-codes-die-when-you-cancel</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog/qr-code-color-scannability</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog/qr-codes-for-event-check-in</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/blog/qr-codes-for-real-estate</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/use-cases/restaurants</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/use-cases/retail</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/use-cases/events</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/use-cases/real-estate</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/use-cases/agencies</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/use-cases/education</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/use-cases/healthcare</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/compare/bitly</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/compare/qr-code-generator</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/compare/uniqode</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/compare/qr-tiger</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/compare/flowcode</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/terms</loc>
+    <lastmod>2026-03-09</lastmod>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://qrius.app/privacy</loc>
+    <loc>https://qriuscodes.com/privacy</loc>
+    <lastmod>2026-03-09</lastmod>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://qrius.app/cookies</loc>
+    <loc>https://qriuscodes.com/cookies</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/acceptable-use</loc>
+    <lastmod>2026-03-09</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://qriuscodes.com/report</loc>
+    <lastmod>2026-03-09</lastmod>
     <priority>0.3</priority>
   </url>
 </urlset>
