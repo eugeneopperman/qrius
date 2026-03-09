@@ -63,13 +63,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           // Get user email
           const { data: user } = await getSupabaseAdmin()
             .from('users')
-            .select('email, raw_user_meta_data')
+            .select('email, name')
             .eq('id', qr.user_id)
             .single();
 
           if (!user?.email) continue;
 
-          const userName = (user.raw_user_meta_data as Record<string, unknown>)?.full_name as string | undefined;
+          const userName = user.name || undefined;
 
           // Generate unsubscribe URL
           const crypto = await import('crypto');

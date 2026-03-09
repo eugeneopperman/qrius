@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const { data: user } = await getSupabaseAdmin()
           .from('users')
-          .select('email, raw_user_meta_data')
+          .select('email, name')
           .eq('id', user_id)
           .single();
 
@@ -110,7 +110,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           to: user.email,
           subject: `Your ${monthName} recap: ${totalScans.toLocaleString()} scans`,
           react: React.createElement(MonthlyDigestEmail, {
-            userName: (user.raw_user_meta_data as Record<string, unknown>)?.full_name as string | undefined,
+            userName: user.name || undefined,
             monthName,
             totalScans,
             scanChange,

@@ -316,10 +316,10 @@ async function handleCreate(
         const count = parseInt(countResult[0]?.count as string || '0');
         if (count === 1) {
           const { getSupabaseAdmin: getSB } = await import('../_lib/auth.js');
-          const { data: u } = await getSB().from('users').select('email, raw_user_meta_data').eq('id', userId).single();
+          const { data: u } = await getSB().from('users').select('email, name').eq('id', userId).single();
           if (u?.email) {
             const { notifyFirstQRCreated } = await import('../_lib/notifications.js');
-            const userName = (u.raw_user_meta_data as Record<string, unknown>)?.full_name as string | undefined;
+            const userName = u.name || undefined;
             await notifyFirstQRCreated(userId, u.email, userName, body.name || undefined);
           }
         }

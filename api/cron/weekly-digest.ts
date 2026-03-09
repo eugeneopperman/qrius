@@ -48,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Get user email from Supabase
         const { data: user } = await getSupabaseAdmin()
           .from('users')
-          .select('email, raw_user_meta_data')
+          .select('email, name')
           .eq('id', user_id)
           .single();
 
@@ -97,7 +97,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         digests.push({
           user_id,
           email: user.email,
-          name: (user.raw_user_meta_data as Record<string, unknown>)?.full_name as string | undefined,
+          name: user.name || undefined,
           total_scans: totalScans,
           prev_scans: prevScans,
           new_qr_codes: parseInt(newCodes?.count || '0'),

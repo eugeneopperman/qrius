@@ -24,7 +24,7 @@ export interface PaymentFailureDetails {
 interface MemberWithUser {
   user_id: string;
   role: string;
-  user: { email: string; raw_user_meta_data?: Record<string, unknown> } | null;
+  user: { email: string; name?: string } | null;
 }
 
 const APP_URL = process.env.APP_URL || 'https://qriuscodes.com';
@@ -64,7 +64,7 @@ async function getOrgAdminEmails(organizationId: string): Promise<Array<{ email:
     .select(`
       user_id,
       role,
-      user:users(email, raw_user_meta_data)
+      user:users(email, name)
     `)
     .eq('organization_id', organizationId)
     .in('role', ['owner', 'admin']);
@@ -79,7 +79,7 @@ async function getOrgAdminEmails(organizationId: string): Promise<Array<{ email:
     .map((m) => ({
       email: m.user!.email,
       userId: m.user_id,
-      name: (m.user?.raw_user_meta_data?.full_name as string) || undefined,
+      name: (m.user?.name as string) || undefined,
     }));
 }
 

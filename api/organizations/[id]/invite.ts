@@ -139,11 +139,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { data: inviter } = await getSupabaseAdmin()
       .from('users')
-      .select('raw_user_meta_data')
+      .select('name')
       .eq('id', user.id)
       .single();
 
-    const inviterName = (inviter?.raw_user_meta_data as Record<string, unknown>)?.full_name as string || user.email;
+    const inviterName = inviter?.name || user.email;
     const orgName = org?.name || 'Your organization';
 
     waitUntil(notifyTeamInvite(body.email, inviterName, orgName, body.role, inviteLink));

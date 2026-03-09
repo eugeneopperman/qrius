@@ -157,9 +157,9 @@ async function handleCreate(
   void (async () => {
     try {
       const { notifyApiKeyCreated } = await import('../_lib/notifications.js');
-      const { data: u } = await getSupabaseAdmin().from('users').select('email, raw_user_meta_data').eq('id', userId).single();
+      const { data: u } = await getSupabaseAdmin().from('users').select('email, name').eq('id', userId).single();
       if (u?.email) {
-        const userName = (u.raw_user_meta_data as Record<string, unknown>)?.full_name as string | undefined;
+        const userName = u.name || undefined;
         await notifyApiKeyCreated(userId, u.email, body.name.trim(), keyPrefix, userName);
       }
     } catch (e) {
