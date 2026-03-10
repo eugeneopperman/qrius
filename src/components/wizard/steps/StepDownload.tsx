@@ -44,17 +44,15 @@ export function StepDownload({ autosave }: StepDownloadProps) {
   useEffect(() => {
     if (autosave) {
       // Finalize as active — promotes draft to active status
-      // If autosave fails or silently skips, fall back to local save
-      Promise.resolve(autosave.saveNowAs('active')).then(() => {
-        // Check if autosave actually produced a saved ID (it may have bailed on a guard)
-        // Give it a brief moment for state to settle
-        setTimeout(() => {
-          if (!autosave.savedQRCodeId && user && !localSaveAttempted) {
-            setLocalSaveAttempted(true);
-            saveToDatabaseLocal();
-          }
-        }, 500);
-      });
+      // Await completion before deciding whether local fallback is needed
+      (async () => {
+        await autosave.saveNowAs('active');
+        // If autosave bailed silently (plan limit, no content, etc.) fall back to local save
+        if (user && !autosave.savedQRCodeId && !localSaveAttempted) {
+          setLocalSaveAttempted(true);
+          saveToDatabaseLocal();
+        }
+      })();
     } else {
       // Fallback: local save logic
       if (!user || localSaveAttempted) return;
