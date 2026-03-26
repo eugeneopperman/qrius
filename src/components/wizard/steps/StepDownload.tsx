@@ -42,25 +42,26 @@ export function StepDownload({ autosave }: StepDownloadProps) {
 
   // Auto-save on mount: either via autosave hook or local fallback
   useEffect(() => {
-    if (autosave) {
-      // Finalize as active — promotes draft to active status
-      // If autosave fails or silently skips, fall back to local save
-      Promise.resolve(autosave.saveNowAs('active')).then(() => {
-        // Check if autosave actually produced a saved ID (it may have bailed on a guard)
-        // Give it a brief moment for state to settle
-        setTimeout(() => {
-          if (!autosave.savedQRCodeId && user && !localSaveAttempted) {
-            setLocalSaveAttempted(true);
-            saveToDatabaseLocal();
-          }
-        }, 500);
-      });
-    } else {
-      // Fallback: local save logic
-      if (!user || localSaveAttempted) return;
-      setLocalSaveAttempted(true);
-      saveToDatabaseLocal();
+    async function finalize() {
+      if (autosave) {
+        // Set loading flag before finalization so UI reflects saving state
+        setLocalIsSaving(true);
+        await autosave.saveNowAs('active');
+        setLocalIsSaving(false);
+        setLocalSaveAttempted(true);
+        // Fallback: if autosave didn't produce a saved ID (e.g. bailed on a guard)
+        // and user is authenticated, attempt a direct local save
+        if (!autosave.savedQRCodeId && user) {
+          saveToDatabaseLocal();
+        }
+      } else {
+        // Fallback: local save logic when autosave hook is not provided
+        if (!user || localSaveAttempted) return;
+        setLocalSaveAttempted(true);
+        saveToDatabaseLocal();
+      }
     }
+    finalize();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

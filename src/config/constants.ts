@@ -281,7 +281,9 @@ export const QR_TYPES = [
 // Admin Configuration
 // ============================================================================
 
-/** Email addresses with access to /admin dashboard */
-export const ADMIN_EMAILS: readonly string[] = [
-  'eugeneopperman11@gmail.com',
-] as const;
+/** Email addresses with access to /admin dashboard — configure via VITE_ADMIN_EMAILS env var */
+export const ADMIN_EMAILS: readonly string[] =
+  import.meta.env.VITE_ADMIN_EMAILS
+    ?.split(',')
+    .map((e: string) => e.trim())
+    .filter(Boolean) ?? [];

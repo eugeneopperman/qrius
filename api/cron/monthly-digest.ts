@@ -99,12 +99,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const token = crypto.randomBytes(32).toString('hex');
         await getSupabaseAdmin()
           .from('email_unsubscribe_tokens')
-          .insert({
-            token,
-            user_id,
-            category: 'monthly_digest',
-            expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-          });
+          .upsert(
+            {
+              token,
+              user_id,
+              category: 'monthly_digest',
+              expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+            },
+            { onConflict: 'token', ignoreDuplicates: true }
+          );
 
         emails.push({
           to: user.email,
