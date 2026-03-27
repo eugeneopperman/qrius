@@ -18,11 +18,11 @@ export function UpgradePromptEmail({ userName, reason, currentPlan, usagePercent
 
   return (
     <EmailLayout
-      preview={isLimit ? `You've used ${usagePercent}% of your QR codes — time to think bigger?` : 'You've been building — here's how to do more'}
+      preview={isLimit ? `You've used ${usagePercent}% of your QR codes — time to think bigger?` : 'You\'ve been building — here\'s how to do more'}
       unsubscribeUrl={unsubscribeUrl}
     >
       <Text style={{ fontFamily: BRAND.serifFont, fontSize: '24px', fontWeight: 700, color: BRAND.ink, margin: '0 0 16px' }}>
-        {isLimit ? 'You're running out of room.' : 'Qrius what comes next?'}
+        {isLimit ? 'You\'re running out of room.' : 'Qrius what comes next?'}
       </Text>
 
       <Text style={{ fontFamily: BRAND.sansFont, fontSize: '16px', color: BRAND.charcoal, lineHeight: '1.6', margin: '0 0 16px' }}>

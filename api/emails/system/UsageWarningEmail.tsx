@@ -33,7 +33,7 @@ export function UsageWarningEmail({
       unsubscribeUrl={unsubscribeUrl}
     >
       <Text style={{ fontFamily: BRAND.serifFont, fontSize: '24px', fontWeight: 700, color: BRAND.ink, margin: '0 0 16px' }}>
-        {isCritical ? 'You're almost at your limit.' : 'A friendly heads up on usage.'}
+        {isCritical ? 'You\'re almost at your limit.' : 'A friendly heads up on usage.'}
       </Text>
 
       <Text style={{ fontFamily: BRAND.sansFont, fontSize: '16px', color: BRAND.charcoal, lineHeight: '1.6', margin: '0 0 16px' }}>

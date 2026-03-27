@@ -30,7 +30,7 @@ export function SubscriptionChangedEmail({
   const titles: Record<string, string> = {
     upgraded: 'You just leveled up.',
     downgraded: 'Your plan has changed.',
-    canceled: 'We've canceled your subscription.',
+    canceled: 'We\'ve canceled your subscription.',
     reactivated: 'Welcome back.',
   };
 

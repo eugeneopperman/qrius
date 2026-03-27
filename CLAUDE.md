@@ -272,3 +272,123 @@ Copy `.env.example` to `.env.local` and configure:
 - Mobile testing requires network access (use `npm run dev -- --host 0.0.0.0`)
 - Stripe integration requires configuration (works without for dev)
 - Neon migrations must be applied manually via Neon SQL Editor (see `api/migrations/`)
+
+## Qrius Growth System
+
+### Working Rhythm
+- **Owner**: Associate Creative Director by day, building Qrius in margins
+- **Available time**: 30 min morning, 30 min lunch, 30 min evening (minimum)
+- **Morning session**: Review overnight work, approve/redirect, queue next tasks
+- **Lunch session**: Check progress, unblock Claude Code, approve next task
+- **Evening session**: Review day's output, update this file, set tomorrow's agenda
+
+### Strategic Priorities (in order)
+1. Customer acquisition — outreach, email campaigns, prospect research
+2. Feature shipping — fast iteration, land-grab on competitors
+3. UX/design improvement — leverage owner's ACD background
+4. Market intelligence — gaps, competitor moves, user complaints
+
+### Current Focus
+- [ ] Update this when focus shifts
+
+### Tools & Roles
+- **Claude Code**: Builds features, runs scheduled tasks on codebase
+- **Cowork**: Overnight research, prospect scraping, competitor monitoring
+- **Claude (claude.ai)**: Strategy, planning, briefs, prompt preparation
+
+---
+
+## Growth: Customer Acquisition
+
+### Target Customer Profile
+- TBD — refine through outreach learnings
+
+### Outreach Learnings
+- _(updated after each campaign)_
+
+### Prospect Sources That Work
+- _(updated as we discover them)_
+
+### Email Subject Lines: Tested
+- _(log what worked / didn't work)_
+
+### Best Sending Times
+- _(update as data comes in)_
+
+---
+
+## Growth: Feature Pipeline
+
+### Upcoming Features (prioritised)
+1. Digital business cards (vCard+)
+2. Enhanced QR frames & styling — best in class
+3. _(add more as we identify them)_
+
+### Feature Shipping Learnings
+- _(patterns that caused bugs, things Claude Code gets wrong on this codebase)_
+
+### Preferred PR Structure
+- Feature branch → PR with summary → review → merge
+- Claude Code uses branch prefix: `claude-task/`
+
+---
+
+## Growth: Market Intelligence
+
+### Competitor Watchlist
+- Uniqode
+- Bitly QR
+- QR Tiger
+- QR Code Generator Pro
+- Flowcode
+
+### Gaps Identified
+- _(updated weekly from Cowork research)_
+
+### User Complaints About Competitors (from Reddit/G2/Product Hunt)
+- _(updated weekly)_
+
+---
+
+## Compound Learning: Working Preferences
+
+### Communication Style
+- Ask one question at a time
+- Prioritise ranked options when decisions needed
+- Be direct — no fluff
+
+### Briefing Format Preferences
+- _(update as we discover what works)_
+
+### Things That Have Wasted Time
+- _(log mistakes so we don't repeat them)_
+
+### Things That Work Well
+- _(log wins so we double down)_
+
+---
+
+## Compound Learning: Session Log
+
+### Template (copy for each evening session)
+```
+#### [Date]
+**Shipped today**: 
+**Outreach sent**: 
+**What worked**: 
+**What didn't**: 
+**Learnings for CLAUDE.md**: 
+**Tomorrow's queue**: 
+```
+
+---
+*Last updated: [date]*
+
+
+## Claude Code Queue — Tonight
+
+> This section is read by the Overnight Feature Build task at 12:30am.
+> Be specific — include file paths, patterns to follow, and exact scope.
+> Clear this entry and write "_empty_" once the build report confirms it's done.
+
+_empty_

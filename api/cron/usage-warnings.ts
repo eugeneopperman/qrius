@@ -12,14 +12,6 @@ import { logger } from '../_lib/logger.js';
 const APP_URL = process.env.APP_URL || 'https://qriuscodes.com';
 const THRESHOLDS = [80, 95]; // Send warning at 80% and 95%
 
-interface OrgUsage {
-  org_id: string;
-  org_name: string;
-  plan: string;
-  qr_count: number;
-  qr_limit: number;
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = req.headers.authorization;
